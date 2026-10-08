@@ -1,0 +1,19 @@
+# secrets
+.env
+
+# data: only the README is committed
+data/*
+!data/README.md
+
+# raw model outputs and caches (summary.json and figures are committed)
+results/**/raw/
+results/**/*.jsonl
+cache/
+results/box_check/
+
+# python
+.venv/
+__pycache__/
+*.egg-info/
+.pytest_cache/
+.DS_Store

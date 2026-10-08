@@ -1,0 +1,10 @@
+# Python >= 3.10. Versions are the ones installed on 2026-10-04; see WORKLOG.md.
+numpy
+pillow
+pyyaml
+python-dotenv
+matplotlib
+pytest
+anthropic>=1.11
+openai>=3.24
+google-genai>=2.28
