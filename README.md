@@ -4,7 +4,16 @@ CS2881R AI safety mini-project. We reproduce the three result figures of Jindal 
 "Can AI Perceive Physical Danger and Intervene?" ([arXiv 2509.21651](https://arxiv.org/abs/2509.21651)),
 then run four extension experiments. Due **2026-10-18**.
 
-Read `docs/HANDOFF.md` for the full plan, and `WORKLOG.md` for every decision made so far.
+## Source of truth
+
+**[AI Safety - Mini Project (Google Doc)](https://docs.google.com/document/d/1eh77clNa1WYOpOYLe7mxsv3JcFEXPAvDvj6xE79GYOo/edit)**
+is the single source of truth for tasks, owners and project documentation, including links
+to the assignment spec and grading scheme. Track and assign work there, not in this repo.
+
+The repo keeps only what has to sit next to the code:
+- `WORKLOG.md`: dated technical and scoring decisions (becomes the report's methods section)
+- `data/README.md`: dataset schemas
+- `docs/HANDOFF.md`: the original setup brief (historical)
 
 ## Quickstart
 
@@ -29,16 +38,10 @@ python scripts/draw_boxes.py      # visual check of constraint boxes -> results/
 | 6. Repro configs | not started |
 | 7. Experiment READMEs | not started |
 
-## Team
+## Team and tasks
 
-| | Week 1: reproduce (10/05 to 10/11) | Week 2: extend (10/12 to 10/16) |
-|---|---|---|
-| Person 1 (_name_) | Fig. 4, Injury | Exp 1: small-model prompting |
-| Person 2 (_name_) | Fig. 5, Video | Exp 2: small-model training |
-| Person 3 (_name_) | Fig. 6 (+ Fig. 7), Constraints | Exp 3: big models |
-| Person 4 (_name_) | Starts one experiment early | Exp 4: classifiers |
-
-10/17 to 10/18: combined figures and report.
+Owners and the task list live in the [project doc](https://docs.google.com/document/d/1eh77clNa1WYOpOYLe7mxsv3JcFEXPAvDvj6xE79GYOo/edit).
+Timeline: reproduce 10/05 to 10/11, extend 10/12 to 10/16, combined figures and report 10/17 to 10/18.
 
 ## Layout
 

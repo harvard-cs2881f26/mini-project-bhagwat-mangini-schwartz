@@ -13,8 +13,15 @@ of Jindal et al., "Can AI Perceive Physical Danger and Intervene?" (ASIMOV-2.0, 
 - **H2:** newer LLM-based safety classifiers have a better accuracy/cost trade-off in these
   physical settings than general models do.
 
-`docs/HANDOFF.md` is the original brief. `WORKLOG.md` is the decision log.
-`docs/presentation_outline.md` is the talk the results feed into.
+**Source of truth for tasks, owners and project docs:** the Google Doc "AI Safety - Mini Project"
+(https://docs.google.com/document/d/1eh77clNa1WYOpOYLe7mxsv3JcFEXPAvDvj6xE79GYOo/edit, Drive file id
+`1eh77clNa1WYOpOYLe7mxsv3JcFEXPAvDvj6xE79GYOo`). Read it with the Google Drive connector before
+planning work or answering "who owns X" / "what's left". Never copy its task list into repo files,
+which would create a second, stale copy. If the doc and the repo disagree, the doc wins on scope and
+owners. Point out the conflict instead of silently picking one.
+
+`WORKLOG.md` is the technical decision log (methods). `docs/HANDOFF.md` is the original brief
+(historical). `docs/presentation_outline.md` is the talk the results feed into.
 
 ## Hard rules
 
