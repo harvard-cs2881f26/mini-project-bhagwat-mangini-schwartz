@@ -96,3 +96,9 @@ Status tags: **DECIDED**, **PROPOSED** (needs team sign-off), **OPEN** (needs a 
   contributions in each writeup", so `CONTRIBUTIONS.md` is back as a dated log with an
   AI-assistance column. *Alternative considered:* a column in the Google Doc. Rejected
   because a file in the repo lives next to the commits it describes.
+
+### Raw model outputs are committed: DECIDED
+- Every raw model response is saved in `results/<run>/` and committed, so all three of us
+  share one set of outputs and reruns are free. The dataset itself stays gitignored.
+  *Alternative considered:* a local-only cache. Rejected because each person would pay for and
+  hold different responses.

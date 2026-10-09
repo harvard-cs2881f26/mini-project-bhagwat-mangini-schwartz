@@ -5,10 +5,9 @@
 data/*
 !data/README.md
 
-# raw model outputs and caches (summary.json and figures are committed)
-results/**/raw/
-results/**/*.jsonl
-cache/
+# Model outputs ARE committed (results/<run>/responses.jsonl, summary.json, figures) so the
+# team shares one set of responses and nobody pays to re-run them. Only local review images
+# derived from the dataset stay out.
 results/box_check/
 
 # python
