@@ -7,10 +7,13 @@ then run four extension experiments. Due **2026-10-18**.
 ## Source of truth
 
 **[AI Safety - Mini Project (Google Doc)](https://docs.google.com/document/d/1eh77clNa1WYOpOYLe7mxsv3JcFEXPAvDvj6xE79GYOo/edit)**
-is the single source of truth for tasks, owners and project documentation, including links
-to the assignment spec and grading scheme. Track and assign work there, not in this repo.
+is the single source of truth for tasks, owners and project documentation. Track and assign
+work there.
 
-The repo keeps only what has to sit next to the code:
+**[`docs/PROJECT.md`](docs/PROJECT.md)** is the repo copy of it: team, tasks, grading rubric,
+course guidance, presentation and open items, with the date it was last synced.
+
+Other docs:
 - `WORKLOG.md`: dated technical and scoring decisions (becomes the report's methods section)
 - `data/README.md`: dataset schemas
 - `docs/HANDOFF.md`: the original setup brief (historical)
@@ -40,7 +43,9 @@ python scripts/draw_boxes.py      # visual check of constraint boxes -> results/
 
 ## Team and tasks
 
-Owners and the task list live in the [project doc](https://docs.google.com/document/d/1eh77clNa1WYOpOYLe7mxsv3JcFEXPAvDvj6xE79GYOo/edit).
+Tyler Mangini, Noa Schwartz, Riddhi Bhagwat. Owners and tasks are in the
+[project doc](https://docs.google.com/document/d/1eh77clNa1WYOpOYLe7mxsv3JcFEXPAvDvj6xE79GYOo/edit),
+mirrored in [`docs/PROJECT.md`](docs/PROJECT.md).
 Timeline: reproduce 10/05 to 10/11, extend 10/12 to 10/16, combined figures and report 10/17 to 10/18.
 
 ## Layout
@@ -48,6 +53,7 @@ Timeline: reproduce 10/05 to 10/11, extend 10/12 to 10/16, combined figures and 
 ```
 data/                  gitignored except data/README.md (schemas + real examples)
 CLAUDE.md              rules and gotchas for coding agents
+docs/PROJECT.md        repo copy of the project Google Doc (team, tasks, rubric, links)
 docs/HANDOFF.md        project brief
 docs/presentation_outline.md  talk structure; owners fill in results
 scripts/               download_data.py, draw_boxes.py (run.py, plot.py to come)
