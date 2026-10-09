@@ -60,4 +60,5 @@ scripts/               download_data.py, draw_boxes.py (run.py, plot.py to come)
 src/asimov/data/       tfrecord.py (raw reader), constraints.py (box parsing)
 tests/
 WORKLOG.md             dated decisions log
+CONTRIBUTIONS.md       who did what (graded); add a row when you finish something
 ```

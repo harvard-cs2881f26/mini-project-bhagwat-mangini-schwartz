@@ -86,3 +86,13 @@ Status tags: **DECIDED**, **PROPOSED** (needs team sign-off), **OPEN** (needs a 
 - The team decided not to keep a separate contributions file, so `CONTRIBUTIONS.md` was
   removed. The repo layout in `docs/HANDOFF.md` still lists it because that file is a
   verbatim copy of the original brief.
+
+---
+
+## 2026-10-09
+
+### CONTRIBUTIONS.md reinstated: DECIDED
+- This reverses the 10/07 decision. The grading scheme asks for "detailed group
+  contributions in each writeup", so `CONTRIBUTIONS.md` is back as a dated log with an
+  AI-assistance column. *Alternative considered:* a column in the Google Doc. Rejected
+  because a file in the repo lives next to the commits it describes.

@@ -32,6 +32,9 @@ scope and owners. Point out the conflict instead of silently picking one.
   give the numbers and point out what they show, but don't write the interpretation.
 - **Ask before any run that costs money**, other than a `--limit N` dry run.
 - **Cache every API response.** Reruns must be free. Never cache errors.
+- **Log finished work in CONTRIBUTIONS.md** under the person it was done for, with an honest
+  "AI assistance" entry saying what the AI did. Don't fill in someone's AI-assistance cell
+  for work you didn't see; mark it for them to fill in.
 - **Log every scoring decision in WORKLOG.md**, with the date, a status tag
   (DECIDED / PROPOSED / OPEN) and the alternative considered.
 - **Never train or tune on eval items.** Training data for H1 must come from elsewhere.

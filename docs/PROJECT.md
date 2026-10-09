@@ -106,9 +106,9 @@ Posted by course staff, copied from the Google Doc:
    has two hypotheses (small models; classifiers). Decide which to drop.
 3. **"Jev-style classifiers":** not yet defined anywhere. Noa owns it; add a one-line
    definition here.
-4. **Contributions:** the rubric asks for detailed group contributions in the writeup. We
-   deleted `CONTRIBUTIONS.md` on 10/07, so track contributions somewhere, e.g. a column in
-   the Google Doc.
+4. **Contributions:** the rubric asks for detailed group contributions in the writeup. These
+   are tracked in [`CONTRIBUTIONS.md`](../CONTRIBUTIONS.md), which was reinstated on 10/09.
+   Everyone adds a row when they finish something.
 5. **The assignment spec PDF isn't mirrored.** Copy its requirements here.
 6. **Data and scoring decisions waiting on the team:** see [`WORKLOG.md`](../WORKLOG.md). The
    constraints overlap rule, the video eval prompt (not in the dataset) and the video
