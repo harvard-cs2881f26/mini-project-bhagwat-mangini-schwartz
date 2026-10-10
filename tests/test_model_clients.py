@@ -7,7 +7,7 @@ import pytest
 from asimov.bench.video import ImagePart, TextPart
 from asimov.models import get_client
 from asimov.models.anthropic_client import to_content
-from asimov.models.gemini_client import min_budget, to_contents
+from asimov.models.gemini_client import min_thinking, to_contents
 from asimov.models.openai_client import to_input
 
 PARTS = [TextPart("intro"), TextPart("t = 0.0 s"), ImagePart(b"\xff\xd8jpeg0"), TextPart("questions")]
@@ -32,8 +32,10 @@ def test_openai_format_full_resolution():
 def test_gemini_format_and_min_thinking():
     c = to_contents(PARTS)
     assert c[0].text == "intro" and c[2].inline_data.data == b"\xff\xd8jpeg0"
-    assert min_budget("gemini-2.5-pro") == 128
-    assert min_budget("gemini-2.5-flash") == 0 and min_budget("gemini-2.5-flash-lite") == 0
+    assert min_thinking("gemini-2.5-pro").thinking_budget == 128
+    assert min_thinking("gemini-2.5-flash-lite").thinking_budget == 0
+    assert min_thinking("gemini-3.1-pro-preview").thinking_level == "LOW"
+    assert min_thinking("gemini-3.1-flash-lite").thinking_level == "MINIMAL"
 
 
 def test_mock_clients():

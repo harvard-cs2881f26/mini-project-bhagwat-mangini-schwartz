@@ -44,3 +44,8 @@ def test_limit_order_is_mixed_and_fixed(tmp_path):
     assert first == [i.id for i in video_order(load_video_items())[:20]]
     answers = load_video_answers()
     assert {answers[i].risk for i in first} == {"Yes", "No"}
+
+
+def test_unknown_model_warns(tmp_path, capsys):
+    assert run(CFG, limit=1, only=["gemini-3.1-flash-lite"], results_dir=tmp_path) == []
+    assert "not in this config" in capsys.readouterr().out

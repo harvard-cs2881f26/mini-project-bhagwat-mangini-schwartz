@@ -1,7 +1,8 @@
 """Gemini via the google-genai SDK (2.28). Reads GEMINI_API_KEY.
 
-Thinking: Gemini 2.5 Pro can't turn thinking off; its minimum budget is 128 tokens. Flash and
-Flash-Lite accept 0. "default" sends no thinking config (dynamic thinking).
+Thinking "min": Gemini 2.5 takes a token budget (Pro's minimum is 128; Flash and Flash-Lite accept
+0). Gemini 3+ takes a level instead: "minimal" for Flash and Flash-Lite, "low" for Pro, whose
+lowest level it is. "default" sends no thinking config (dynamic thinking).
 """
 from __future__ import annotations
 
@@ -12,7 +13,6 @@ from asimov.bench.video import ImagePart, Part, TextPart
 from asimov.models.base import ModelResponse, Thinking, Timer
 
 MAX_OUTPUT_TOKENS = 8192  # includes thinking tokens
-MIN_THINKING_BUDGET = {"gemini-2.5-pro": 128}  # everything else: 0
 
 
 def to_contents(parts: list[Part]) -> list:
@@ -25,8 +25,11 @@ def to_contents(parts: list[Part]) -> list:
     return out
 
 
-def min_budget(model: str) -> int:
-    return next((b for prefix, b in MIN_THINKING_BUDGET.items() if model.startswith(prefix)), 0)
+def min_thinking(model: str) -> types.ThinkingConfig:
+    pro = "-pro" in model
+    if model.startswith("gemini-2.5"):
+        return types.ThinkingConfig(thinking_budget=128 if pro else 0)
+    return types.ThinkingConfig(thinking_level=types.ThinkingLevel.LOW if pro else types.ThinkingLevel.MINIMAL)
 
 
 class GeminiClient:
@@ -37,9 +40,11 @@ class GeminiClient:
         self.client = genai.Client()
 
     def generate(self, parts: list[Part], thinking: Thinking = "min") -> ModelResponse:
-        cfg = {"max_output_tokens": MAX_OUTPUT_TOKENS}
+        # AFC is the SDK's tool-calling loop; we send no tools, and disabling it silences its warning
+        cfg = {"max_output_tokens": MAX_OUTPUT_TOKENS,
+               "automatic_function_calling": types.AutomaticFunctionCallingConfig(disable=True)}
         if thinking == "min":
-            cfg["thinking_config"] = types.ThinkingConfig(thinking_budget=min_budget(self.model))
+            cfg["thinking_config"] = min_thinking(self.model)
         with Timer() as t:
             r = self.client.models.generate_content(
                 model=self.model, contents=to_contents(parts), config=types.GenerateContentConfig(**cfg)

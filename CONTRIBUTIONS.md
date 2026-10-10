@@ -39,3 +39,4 @@ before the writeup is submitted.
 | Tyler Mangini | Project setup and repo, presentation template, Fig. 5 (video) |
 | Noa Schwartz | Fig. 4 (text), Jev-style classifiers |
 | Riddhi Bhagwat | Fig. 6 (constraints) |
+| 2026-10-10 | Tyler | Gemini stand-ins (2.5 retired for new keys) and Gemini 3 thinking levels; runner warns on unknown `--models` | `configs/repro_fig5.yaml`, `src/asimov/models/gemini_client.py`, `src/asimov/runner.py` | Code written by Claude from Tyler's stand-in decision (review pending) |

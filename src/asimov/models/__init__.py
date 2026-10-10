@@ -5,9 +5,11 @@ from __future__ import annotations
 # The models in the paper's Fig. 5b, as API model IDs. Availability is checked by
 # scripts/check_models.py; substitutions are recorded in WORKLOG.md, never made silently.
 PAPER_MODELS = {
-    "Gemini 2.5 Pro": ("gemini", "gemini-2.5-pro"),
-    "Gemini 2.5 Flash": ("gemini", "gemini-2.5-flash"),
-    "Gemini 2.5 Flash-Lite": ("gemini", "gemini-2.5-flash-lite"),
+    # Gemini 2.5 models return 404 for new API keys (checked 2026-10-10). Stand-ins chosen by
+    # Tyler: the nearest successors served to this key.
+    "Gemini 2.5 Pro": ("gemini", "gemini-3.1-pro-preview"),
+    "Gemini 2.5 Flash": ("gemini", "gemini-3-flash-preview"),
+    "Gemini 2.5 Flash-Lite": ("gemini", "gemini-3.1-flash-lite"),
     # Opus 4.1 and Sonnet 4 are retired (checked 2026-10-10). Stand-ins chosen by Tyler: the
     # nearest successors still served. Dated IDs so the exact model is recorded.
     "Claude Opus 4.1": ("anthropic", "claude-opus-4-5-20251101"),

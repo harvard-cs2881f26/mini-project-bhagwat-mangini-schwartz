@@ -176,6 +176,17 @@ Status tags: **DECIDED**, **PROPOSED** (needs team sign-off), **OPEN** (needs a 
   successors still served. Both are likely stronger than the originals, which the report must
   state. *Alternative considered:* current models (Opus 5.5, Sonnet 5.5). Rejected for the
   reproduction because the capability gap from the originals is larger.
+- **Gemini 2.5 is closed to new API keys (checked 2026-10-10).** All three still appear in the
+  model list, but `generate_content` returns 404 "no longer available to new users".
+- **Gemini stand-ins: 3.1 Flash-Lite (`gemini-3.1-flash-lite`) for 2.5 Flash-Lite, 3 Flash
+  (`gemini-3-flash-preview`) for 2.5 Flash, 3.1 Pro (`gemini-3.1-pro-preview`) for 2.5 Pro:
+  DECIDED (Tyler).** Same rule as Claude: the nearest successors this key serves. Flash and Pro
+  are previews (no GA 3.x Flash/Pro was listed). *Alternative considered:* `gemini-3.5-flash(-lite)`,
+  which Google's error message suggests. Rejected: a bigger gap from the originals.
+- **Gemini 3 "min" thinking is a level, not a budget: DECIDED.** Gemini 3+ takes `thinking_level`.
+  Flash and Flash-Lite get "minimal"; Pro gets "low", its lowest. This mirrors 2.5 Pro's 128-token
+  floor. *Alternative considered:* `thinking_budget` (accepted for back-compat, but maps to levels
+  in ways the docs don't pin down).
 
 ### Video scorer (component E): DECIDED
 - See the decisions in `src/asimov/bench/video_score.py`. In short:

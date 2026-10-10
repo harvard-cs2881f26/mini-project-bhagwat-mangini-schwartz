@@ -101,6 +101,9 @@ def run(cfg: dict, limit: int | None = None, only: list[str] | None = None,
     items = video_order(load_video_items())[:limit]
     out_dir = (results_dir or ROOT / "results") / cfg["run"]
     show = limit is not None and limit <= 5
+    for name in only or []:
+        if not any(name in (s["name"], s["model"]) for s in cfg["models"]):
+            print(f"WARNING: {name!r} is not in this config. Options: {', '.join(s['model'] for s in cfg['models'])}")
     rows = []
     for spec in cfg["models"]:
         if only and spec["name"] not in only and spec["model"] not in only:
