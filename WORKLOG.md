@@ -233,6 +233,6 @@ Status tags: **DECIDED**, **PROPOSED** (needs team sign-off), **OPEN** (needs a 
   prompt asks for JSON only, and we don't penalize the wrapper.
 - **Gemini 3 input is 17,969 tokens per video** (the pre-run estimate was ~8,500). Thinking tokens
   come back empty, so "minimal" took effect on Flash and Flash-Lite.
-- Observation for the full run: none of the 33 timestamp predictions was earlier than the
-  (snapped) answer; most were exactly +0.5 s, which "within 0.5 s" (inclusive) counts as a hit.
+- Observation for the full run: none of the 29 timestamp predictions was earlier than the
+  (snapped) answer; 14 of 29 were exactly +0.5 s, which "within 0.5 s" (inclusive) counts as a hit.
   Five videos only; check the direction of errors at full scale.
