@@ -145,3 +145,9 @@ Status tags: **DECIDED**, **PROPOSED** (needs team sign-off), **OPEN** (needs a 
   the timestamp is likely a single dissenting rater's pick (all 95 are on the 0.5 s grid, while
   "Yes" times are rater averages), but chose to honor the label as published.
 - **Frames are sent at full resolution (1280×720): DECIDED.**
+- **Prompt Q3 asks about a "potential" injury: DECIDED.** It reads "...could intervene to
+  prevent a potential injury" (the paper's Fig. 1(c) says "the injury"). Otherwise a model that
+  correctly calls a near-miss "No risk" would be pushed to answer -1 and be scored as a miss on
+  the 95 "No" videos that have a timestamp.
+- **8.0 s answer-key times stay at 8.0: DECIDED.** The last visible frame is 7.5 s, so these 5
+  videos carry an error floor of 0.5 s.
