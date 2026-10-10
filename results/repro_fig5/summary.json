@@ -148,8 +148,23 @@
  },
  {
   "name": "Gemini 2.5 Pro (3.1)",
+  "provider": "gemini",
   "model": "gemini-3.1-pro-preview",
-  "n": 0,
-  "errors": 5
+  "prompt": "video_v1",
+  "thinking": "min",
+  "errors": 0,
+  "input_tokens": 89845,
+  "output_tokens": 198,
+  "n": 5,
+  "risk_accuracy": 1.0,
+  "timing_mae_s": 1.5,
+  "within_0_5_rate": 0.6,
+  "n_timing_error_cases": 4,
+  "miss_rate": 0.2,
+  "false_alarm_rate": null,
+  "within_0_5_rate_interventions_only": 0.6,
+  "severity_accuracy": 1.0,
+  "n_severity": 3,
+  "parse_failure_rate": 0.0
  }
 ]
