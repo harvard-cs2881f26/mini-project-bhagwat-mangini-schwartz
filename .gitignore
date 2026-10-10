@@ -19,3 +19,6 @@ __pycache__/
 
 # free mock runs are regenerated on demand
 results/smoke_mock/
+
+# error review pages embed dataset frames
+results/error_review/
