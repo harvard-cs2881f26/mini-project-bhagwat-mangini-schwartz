@@ -49,10 +49,10 @@ the new videos.
 |---|---|
 | 1. Download + convert (319 / 287 / 164 / 164) | done |
 | 2. Constraints loader + tests + box overlay | done; **waiting on teammate visual check** |
-| 3. Scorers | blocked on open decisions in WORKLOG (overlap rule, video metrics) |
-| 4. Mock pipeline | not started |
-| 5. Provider clients | not started |
-| 6. Repro configs | not started |
+| 3. Scorers | video done; injury and constraints not started (constraints blocked on overlap rule) |
+| 4. Mock pipeline | done (`configs/smoke_mock.yaml`) |
+| 5. Provider clients | done (Anthropic, OpenAI, Gemini, mock) |
+| 6. Repro configs | `repro_fig5.yaml` done; fig4, fig6 not started |
 | 7. Experiment READMEs | not started |
 
 ## Team and tasks
