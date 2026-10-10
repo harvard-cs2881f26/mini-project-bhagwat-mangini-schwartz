@@ -25,6 +25,7 @@ section from.
 | 2026-10-08 | Tyler | Created the private GitHub repo and set up the project Google Doc as source of truth | GitHub, `docs/PROJECT.md` | Claude pushed the repo and wrote the repo copy |
 | 2026-10-10 | Tyler | Fig. 5 reproduction design: read the paper's metric definitions; chose yes/no accuracy for 5a, timing penalties (record 3 metrics, report the paper's 2), answer-key rules (snap ties earlier, "No" videos with a timestamp keep it, 8.0 s kept) and prompt wording (no rationale, "potential" injury); emailed the first author | `WORKLOG.md`, `src/asimov/prompts/video_v1.txt` | Claude pulled the paper's figures and definitions, built a review page of answer-key oddities, and proposed options; Tyler made each decision |
 | 2026-10-10 | Tyler | Video request builder and leakage test (B + H) | `src/asimov/data/video.py`, `src/asimov/bench/video.py`, `tests/test_video_request.py` | Code written by Claude; Tyler set the leakage requirement (review pending) |
+| 2026-10-10 | Tyler | Model clients (C): Anthropic, OpenAI, Gemini and mock, plus a free availability check | `src/asimov/models/`, `scripts/check_models.py`, `tests/test_model_clients.py` | Code written by Claude; Tyler set the thinking and temperature policy (review pending) |
 
 ## Summary by person
 

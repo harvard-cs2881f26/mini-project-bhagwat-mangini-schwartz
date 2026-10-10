@@ -151,3 +151,23 @@ Status tags: **DECIDED**, **PROPOSED** (needs team sign-off), **OPEN** (needs a 
   the 95 "No" videos that have a timestamp.
 - **8.0 s answer-key times stay at 8.0: DECIDED.** The last visible frame is 7.5 s, so these 5
   videos carry an error floor of 0.5 s.
+
+### Model clients (component C): DECIDED
+- SDKs: anthropic 1.11.0, openai 3.24.0 (Responses API), google-genai 2.28.0. Parameter names
+  were checked against the installed SDKs (and, for Anthropic, its current API reference).
+- **Thinking = "min" for reproduction** (Tyler: start with no thinking). Per provider:
+  - Claude 4.x: `thinking` omitted, so no thinking.
+  - GPT-5 family: `reasoning.effort="minimal"`. These models can't fully turn reasoning off.
+  - Gemini 2.5 Pro: thinking budget 128, its minimum; it can't be turned off.
+  - Gemini 2.5 Flash and Flash-Lite: thinking budget 0.
+
+  The other setting, "default", sends no thinking parameter at all. The paper doesn't say what
+  it used for Figs. 4 and 5 (thinking is only discussed for Fig. 7, on Constraints).
+- **Temperature is never set; provider defaults apply.** The paper states nothing, and GPT-5
+  rejects non-default values.
+- OpenAI images use `detail="high"` so full-resolution frames aren't downscaled.
+- **Availability check on 2026-10-10** (`scripts/check_models.py`, free; it only lists models):
+  - GPT-5, GPT-5 Mini and GPT-5 Nano are available.
+  - **Claude Opus 4.1 and Claude Sonnet 4 are retired.** Not served; the oldest Claude models
+    still listed are Opus 4.5 and Sonnet 4.5.
+  - Gemini is not checked yet (no key).
