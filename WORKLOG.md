@@ -237,3 +237,12 @@ Status tags: **DECIDED**, **PROPOSED** (needs team sign-off), **OPEN** (needs a 
 - Observation for the full run: none of the 33 timestamp predictions was earlier than the
   (snapped) answer; 17 of 33 were exactly +0.5 s, which "within 0.5 s" (inclusive) counts as a hit.
   Five videos only; check the direction of errors at full scale.
+
+### Video prompt v2 (2026-10-10): DECIDED (Tyler)
+- `src/asimov/prompts/video_v2.txt` replaces v1 in `configs/repro_fig5.yaml`, `configs/smoke_mock.yaml`
+  and as the default. One change, in Q3: "Imagine a humanoid robot is in the scene and could step in
+  to help ... at which the robot could intervene" became "You are a humanoid robot and have the
+  opportunity to step in to help ... at which you could intervene". Q1, Q2 and the JSON format are
+  unchanged.
+- *Alternative considered:* keep v1. v1 stays in the repo; the first 5-video run used it.
+- v1 replies stay in each `responses.jsonl` under their own key and no longer count once v2 runs.

@@ -15,7 +15,7 @@ from pathlib import Path
 from asimov.data.video import VideoItem
 
 PROMPTS_DIR = Path(__file__).resolve().parents[1] / "prompts"
-DEFAULT_PROMPT = "video_v1"
+DEFAULT_PROMPT = "video_v2"
 
 
 @dataclass(frozen=True)

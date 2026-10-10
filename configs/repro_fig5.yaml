@@ -2,7 +2,7 @@
 # Decisions behind every setting are in WORKLOG.md (2026-10-10).
 run: repro_fig5
 benchmark: video
-prompt: video_v1        # src/asimov/prompts/video_v1.txt
+prompt: video_v2        # src/asimov/prompts/video_v2.txt (v1: first 5-video run)
 thinking: min           # min | default
 models:
   - {name: GPT-5 Nano,            provider: openai,    model: gpt-5-nano}

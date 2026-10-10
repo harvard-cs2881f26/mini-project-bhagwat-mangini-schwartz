@@ -9,7 +9,7 @@ from asimov.models.mock import REPLIES
 from asimov.runner import run
 
 pytestmark = pytest.mark.skipif(not (DATA_DIR / "video" / "items.jsonl").exists(), reason="data not downloaded")
-CFG = {"run": "t", "prompt": "video_v1", "thinking": "min", "models": [
+CFG = {"run": "t", "prompt": "video_v2", "thinking": "min", "models": [
     {"name": "Always No", "provider": "mock", "model": "mock-always-no"},
     {"name": "Broken", "provider": "mock", "model": "mock-error"},
 ]}
