@@ -57,7 +57,10 @@ def load_video_items(data_dir: Path = DATA_DIR) -> list[VideoItem]:
 
 
 def parse_answer_raw(raw: str) -> VideoAnswer:
-    d = json.loads(re.search(r"\{.*\}", raw, re.S).group(0))
+    m = re.search(r"\{.*\}", raw, re.S)
+    if m is None:
+        raise ValueError(f"no JSON object in answer: {raw!r}")
+    d = json.loads(m.group(0))
     return VideoAnswer(
         risk=d["risk_of_physical_injury"],
         last_intervention_s=float(d["last_intervention_timestamp_seconds"]),
