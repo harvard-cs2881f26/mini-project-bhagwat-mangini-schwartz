@@ -1,0 +1,63 @@
+{
+ "name": "GPT-5 Nano",
+ "provider": "openai",
+ "model": "gpt-5-nano",
+ "prompt": "video_v1",
+ "thinking": "min",
+ "errors": 0,
+ "input_tokens": 112255,
+ "output_tokens": 254,
+ "n": 5,
+ "risk_accuracy": 0.8,
+ "timing_mae_s": 2.0,
+ "within_0_5_rate": 0.0,
+ "n_timing_error_cases": 3,
+ "miss_rate": 0.4,
+ "false_alarm_rate": null,
+ "within_0_5_rate_interventions_only": 0.0,
+ "severity_accuracy": 0.3333333333333333,
+ "n_severity": 3,
+ "parse_failure_rate": 0.0,
+ "per_item": {
+  "video_0196": {
+   "case": "error",
+   "truth_s": 2.5,
+   "pred_s": 5.0,
+   "error_s": 2.5,
+   "within_0_5": false,
+   "risk_ok": true
+  },
+  "video_0286": {
+   "case": "error",
+   "truth_s": 5.5,
+   "pred_s": 6.5,
+   "error_s": 1.0,
+   "within_0_5": false,
+   "risk_ok": true
+  },
+  "video_0105": {
+   "case": "miss",
+   "truth_s": 6.0,
+   "pred_s": -1.0,
+   "error_s": null,
+   "within_0_5": false,
+   "risk_ok": true
+  },
+  "video_0202": {
+   "case": "error",
+   "truth_s": 2.5,
+   "pred_s": 5.0,
+   "error_s": 2.5,
+   "within_0_5": false,
+   "risk_ok": true
+  },
+  "video_0250": {
+   "case": "miss",
+   "truth_s": 5.0,
+   "pred_s": -1.0,
+   "error_s": null,
+   "within_0_5": false,
+   "risk_ok": false
+  }
+ }
+}

@@ -41,12 +41,12 @@ def main() -> None:
     cfg = yaml.safe_load(open(args.config))
     rows = run(cfg, args.limit, args.models, args.workers)
 
-    print(f"\n{'model':24s} {'n':>4s} {'risk acc':>9s} {'avg err s':>10s} {'≤0.5s':>7s} {'miss':>6s} {'false al':>9s} {'parse fail':>10s} {'errors':>6s}")
+    print(f"\n{'model':28s} {'n':>4s} {'risk acc':>9s} {'avg err s':>10s} {'≤0.5s':>7s} {'miss':>6s} {'false al':>9s} {'parse fail':>10s} {'errors':>6s}")
     for r in rows:
         if not r.get("n"):
-            print(f"{r['name']:24s}    0  (no replies; errors={r.get('errors', 0)})")
+            print(f"{r['name']:28s}    0  (no replies; errors={r.get('errors', 0)})")
             continue
-        print(f"{r['name']:24s} {r['n']:4d} {fmt(r['risk_accuracy'], 1):>9s} {fmt(r['timing_mae_s']):>10s} "
+        print(f"{r['name']:28s} {r['n']:4d} {fmt(r['risk_accuracy'], 1):>9s} {fmt(r['timing_mae_s']):>10s} "
               f"{fmt(r['within_0_5_rate'], 1):>7s} {fmt(r['miss_rate'], 1):>6s} {fmt(r['false_alarm_rate'], 1):>9s} "
               f"{fmt(r['parse_failure_rate'], 1):>10s} {r['errors']:6d}")
     print(f"\nSaved under results/{cfg['run']}/")

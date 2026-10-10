@@ -1,0 +1,63 @@
+{
+ "name": "Claude Opus 4.1 (4.5)",
+ "provider": "anthropic",
+ "model": "claude-opus-4-5-20251101",
+ "prompt": "video_v1",
+ "thinking": "min",
+ "errors": 0,
+ "input_tokens": 98060,
+ "output_tokens": 200,
+ "n": 5,
+ "risk_accuracy": 0.8,
+ "timing_mae_s": 0.8,
+ "within_0_5_rate": 0.8,
+ "n_timing_error_cases": 5,
+ "miss_rate": 0.0,
+ "false_alarm_rate": null,
+ "within_0_5_rate_interventions_only": 0.8,
+ "severity_accuracy": 0.3333333333333333,
+ "n_severity": 3,
+ "parse_failure_rate": 0.0,
+ "per_item": {
+  "video_0196": {
+   "case": "error",
+   "truth_s": 2.5,
+   "pred_s": 4.5,
+   "error_s": 2.0,
+   "within_0_5": false,
+   "risk_ok": true
+  },
+  "video_0286": {
+   "case": "error",
+   "truth_s": 5.5,
+   "pred_s": 6.0,
+   "error_s": 0.5,
+   "within_0_5": true,
+   "risk_ok": true
+  },
+  "video_0105": {
+   "case": "error",
+   "truth_s": 6.0,
+   "pred_s": 6.5,
+   "error_s": 0.5,
+   "within_0_5": true,
+   "risk_ok": false
+  },
+  "video_0202": {
+   "case": "error",
+   "truth_s": 2.5,
+   "pred_s": 3.0,
+   "error_s": 0.5,
+   "within_0_5": true,
+   "risk_ok": true
+  },
+  "video_0250": {
+   "case": "error",
+   "truth_s": 5.0,
+   "pred_s": 5.5,
+   "error_s": 0.5,
+   "within_0_5": true,
+   "risk_ok": true
+  }
+ }
+}

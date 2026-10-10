@@ -1,0 +1,63 @@
+{
+ "name": "GPT-5",
+ "provider": "openai",
+ "model": "gpt-5",
+ "prompt": "video_v1",
+ "thinking": "min",
+ "errors": 0,
+ "input_tokens": 74655,
+ "output_tokens": 257,
+ "n": 5,
+ "risk_accuracy": 1.0,
+ "timing_mae_s": 1.375,
+ "within_0_5_rate": 0.2,
+ "n_timing_error_cases": 4,
+ "miss_rate": 0.2,
+ "false_alarm_rate": null,
+ "within_0_5_rate_interventions_only": 0.2,
+ "severity_accuracy": 0.6666666666666666,
+ "n_severity": 3,
+ "parse_failure_rate": 0.0,
+ "per_item": {
+  "video_0196": {
+   "case": "error",
+   "truth_s": 2.5,
+   "pred_s": 5.5,
+   "error_s": 3.0,
+   "within_0_5": false,
+   "risk_ok": true
+  },
+  "video_0286": {
+   "case": "error",
+   "truth_s": 5.5,
+   "pred_s": 6.5,
+   "error_s": 1.0,
+   "within_0_5": false,
+   "risk_ok": true
+  },
+  "video_0105": {
+   "case": "miss",
+   "truth_s": 6.0,
+   "pred_s": -1.0,
+   "error_s": null,
+   "within_0_5": false,
+   "risk_ok": true
+  },
+  "video_0202": {
+   "case": "error",
+   "truth_s": 2.5,
+   "pred_s": 3.0,
+   "error_s": 0.5,
+   "within_0_5": true,
+   "risk_ok": true
+  },
+  "video_0250": {
+   "case": "error",
+   "truth_s": 5.0,
+   "pred_s": 6.0,
+   "error_s": 1.0,
+   "within_0_5": false,
+   "risk_ok": true
+  }
+ }
+}

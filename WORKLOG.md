@@ -223,3 +223,16 @@ Status tags: **DECIDED**, **PROPOSED** (needs team sign-off), **OPEN** (needs a 
 - Errors are printed, counted and never saved.
 - Providers without a key are skipped with a message.
 - Claude only tested the runner with mock models; Tyler runs the real calls.
+
+### First 5-video run, all models (2026-10-10)
+- `--limit 5` on all 8 models (`results/repro_fig5/`). Same 5 videos for every model (seed-0 order).
+- **Gemini 3.1 Pro: 429 RESOURCE_EXHAUSTED on every call.** The key's quota doesn't cover it (likely
+  free tier; billing needed). Nothing saved; rerun once fixed.
+- **Parsing held up: 0 parse failures.** Sonnet 4.5 wraps JSON in a code fence, and once wrote
+  prose before the JSON; the parser takes the last `{...}`, so both scored. Kept as is: the
+  prompt asks for JSON only, and we don't penalize the wrapper.
+- **Gemini 3 input is 17,969 tokens per video** (the pre-run estimate was ~8,500). Thinking tokens
+  come back empty, so "minimal" took effect on Flash and Flash-Lite.
+- Observation for the full run: none of the 33 timestamp predictions was earlier than the
+  (snapped) answer; most were exactly +0.5 s, which "within 0.5 s" (inclusive) counts as a hit.
+  Five videos only; check the direction of errors at full scale.
