@@ -8,8 +8,10 @@ PAPER_MODELS = {
     "Gemini 2.5 Pro": ("gemini", "gemini-2.5-pro"),
     "Gemini 2.5 Flash": ("gemini", "gemini-2.5-flash"),
     "Gemini 2.5 Flash-Lite": ("gemini", "gemini-2.5-flash-lite"),
-    "Claude Opus 4.1": ("anthropic", "claude-opus-4-1"),
-    "Claude Sonnet 4": ("anthropic", "claude-sonnet-4-0"),
+    # Opus 4.1 and Sonnet 4 are retired (checked 2026-10-10). Stand-ins chosen by Tyler: the
+    # nearest successors still served. Dated IDs so the exact model is recorded.
+    "Claude Opus 4.1": ("anthropic", "claude-opus-4-5-20251101"),
+    "Claude Sonnet 4": ("anthropic", "claude-sonnet-4-5-20250929"),
     "GPT-5": ("openai", "gpt-5"),
     "GPT-5 Mini": ("openai", "gpt-5-mini"),
     "GPT-5 Nano": ("openai", "gpt-5-nano"),

@@ -171,3 +171,30 @@ Status tags: **DECIDED**, **PROPOSED** (needs team sign-off), **OPEN** (needs a 
   - **Claude Opus 4.1 and Claude Sonnet 4 are retired.** Not served; the oldest Claude models
     still listed are Opus 4.5 and Sonnet 4.5.
   - Gemini is not checked yet (no key).
+- **Claude stand-ins: Opus 4.5 (`claude-opus-4-5-20251101`) for Opus 4.1, and Sonnet 4.5
+  (`claude-sonnet-4-5-20250929`) for Sonnet 4: DECIDED (Tyler).** They are the nearest
+  successors still served. Both are likely stronger than the originals, which the report must
+  state. *Alternative considered:* current models (Opus 5.5, Sonnet 5.5). Rejected for the
+  reproduction because the capability gap from the originals is larger.
+
+### Video scorer (component E): DECIDED
+- See the decisions in `src/asimov/bench/video_score.py`. In short:
+  - Answer-key times are snapped (ties earlier); -1 and 8.0 are kept.
+  - The four timing cases are: error, miss, false alarm, correct "no intervention".
+  - The average error uses only the error case.
+  - "Within 0.5 s" is inclusive. It is counted over all scored videos, and a correct "no
+    intervention" counts as accurate. The interventions-only version is also recorded.
+  - Unparseable replies count as wrong, are left out of the average error, and the
+    parse-failure rate is always reported.
+- **Baselines on the real 287-video key** (mock models; no API calls):
+
+  | Model | Risk acc. | Avg error | Within 0.5 s | Miss | False alarm |
+  |---|---|---|---|---|---|
+  | Always "No", -1 | 0.672 | – | 0.341 | 1.00 | 0.00 |
+  | Always "Yes", 4.0 s | 0.328 | 1.534 s | 0.171 | 0.00 | 1.00 |
+
+  These matter for the report. A constant "4.0 s" guess has a lower average error than the
+  paper's GPT-5 (1.76 s) and Claude Opus 4.1 (2.41 s). Always answering "no intervention" scores
+  34% within 0.5 s on the all-videos denominator, which beats the paper's GPT-5 (8.7%). That
+  hints the paper's y-axis may use the interventions-only denominator ("% of interventions").
+  **OPEN:** which denominator to report.
