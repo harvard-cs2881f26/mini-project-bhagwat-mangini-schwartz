@@ -1,0 +1,9 @@
+# Free end-to-end check: no API keys, no network. Expected numbers are in tests/test_runner.py.
+run: smoke_mock
+benchmark: video
+prompt: video_v1
+thinking: min
+models:
+  - {name: Always No,  provider: mock, model: mock-always-no}
+  - {name: Always Yes, provider: mock, model: mock-always-yes}
+  - {name: Garbage,    provider: mock, model: mock-garbage}

@@ -198,3 +198,17 @@ Status tags: **DECIDED**, **PROPOSED** (needs team sign-off), **OPEN** (needs a 
   34% within 0.5 s on the all-videos denominator, which beats the paper's GPT-5 (8.7%). That
   hints the paper's y-axis may use the interventions-only denominator ("% of interventions").
   **OPEN:** which denominator to report.
+- **Denominator for "% within 0.5 s": report all scored videos (Tyler), and record the
+  interventions-only version; revisit once real results are in.** Tyler finds it plausible,
+  though surprising, that GPT-5 scored below "never intervene".
+- **Trivial baselines go in the report next to the paper's numbers: DECIDED (Tyler).** If ours
+  differ a lot from the paper's, that is a finding in itself.
+
+### Runner (component F): DECIDED
+- `scripts/run.py <config> [--limit N] [--models ...]`. `--limit` takes the first N videos of
+  a fixed shuffled order (seed 0), so small runs mix Yes and No videos and grow consistently.
+- Replies are saved in `results/<run>/<model>/responses.jsonl`, append-only and committed. A
+  saved reply is reused when the video, model, prompt text and thinking setting all match.
+- Errors are printed, counted and never saved.
+- Providers without a key are skipped with a message.
+- Claude only tested the runner with mock models; Tyler runs the real calls.

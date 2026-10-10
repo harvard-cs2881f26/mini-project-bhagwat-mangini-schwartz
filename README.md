@@ -29,6 +29,20 @@ python -m pytest
 python scripts/draw_boxes.py      # visual check of constraint boxes -> results/box_check/
 ```
 
+## Running Fig. 5 (video)
+
+```bash
+python scripts/check_models.py                                        # free: which models each API serves
+python scripts/run.py configs/smoke_mock.yaml                         # free: mock models, no keys
+python scripts/run.py configs/repro_fig5.yaml --limit 1 --models gpt-5-nano   # 1 real call, reply printed
+python scripts/run.py configs/repro_fig5.yaml --limit 5               # 5 videos per model with a key
+python scripts/run.py configs/repro_fig5.yaml                         # all 287 (ask the team first: costs money)
+```
+
+Replies are saved to `results/repro_fig5/<model>/responses.jsonl` (committed, so the team shares
+them) and reused on reruns. Metrics go to `summary.json` next to them. Growing `--limit` only calls
+the new videos.
+
 ## Build status
 
 | Step | Status |

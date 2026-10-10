@@ -20,9 +20,11 @@ class MockClient:
     provider = "mock"
 
     def __init__(self, model: str):
-        if model not in REPLIES:
+        if model not in REPLIES and model != "mock-error":
             raise ValueError(f"unknown mock {model}; choose from {sorted(REPLIES)}")
         self.model = model
 
     def generate(self, parts: list[Part], thinking: Thinking = "min") -> ModelResponse:
+        if self.model == "mock-error":
+            raise RuntimeError("simulated API failure")
         return ModelResponse(text=REPLIES[self.model], model=self.model, usage={"input_tokens": 0, "output_tokens": 0})

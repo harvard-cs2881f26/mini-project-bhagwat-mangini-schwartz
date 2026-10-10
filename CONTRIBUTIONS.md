@@ -27,6 +27,7 @@ section from.
 | 2026-10-10 | Tyler | Video request builder and leakage test (B + H) | `src/asimov/data/video.py`, `src/asimov/bench/video.py`, `tests/test_video_request.py` | Code written by Claude; Tyler set the leakage requirement (review pending) |
 | 2026-10-10 | Tyler | Model clients (C): Anthropic, OpenAI, Gemini and mock, plus a free availability check | `src/asimov/models/`, `scripts/check_models.py`, `tests/test_model_clients.py` | Code written by Claude; Tyler set the thinking and temperature policy (review pending) |
 | 2026-10-10 | Tyler | Video scorer (E): answer-key snapping, the four timing cases, reported and analysis metrics, hand-worked tests; chose the Claude stand-ins | `src/asimov/bench/video_score.py`, `tests/test_video_score.py` | Code written by Claude from Tyler's scoring decisions (review pending) |
+| 2026-10-10 | Tyler | Runner (F): config-driven runs with saved, reusable replies, staged --limit, and a free mock smoke config | `src/asimov/runner.py`, `scripts/run.py`, `configs/`, `tests/test_runner.py` | Code written by Claude to Tyler's spec (tight, runnable by Tyler; Claude ran mocks only) |
 
 ## Summary by person
 

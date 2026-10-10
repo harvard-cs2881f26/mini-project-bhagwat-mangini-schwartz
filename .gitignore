@@ -16,3 +16,6 @@ __pycache__/
 *.egg-info/
 .pytest_cache/
 .DS_Store
+
+# free mock runs are regenerated on demand
+results/smoke_mock/
