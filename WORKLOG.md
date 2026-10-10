@@ -246,3 +246,12 @@ Status tags: **DECIDED**, **PROPOSED** (needs team sign-off), **OPEN** (needs a 
   unchanged.
 - *Alternative considered:* keep v1. v1 stays in the repo; the first 5-video run used it.
 - v1 replies stay in each `responses.jsonl` under their own key and no longer count once v2 runs.
+
+### Full run, Claude models (2026-10-10, prompt v2)
+- All 287 videos on Sonnet 4.5 and Opus 4.5, run by Claude at Tyler's request. 0 errors, 0 parse
+  failures, every reply `end_turn`. Cost from token counts at list price: ~$17.35 + ~$28.40.
+- Sonnet answered in prose before the JSON on 59 videos; all parsed.
+- Both say "Yes" on most "No" videos: Sonnet 103/193, Opus 113/193. Split by the answer key:
+  "No" with a timestamp, Sonnet 64/95 and Opus 69/95; "No" with -1, Sonnet 39/98 and Opus 44/98.
+- Timing errors run both ways at full scale (Sonnet 49 early / 66 late, Opus 41 / 97), unlike
+  the 5-video sample.
