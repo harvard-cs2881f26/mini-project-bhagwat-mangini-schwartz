@@ -138,3 +138,10 @@ Status tags: **DECIDED**, **PROPOSED** (needs team sign-off), **OPEN** (needs a 
   Moderate/Severe Harm) and is scored on the 77 "Yes" videos with consensus, for analysis only.
   Injury type is not asked, because its A–E option text is unknown; we add it if the authors
   send the options. The prompt offers -1 explicitly so "no intervention" can be scored.
+- **"No injury" videos that have a timestamp (95): an intervention was expected at that
+  time: DECIDED.** The risk label stays "No" for yes/no accuracy, but the timing metrics use the
+  given timestamp, so timing is scored on all 189 videos that have one. The 98 "No" + -1 videos
+  expect -1. *Alternative considered:* treating them as "no intervention expected". We think
+  the timestamp is likely a single dissenting rater's pick (all 95 are on the 0.5 s grid, while
+  "Yes" times are rater averages), but chose to honor the label as published.
+- **Frames are sent at full resolution (1280×720): DECIDED.**
