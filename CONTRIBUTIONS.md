@@ -28,6 +28,7 @@ section from.
 | 2026-10-10 | Tyler | Model clients (C): Anthropic, OpenAI, Gemini and mock, plus a free availability check | `src/asimov/models/`, `scripts/check_models.py`, `tests/test_model_clients.py` | Code written by Claude; Tyler set the thinking and temperature policy (review pending) |
 | 2026-10-10 | Tyler | Video scorer (E): answer-key snapping, the four timing cases, reported and analysis metrics, hand-worked tests; chose the Claude stand-ins | `src/asimov/bench/video_score.py`, `tests/test_video_score.py` | Code written by Claude from Tyler's scoring decisions (review pending) |
 | 2026-10-10 | Tyler | Runner (F): config-driven runs with saved, reusable replies, staged --limit, and a free mock smoke config | `src/asimov/runner.py`, `scripts/run.py`, `configs/`, `tests/test_runner.py` | Code written by Claude to Tyler's spec (tight, runnable by Tyler; Claude ran mocks only) |
+| 2026-10-11 | Noa | Benchmark naming by input type (text / video / image) across data folders, loaders, tests and docs; fixed the download script crashing with no arguments | `scripts/download_data.py`, `src/asimov/data/image.py`, `CLAUDE.md`, `data/README.md`, `WORKLOG.md` | Noa chose the naming rule (one axis, input type) and asked for it to match the code; Claude compared options, made the rename and checked tests and mock runs before/after (Noa reviewing) |
 
 ## Summary by person
 

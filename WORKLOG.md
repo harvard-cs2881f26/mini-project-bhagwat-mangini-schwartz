@@ -268,3 +268,21 @@ Status tags: **DECIDED**, **PROPOSED** (needs team sign-off), **OPEN** (needs a 
   Scored under the existing rule: a reply with no answer counts as wrong and as a parse failure
   (0.7%). *Alternative considered:* drop both videos for every model. Not taken: the paper's rule
   for refusals isn't stated, and the parse-failure rate already reports it. Frames not reviewed.
+
+## 2026-10-11: benchmark names and shared benchmark interface (Noa)
+
+### Benchmarks named by input type: PROPOSED (Noa; in a PR for Tyler and Riddhi)
+- **text** (Fig. 4, paper: Injury), **video** (Fig. 5), **image** (Fig. 6, paper: Constraints), used
+  in prose and in code: data folders, modules, configs. `injury/` became `data/text/`,
+  `constraints*/` became `data/image*/`, `data/constraints.py` became `data/image.py`
+  (`load_constraints` → `load_image_items`, `ConstraintItem` → `ImageItem`).
+- Item IDs follow the folder, so they changed prefix but not number: `constraints_0032` is now
+  `image_0032`, `injury_0000` is now `text_0000`. Notes above keep the old IDs. Video is unchanged.
+- *Alternatives considered:* the paper's names (Injury / Video / Constraints) mix content and
+  input type; task names (Injury risk / Intervention / Constraints) overlap, since text and video
+  both ask about injury risk. Input type is the one axis that names all three cleanly, and it is
+  the axis of the paper's text-vs-video comparison and of H1's cost question.
+- To update a checkout: `python scripts/download_data.py` (converts from the cached TFRecords,
+  no re-download), then delete `data/injury/`, `data/constraints/`, `data/constraints_rationale/`.
+- Also fixed: `download_data.py` with no arguments crashed on Python 3.12.12 (argparse rejects a
+  list default that has `choices`).

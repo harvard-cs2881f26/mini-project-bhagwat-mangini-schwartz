@@ -4,6 +4,9 @@ CS2881R AI safety mini-project. We reproduce the three result figures of Jindal 
 "Can AI Perceive Physical Danger and Intervene?" ([arXiv 2509.21651](https://arxiv.org/abs/2509.21651)),
 then run four extension experiments. Due **2026-10-18**.
 
+We name the benchmarks by input type: **text** (Fig. 4, the paper's Injury), **video** (Fig. 5)
+and **image** (Fig. 6, the paper's Constraints). Data folders, modules and configs use the same names.
+
 ## Source of truth
 
 **[AI Safety - Mini Project (Google Doc)](https://docs.google.com/document/d/1eh77clNa1WYOpOYLe7mxsv3JcFEXPAvDvj6xE79GYOo/edit)**
@@ -48,8 +51,8 @@ the new videos.
 | Step | Status |
 |---|---|
 | 1. Download + convert (319 / 287 / 164 / 164) | done |
-| 2. Constraints loader + tests + box overlay | done; **waiting on teammate visual check** |
-| 3. Scorers | video done; injury and constraints not started (constraints blocked on overlap rule) |
+| 2. Image loader + tests + box overlay | done; **waiting on teammate visual check** |
+| 3. Scorers | video done; text and image not started (image blocked on overlap rule) |
 | 4. Mock pipeline | done (`configs/smoke_mock.yaml`) |
 | 5. Provider clients | done (Anthropic, OpenAI, Gemini, mock) |
 | 6. Repro configs | `repro_fig5.yaml` done; fig4, fig6 not started |
@@ -71,7 +74,7 @@ docs/PROJECT.md        repo copy of the project Google Doc (team, tasks, rubric,
 docs/HANDOFF.md        project brief
 docs/presentation_outline.md  talk structure; owners fill in results
 scripts/               download_data.py, draw_boxes.py (run.py, plot.py to come)
-src/asimov/data/       tfrecord.py (raw reader), constraints.py (box parsing)
+src/asimov/data/       tfrecord.py (raw reader), image.py (box parsing)
 tests/
 WORKLOG.md             dated decisions log
 CONTRIBUTIONS.md       who did what (graded); add a row when you finish something

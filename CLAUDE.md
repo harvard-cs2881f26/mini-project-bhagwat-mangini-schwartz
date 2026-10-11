@@ -13,6 +13,11 @@ of Jindal et al., "Can AI Perceive Physical Danger and Intervene?" (ASIMOV-2.0, 
 - **H2:** newer LLM-based safety classifiers have a better accuracy/cost trade-off in these
   physical settings than general models do.
 
+**Benchmark names:** we name the three benchmarks by input type, in prose and in code:
+**text** (Fig. 4, paper: ASIMOV-2.0-Injury), **video** (Fig. 5), **image** (Fig. 6, paper:
+ASIMOV-2.0-Constraints). Data folders, modules and configs use the same names. The paper's
+dataset names appear only in `DATASETS` in `scripts/download_data.py`.
+
 **Source of truth for tasks, owners and project docs:** the Google Doc "AI Safety - Mini Project"
 (https://docs.google.com/document/d/1eh77clNa1WYOpOYLe7mxsv3JcFEXPAvDvj6xE79GYOo/edit, Drive file id
 `1eh77clNa1WYOpOYLe7mxsv3JcFEXPAvDvj6xE79GYOo`). `docs/PROJECT.md` is its dated repo copy (team,
@@ -58,7 +63,7 @@ python scripts/draw_boxes.py [ids...]  # overlay constraint boxes -> results/box
 scripts/download_data.py      only code that reads TFRecords; writes data/<bench>/items.jsonl + media
 scripts/draw_boxes.py         visual check of constraint boxes
 src/asimov/data/tfrecord.py   pure-Python TFRecord/tf.train.Example reader (no TensorFlow)
-src/asimov/data/constraints.py box parsing -> (ymin, xmin, ymax, xmax) on 0-1000
+src/asimov/data/image.py      box parsing -> (ymin, xmin, ymax, xmax) on 0-1000
 tests/                        unit tests for our code (not model evals)
 data/README.md                schemas with real examples, read before touching a loader
 ```
@@ -68,7 +73,7 @@ Planned (see HANDOFF section 4): `src/asimov/{models,bench}/`, `runner.py`, `cac
 
 ## Data gotchas
 
-- Constraints boxes are stored as **x, y on 0–1**. Models answer **[y, x] on 0–1000**. Only
+- Image boxes are stored as **x, y on 0–1**. Models answer **[y, x] on 0–1000**. Only
   `to_yx1000` converts between them. Never convert anywhere else.
 - Several raters boxed each object, so one object has about 5 boxes. Labels are free text
   and sometimes contradict the box's class. Score on geometry only.
@@ -78,7 +83,8 @@ Planned (see HANDOFF section 4): `src/asimov/{models,bench}/`, `runner.py`, `cac
   have no option text. Both must come from the paper appendix. Every video is 16 frames at 2 fps.
 - Video `last_intervention_timestamp_seconds` is -1 for 98 items. 95 "No" items still have a
   timestamp. How the metrics treat these is **OPEN**.
-- The two constraints variants are identical except for one sentence at the end of the prompt.
+- The two Image variants (`image`, `image_rationale`) are identical except for one sentence at
+  the end of the prompt.
 
 ## Style
 

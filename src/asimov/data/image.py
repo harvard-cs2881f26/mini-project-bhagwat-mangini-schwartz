@@ -1,4 +1,4 @@
-"""Constraints benchmark loader.
+"""Image benchmark loader (the paper's ASIMOV-2.0-Constraints, Fig. 6).
 
 Raw box fields are stringified Python dicts: {label: "[x: X1\\ny: Y1\\n, x: X2\\ny: Y2\\n]"}
 with coordinates normalized 0-1, x before y. Models answer points as [y, x] on 0-1000, so
@@ -54,7 +54,7 @@ class Box:
 
 
 @dataclass
-class ConstraintItem:
+class ImageItem:
     id: str
     prompt: str
     image_path: Path
@@ -126,8 +126,8 @@ def merge_into_objects(boxes: list[Box], threshold: float = 0.5) -> list[list[Bo
     return list(groups.values())
 
 
-def load_constraints(variant: str = "constraints", data_dir: Path = DATA_DIR) -> list[ConstraintItem]:
-    """variant: 'constraints' (without rationale) or 'constraints_rationale'."""
+def load_image_items(variant: str = "image", data_dir: Path = DATA_DIR) -> list[ImageItem]:
+    """variant: 'image' (without rationale) or 'image_rationale'."""
     root = data_dir / variant
     items = []
     with open(root / "items.jsonl") as f:
@@ -136,7 +136,7 @@ def load_constraints(variant: str = "constraints", data_dir: Path = DATA_DIR) ->
             v = parse_box_dict(r["violating_raw"], violating=True)
             s = parse_box_dict(r["non_violating_raw"], violating=False)
             items.append(
-                ConstraintItem(
+                ImageItem(
                     id=r["id"],
                     prompt=r["prompt"],
                     image_path=root / r["image"],

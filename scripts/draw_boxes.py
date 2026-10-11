@@ -3,7 +3,7 @@
 grey dashed = dropped as degenerate.
 
     python scripts/draw_boxes.py                       # 5 evenly spaced items
-    python scripts/draw_boxes.py constraints_0032 ...  # specific items
+    python scripts/draw_boxes.py image_0032 ...        # specific items
     python scripts/draw_boxes.py --n 20 --out results/box_check
 
 Output: one PNG per item plus a text file listing each box's label, so the reviewer can
@@ -20,7 +20,7 @@ from PIL import Image, ImageDraw
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT / "src"))
 
-from asimov.data.constraints import Box, load_constraints  # noqa: E402
+from asimov.data.image import Box, load_image_items  # noqa: E402
 
 RED, GREEN, GREY = (230, 30, 30), (20, 200, 60), (160, 160, 160)
 
@@ -54,7 +54,7 @@ def main() -> None:
     ap.add_argument("--n", type=int, default=5)
     ap.add_argument("--out", default=str(ROOT / "results" / "box_check"))
     args = ap.parse_args()
-    items = load_constraints()
+    items = load_image_items()
     if args.ids:
         items = [i for i in items if i.id in set(args.ids)]
     else:
