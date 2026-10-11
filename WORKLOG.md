@@ -286,3 +286,19 @@ Status tags: **DECIDED**, **PROPOSED** (needs team sign-off), **OPEN** (needs a 
   no re-download), then delete `data/injury/`, `data/constraints/`, `data/constraints_rationale/`.
 - Also fixed: `download_data.py` with no arguments crashed on Python 3.12.12 (argparse rejects a
   list default that has `choices`).
+
+### Shared benchmark interface: PROPOSED (Noa; in a PR for Tyler, who owns the runner)
+- The runner was wired to video. Now `cfg["benchmark"]` picks a `Benchmark` from a registry
+  (`asimov.bench.get_benchmark`), which bundles that benchmark's loaders, request builder, scorer,
+  prompt identity for the saved-reply key, and the columns `scripts/run.py` prints. Text and image
+  plug in by adding an entry; the runner, CLI and clients stay the same.
+- Moved out of video code so every benchmark shares them: `TextPart`/`ImagePart` (`bench/parts.py`),
+  the reply JSON parser (`bench/parse.py`), the items.jsonl reader and answer-key JSON parser
+  (`data/rows.py`). `runner.video_order` is now `fixed_order` (same seed, same order).
+- **Saved replies stay valid.** Video's prompt identity is still the prompt file's text, so the key
+  is unchanged. Checked on 2026-10-11: all saved replies in `results/repro_fig5/` (7 models × 287,
+  Gemini 3.1 Pro 165) are found under the new code, and rescoring them reproduces each committed
+  `summary.json` exactly. Mock run (`configs/smoke_mock.yaml`) and all 36 tests match before/after.
+- *Alternatives considered:* a class hierarchy (base class per benchmark), rejected as more code
+  for three benchmarks; one generic scorer, rejected because the three metric sets share nothing
+  but the return shape; a separate runner per benchmark, rejected as duplicated cache/error code.

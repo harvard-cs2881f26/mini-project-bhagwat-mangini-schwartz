@@ -62,14 +62,28 @@ python scripts/draw_boxes.py [ids...]  # overlay constraint boxes -> results/box
 ```
 scripts/download_data.py      only code that reads TFRecords; writes data/<bench>/items.jsonl + media
 scripts/draw_boxes.py         visual check of constraint boxes
+scripts/run.py <config>       run any benchmark config; scripts/error_report.py is video-only
 src/asimov/data/tfrecord.py   pure-Python TFRecord/tf.train.Example reader (no TensorFlow)
-src/asimov/data/image.py      box parsing -> (ymin, xmin, ymax, xmax) on 0-1000
+src/asimov/data/rows.py       shared: read data/<bench>/items.jsonl, parse answer-key JSON
+src/asimov/data/<bench>.py    loaders: inputs and answers loaded by separate functions
+src/asimov/data/image.py      also box parsing -> (ymin, xmin, ymax, xmax) on 0-1000
+src/asimov/bench/__init__.py  Benchmark interface + registry (get_benchmark)
+src/asimov/bench/parts.py     TextPart / ImagePart: provider-neutral request parts
+src/asimov/bench/parse.py     shared: pull the JSON object out of a model reply
+src/asimov/bench/<bench>.py   build_request + BENCHMARK; scorer in <bench>_score.py
+src/asimov/models/            one client per provider + mock; get_client(provider, model)
+src/asimov/runner.py          benchmark-agnostic: cache, calls, errors, scoring via the registry
+configs/*.yaml                run, benchmark, prompt, thinking, models
 tests/                        unit tests for our code (not model evals)
 data/README.md                schemas with real examples, read before touching a loader
 ```
 
-Planned (see HANDOFF section 4): `src/asimov/{models,bench}/`, `runner.py`, `cache.py`,
-`scripts/run.py`, `scripts/plot.py`, `configs/*.yaml`, `experiments/*/README.md`.
+**Adding a benchmark** (text, image): write its loader, `build_request` and scorer, define
+`BENCHMARK = Benchmark(...)` in `bench/<bench>.py`, add it to `MODULES` in `bench/__init__.py`,
+and add a config. Don't edit the runner or the clients for one benchmark. Scorers stay separate:
+they only share the return shape (`n`, metrics, `per_item`) and `bench/parse.py`.
+
+Planned: `scripts/plot.py`, `experiments/*/README.md`.
 
 ## Data gotchas
 

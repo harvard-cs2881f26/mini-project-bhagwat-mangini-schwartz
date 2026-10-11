@@ -9,27 +9,15 @@ Each provider client turns these parts into its own message format. Images are s
 """
 from __future__ import annotations
 
-from dataclasses import dataclass
 from pathlib import Path
 
-from asimov.data.video import VideoItem
+from asimov.bench import Benchmark
+from asimov.bench.parts import ImagePart, Part, TextPart
+from asimov.bench.video_score import score
+from asimov.data.video import VideoItem, load_video_answers, load_video_items
 
 PROMPTS_DIR = Path(__file__).resolve().parents[1] / "prompts"
 DEFAULT_PROMPT = "video_v2"
-
-
-@dataclass(frozen=True)
-class TextPart:
-    text: str
-
-
-@dataclass(frozen=True)
-class ImagePart:
-    data: bytes
-    media_type: str = "image/jpeg"
-
-
-Part = TextPart | ImagePart
 
 
 def load_prompt(name: str = DEFAULT_PROMPT) -> str:
@@ -51,3 +39,21 @@ def build_request(item: VideoItem, prompt_name: str = DEFAULT_PROMPT) -> list[Pa
         parts.append(ImagePart(path.read_bytes()))
     parts.append(TextPart(after.lstrip("\n")))
     return parts
+
+
+BENCHMARK = Benchmark(
+    name="video",
+    load_items=load_video_items,
+    load_answers=load_video_answers,
+    build_request=build_request,
+    score=score,
+    prompt_version=load_prompt,  # the prompt file's text, so editing a prompt file invalidates saved replies
+    columns=(
+        ("risk acc", "risk_accuracy", True),
+        ("avg err s", "timing_mae_s", False),
+        ("≤0.5s", "within_0_5_rate", True),
+        ("miss", "miss_rate", True),
+        ("false al", "false_alarm_rate", True),
+        ("parse fail", "parse_failure_rate", True),
+    ),
+)

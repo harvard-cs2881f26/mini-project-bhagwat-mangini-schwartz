@@ -4,7 +4,7 @@ import base64
 
 import pytest
 
-from asimov.bench.video import ImagePart, TextPart
+from asimov.bench.parts import ImagePart, TextPart
 from asimov.models import get_client
 from asimov.models.anthropic_client import to_content
 from asimov.models.gemini_client import min_thinking, to_contents

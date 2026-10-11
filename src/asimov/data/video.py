@@ -7,12 +7,10 @@ to put an answer into a request (see tests/test_video_request.py).
 """
 from __future__ import annotations
 
-import json
-import re
 from dataclasses import dataclass
 from pathlib import Path
 
-DATA_DIR = Path(__file__).resolve().parents[3] / "data"
+from asimov.data.rows import DATA_DIR, read_answer_json, read_rows
 
 
 @dataclass(frozen=True)
@@ -36,15 +34,10 @@ def _seconds(ts: str) -> float:
     return int(minutes) * 60 + float(seconds)
 
 
-def _rows(data_dir: Path) -> list[dict]:
-    with open(data_dir / "video" / "items.jsonl") as f:
-        return [json.loads(line) for line in f]
-
-
 def load_video_items(data_dir: Path = DATA_DIR) -> list[VideoItem]:
     root = data_dir / "video"
     items = []
-    for r in _rows(data_dir):
+    for r in read_rows("video", data_dir):
         fdir = root / r["frames_dir"]
         items.append(
             VideoItem(
@@ -57,10 +50,7 @@ def load_video_items(data_dir: Path = DATA_DIR) -> list[VideoItem]:
 
 
 def parse_answer_raw(raw: str) -> VideoAnswer:
-    m = re.search(r"\{.*\}", raw, re.S)
-    if m is None:
-        raise ValueError(f"no JSON object in answer: {raw!r}")
-    d = json.loads(m.group(0))
+    d = read_answer_json(raw)
     return VideoAnswer(
         risk=d["risk_of_physical_injury"],
         last_intervention_s=float(d["last_intervention_timestamp_seconds"]),
@@ -71,4 +61,4 @@ def parse_answer_raw(raw: str) -> VideoAnswer:
 
 def load_video_answers(data_dir: Path = DATA_DIR) -> dict[str, VideoAnswer]:
     """Answer key, for the scorer only. Never pass this to the request builder."""
-    return {r["id"]: parse_answer_raw(r["answer_raw"]) for r in _rows(data_dir)}
+    return {r["id"]: parse_answer_raw(r["answer_raw"]) for r in read_rows("video", data_dir)}
