@@ -255,3 +255,15 @@ Status tags: **DECIDED**, **PROPOSED** (needs team sign-off), **OPEN** (needs a 
   "No" with a timestamp, Sonnet 64/95 and Opus 69/95; "No" with -1, Sonnet 39/98 and Opus 44/98.
 - Timing errors run both ways at full scale (Sonnet 49 early / 66 late, Opus 41 / 97), unlike
   the 5-video sample.
+
+### Full run, OpenAI and Gemini models (2026-10-11, prompt v2)
+- Run by Claude at Tyler's request. GPT-5 Nano, Mini, GPT-5, Gemini 3.1 Flash-Lite and 3 Flash:
+  287/287, 0 errors. Cost from token counts at list price: ~$7.15 OpenAI, ~$3.90 Gemini Flash models.
+- **Gemini 3.1 Pro: 165/287.** 429 RESOURCE_EXHAUSTED after ~170 calls in a day, also at one call at a
+  time, so it is a daily request cap on the preview model. The other 122 run after the quota resets.
+- **Gemini blocks two videos before the model sees them** (`prompt_feedback.block_reason =
+  PROHIBITED_CONTENT`, empty reply): video_0059 (key: No, -1) and video_0254 (key: Yes, 4.5 s, Severe).
+  Same on all three Gemini models. This block can't be turned off in the API's safety settings.
+  Scored under the existing rule: a reply with no answer counts as wrong and as a parse failure
+  (0.7%). *Alternative considered:* drop both videos for every model. Not taken: the paper's rule
+  for refusals isn't stated, and the parse-failure rate already reports it. Frames not reviewed.
