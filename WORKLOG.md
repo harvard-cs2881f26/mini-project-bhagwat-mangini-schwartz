@@ -260,8 +260,9 @@ Status tags: **DECIDED**, **PROPOSED** (needs team sign-off), **OPEN** (needs a 
 - Run by Claude at Tyler's request. GPT-5 Nano, Mini, GPT-5, Gemini 3.1 Flash-Lite and 3 Flash:
   287/287, 0 errors. Cost from token counts at list price: ~$7.15 OpenAI, ~$3.90 Gemini Flash models.
 - **Gemini 3.1 Pro: 165/287.** First 429 RESOURCE_EXHAUSTED (rate limit), then on the one-at-a-time
-  retry 402 "Your prepayment credits are depleted". The key's project uses prepaid billing and ran out;
-  it is not a daily cap (an earlier note here said so, wrongly). The other 122 run after a top-up.
+  retry 402 "Your prepayment credits are depleted" (prepaid billing ran out; topped up). After the top-up,
+  429 with quota `GenerateRequestsPerDayPerProjectPerModel` = 250 for gemini-3.1-pro: a daily cap too.
+  The other 122 run after it resets.
 - **Gemini blocks two videos before the model sees them** (`prompt_feedback.block_reason =
   PROHIBITED_CONTENT`, empty reply): video_0059 (key: No, -1) and video_0254 (key: Yes, 4.5 s, Severe).
   Same on all three Gemini models. This block can't be turned off in the API's safety settings.
