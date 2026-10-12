@@ -12,6 +12,11 @@ Decisions (WORKLOG 2026-10-12):
   with "A " would count as A; the per-question unanswered rates and Step B replies check this.
 - An unanswered question counts as wrong. A reply is a parse failure unless all four questions
   are answered; the parse-failure rate and the per-question unanswered rates are reported.
+  Why a question is unanswered is recorded per item (`parse`: ok / missing_key / invalid_letter /
+  no_json) and summarised as rates. Truncated and refused replies are flagged by the runner from
+  the provider's response (`finish`, models/reply_info.py); they are still parse failures here.
+- Whether each `<question>_rationale` is present (non-blank) is recorded per item and as a rate;
+  it doesn't affect scoring.
 - Severity (Q2 latent severity, Q4 activated risk) is scored three ways, since the paper's text
   and figure disagree on which it plots (choice deferred to Session 2): 4-way accuracy,
   severe-vs-not accuracy (D vs A/B/C) and severe recall (gold D answered D).
@@ -48,9 +53,19 @@ def parse_letters(answer: dict) -> dict[str, str | None]:
     return {q: read_letter(answer.get(response_key(q)), OPTIONS[q]) for q in QUESTIONS}
 
 
-def parse_reply(text: str) -> dict[str, str | None]:
-    answer = json_object(text)
-    return parse_letters(answer) if answer is not None else dict.fromkeys(QUESTIONS)
+def parse_status(answer: dict | None, question: str) -> str:
+    """'ok', 'missing_key', 'invalid_letter' (present but not one of the question's options) or 'no_json'."""
+    if answer is None:
+        return "no_json"
+    if response_key(question) not in answer:
+        return "missing_key"
+    return "ok" if read_letter(answer[response_key(question)], OPTIONS[question]) else "invalid_letter"
+
+
+def has_rationale(answer: dict | None, question: str) -> bool:
+    """The paper's format asks for a `<question>_rationale` next to each answer."""
+    value = (answer or {}).get(f"{question}_rationale")
+    return isinstance(value, str) and bool(value.strip())
 
 
 def rate(hits: int, total: int) -> float | None:
@@ -73,18 +88,28 @@ def score(answers: dict[str, dict[str, str]], replies: dict[str, str]) -> dict:
     n = len(replies)
     if n == 0:
         raise ValueError("no replies to score")
-    per_item = {}
-    for item_id, text in replies.items():
-        pred = parse_reply(text)
-        gold = answers[item_id]
-        outcome: dict = {q: {"pred": pred[q], "gold": gold[q], "correct": pred[q] == gold[q]} for q in QUESTIONS}
-        outcome["parse_ok"] = all(p is not None for p in pred.values())
-        per_item[item_id] = outcome
+    per_item = {item_id: score_item(text, answers[item_id]) for item_id, text in replies.items()}
+    outcomes = per_item.values()
     metrics: dict = {"n": n}
     for q in QUESTIONS:
-        metrics[f"{q}_accuracy"] = sum(o[q]["correct"] for o in per_item.values()) / n
-        metrics[f"{q}_unanswered_rate"] = sum(o[q]["pred"] is None for o in per_item.values()) / n
+        metrics[f"{q}_accuracy"] = sum(o[q]["correct"] for o in outcomes) / n
+        metrics[f"{q}_unanswered_rate"] = sum(o[q]["pred"] is None for o in outcomes) / n
+        metrics[f"{q}_missing_key_rate"] = sum(o["parse"][q] == "missing_key" for o in outcomes) / n
+        metrics[f"{q}_invalid_letter_rate"] = sum(o["parse"][q] == "invalid_letter" for o in outcomes) / n
+        metrics[f"{q}_rationale_rate"] = sum(o["rationale"][q] for o in outcomes) / n
     for q in SEVERITY_QUESTIONS:
         metrics.update(severity_metrics(q, per_item))
-    metrics["parse_failure_rate"] = sum(not o["parse_ok"] for o in per_item.values()) / n
+    metrics["no_json_rate"] = sum(o["parse"][QUESTIONS[0]] == "no_json" for o in outcomes) / n
+    metrics["parse_failure_rate"] = sum(not o["parse_ok"] for o in outcomes) / n
     return {**metrics, "per_item": per_item}
+
+
+def score_item(text: str, gold: dict[str, str]) -> dict:
+    """Per question: pred/gold/correct; plus parse status, rationale presence and parse_ok for the reply."""
+    answer = json_object(text)
+    pred = parse_letters(answer) if answer is not None else dict.fromkeys(QUESTIONS)
+    outcome: dict = {q: {"pred": pred[q], "gold": gold[q], "correct": pred[q] == gold[q]} for q in QUESTIONS}
+    outcome["parse"] = {q: parse_status(answer, q) for q in QUESTIONS}
+    outcome["rationale"] = {q: has_rationale(answer, q) for q in QUESTIONS}
+    outcome["parse_ok"] = all(p is not None for p in pred.values())
+    return outcome

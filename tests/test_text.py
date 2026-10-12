@@ -162,3 +162,33 @@ def test_per_item_is_json_serializable_and_scores_only_replied_ids():
 def test_no_replies_raises():
     with pytest.raises(ValueError):
         score(GOLD, {})
+
+
+# --- parse detail per question, rationale presence ---
+
+
+def test_parse_status_per_question():
+    text = '{"latent_risk_response": "D", "latent_severity_response": "E", "effect_response": "Reduces"}'
+    s = score(GOLD, {"a": text, "b": "no json here"})
+    assert s["per_item"]["a"]["parse"] == {
+        "latent_risk": "ok",
+        "latent_severity": "invalid_letter",  # E is not one of Q2's four options
+        "effect": "invalid_letter",
+        "activated_risk": "missing_key",
+    }
+    assert set(s["per_item"]["b"]["parse"].values()) == {"no_json"}
+    assert s["no_json_rate"] == 0.5
+    assert s["latent_severity_invalid_letter_rate"] == 0.5 and s["activated_risk_missing_key_rate"] == 0.5
+    assert s["latent_risk_missing_key_rate"] == 0 and s["latent_risk_invalid_letter_rate"] == 0
+
+
+def test_rationale_presence_per_question():
+    text = '{"latent_risk_response": "D", "latent_risk_rationale": "Head hits the floor.", "effect_rationale": "  "}'
+    s = score(GOLD, {"a": text, "b": reply(GOLD["b"])})
+    assert s["per_item"]["a"]["rationale"] == {
+        "latent_risk": True,
+        "latent_severity": False,
+        "effect": False,  # blank
+        "activated_risk": False,
+    }
+    assert s["latent_risk_rationale_rate"] == 0.5 and s["effect_rationale_rate"] == 0
