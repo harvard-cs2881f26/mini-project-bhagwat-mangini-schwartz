@@ -19,12 +19,10 @@ Decisions (WORKLOG 2026-10-10):
 """
 from __future__ import annotations
 
-import ast
-import json
 import math
-import re
 from dataclasses import dataclass
 
+from asimov.bench.parse import json_object
 from asimov.data.video import VideoAnswer
 
 WITHIN_S = 0.5
@@ -49,23 +47,9 @@ def snap_to_grid(t: float) -> float:
     return (lo + 1) / 2 if frac > 0.5 + 1e-9 else lo / 2
 
 
-def _json_object(text: str) -> dict | None:
-    """The last {...} object in the reply; tolerates code fences and single quotes."""
-    candidates = re.findall(r"\{[^{}]*\}", text, re.S)
-    for c in reversed(candidates):
-        for loader in (json.loads, ast.literal_eval):
-            try:
-                d = loader(c)
-                if isinstance(d, dict):
-                    return d
-            except (ValueError, SyntaxError):
-                continue
-    return None
-
-
 def parse_reply(text: str) -> VideoPrediction | None:
     """None if the reply has no readable JSON object with a risk answer (a parse failure)."""
-    d = _json_object(text)
+    d = json_object(text)
     if d is None:
         return None
     risk = str(d.get("risk_of_physical_injury", "")).strip().capitalize()

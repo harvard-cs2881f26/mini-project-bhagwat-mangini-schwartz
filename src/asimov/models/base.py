@@ -15,7 +15,7 @@ import time
 from dataclasses import dataclass, field
 from typing import Literal, Protocol
 
-from asimov.bench.video import Part
+from asimov.bench.parts import Part
 
 Thinking = Literal["min", "default"]
 

@@ -9,7 +9,8 @@ except the frames can be in a request:
 """
 import pytest
 
-from asimov.bench.video import ImagePart, TextPart, build_request, frame_label
+from asimov.bench.parts import ImagePart, TextPart
+from asimov.bench.video import build_request, frame_label
 from asimov.data.video import DATA_DIR, VideoItem, load_video_answers, load_video_items, parse_answer_raw
 
 HAVE_DATA = (DATA_DIR / "video" / "items.jsonl").exists()

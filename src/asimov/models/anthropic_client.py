@@ -9,7 +9,7 @@ import base64
 
 import anthropic
 
-from asimov.bench.video import ImagePart, Part, TextPart
+from asimov.bench.parts import ImagePart, Part, TextPart
 from asimov.models.base import ModelResponse, Thinking, Timer
 
 MAX_TOKENS = 2048  # the answer is a short JSON object

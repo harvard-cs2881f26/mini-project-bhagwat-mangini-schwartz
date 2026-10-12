@@ -9,7 +9,7 @@ from asimov.models.mock import REPLIES
 from asimov.runner import run
 
 pytestmark = pytest.mark.skipif(not (DATA_DIR / "video" / "items.jsonl").exists(), reason="data not downloaded")
-CFG = {"run": "t", "prompt": "video_v2", "thinking": "min", "models": [
+CFG = {"run": "t", "benchmark": "video", "prompt": "video_v2", "thinking": "min", "models": [
     {"name": "Always No", "provider": "mock", "model": "mock-always-no"},
     {"name": "Broken", "provider": "mock", "model": "mock-error"},
 ]}
@@ -39,9 +39,9 @@ def test_run_scores_saves_and_reuses(tmp_path):
 
 def test_limit_order_is_mixed_and_fixed(tmp_path):
     from asimov.data.video import load_video_items
-    from asimov.runner import video_order
-    first = [i.id for i in video_order(load_video_items())[:20]]
-    assert first == [i.id for i in video_order(load_video_items())[:20]]
+    from asimov.runner import fixed_order
+    first = [i.id for i in fixed_order(load_video_items())[:20]]
+    assert first == [i.id for i in fixed_order(load_video_items())[:20]]
     answers = load_video_answers()
     assert {answers[i].risk for i in first} == {"Yes", "No"}
 

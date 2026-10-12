@@ -10,7 +10,7 @@ import base64
 
 import openai
 
-from asimov.bench.video import ImagePart, Part, TextPart
+from asimov.bench.parts import ImagePart, Part, TextPart
 from asimov.models.base import ModelResponse, Thinking, Timer
 
 MAX_OUTPUT_TOKENS = 8192  # includes reasoning tokens

@@ -272,7 +272,7 @@ Status tags: **DECIDED**, **PROPOSED** (needs team sign-off), **OPEN** (needs a 
 
 ## 2026-10-11: benchmark names and shared benchmark interface (Noa)
 
-### Benchmarks named by input type: PROPOSED (Noa; in a PR for Tyler and Riddhi)
+### Benchmarks named by input type: DECIDED (Noa; merged 2026-10-11 as 25983b8; Tyler agreed in the PR 1 review)
 - **text** (Fig. 4, paper: Injury), **video** (Fig. 5), **image** (Fig. 6, paper: Constraints), used
   in prose and in code: data folders, modules, configs. `injury/` became `data/text/`,
   `constraints*/` became `data/image*/`, `data/constraints.py` became `data/image.py`
@@ -287,3 +287,36 @@ Status tags: **DECIDED**, **PROPOSED** (needs team sign-off), **OPEN** (needs a 
   no re-download), then delete `data/injury/`, `data/constraints/`, `data/constraints_rationale/`.
 - Also fixed: `download_data.py` with no arguments crashed on Python 3.12.12 (argparse rejects a
   list default that has `choices`).
+
+### Shared benchmark interface: PROPOSED (Noa; in a PR for Tyler, who owns the runner)
+- The runner was wired to video. Now `cfg["benchmark"]` picks a `Benchmark` from a registry
+  (`asimov.bench.get_benchmark`), which bundles that benchmark's loaders, request builder, scorer,
+  prompt identity for the saved-reply key, and the columns `scripts/run.py` prints. Text and image
+  plug in by adding an entry; the runner, CLI and clients stay the same.
+- Moved out of video code so every benchmark shares them: `TextPart`/`ImagePart` (`bench/parts.py`),
+  the reply JSON parser (`bench/parse.py`), the items.jsonl reader and answer-key JSON parser
+  (`data/rows.py`). `runner.video_order` is now `fixed_order` (same seed, same order).
+- **Saved replies stay valid.** Video's prompt identity is still the prompt file's text, so the key
+  is unchanged. Checked on 2026-10-11: all saved replies in `results/repro_fig5/` (7 models × 287,
+  Gemini 3.1 Pro 165) are found under the new code, and rescoring them reproduces each committed
+  `summary.json` exactly. Mock run (`configs/smoke_mock.yaml`) and all 36 tests match before/after.
+- *Alternatives considered:* a class hierarchy (base class per benchmark), rejected as more code
+  for three benchmarks; one generic scorer, rejected because the three metric sets share nothing
+  but the return shape; a separate runner per benchmark, rejected as duplicated cache/error code.
+- **Tyler's review of PR 1 (2026-10-11), and what changed:** video results unchanged (he
+  re-checked keys and rescoring independently). Three points for text and image:
+  1. *Text could silently reuse old replies* if `prompt_version` were only the dataset version: an
+     H1 prompt variant under the same run name would be scored with the old prompt's replies.
+     Now a documented rule on `Benchmark.prompt_version`: it covers everything our code adds to a
+     request beyond the item (prompt file text, prompt name or variant, wrapper text, dataset
+     version). Planned for text: `"asimov_v2_injuries/0.1.0|<prompt name>|<wrapper text>"`.
+  2. *`image` and `image_rationale` could collide the same way.* They will be two registry
+     entries, one per data folder, each with its own `prompt_version`. Convention: a benchmark's
+     `name` is its data folder.
+  3. *The leakage test was video-only.* `tests/test_leakage.py` now runs on every registered
+     benchmark: for every item, neither the raw answer string nor the item ID appears in the
+     request (text or image bytes), and no field of the item contains the raw answer. Searching
+     for answer values is not used, since "Yes"/"No" and letters A–D appear in the prompts
+     themselves. The stricter video-only checks in `tests/test_video_request.py` stay.
+     *Alternative considered:* a test-only rule that request text is identical across items, as
+     for video; rejected because each text item has its own scenario.

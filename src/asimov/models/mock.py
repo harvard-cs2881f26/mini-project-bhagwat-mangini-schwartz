@@ -5,7 +5,7 @@ never see answers. Scorer tests check exact numbers with hand-built replies inst
 """
 from __future__ import annotations
 
-from asimov.bench.video import Part
+from asimov.bench.parts import Part
 from asimov.models.base import ModelResponse, Thinking
 
 REPLIES = {

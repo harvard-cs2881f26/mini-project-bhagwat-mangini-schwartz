@@ -13,12 +13,11 @@ Decisions (see WORKLOG.md):
 from __future__ import annotations
 
 import ast
-import json
 import re
 from dataclasses import dataclass, field
 from pathlib import Path
 
-DATA_DIR = Path(__file__).resolve().parents[3] / "data"
+from asimov.data.rows import DATA_DIR, read_rows
 
 MIN_SIDE = 5.0  # 0.5% of the image side; see WORKLOG.md 2026-10-04
 
@@ -130,21 +129,19 @@ def load_image_items(variant: str = "image", data_dir: Path = DATA_DIR) -> list[
     """variant: 'image' (without rationale) or 'image_rationale'."""
     root = data_dir / variant
     items = []
-    with open(root / "items.jsonl") as f:
-        for line in f:
-            r = json.loads(line)
-            v = parse_box_dict(r["violating_raw"], violating=True)
-            s = parse_box_dict(r["non_violating_raw"], violating=False)
-            items.append(
-                ImageItem(
-                    id=r["id"],
-                    prompt=r["prompt"],
-                    image_path=root / r["image"],
-                    width=r["width"],
-                    height=r["height"],
-                    violating=[b for b in v if not is_degenerate(b)],
-                    safe=[b for b in s if not is_degenerate(b)],
-                    dropped=[b for b in v + s if is_degenerate(b)],
-                )
+    for r in read_rows(variant, data_dir):
+        v = parse_box_dict(r["violating_raw"], violating=True)
+        s = parse_box_dict(r["non_violating_raw"], violating=False)
+        items.append(
+            ImageItem(
+                id=r["id"],
+                prompt=r["prompt"],
+                image_path=root / r["image"],
+                width=r["width"],
+                height=r["height"],
+                violating=[b for b in v if not is_degenerate(b)],
+                safe=[b for b in s if not is_degenerate(b)],
+                dropped=[b for b in v + s if is_degenerate(b)],
             )
+        )
     return items
