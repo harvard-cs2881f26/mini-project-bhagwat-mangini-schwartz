@@ -28,6 +28,7 @@ import yaml
 from asimov.bench import Benchmark, get_benchmark
 from asimov.config import RunConfig
 from asimov.models import get_client
+from asimov.models.reply_info import cached_input_tokens, finish
 
 ROOT = Path(__file__).resolve().parents[2]
 KEY_VARS = {"anthropic": "ANTHROPIC_API_KEY", "openai": "OPENAI_API_KEY", "gemini": "GEMINI_API_KEY"}
@@ -120,20 +121,23 @@ def run_model(bench: Benchmark, spec: dict, cfg: dict, items, out_dir: Path, wor
         client = get_client(provider, model)
 
         def call(item):
-            return item, client.generate(bench.build_request(item, prompt), thinking=thinking)
+            return client.generate(bench.build_request(item, prompt), thinking=thinking)
 
         with ThreadPoolExecutor(max_workers=workers) as pool, open(resp_path, "a") as f:
-            futures = [pool.submit(call, i) for i in todo]
+            futures = {pool.submit(call, i): i for i in todo}
             for fut in as_completed(futures):
+                item = futures[fut]
                 try:
-                    item, r = fut.result()
-                except Exception as e:  # never saved; rerun to retry
+                    r = fut.result()
+                except Exception as e:  # logged to errors.jsonl, never saved as a reply; rerun to retry
                     errors += 1
+                    log_error(mdir / "errors.jsonl", item.id, key, e)
                     print(f"  ERROR {type(e).__name__}: {str(e)[:200]}")
                     continue
+                usage = {**r.usage, "cached_input_tokens": cached_input_tokens(provider, r.raw)}
                 row = {"id": item.id, "key": key, "provider": provider, "model": model,
                        "served_model": r.model, "prompt": prompt, "thinking": thinking,
-                       "text": r.text, "usage": r.usage, "latency_s": round(r.latency_s, 2),
+                       "text": r.text, "usage": usage, "latency_s": round(r.latency_s, 2),
                        "time": time.strftime("%Y-%m-%dT%H:%M:%S"), "raw": r.raw}
                 f.write(json.dumps(row) + "\n")
                 f.flush()
@@ -147,14 +151,37 @@ def run_model(bench: Benchmark, spec: dict, cfg: dict, items, out_dir: Path, wor
         (mdir / "summary.json").write_text(json.dumps(empty, indent=1))  # keeps the error count for --no-calls
         return empty
     s = bench.score(bench.load_answers(), replies)
-    usage = [saved[i]["usage"] for i in replies]
+    rows = [saved[i] for i in replies]
+    finishes = {r["id"]: finish(provider, r["raw"]) for r in rows}
+    per_item = {i: {**outcome, "finish": finishes[i]} for i, outcome in s.pop("per_item").items()}
     summary = {"name": spec["name"], "provider": provider, "model": model, "prompt": prompt,
                "thinking": thinking, **made, "key": key, "errors": errors,
-               "input_tokens": sum(u.get("input_tokens") or 0 for u in usage),
-               "output_tokens": sum(u.get("output_tokens") or 0 for u in usage),
-               **{k: v for k, v in s.items() if k != "per_item"}}
-    (mdir / "summary.json").write_text(json.dumps({**summary, "per_item": s["per_item"]}, indent=1))
+               **token_totals(provider, rows), **finish_rates(finishes), **s}
+    (mdir / "summary.json").write_text(json.dumps({**summary, "per_item": per_item}, indent=1))
     return summary
+
+
+def log_error(path: Path, item_id: str, key: str, e: Exception) -> None:
+    """A failed call, for the record only: the cache never reads this file, so it's retried."""
+    row = {"id": item_id, "key": key, "error_type": type(e).__name__, "message": str(e)[:2000],
+           "time": time.strftime("%Y-%m-%dT%H:%M:%S%z")}
+    with open(path, "a") as f:
+        f.write(json.dumps(row) + "\n")
+
+
+def token_totals(provider: str, rows: list[dict]) -> dict:
+    """Summed usage. Cached input tokens are read from the saved raw response, so old replies count too."""
+    cached = [cached_input_tokens(provider, r["raw"]) for r in rows]
+    return {"input_tokens": sum(r["usage"].get("input_tokens") or 0 for r in rows),
+            "output_tokens": sum(r["usage"].get("output_tokens") or 0 for r in rows),
+            "cached_input_tokens": None if any(c is None for c in cached) else sum(c or 0 for c in cached)}
+
+
+def finish_rates(finishes: dict[str, str]) -> dict:
+    """Share of replies cut off by the output limit, and refused or safety-blocked (models.reply_info)."""
+    n = len(finishes)
+    return {"truncation_rate": sum(f == "truncated" for f in finishes.values()) / n,
+            "refusal_rate": sum(f == "refused" for f in finishes.values()) / n}
 
 
 def run(cfg: dict, limit: int | None = None, only: list[str] | None = None,

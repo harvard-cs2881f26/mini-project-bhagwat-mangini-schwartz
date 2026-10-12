@@ -130,3 +130,26 @@ def test_no_calls_keeps_error_counts_after_a_partial_run(tmp_path):
     broken = run(CFG, limit=2, results_dir=tmp_path, call_models=False)[1]
     assert broken["errors"] == 2
     assert json.loads((tmp_path / "t" / "mock-error" / "summary.json").read_text())["n"] == 0
+
+
+# --- failed-call log, finish categories, cached tokens ---
+
+
+def test_failed_calls_are_logged_but_never_saved_as_replies(tmp_path):
+    run(CFG, limit=2, results_dir=tmp_path)
+    errs = [json.loads(line) for line in lines(tmp_path / "t" / "mock-error" / "errors.jsonl")]
+    assert len(errs) == 2 and {e["error_type"] for e in errs} == {"RuntimeError"}
+    assert set(errs[0]) >= {"id", "key", "error_type", "message", "time"}
+    assert lines(tmp_path / "t" / "mock-error" / "responses.jsonl") == []
+    run(CFG, limit=2, results_dir=tmp_path)  # failures are retried, not reused from the log
+    assert len(lines(tmp_path / "t" / "mock-error" / "errors.jsonl")) == 4
+
+
+def test_finish_categories_and_cached_tokens_in_summary(tmp_path):
+    no = run(CFG, limit=2, results_dir=tmp_path)[0]
+    assert no["truncation_rate"] == 0 and no["refusal_rate"] == 0
+    assert "cached_input_tokens" in no
+    summary = json.loads((tmp_path / "t" / "mock-always-no" / "summary.json").read_text())
+    assert {o["finish"] for o in summary["per_item"].values()} == {"complete"}
+    row = json.loads(lines(tmp_path / "t" / "mock-always-no" / "responses.jsonl")[0])
+    assert "cached_input_tokens" in row["usage"]
