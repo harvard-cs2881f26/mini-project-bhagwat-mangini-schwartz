@@ -4,6 +4,7 @@
 root="$(git rev-parse --show-toplevel)"
 path=$(python3 -c 'import json,sys; print(json.load(sys.stdin).get("tool_input",{}).get("file_path",""))')
 case "$path" in
+  "$root"/data/README.md|data/README.md) ;;  # committed documentation, editable
   "$root"/data/*|data/*)
     echo "Blocked: $path is under data/, which is never edited (CLAUDE.md). Regenerate it with scripts/download_data.py." >&2
     exit 2;;

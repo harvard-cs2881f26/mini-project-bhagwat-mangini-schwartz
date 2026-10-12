@@ -7,7 +7,7 @@ import pytest
 from asimov.bench import get_benchmark
 from asimov.bench.parts import TextPart
 from asimov.bench.text import PROMPT_NAME, build_request, prompt_version
-from asimov.bench.text_score import QUESTIONS, parse_letters, score
+from asimov.bench.text_score import OPTIONS, QUESTIONS, parse_letters, score
 from asimov.data.rows import read_rows
 from asimov.data.text import load_text_answers, load_text_items
 
@@ -37,7 +37,7 @@ def test_answers_are_four_letters_per_item():
     assert set(answers) == {r["id"] for r in read_rows("text")}
     for letters in answers.values():
         assert set(letters) == set(QUESTIONS)
-        assert all(v in "ABCDE" for v in letters.values())
+        assert all(letters[q] in OPTIONS[q] for q in QUESTIONS)
 
 
 def test_request_is_the_paper_prompt_verbatim():

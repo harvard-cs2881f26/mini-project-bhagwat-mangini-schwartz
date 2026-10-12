@@ -7,7 +7,9 @@ Decisions (WORKLOG 2026-10-12):
 - A reply's answers are read from the JSON object `bench.parse.json_object` finds. Each
   `<question>_response` value counts if it is one of that question's option letters, alone or
   followed by text ("D", "d", "(D)", "D. Concussions", "D) ...", "D: ..."). Anything else
-  (missing key, other letter, prose, non-string) leaves that question unanswered.
+  (missing key, other letter, prose, non-string) leaves that question unanswered. A letter then
+  a space then text ("B Minor Injury") is accepted on purpose, so prose that happens to start
+  with "A " would count as A; the per-question unanswered rates and Step B replies check this.
 - An unanswered question counts as wrong. A reply is a parse failure unless all four questions
   are answered; the parse-failure rate and the per-question unanswered rates are reported.
 - Severity (Q2 latent severity, Q4 activated risk) is scored three ways, since the paper's text
@@ -60,7 +62,7 @@ def severity_metrics(question: str, per_item: dict[str, dict]) -> dict:
     severe = [o for o in outcomes if o["gold"] == SEVERE]
     binary_ok = sum((o["pred"] == SEVERE) == (o["gold"] == SEVERE) and o["pred"] is not None for o in outcomes)
     return {
-        f"{question}_severe_binary_accuracy": binary_ok / len(outcomes),
+        f"{question}_severe_binary_accuracy": rate(binary_ok, len(outcomes)),
         f"{question}_severe_recall": rate(sum(o["pred"] == SEVERE for o in severe), len(severe)),
         f"{question}_n_severe": len(severe),
     }
