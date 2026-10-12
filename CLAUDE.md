@@ -37,6 +37,9 @@ scope and owners. Point out the conflict instead of silently picking one.
   give the numbers and point out what they show, but don't write the interpretation.
 - **Ask before any run that costs money**, other than a `--limit N` dry run.
 - **Cache every API response.** Reruns must be free. Never cache errors.
+- **Results only come from `scripts/run.py`**, never from a notebook or a one-off script, so every
+  run records how it was made. `tests/test_results_schema.py` checks committed results on CI. Older
+  results can be brought up to date for free with `scripts/run.py <config> --no-calls`.
 - **Log finished work in CONTRIBUTIONS.md** under the person it was done for, with an honest
   "AI assistance" entry saying what the AI did. Don't fill in someone's AI-assistance cell
   for work you didn't see; mark it for them to fill in.
