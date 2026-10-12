@@ -51,9 +51,13 @@ def run_key(model: str, prompt_version: str, thinking: str) -> str:
 
 
 def guard_config(out_dir: Path, config_text: str) -> None:
-    """Write results/<run>/config.yaml, or stop if it exists with different contents."""
+    """Write results/<run>/config.yaml, or stop if it exists with different settings.
+
+    Settings are compared as parsed YAML, so editing a comment keeps the run name (and refreshes
+    the copy); any change to a value, including the model list, needs a new run name.
+    """
     copy = out_dir / "config.yaml"
-    if copy.exists() and copy.read_text() != config_text:
+    if copy.exists() and yaml.safe_load(copy.read_text()) != yaml.safe_load(config_text):
         raise ConfigChanged(
             f"{copy} was written by a different config. Results made with different settings must "
             "not share a run name: give this config a new `run:` name (e.g. repro_fig4_default)."
@@ -79,13 +83,16 @@ def provenance(cfg: dict, config_text: str, config_path: Path | None) -> dict:
     return {"benchmark": cfg["benchmark"], "run": cfg["run"],
             "config_path": str(path.relative_to(ROOT)) if path and path.is_relative_to(ROOT) else (str(path) if path else None),
             "config_sha256": hashlib.sha256(config_text.encode()).hexdigest(),
-            "git_commit": commit, "git_dirty": dirty, "scored_at": time.strftime("%Y-%m-%dT%H:%M:%S")}
+            "git_commit": commit, "git_dirty": dirty, "scored_at": time.strftime("%Y-%m-%dT%H:%M:%S%z")}
 
 
-def last_errors(out_dir: Path) -> dict[str, int]:
-    """Failed calls per model from the last saved results/<run>/summary.json (kept by --no-calls)."""
-    path = out_dir / "summary.json"
-    return {r["model"]: r.get("errors", 0) for r in json.loads(path.read_text())} if path.exists() else {}
+def last_errors(mdir: Path) -> int:
+    """Failed calls in the model's last run that made calls, from its summary.json (kept by --no-calls).
+
+    The count belongs to that run's items; a --no-calls run with another --limit still reports it.
+    """
+    path = mdir / "summary.json"
+    return json.loads(path.read_text()).get("errors", 0) if path.exists() else 0
 
 
 def load_saved(path: Path, key: str) -> dict[str, dict]:
@@ -97,8 +104,7 @@ def load_saved(path: Path, key: str) -> dict[str, dict]:
 
 
 def run_model(bench: Benchmark, spec: dict, cfg: dict, items, out_dir: Path, workers: int, show: bool,
-              made: dict, call_models: bool = True, errors: int = 0) -> dict:
-    """errors: failed calls to report when call_models is False (the last real run's count)."""
+              made: dict, call_models: bool = True) -> dict:
     provider, model, thinking, prompt = spec["provider"], spec["model"], cfg["thinking"], cfg["prompt"]
     key = run_key(model, bench.prompt_version(prompt), thinking)
     mdir = out_dir / model
@@ -109,8 +115,8 @@ def run_model(bench: Benchmark, spec: dict, cfg: dict, items, out_dir: Path, wor
     to_call = f"{len(todo)} to call" if call_models else "no calls"
     print(f"\n== {spec['name']} ({model}): {len(items)} items, {len(items) - len(todo)} saved, {to_call}")
 
+    errors = 0 if call_models else last_errors(mdir)
     if todo and call_models:
-        errors = 0
         client = get_client(provider, model)
 
         def call(item):
@@ -137,7 +143,9 @@ def run_model(bench: Benchmark, spec: dict, cfg: dict, items, out_dir: Path, wor
 
     replies = {i.id: saved[i.id]["text"] for i in items if i.id in saved}
     if not replies:
-        return {"name": spec["name"], "model": model, **made, "key": key, "n": 0, "errors": errors}
+        empty = {"name": spec["name"], "model": model, **made, "key": key, "n": 0, "errors": errors}
+        (mdir / "summary.json").write_text(json.dumps(empty, indent=1))  # keeps the error count for --no-calls
+        return empty
     s = bench.score(bench.load_answers(), replies)
     usage = [saved[i]["usage"] for i in replies]
     summary = {"name": spec["name"], "provider": provider, "model": model, "prompt": prompt,
@@ -153,14 +161,14 @@ def run(cfg: dict, limit: int | None = None, only: list[str] | None = None,
         workers: int = 4, results_dir: Path | None = None,
         config_path: Path | None = None, call_models: bool = True) -> list[dict]:
     """config_path: the YAML file cfg was read from; its exact text is kept as results/<run>/config.yaml."""
-    RunConfig.model_validate(cfg)  # unknown or missing keys fail here, before anything runs
+    RunConfig.model_validate(cfg)  # unknown or missing keys and unknown providers fail here, before anything runs
     bench = get_benchmark(cfg["benchmark"])
+    bench.prompt_version(cfg["prompt"])  # an unknown prompt name fails before results/<run>/ is touched
     items = fixed_order(bench.load_items())[:limit]
     out_dir = (results_dir or ROOT / "results") / cfg["run"]
     config_text = config_path.read_text() if config_path else yaml.safe_dump(cfg, sort_keys=False)
     guard_config(out_dir, config_text)
     made = provenance(cfg, config_text, config_path)
-    previous = {} if call_models else last_errors(out_dir)
     show = limit is not None and limit <= 5
     for name in only or []:
         if not any(name in (s["name"], s["model"]) for s in cfg["models"]):
@@ -173,7 +181,6 @@ def run(cfg: dict, limit: int | None = None, only: list[str] | None = None,
         if call_models and var and not os.environ.get(var):
             print(f"\n== {spec['name']}: skipped, {var} not set")
             continue
-        rows.append(run_model(bench, spec, cfg, items, out_dir, workers, show, made, call_models,
-                              previous.get(spec["model"], 0)))
+        rows.append(run_model(bench, spec, cfg, items, out_dir, workers, show, made, call_models))
     (out_dir / "summary.json").write_text(json.dumps(rows, indent=1))
     return rows

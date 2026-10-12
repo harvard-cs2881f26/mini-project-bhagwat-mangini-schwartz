@@ -105,3 +105,28 @@ def test_no_calls_keeps_the_last_error_count(tmp_path):
     run(CFG, limit=2, results_dir=tmp_path)
     broken = run(CFG, limit=2, results_dir=tmp_path, call_models=False)[1]
     assert broken["errors"] == 2
+
+
+def test_bad_prompt_or_provider_fails_before_the_config_copy(tmp_path):
+    with pytest.raises(FileNotFoundError):  # video prompts are files: src/asimov/prompts/<name>.txt
+        run({**CFG, "prompt": "video_v9"}, limit=1, results_dir=tmp_path)
+    with pytest.raises(ValidationError):
+        run({**CFG, "models": [{"name": "X", "provider": "opnai", "model": "gpt-5"}]}, limit=1, results_dir=tmp_path)
+    assert not (tmp_path / "t" / "config.yaml").exists()
+
+
+def test_comment_only_edit_keeps_the_run_name(tmp_path):
+    path = tmp_path / "cfg.yaml"
+    path.write_text(yaml.safe_dump(CFG))
+    run(CFG, limit=1, results_dir=tmp_path / "res", config_path=path)
+    path.write_text("# a new comment\n" + yaml.safe_dump(CFG))
+    run(CFG, limit=1, results_dir=tmp_path / "res", config_path=path)  # no ConfigChanged
+    assert (tmp_path / "res" / "t" / "config.yaml").read_bytes() == path.read_bytes()
+
+
+def test_no_calls_keeps_error_counts_after_a_partial_run(tmp_path):
+    run(CFG, limit=2, results_dir=tmp_path)
+    run(CFG, limit=2, results_dir=tmp_path, only=["mock-always-no"])  # run-level summary now lacks Broken
+    broken = run(CFG, limit=2, results_dir=tmp_path, call_models=False)[1]
+    assert broken["errors"] == 2
+    assert json.loads((tmp_path / "t" / "mock-error" / "summary.json").read_text())["n"] == 0
