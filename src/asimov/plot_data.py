@@ -7,6 +7,7 @@ a figure and its page can't disagree. Paper values come from configs/paper/claim
 from __future__ import annotations
 
 from dataclasses import dataclass
+from typing import Protocol, TypeVar
 
 from asimov.claims import Claims, as_fraction, model_key
 from asimov.collect.load import RunData
@@ -16,9 +17,19 @@ from asimov.collect.metrics import estimate
 SEVERITY = {"4way": "_accuracy", "binary": "_severe_binary_accuracy", "recall": "_severe_recall"}
 # Goes between the axis name and "(Higher is Better)", e.g. "Severity Accuracy, severe vs not (Higher is Better)".
 SEVERITY_LABEL = {"4way": "", "binary": ", severe vs not", "recall": ", severe recall"}
-# Validated categorical palette (dataviz skill, light mode on the grey plot surface): one hue per model,
-# by the model's position in the Fig 4 config, so a model keeps its color in every figure.
-PALETTE = ("#2a78d6", "#eb6834", "#1baf7a", "#eda100", "#e87ba4", "#008300", "#4a3aa7", "#e34948")
+# The paper's colors (seaborn "deep"), one per model as in its Fig 4 legend, in that legend's order.
+# Used in every figure so ours sit beside the paper's on a slide (Noa, 2026-10-12). The paper's own
+# Fig 5b legend swaps GPT 5 Nano and Mini; we keep the Fig 4 colors everywhere.
+PAPER_COLORS = {
+    "Gemini 2.5 Flash-Lite": "#4c72b0",
+    "Gemini 2.5 Flash": "#dd8452",
+    "Gemini 2.5 Pro": "#55a868",
+    "Claude Opus 4.1": "#c44e52",
+    "Claude Sonnet 4": "#8172b3",
+    "GPT 5 Nano": "#937860",
+    "GPT 5 Mini": "#da8bc3",
+    "GPT 5": "#8c8c8c",
+}
 FALLBACK_COLOR = "#6b6b6b"
 SAME_SPOT_DECIMALS = 6  # points equal to this many decimals are drawn as one spot (ringed markers)
 MAX_LABEL_SHIFTS = 12  # slots tried above and below a label's home before it is left where it is
@@ -106,9 +117,23 @@ def ci(lo: float | None, hi: float | None) -> tuple[float, float] | None:
     return (lo, hi) if lo is not None and hi is not None else None
 
 
-def colors(names: list[str]) -> dict[str, str]:
-    """Model name -> color, by position in `names` (the Fig 4 config's model order)."""
-    return {model_key(n): PALETTE[i] if i < len(PALETTE) else FALLBACK_COLOR for i, n in enumerate(names)}
+def color(name: str) -> str:
+    """The paper's color for a model (our stand-in names map to the paper model they stand in for)."""
+    return next((c for n, c in PAPER_COLORS.items() if model_key(n) == model_key(name)), FALLBACK_COLOR)
+
+
+class Named(Protocol):
+    @property
+    def name(self) -> str: ...
+
+
+N = TypeVar("N", bound=Named)
+
+
+def in_paper_order(items: list[N]) -> list[N]:
+    """Points or bars in the paper's legend order; models the paper doesn't have go last, by name."""
+    rank = {model_key(n): i for i, n in enumerate(PAPER_COLORS)}
+    return sorted(items, key=lambda p: (rank.get(model_key(p.name), len(rank)), p.name))
 
 
 def same_spot_ranks(points: list[Point]) -> list[tuple[int, int]]:

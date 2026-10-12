@@ -10,10 +10,12 @@ import yaml
 from asimov.claims import Claims
 from asimov.collect.load import load_results
 from asimov.plot_data import (
+    FALLBACK_COLOR,
     Box,
     Point,
     baseline,
-    colors,
+    color,
+    in_paper_order,
     ours,
     paper,
     place_labels,
@@ -116,10 +118,16 @@ def test_text_vs_video(runs, claims):
     assert bars[0].video == pytest.approx(2 / 3)
 
 
-def test_colors_follow_the_model_not_the_figure():
-    c = colors(["GPT-5 Nano", "GPT-5"])
-    assert c["gpt5nano"] != c["gpt5"]
-    assert colors(["GPT-5 Nano", "GPT-5", "Claude Opus 4.1 (4.5)"])["gpt5"] == c["gpt5"]
+def test_paper_colors_follow_the_model():
+    assert color("GPT-5 Nano") == color("GPT 5 Nano") == "#937860"
+    assert color("Claude Opus 4.1 (4.5)") == "#c44e52"  # our stand-in gets the paper model's color
+    assert color("Some Other Model") == FALLBACK_COLOR
+
+
+def test_points_in_paper_legend_order():
+    names = ["GPT-5", "Claude Opus 4.1 (4.5)", "Gemini 2.5 Flash-Lite (3.1)", "Unknown"]
+    ordered = in_paper_order([Point(n, 0.5, 0.5) for n in names])
+    assert [p.name for p in ordered] == ["Gemini 2.5 Flash-Lite (3.1)", "Claude Opus 4.1 (4.5)", "GPT-5", "Unknown"]
 
 
 def test_plot_writes_paper_and_comparison_figures(results, tmp_path, capsys):
@@ -135,8 +143,6 @@ def test_plot_writes_paper_and_comparison_figures(results, tmp_path, capsys):
         str(claims_path),
         "--out",
         str(out),
-        "--config",
-        str(ROOT / "configs/repro_fig4.yaml"),
     ]
     assert plot.main(args) == 0
     for fig in ("fig4a", "fig4b", "fig5a", "fig5b"):
@@ -180,9 +186,23 @@ def test_labels_avoid_markers_and_stay_inside_the_plot():
 
 def test_no_model_legend_without_points():
     fig, ax = plt.subplots()
-    plot.model_legend(ax, [], {})
+    plot.model_legend(ax, [], plot.COMPARISON)
     assert ax.get_legend() is None
-    plot.model_legend(ax, [Point("GPT-5", 0.5, 0.5)], colors(["GPT-5"]))
+    plot.model_legend(ax, [Point("GPT-5", 0.5, 0.5)], plot.COMPARISON)
     legend = ax.get_legend()
     assert legend is not None and [t.get_text() for t in legend.get_texts()] == ["GPT-5"]
+    plt.close(fig)
+
+
+def test_legend_moves_outside_when_it_would_cover_a_marker():
+    fig, ax = plt.subplots()
+    corners = [
+        Point(n, x, y) for n, x, y in [("GPT-5", 0, 0), ("GPT-5 Mini", 0, 1), ("GPT-5 Nano", 1, 0), ("Claude Sonnet 4", 1, 1)]
+    ]
+    corners += [Point(f"M{i}", i / 10, j / 10) for i in range(11) for j in range(11)]  # no free spot inside
+    plot.scatter(ax, corners, plot.PAPER_FIG4)
+    plot.model_legend(ax, corners, plot.PAPER_FIG4)
+    legend = ax.get_legend()
+    assert legend is not None and legend.get_bbox_to_anchor().x0 > ax.get_window_extent().x1  # outside, right
+    assert not plot.legend_covers(ax, legend, [])
     plt.close(fig)

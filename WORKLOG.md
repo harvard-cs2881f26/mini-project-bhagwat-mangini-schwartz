@@ -592,3 +592,16 @@ No existing cache key changed. Each change is its own commit in PR #4.
   for the same three models; the Mini/Nano gaps read 18/8 points, not 19/17). The text's numbers
   stay in claims.yaml under the severe-vs-not keys; `scripts/plot.py --severity binary|recall`
   still draws those versions for the report if wanted.
+
+### Figure colors = the paper's, in every figure: DECIDED (Noa)
+- Paper-style figures copy the paper's look (seaborn "deep" colors per model, big translucent dots,
+  labels below the dot in Fig 4 and to its right in Fig 5b, legend inside, no title), so ours and
+  the paper's can sit side by side on a slide. The comparison figures use the same colors, so a model
+  has one color everywhere (`PAPER_COLORS` in `src/asimov/plot_data.py`).
+- The paper's own Fig 5b legend swaps GPT 5 Nano (pink there) and GPT 5 Mini (brown there) relative to
+  its Fig 4. We use the Fig 4 colors in every figure.
+- The legend sits inside the plot as in the paper, but moves just outside when it would cover a dot or
+  a bar (matters on partial runs, where dots fill every corner).
+- *Alternative considered:* a colorblind-checked palette (dataviz validator: passes CVD separation).
+  The paper's palette puts red (Opus) and green (Gemini Pro) side by side; every dot is also labeled
+  with its model name, so color is never the only cue.
