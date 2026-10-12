@@ -32,6 +32,7 @@ class ModelResponse:
     latency_s: float = 0.0
     raw: dict = field(default_factory=dict)  # full provider response, for the shared results
     reasoning: str = ""  # reasoning/thought summary, only with log_reasoning; never scored
+    probs: dict = field(default_factory=dict)  # decision models: {question: {option: p}}; empty for LLMs
 
 
 class ModelClient(Protocol):

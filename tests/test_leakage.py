@@ -15,7 +15,7 @@ import pytest
 import yaml
 
 from asimov.bench import MODULES, get_benchmark
-from asimov.bench.parts import ImagePart, TextPart
+from asimov.bench.parts import DecisionPart, ImagePart, TextPart
 from asimov.data.rows import read_rows
 
 CONFIGS = sorted((Path(__file__).resolve().parents[1] / "configs").glob("*.yaml"))
@@ -35,9 +35,16 @@ def test_no_answer_or_id_in_any_request(name, prompt):
     for item in items:
         raw = raw_answers[item.id]
         parts = bench.build_request(item, prompt)
-        text = "\n".join(p.text for p in parts if isinstance(p, TextPart))
+        text = "\n".join([p.text for p in parts if isinstance(p, TextPart)]
+                         + [decision_text(p) for p in parts if isinstance(p, DecisionPart)])
         images = b"".join(p.data for p in parts if isinstance(p, ImagePart))
         assert raw not in text and raw.encode() not in images, f"answer leaks into {item.id}"
         assert item.id not in text, f"ID leaks into {item.id}"
         fields = {f.name: getattr(item, f.name) for f in dataclasses.fields(item) if f.name != "id"}
         assert not any(raw in str(v) for v in fields.values()), f"answer stored on item {item.id}"
+
+
+def decision_text(part: DecisionPart) -> str:
+    """Everything a decision request sends: state, instructions, option values and descriptions."""
+    return "\n".join([part.state] + [f"{q.id}\n{q.instructions}\n" + "\n".join(f"{v} {d}" for v, d in q.options)
+                                      for q in part.questions])

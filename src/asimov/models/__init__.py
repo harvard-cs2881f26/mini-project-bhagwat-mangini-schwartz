@@ -33,4 +33,7 @@ def get_client(provider: str, model: str):
     if provider == "mock":
         from asimov.models.mock import MockClient
         return MockClient(model)
+    if provider == "mock_decision":
+        from asimov.models.mock import MockDecisionClient
+        return MockDecisionClient(model)
     raise ValueError(f"unknown provider {provider}")
