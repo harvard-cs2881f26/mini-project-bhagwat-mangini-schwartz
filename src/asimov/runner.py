@@ -63,11 +63,11 @@ def guard_config(out_dir: Path, config_text: str) -> None:
 
 
 def git_state() -> tuple[str | None, bool | None]:
-    """(HEAD commit, uncommitted changes outside results/); (None, None) outside a git checkout."""
+    """(HEAD commit, edits to tracked files outside results/); (None, None) outside a git checkout."""
     def git(*args: str) -> str:
         return subprocess.run(["git", *args], cwd=ROOT, capture_output=True, text=True, check=True).stdout.strip()
     try:
-        return git("rev-parse", "HEAD"), bool(git("status", "--porcelain", "--", ".", ":!results"))
+        return git("rev-parse", "HEAD"), bool(git("status", "--porcelain", "--untracked-files=no", "--", ".", ":!results"))
     except (OSError, subprocess.CalledProcessError):
         return None, None
 
