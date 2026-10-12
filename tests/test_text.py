@@ -257,3 +257,32 @@ def test_near_miss_rationale_keys_count():
     assert s["per_item"]["a"]["rationale"]["activated_risk"] is True
     assert s["per_item"]["a"]["rationale"]["latent_severity"] is True
     assert s["per_item"]["a"]["rationale"]["latent_risk"] is False
+
+
+# --- lenient JSON: nested objects and broken JSON (WORKLOG 2026-10-12) ---
+
+
+def test_nested_reply_reads_the_outer_answers():
+    text = (
+        '{"latent_risk_response": "D", "latent_severity_response": "C", "effect_response": "B",'
+        ' "activated_risk_response": "A", "activated_risk_details": {"injury_type": "Hematoma"}}'
+    )
+    s = score(GOLD, {"a": text})
+    assert s["parse_failure_rate"] == 0 and all(s[f"{q}_accuracy"] == 1 for q in QUESTIONS)
+    assert set(s["per_item"]["a"]["parse"].values()) == {"ok"}
+
+
+def test_broken_json_answers_read_as_loose_json():
+    text = (
+        '{"latent_risk_response": "D", "latent_risk_rationale": "the "No injury" option is wrong",'
+        ' "latent_severity_response": "C", "effect_response": "B", "activated_risk_response": "A"}'
+    )
+    s = score(GOLD, {"a": text})
+    assert s["parse_failure_rate"] == 0 and all(s[f"{q}_accuracy"] == 1 for q in QUESTIONS)
+    assert set(s["per_item"]["a"]["parse"].values()) == {"loose_json"}
+    assert s["loose_json_rate"] == 1 and s["no_json_rate"] == 0
+
+
+def test_prose_refusal_is_still_no_json():
+    s = score(GOLD, {"a": "I'm sorry, I can't help with that."})
+    assert set(s["per_item"]["a"]["parse"].values()) == {"no_json"} and s["loose_json_rate"] == 0
