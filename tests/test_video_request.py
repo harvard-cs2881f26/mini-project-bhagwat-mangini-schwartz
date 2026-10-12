@@ -13,8 +13,6 @@ from asimov.bench.parts import ImagePart, TextPart
 from asimov.bench.video import build_request, frame_label
 from asimov.data.video import DATA_DIR, VideoItem, load_video_answers, load_video_items, parse_answer_raw
 
-HAVE_DATA = (DATA_DIR / "video" / "items.jsonl").exists()
-needs_data = pytest.mark.skipif(not HAVE_DATA, reason="data not downloaded")
 
 
 def _texts(parts):
@@ -52,10 +50,9 @@ def test_parse_answer_raw_real_format():
     assert (a.risk, a.last_intervention_s, a.injury_type, a.severity) == ("Yes", 4.0, "A", "No_Consensus")
 
 
-@needs_data
 def test_no_answer_leaks_into_any_request():
     items = load_video_items()
-    assert len(items) == 287
+    assert items
     raw_answers = {}
     import json
     with open(DATA_DIR / "video" / "items.jsonl") as f:
@@ -81,9 +78,7 @@ def test_no_answer_leaks_into_any_request():
         assert raw_answers[item.id].encode() not in b"".join(_images(parts))
 
 
-@needs_data
 def test_answer_key_loads():
     answers = load_video_answers()
-    assert len(answers) == 287
-    assert sum(a.risk == "Yes" for a in answers.values()) == 94
-    assert sum(a.last_intervention_s == -1 for a in answers.values()) == 98
+    assert answers.keys() == {i.id for i in load_video_items()}
+    assert {a.risk for a in answers.values()} <= {"Yes", "No"}

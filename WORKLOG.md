@@ -319,3 +319,21 @@ Status tags: **DECIDED**, **PROPOSED** (needs team sign-off), **OPEN** (needs a 
      themselves. The stricter video-only checks in `tests/test_video_request.py` stay.
      *Alternative considered:* a test-only rule that request text is identical across items, as
      for video; rejected because each text item has its own scenario.
+
+## 2026-10-12: 5-item test sample in the repo (Noa)
+
+### Committed test sample, at most 5 items per benchmark: DECIDED (Noa; exception added to CLAUDE.md)
+- Without `data/` (fresh checkout, CI), the tests that check the real pipeline (runner end to end,
+  leakage, loaders) were skipped and the run still showed green: 31 passed, 7 skipped.
+- `tests/fixtures/data/` now holds 5 items of each benchmark (text, video, image, image_rationale),
+  same layout as `data/`, 0.43 MB. Items are the first 5 of the runner's fixed order; video frames
+  are downscaled to 96 px (tests check which frames are sent, not pixels). `scripts/make_fixtures.py`
+  regenerates it. `ASIMOV_DATA_DIR` points the loaders at it; `tests/conftest.py` uses `data/` when
+  all four folders are there, else the sample, so pipeline tests no longer skip.
+- Whole-dataset facts (319/287/164/164 items, 94 "Yes" and 98 "-1" videos) moved to
+  `tests/test_full_data.py`, marked `full_data` and skipped with that reason on the sample.
+  On the sample: 38 passed, 6 skipped. On full data: 44 passed.
+- *Alternatives considered:* made-up items in the same format (no dataset content committed, but
+  misses real-data quirks); downloading the public data on CI with a cache (full coverage, nothing
+  committed). *Open:* the dataset's license isn't stated in its metadata or on the project page;
+  the repo is private. Worth confirming with the authors.
