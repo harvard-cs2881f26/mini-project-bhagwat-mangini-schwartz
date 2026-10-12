@@ -1,0 +1,1228 @@
+# The paper's reported numbers for Figs 4-6 (Jindal et al., arXiv 2509.21651v2).
+# Drafted by the paper-reader subagent from the paper alone; to be reviewed by Noa, then frozen.
+# Schema: src/asimov/claims.py. `kind` and the size_gap `pairs` were added by the main session after the draft.
+paper:
+  arxiv: '2509.21651'
+  version: v2
+  title: Can AI Perceive Physical Danger and Intervene?
+  read_on: '2026-10-12'
+claims:
+- id: fig4a_gemini_2_5_flash_lite_latent_risk_accuracy
+  figure: 4a
+  section: '3'
+  benchmark: text
+  model: Gemini 2.5 Flash-Lite
+  metric: latent_risk_accuracy
+  value: 0.82
+  scale: fraction
+  kind: value
+  source: figure
+  quote: Fig 4a y-axis 'Risk Recognition Accuracy (Higher is Better)'
+  approx: true
+  note: 'Read off scatter: marker centre measured in pixels against gridlines; points sit on a 0.01 grid, so likely exact
+    to 0.01 but not printed.'
+- id: fig4a_gemini_2_5_flash_lite_latent_severity_accuracy
+  figure: 4a
+  section: '3'
+  benchmark: text
+  model: Gemini 2.5 Flash-Lite
+  metric: latent_severity_accuracy
+  value: 0.78
+  scale: fraction
+  kind: value
+  source: figure
+  quote: Fig 4a x-axis 'Severity Accuracy (Higher is Better)'
+  approx: true
+  note: 'Read off scatter: marker centre measured in pixels against gridlines; points sit on a 0.01 grid, so likely exact
+    to 0.01 but not printed. Axis says only ''Severity Accuracy''; Fig 3 defines Q2 as 4-choice severity accuracy, so mapped
+    to the 4-way metric.'
+- id: fig4a_gemini_2_5_flash_latent_risk_accuracy
+  figure: 4a
+  section: '3'
+  benchmark: text
+  model: Gemini 2.5 Flash
+  metric: latent_risk_accuracy
+  value: 0.93
+  scale: fraction
+  kind: value
+  source: figure
+  quote: Fig 4a y-axis 'Risk Recognition Accuracy (Higher is Better)'
+  approx: true
+  note: 'Read off scatter: marker centre measured in pixels against gridlines; points sit on a 0.01 grid, so likely exact
+    to 0.01 but not printed.'
+- id: fig4a_gemini_2_5_flash_latent_severity_accuracy
+  figure: 4a
+  section: '3'
+  benchmark: text
+  model: Gemini 2.5 Flash
+  metric: latent_severity_accuracy
+  value: 0.94
+  scale: fraction
+  kind: value
+  source: figure
+  quote: Fig 4a x-axis 'Severity Accuracy (Higher is Better)'
+  approx: true
+  note: 'Read off scatter: marker centre measured in pixels against gridlines; points sit on a 0.01 grid, so likely exact
+    to 0.01 but not printed. Axis says only ''Severity Accuracy''; Fig 3 defines Q2 as 4-choice severity accuracy, so mapped
+    to the 4-way metric.'
+- id: fig4a_gemini_2_5_pro_latent_risk_accuracy
+  figure: 4a
+  section: '3'
+  benchmark: text
+  model: Gemini 2.5 Pro
+  metric: latent_risk_accuracy
+  value: 0.94
+  scale: fraction
+  kind: value
+  source: figure
+  quote: Fig 4a y-axis 'Risk Recognition Accuracy (Higher is Better)'
+  approx: true
+  note: 'Read off scatter: marker centre measured in pixels against gridlines; points sit on a 0.01 grid, so likely exact
+    to 0.01 but not printed.'
+- id: fig4a_gemini_2_5_pro_latent_severity_accuracy
+  figure: 4a
+  section: '3'
+  benchmark: text
+  model: Gemini 2.5 Pro
+  metric: latent_severity_accuracy
+  value: 0.96
+  scale: fraction
+  kind: value
+  source: figure
+  quote: Fig 4a x-axis 'Severity Accuracy (Higher is Better)'
+  approx: true
+  note: 'Read off scatter: marker centre measured in pixels against gridlines; points sit on a 0.01 grid, so likely exact
+    to 0.01 but not printed. Axis says only ''Severity Accuracy''; Fig 3 defines Q2 as 4-choice severity accuracy, so mapped
+    to the 4-way metric.'
+- id: fig4a_claude_opus_4_1_latent_risk_accuracy
+  figure: 4a
+  section: '3'
+  benchmark: text
+  model: Claude Opus 4.1
+  metric: latent_risk_accuracy
+  value: 0.91
+  scale: fraction
+  kind: value
+  source: figure
+  quote: Fig 4a y-axis 'Risk Recognition Accuracy (Higher is Better)'
+  approx: true
+  note: 'Read off scatter: marker centre measured in pixels against gridlines; points sit on a 0.01 grid, so likely exact
+    to 0.01 but not printed.'
+- id: fig4a_claude_opus_4_1_latent_severity_accuracy
+  figure: 4a
+  section: '3'
+  benchmark: text
+  model: Claude Opus 4.1
+  metric: latent_severity_accuracy
+  value: 0.93
+  scale: fraction
+  kind: value
+  source: figure
+  quote: Fig 4a x-axis 'Severity Accuracy (Higher is Better)'
+  approx: true
+  note: 'Read off scatter: marker centre measured in pixels against gridlines; points sit on a 0.01 grid, so likely exact
+    to 0.01 but not printed. Axis says only ''Severity Accuracy''; Fig 3 defines Q2 as 4-choice severity accuracy, so mapped
+    to the 4-way metric.'
+- id: fig4a_claude_sonnet_4_latent_risk_accuracy
+  figure: 4a
+  section: '3'
+  benchmark: text
+  model: Claude Sonnet 4
+  metric: latent_risk_accuracy
+  value: 0.87
+  scale: fraction
+  kind: value
+  source: figure
+  quote: Fig 4a y-axis 'Risk Recognition Accuracy (Higher is Better)'
+  approx: true
+  note: 'Read off scatter: marker centre measured in pixels against gridlines; points sit on a 0.01 grid, so likely exact
+    to 0.01 but not printed.'
+- id: fig4a_claude_sonnet_4_latent_severity_accuracy
+  figure: 4a
+  section: '3'
+  benchmark: text
+  model: Claude Sonnet 4
+  metric: latent_severity_accuracy
+  value: 0.92
+  scale: fraction
+  kind: value
+  source: figure
+  quote: Fig 4a x-axis 'Severity Accuracy (Higher is Better)'
+  approx: true
+  note: 'Read off scatter: marker centre measured in pixels against gridlines; points sit on a 0.01 grid, so likely exact
+    to 0.01 but not printed. Axis says only ''Severity Accuracy''; Fig 3 defines Q2 as 4-choice severity accuracy, so mapped
+    to the 4-way metric.'
+- id: fig4a_gpt_5_nano_latent_risk_accuracy
+  figure: 4a
+  section: '3'
+  benchmark: text
+  model: GPT 5 Nano
+  metric: latent_risk_accuracy
+  value: 0.87
+  scale: fraction
+  kind: value
+  source: figure
+  quote: Fig 4a y-axis 'Risk Recognition Accuracy (Higher is Better)'
+  approx: true
+  note: 'Read off scatter: marker centre measured in pixels against gridlines; points sit on a 0.01 grid, so likely exact
+    to 0.01 but not printed.'
+- id: fig4a_gpt_5_nano_latent_severity_accuracy
+  figure: 4a
+  section: '3'
+  benchmark: text
+  model: GPT 5 Nano
+  metric: latent_severity_accuracy
+  value: 0.74
+  scale: fraction
+  kind: value
+  source: figure
+  quote: Fig 4a x-axis 'Severity Accuracy (Higher is Better)'
+  approx: true
+  note: 'Read off scatter: marker centre measured in pixels against gridlines; points sit on a 0.01 grid, so likely exact
+    to 0.01 but not printed. Axis says only ''Severity Accuracy''; Fig 3 defines Q2 as 4-choice severity accuracy, so mapped
+    to the 4-way metric.'
+- id: fig4a_gpt_5_mini_latent_risk_accuracy
+  figure: 4a
+  section: '3'
+  benchmark: text
+  model: GPT 5 Mini
+  metric: latent_risk_accuracy
+  value: 0.72
+  scale: fraction
+  kind: value
+  source: figure
+  quote: Fig 4a y-axis 'Risk Recognition Accuracy (Higher is Better)'
+  approx: true
+  note: 'Read off scatter: marker centre measured in pixels against gridlines; points sit on a 0.01 grid, so likely exact
+    to 0.01 but not printed.'
+- id: fig4a_gpt_5_mini_latent_severity_accuracy
+  figure: 4a
+  section: '3'
+  benchmark: text
+  model: GPT 5 Mini
+  metric: latent_severity_accuracy
+  value: 0.64
+  scale: fraction
+  kind: value
+  source: figure
+  quote: Fig 4a x-axis 'Severity Accuracy (Higher is Better)'
+  approx: true
+  note: 'Read off scatter: marker centre measured in pixels against gridlines; points sit on a 0.01 grid, so likely exact
+    to 0.01 but not printed. Axis says only ''Severity Accuracy''; Fig 3 defines Q2 as 4-choice severity accuracy, so mapped
+    to the 4-way metric.'
+- id: fig4a_gpt_5_latent_risk_accuracy
+  figure: 4a
+  section: '3'
+  benchmark: text
+  model: GPT 5
+  metric: latent_risk_accuracy
+  value: 0.92
+  scale: fraction
+  kind: value
+  source: figure
+  quote: Fig 4a y-axis 'Risk Recognition Accuracy (Higher is Better)'
+  approx: true
+  note: 'Read off scatter: marker centre measured in pixels against gridlines; points sit on a 0.01 grid, so likely exact
+    to 0.01 but not printed.'
+- id: fig4a_gpt_5_latent_severity_accuracy
+  figure: 4a
+  section: '3'
+  benchmark: text
+  model: GPT 5
+  metric: latent_severity_accuracy
+  value: 0.82
+  scale: fraction
+  kind: value
+  source: figure
+  quote: Fig 4a x-axis 'Severity Accuracy (Higher is Better)'
+  approx: true
+  note: 'Read off scatter: marker centre measured in pixels against gridlines; points sit on a 0.01 grid, so likely exact
+    to 0.01 but not printed. Axis says only ''Severity Accuracy''; Fig 3 defines Q2 as 4-choice severity accuracy, so mapped
+    to the 4-way metric.'
+- id: fig4b_gemini_2_5_flash_lite_effect_accuracy
+  figure: 4b
+  section: '3'
+  benchmark: text
+  model: Gemini 2.5 Flash-Lite
+  metric: effect_accuracy
+  value: 0.63
+  scale: fraction
+  kind: value
+  source: figure
+  quote: Fig 4b y-axis 'Action Effect Accuracy (Higher is Better)'
+  approx: true
+  note: 'Read off scatter: marker centre measured in pixels against gridlines; points sit on a 0.01 grid, so likely exact
+    to 0.01 but not printed. GPT 5 Nano and Gemini 2.5 Flash-Lite markers overlap and the GPT 5 marker is partly covered by
+    its label; slightly less certain.'
+- id: fig4b_gemini_2_5_flash_lite_activated_risk_accuracy
+  figure: 4b
+  section: '3'
+  benchmark: text
+  model: Gemini 2.5 Flash-Lite
+  metric: activated_risk_accuracy
+  value: 0.59
+  scale: fraction
+  kind: value
+  source: figure
+  quote: Fig 4b x-axis 'Activated Risk Accuracy (Higher is Better)'
+  approx: true
+  note: 'Read off scatter: marker centre measured in pixels against gridlines; points sit on a 0.01 grid, so likely exact
+    to 0.01 but not printed. GPT 5 Nano and Gemini 2.5 Flash-Lite markers overlap and the GPT 5 marker is partly covered by
+    its label; slightly less certain.'
+- id: fig4b_gemini_2_5_flash_effect_accuracy
+  figure: 4b
+  section: '3'
+  benchmark: text
+  model: Gemini 2.5 Flash
+  metric: effect_accuracy
+  value: 0.71
+  scale: fraction
+  kind: value
+  source: figure
+  quote: Fig 4b y-axis 'Action Effect Accuracy (Higher is Better)'
+  approx: true
+  note: 'Read off scatter: marker centre measured in pixels against gridlines; points sit on a 0.01 grid, so likely exact
+    to 0.01 but not printed.'
+- id: fig4b_gemini_2_5_flash_activated_risk_accuracy
+  figure: 4b
+  section: '3'
+  benchmark: text
+  model: Gemini 2.5 Flash
+  metric: activated_risk_accuracy
+  value: 0.66
+  scale: fraction
+  kind: value
+  source: figure
+  quote: Fig 4b x-axis 'Activated Risk Accuracy (Higher is Better)'
+  approx: true
+  note: 'Read off scatter: marker centre measured in pixels against gridlines; points sit on a 0.01 grid, so likely exact
+    to 0.01 but not printed.'
+- id: fig4b_gemini_2_5_pro_effect_accuracy
+  figure: 4b
+  section: '3'
+  benchmark: text
+  model: Gemini 2.5 Pro
+  metric: effect_accuracy
+  value: 0.7
+  scale: fraction
+  kind: value
+  source: figure
+  quote: Fig 4b y-axis 'Action Effect Accuracy (Higher is Better)'
+  approx: true
+  note: 'Read off scatter: marker centre measured in pixels against gridlines; points sit on a 0.01 grid, so likely exact
+    to 0.01 but not printed.'
+- id: fig4b_gemini_2_5_pro_activated_risk_accuracy
+  figure: 4b
+  section: '3'
+  benchmark: text
+  model: Gemini 2.5 Pro
+  metric: activated_risk_accuracy
+  value: 0.64
+  scale: fraction
+  kind: value
+  source: figure
+  quote: Fig 4b x-axis 'Activated Risk Accuracy (Higher is Better)'
+  approx: true
+  note: 'Read off scatter: marker centre measured in pixels against gridlines; points sit on a 0.01 grid, so likely exact
+    to 0.01 but not printed.'
+- id: fig4b_claude_opus_4_1_effect_accuracy
+  figure: 4b
+  section: '3'
+  benchmark: text
+  model: Claude Opus 4.1
+  metric: effect_accuracy
+  value: 0.74
+  scale: fraction
+  kind: value
+  source: figure
+  quote: Fig 4b y-axis 'Action Effect Accuracy (Higher is Better)'
+  approx: true
+  note: 'Read off scatter: marker centre measured in pixels against gridlines; points sit on a 0.01 grid, so likely exact
+    to 0.01 but not printed.'
+- id: fig4b_claude_opus_4_1_activated_risk_accuracy
+  figure: 4b
+  section: '3'
+  benchmark: text
+  model: Claude Opus 4.1
+  metric: activated_risk_accuracy
+  value: 0.63
+  scale: fraction
+  kind: value
+  source: figure
+  quote: Fig 4b x-axis 'Activated Risk Accuracy (Higher is Better)'
+  approx: true
+  note: 'Read off scatter: marker centre measured in pixels against gridlines; points sit on a 0.01 grid, so likely exact
+    to 0.01 but not printed.'
+- id: fig4b_claude_sonnet_4_effect_accuracy
+  figure: 4b
+  section: '3'
+  benchmark: text
+  model: Claude Sonnet 4
+  metric: effect_accuracy
+  value: 0.72
+  scale: fraction
+  kind: value
+  source: figure
+  quote: Fig 4b y-axis 'Action Effect Accuracy (Higher is Better)'
+  approx: true
+  note: 'Read off scatter: marker centre measured in pixels against gridlines; points sit on a 0.01 grid, so likely exact
+    to 0.01 but not printed.'
+- id: fig4b_claude_sonnet_4_activated_risk_accuracy
+  figure: 4b
+  section: '3'
+  benchmark: text
+  model: Claude Sonnet 4
+  metric: activated_risk_accuracy
+  value: 0.66
+  scale: fraction
+  kind: value
+  source: figure
+  quote: Fig 4b x-axis 'Activated Risk Accuracy (Higher is Better)'
+  approx: true
+  note: 'Read off scatter: marker centre measured in pixels against gridlines; points sit on a 0.01 grid, so likely exact
+    to 0.01 but not printed.'
+- id: fig4b_gpt_5_nano_effect_accuracy
+  figure: 4b
+  section: '3'
+  benchmark: text
+  model: GPT 5 Nano
+  metric: effect_accuracy
+  value: 0.62
+  scale: fraction
+  kind: value
+  source: figure
+  quote: Fig 4b y-axis 'Action Effect Accuracy (Higher is Better)'
+  approx: true
+  note: 'Read off scatter: marker centre measured in pixels against gridlines; points sit on a 0.01 grid, so likely exact
+    to 0.01 but not printed. GPT 5 Nano and Gemini 2.5 Flash-Lite markers overlap and the GPT 5 marker is partly covered by
+    its label; slightly less certain.'
+- id: fig4b_gpt_5_nano_activated_risk_accuracy
+  figure: 4b
+  section: '3'
+  benchmark: text
+  model: GPT 5 Nano
+  metric: activated_risk_accuracy
+  value: 0.59
+  scale: fraction
+  kind: value
+  source: figure
+  quote: Fig 4b x-axis 'Activated Risk Accuracy (Higher is Better)'
+  approx: true
+  note: 'Read off scatter: marker centre measured in pixels against gridlines; points sit on a 0.01 grid, so likely exact
+    to 0.01 but not printed. GPT 5 Nano and Gemini 2.5 Flash-Lite markers overlap and the GPT 5 marker is partly covered by
+    its label; slightly less certain.'
+- id: fig4b_gpt_5_mini_effect_accuracy
+  figure: 4b
+  section: '3'
+  benchmark: text
+  model: GPT 5 Mini
+  metric: effect_accuracy
+  value: 0.51
+  scale: fraction
+  kind: value
+  source: figure
+  quote: Fig 4b y-axis 'Action Effect Accuracy (Higher is Better)'
+  approx: true
+  note: 'Read off scatter: marker centre measured in pixels against gridlines; points sit on a 0.01 grid, so likely exact
+    to 0.01 but not printed.'
+- id: fig4b_gpt_5_mini_activated_risk_accuracy
+  figure: 4b
+  section: '3'
+  benchmark: text
+  model: GPT 5 Mini
+  metric: activated_risk_accuracy
+  value: 0.48
+  scale: fraction
+  kind: value
+  source: figure
+  quote: Fig 4b x-axis 'Activated Risk Accuracy (Higher is Better)'
+  approx: true
+  note: 'Read off scatter: marker centre measured in pixels against gridlines; points sit on a 0.01 grid, so likely exact
+    to 0.01 but not printed.'
+- id: fig4b_gpt_5_effect_accuracy
+  figure: 4b
+  section: '3'
+  benchmark: text
+  model: GPT 5
+  metric: effect_accuracy
+  value: 0.67
+  scale: fraction
+  kind: value
+  source: figure
+  quote: Fig 4b y-axis 'Action Effect Accuracy (Higher is Better)'
+  approx: true
+  note: 'Read off scatter: marker centre measured in pixels against gridlines; points sit on a 0.01 grid, so likely exact
+    to 0.01 but not printed. GPT 5 Nano and Gemini 2.5 Flash-Lite markers overlap and the GPT 5 marker is partly covered by
+    its label; slightly less certain.'
+- id: fig4b_gpt_5_activated_risk_accuracy
+  figure: 4b
+  section: '3'
+  benchmark: text
+  model: GPT 5
+  metric: activated_risk_accuracy
+  value: 0.6
+  scale: fraction
+  kind: value
+  source: figure
+  quote: Fig 4b x-axis 'Activated Risk Accuracy (Higher is Better)'
+  approx: true
+  note: 'Read off scatter: marker centre measured in pixels against gridlines; points sit on a 0.01 grid, so likely exact
+    to 0.01 but not printed. GPT 5 Nano and Gemini 2.5 Flash-Lite markers overlap and the GPT 5 marker is partly covered by
+    its label; slightly less certain.'
+- id: fig5a_gemini_2_5_pro_latent_risk_accuracy
+  figure: 5a
+  section: '3'
+  benchmark: text
+  model: Gemini 2.5 Pro
+  metric: latent_risk_accuracy
+  value: 0.94
+  scale: fraction
+  kind: value
+  source: figure
+  quote: Fig 5a 'Text' bar, value printed on the bar
+  approx: false
+  note: Same text-benchmark number as Fig 4a, repeated as the text baseline in Fig 5a; agrees with the Fig 4a read-off.
+- id: fig5a_gemini_2_5_pro_risk_accuracy
+  figure: 5a
+  section: '3'
+  benchmark: video
+  model: Gemini 2.5 Pro
+  metric: risk_accuracy
+  value: 0.84
+  scale: fraction
+  kind: value
+  source: figure
+  quote: Fig 5a 'Video' bar ('Risk Recognition Accuracy'), value printed on the bar
+  approx: false
+  note: Fig 3 lists two video risk metrics (yes/no injury risk; 4-choice NEISS latent risk). The figure does not say which
+    one this is.
+- id: fig5a_claude_opus_4_1_latent_risk_accuracy
+  figure: 5a
+  section: '3'
+  benchmark: text
+  model: Claude Opus 4.1
+  metric: latent_risk_accuracy
+  value: 0.91
+  scale: fraction
+  kind: value
+  source: figure
+  quote: Fig 5a 'Text' bar, value printed on the bar
+  approx: false
+  note: Same text-benchmark number as Fig 4a, repeated as the text baseline in Fig 5a; agrees with the Fig 4a read-off.
+- id: fig5a_claude_opus_4_1_risk_accuracy
+  figure: 5a
+  section: '3'
+  benchmark: video
+  model: Claude Opus 4.1
+  metric: risk_accuracy
+  value: 0.64
+  scale: fraction
+  kind: value
+  source: figure
+  quote: Fig 5a 'Video' bar ('Risk Recognition Accuracy'), value printed on the bar
+  approx: false
+  note: Fig 3 lists two video risk metrics (yes/no injury risk; 4-choice NEISS latent risk). The figure does not say which
+    one this is.
+- id: fig5a_gpt_5_latent_risk_accuracy
+  figure: 5a
+  section: '3'
+  benchmark: text
+  model: GPT 5
+  metric: latent_risk_accuracy
+  value: 0.92
+  scale: fraction
+  kind: value
+  source: figure
+  quote: Fig 5a 'Text' bar, value printed on the bar
+  approx: false
+  note: Same text-benchmark number as Fig 4a, repeated as the text baseline in Fig 5a; agrees with the Fig 4a read-off.
+- id: fig5a_gpt_5_risk_accuracy
+  figure: 5a
+  section: '3'
+  benchmark: video
+  model: GPT 5
+  metric: risk_accuracy
+  value: 0.44
+  scale: fraction
+  kind: value
+  source: figure
+  quote: Fig 5a 'Video' bar ('Risk Recognition Accuracy'), value printed on the bar
+  approx: false
+  note: Fig 3 lists two video risk metrics (yes/no injury risk; 4-choice NEISS latent risk). The figure does not say which
+    one this is.
+- id: fig5b_gemini_2_5_flash_lite_timing_mae_s
+  figure: 5b
+  section: '3'
+  benchmark: video
+  model: Gemini 2.5 Flash-lite
+  metric: timing_mae_s
+  value: 1.43
+  scale: seconds
+  kind: value
+  source: figure
+  quote: Fig 5b x-axis 'Last Time of Intervention Mean Absolute Error (Lower is Better, Inverted axis)'
+  approx: true
+  note: 'Read off scatter: marker centre measured in pixels against gridlines (x step 0.25 s, y step 10); about +/-0.02 s
+    and +/-0.5 points.'
+- id: fig5b_gemini_2_5_flash_lite_within_0_5_rate
+  figure: 5b
+  section: '3'
+  benchmark: video
+  model: Gemini 2.5 Flash-lite
+  metric: within_0_5_rate
+  value: 29.0
+  scale: percent
+  kind: value
+  source: figure
+  quote: Fig 5b y-axis 'Ratio of Accurate Interventions (Higher is Better)'
+  approx: true
+  note: 'Read off scatter: marker centre measured in pixels against gridlines (x step 0.25 s, y step 10); about +/-0.02 s
+    and +/-0.5 points. Axis is on 0-100; Fig 3 defines it as % of predictions within 0.5 s of ground truth.'
+- id: fig5b_gemini_2_5_flash_timing_mae_s
+  figure: 5b
+  section: '3'
+  benchmark: video
+  model: Gemini 2.5 Flash
+  metric: timing_mae_s
+  value: 1.4
+  scale: seconds
+  kind: value
+  source: figure
+  quote: Fig 5b x-axis 'Last Time of Intervention Mean Absolute Error (Lower is Better, Inverted axis)'
+  approx: true
+  note: 'Read off scatter: marker centre measured in pixels against gridlines (x step 0.25 s, y step 10); about +/-0.02 s
+    and +/-0.5 points.'
+- id: fig5b_gemini_2_5_flash_within_0_5_rate
+  figure: 5b
+  section: '3'
+  benchmark: video
+  model: Gemini 2.5 Flash
+  metric: within_0_5_rate
+  value: 34.4
+  scale: percent
+  kind: value
+  source: figure
+  quote: Fig 5b y-axis 'Ratio of Accurate Interventions (Higher is Better)'
+  approx: true
+  note: 'Read off scatter: marker centre measured in pixels against gridlines (x step 0.25 s, y step 10); about +/-0.02 s
+    and +/-0.5 points. Axis is on 0-100; Fig 3 defines it as % of predictions within 0.5 s of ground truth.'
+- id: fig5b_gemini_2_5_pro_timing_mae_s
+  figure: 5b
+  section: '3'
+  benchmark: video
+  model: Gemini 2.5 Pro
+  metric: timing_mae_s
+  value: 0.72
+  scale: seconds
+  kind: value
+  source: figure
+  quote: Fig 5b x-axis 'Last Time of Intervention Mean Absolute Error (Lower is Better, Inverted axis)'
+  approx: true
+  note: 'Read off scatter: marker centre measured in pixels against gridlines (x step 0.25 s, y step 10); about +/-0.02 s
+    and +/-0.5 points.'
+- id: fig5b_gemini_2_5_pro_within_0_5_rate
+  figure: 5b
+  section: '3'
+  benchmark: video
+  model: Gemini 2.5 Pro
+  metric: within_0_5_rate
+  value: 56.0
+  scale: percent
+  kind: value
+  source: figure
+  quote: Fig 5b y-axis 'Ratio of Accurate Interventions (Higher is Better)'
+  approx: true
+  note: 'Read off scatter: marker centre measured in pixels against gridlines (x step 0.25 s, y step 10); about +/-0.02 s
+    and +/-0.5 points. Axis is on 0-100; Fig 3 defines it as % of predictions within 0.5 s of ground truth.'
+- id: fig5b_claude_opus_4_1_timing_mae_s
+  figure: 5b
+  section: '3'
+  benchmark: video
+  model: Claude Opus 4.1
+  metric: timing_mae_s
+  value: 2.41
+  scale: seconds
+  kind: value
+  source: figure
+  quote: Fig 5b x-axis 'Last Time of Intervention Mean Absolute Error (Lower is Better, Inverted axis)'
+  approx: true
+  note: 'Read off scatter: marker centre measured in pixels against gridlines (x step 0.25 s, y step 10); about +/-0.02 s
+    and +/-0.5 points.'
+- id: fig5b_claude_opus_4_1_within_0_5_rate
+  figure: 5b
+  section: '3'
+  benchmark: video
+  model: Claude Opus 4.1
+  metric: within_0_5_rate
+  value: 31.9
+  scale: percent
+  kind: value
+  source: figure
+  quote: Fig 5b y-axis 'Ratio of Accurate Interventions (Higher is Better)'
+  approx: true
+  note: 'Read off scatter: marker centre measured in pixels against gridlines (x step 0.25 s, y step 10); about +/-0.02 s
+    and +/-0.5 points. Axis is on 0-100; Fig 3 defines it as % of predictions within 0.5 s of ground truth.'
+- id: fig5b_claude_sonnet_4_timing_mae_s
+  figure: 5b
+  section: '3'
+  benchmark: video
+  model: Claude Sonnet 4
+  metric: timing_mae_s
+  value: 1.81
+  scale: seconds
+  kind: value
+  source: figure
+  quote: Fig 5b x-axis 'Last Time of Intervention Mean Absolute Error (Lower is Better, Inverted axis)'
+  approx: true
+  note: 'Read off scatter: marker centre measured in pixels against gridlines (x step 0.25 s, y step 10); about +/-0.02 s
+    and +/-0.5 points.'
+- id: fig5b_claude_sonnet_4_within_0_5_rate
+  figure: 5b
+  section: '3'
+  benchmark: video
+  model: Claude Sonnet 4
+  metric: within_0_5_rate
+  value: 41.5
+  scale: percent
+  kind: value
+  source: figure
+  quote: Fig 5b y-axis 'Ratio of Accurate Interventions (Higher is Better)'
+  approx: true
+  note: 'Read off scatter: marker centre measured in pixels against gridlines (x step 0.25 s, y step 10); about +/-0.02 s
+    and +/-0.5 points. Axis is on 0-100; Fig 3 defines it as % of predictions within 0.5 s of ground truth.'
+- id: fig5b_gpt_5_mini_timing_mae_s
+  figure: 5b
+  section: '3'
+  benchmark: video
+  model: GPT 5 Mini
+  metric: timing_mae_s
+  value: 1.42
+  scale: seconds
+  kind: value
+  source: figure
+  quote: Fig 5b x-axis 'Last Time of Intervention Mean Absolute Error (Lower is Better, Inverted axis)'
+  approx: true
+  note: 'Read off scatter: marker centre measured in pixels against gridlines (x step 0.25 s, y step 10); about +/-0.02 s
+    and +/-0.5 points.'
+- id: fig5b_gpt_5_mini_within_0_5_rate
+  figure: 5b
+  section: '3'
+  benchmark: video
+  model: GPT 5 Mini
+  metric: within_0_5_rate
+  value: 19.3
+  scale: percent
+  kind: value
+  source: figure
+  quote: Fig 5b y-axis 'Ratio of Accurate Interventions (Higher is Better)'
+  approx: true
+  note: 'Read off scatter: marker centre measured in pixels against gridlines (x step 0.25 s, y step 10); about +/-0.02 s
+    and +/-0.5 points. Axis is on 0-100; Fig 3 defines it as % of predictions within 0.5 s of ground truth.'
+- id: fig5b_gpt_5_nano_timing_mae_s
+  figure: 5b
+  section: '3'
+  benchmark: video
+  model: GPT 5 Nano
+  metric: timing_mae_s
+  value: 1.81
+  scale: seconds
+  kind: value
+  source: figure
+  quote: Fig 5b x-axis 'Last Time of Intervention Mean Absolute Error (Lower is Better, Inverted axis)'
+  approx: true
+  note: 'Read off scatter: marker centre measured in pixels against gridlines (x step 0.25 s, y step 10); about +/-0.02 s
+    and +/-0.5 points.'
+- id: fig5b_gpt_5_nano_within_0_5_rate
+  figure: 5b
+  section: '3'
+  benchmark: video
+  model: GPT 5 Nano
+  metric: within_0_5_rate
+  value: 30.0
+  scale: percent
+  kind: value
+  source: figure
+  quote: Fig 5b y-axis 'Ratio of Accurate Interventions (Higher is Better)'
+  approx: true
+  note: 'Read off scatter: marker centre measured in pixels against gridlines (x step 0.25 s, y step 10); about +/-0.02 s
+    and +/-0.5 points. Axis is on 0-100; Fig 3 defines it as % of predictions within 0.5 s of ground truth.'
+- id: fig5b_gpt_5_timing_mae_s
+  figure: 5b
+  section: '3'
+  benchmark: video
+  model: GPT 5
+  metric: timing_mae_s
+  value: 1.76
+  scale: seconds
+  kind: value
+  source: figure
+  quote: Fig 5b x-axis 'Last Time of Intervention Mean Absolute Error (Lower is Better, Inverted axis)'
+  approx: true
+  note: 'Read off scatter: marker centre measured in pixels against gridlines (x step 0.25 s, y step 10); about +/-0.02 s
+    and +/-0.5 points.'
+- id: fig5b_gpt_5_within_0_5_rate
+  figure: 5b
+  section: '3'
+  benchmark: video
+  model: GPT 5
+  metric: within_0_5_rate
+  value: 8.6
+  scale: percent
+  kind: value
+  source: figure
+  quote: Fig 5b y-axis 'Ratio of Accurate Interventions (Higher is Better)'
+  approx: true
+  note: 'Read off scatter: marker centre measured in pixels against gridlines (x step 0.25 s, y step 10); about +/-0.02 s
+    and +/-0.5 points. Axis is on 0-100; Fig 3 defines it as % of predictions within 0.5 s of ground truth.'
+- id: fig6a_gemini_2_5_flash_lite_violation_rate
+  figure: 6a
+  section: '3'
+  benchmark: image
+  model: Gemini 2.5 Flash-Lite
+  metric: violation_rate
+  value: 75.3
+  scale: percent
+  kind: value
+  source: figure
+  quote: Fig 6a bar 'Constraint Violation Rate (%)', value printed at the end of the bar
+  approx: false
+- id: fig6a_claude_sonnet_4_violation_rate
+  figure: 6a
+  section: '3'
+  benchmark: image
+  model: Claude Sonnet 4
+  metric: violation_rate
+  value: 50.0
+  scale: percent
+  kind: value
+  source: figure
+  quote: Fig 6a bar 'Constraint Violation Rate (%)', value printed at the end of the bar
+  approx: false
+- id: fig6a_gpt_5_mini_violation_rate
+  figure: 6a
+  section: '3'
+  benchmark: image
+  model: GPT 5 Mini
+  metric: violation_rate
+  value: 46.9
+  scale: percent
+  kind: value
+  source: figure
+  quote: Fig 6a bar 'Constraint Violation Rate (%)', value printed at the end of the bar
+  approx: false
+- id: fig6a_gemini_2_5_pro_violation_rate
+  figure: 6a
+  section: '3'
+  benchmark: image
+  model: Gemini 2.5 Pro
+  metric: violation_rate
+  value: 45.5
+  scale: percent
+  kind: value
+  source: figure
+  quote: Fig 6a bar 'Constraint Violation Rate (%)', value printed at the end of the bar
+  approx: false
+- id: fig6a_gemini_2_5_flash_violation_rate
+  figure: 6a
+  section: '3'
+  benchmark: image
+  model: Gemini 2.5 Flash
+  metric: violation_rate
+  value: 41.7
+  scale: percent
+  kind: value
+  source: figure
+  quote: Fig 6a bar 'Constraint Violation Rate (%)', value printed at the end of the bar
+  approx: false
+- id: fig6a_gpt_5_violation_rate
+  figure: 6a
+  section: '3'
+  benchmark: image
+  model: GPT 5
+  metric: violation_rate
+  value: 40.6
+  scale: percent
+  kind: value
+  source: figure
+  quote: Fig 6a bar 'Constraint Violation Rate (%)', value printed at the end of the bar
+  approx: false
+- id: fig6a_gpt_nano_violation_rate
+  figure: 6a
+  section: '3'
+  benchmark: image
+  model: GPT Nano
+  metric: violation_rate
+  value: 40.6
+  scale: percent
+  kind: value
+  source: figure
+  quote: Fig 6a bar 'Constraint Violation Rate (%)', value printed at the end of the bar
+  approx: false
+  note: Printed as 'GPT Nano' in Fig 6a (elsewhere 'GPT 5 Nano').
+- id: fig6a_claude_opus_4_1_violation_rate
+  figure: 6a
+  section: '3'
+  benchmark: image
+  model: Claude Opus 4.1
+  metric: violation_rate
+  value: 38.6
+  scale: percent
+  kind: value
+  source: figure
+  quote: Fig 6a bar 'Constraint Violation Rate (%)', value printed at the end of the bar
+  approx: false
+- id: sec3_avg_latent_risk_accuracy
+  figure: null
+  section: '3'
+  benchmark: text
+  model: null
+  metric: latent_risk_accuracy
+  value: 92.3
+  scale: percent
+  kind: mean
+  models: &id001
+  - GPT5
+  - Gemini 2.5 Pro
+  - Claude Opus 4.1
+  source: text
+  quote: GPT5, Gemini 2.5 Pro and Claude Opus 4.1 all score above 90% with an average accuracy of 92.3%
+  approx: false
+  note: 'Average over GPT5, Gemini 2.5 Pro, Claude Opus 4.1 (Fig 4a). Fig 4a read-offs 0.92, 0.94, 0.91 average 0.923: agrees.'
+- id: sec3_avg_latent_risk_accuracy_floor
+  figure: null
+  section: '3'
+  benchmark: text
+  model: null
+  metric: latent_risk_accuracy
+  value: 90.0
+  scale: percent
+  kind: bound
+  models: *id001
+  source: text
+  quote: GPT5, Gemini 2.5 Pro and Claude Opus 4.1 all score above 90%
+  approx: false
+  note: Lower bound (each of GPT5, Gemini 2.5 Pro, Claude Opus 4.1 is above this), not a measured value.
+- id: sec3_avg_latent_severity_severe_binary_accuracy
+  figure: null
+  section: '3'
+  benchmark: text
+  model: null
+  metric: latent_severity_severe_binary_accuracy
+  value: 88.7
+  scale: percent
+  kind: mean
+  models: *id001
+  source: text
+  quote: On judging whether risks are highly severe or not, these models score an average of 88.7%
+  approx: false
+  note: 'Average over GPT5, Gemini 2.5 Pro, Claude Opus 4.1. Wording suggests a severe-vs-not binary, so mapped to severe_binary.
+    DISAGREEMENT if it refers to Fig 4a''s ''Severity Accuracy'': Fig 4a read-offs 0.82, 0.96, 0.93 average 0.903, not 0.887.'
+- id: sec3_gpt5_mini_latent_risk_accuracy_gap_vs_gpt5
+  figure: null
+  section: '3'
+  benchmark: text
+  model: GPT5-Mini
+  metric: latent_risk_accuracy
+  value: 20.0
+  scale: percent
+  kind: gap
+  versus: GPT5
+  source: text
+  quote: GPT5-Mini and GPT5-Nano are 20% and 5% lower in latent risk accuracy
+  approx: false
+  note: 'GPT5-Mini minus GPT5, in points (no gap metric key exists). Fig 4a: 0.92 - 0.72 = 0.20, agrees.'
+- id: sec3_gpt5_nano_latent_risk_accuracy_gap_vs_gpt5
+  figure: null
+  section: '3'
+  benchmark: text
+  model: GPT5-Nano
+  metric: latent_risk_accuracy
+  value: 5.0
+  scale: percent
+  kind: gap
+  versus: GPT5
+  source: text
+  quote: GPT5-Mini and GPT5-Nano are 20% and 5% lower in latent risk accuracy
+  approx: false
+  note: 'GPT5-Nano minus GPT5, in points. Fig 4a: 0.92 - 0.87 = 0.05, agrees.'
+- id: sec3_gpt5_mini_latent_severity_severe_binary_accuracy_gap_vs_gpt5
+  figure: null
+  section: '3'
+  benchmark: text
+  model: GPT5-Mini
+  metric: latent_severity_severe_binary_accuracy
+  value: 19.0
+  scale: percent
+  kind: gap
+  versus: GPT5
+  source: text
+  quote: and 19% and 17% lower in high-severity accuracies in comparison to GPT5
+  approx: false
+  note: 'GPT5-Mini minus GPT5. DISAGREEMENT if this is Fig 4a''s ''Severity Accuracy'': 0.82 - 0.64 = 0.18.'
+- id: sec3_gpt5_nano_latent_severity_severe_binary_accuracy_gap_vs_gpt5
+  figure: null
+  section: '3'
+  benchmark: text
+  model: GPT5-Nano
+  metric: latent_severity_severe_binary_accuracy
+  value: 17.0
+  scale: percent
+  kind: gap
+  versus: GPT5
+  source: text
+  quote: and 19% and 17% lower in high-severity accuracies in comparison to GPT5
+  approx: false
+  note: 'GPT5-Nano minus GPT5. DISAGREEMENT if this is Fig 4a''s ''Severity Accuracy'': 0.82 - 0.74 = 0.08, not 0.17.'
+- id: sec3_avg_effect_accuracy_top
+  figure: null
+  section: '3'
+  benchmark: text
+  model: null
+  metric: effect_accuracy
+  value: 74.0
+  scale: percent
+  kind: max
+  models: &id002
+  - Gemini 2.5 Flash-Lite
+  - Gemini 2.5 Flash
+  - Gemini 2.5 Pro
+  - Claude Opus 4.1
+  - Claude Sonnet 4
+  - GPT 5 Nano
+  - GPT 5 Mini
+  - GPT 5
+  source: text
+  quote: Top models score 74% and 66% respectively on these metrics.
+  approx: false
+  note: 'Best model, unnamed in text (Fig 4b: Claude Opus 4.1 at 0.74, agrees). ''These metrics'' = action-safe accuracy (y-axis)
+    then activated risk (x-axis).'
+- id: sec3_avg_activated_risk_accuracy_top
+  figure: null
+  section: '3'
+  benchmark: text
+  model: null
+  metric: activated_risk_accuracy
+  value: 66.0
+  scale: percent
+  kind: max
+  models: *id002
+  source: text
+  quote: Top models score 74% and 66% respectively on these metrics.
+  approx: false
+  note: 'Best model, unnamed in text (Fig 4b: Claude Sonnet 4 and Gemini 2.5 Flash at 0.66, agrees).'
+- id: sec3_claude_opus_4_1_risk_accuracy_gap_text_minus_video
+  figure: null
+  section: '3'
+  benchmark: video
+  model: Claude Opus 4.1
+  metric: risk_accuracy
+  value: 27.0
+  scale: percent
+  kind: gap
+  source: text
+  quote: For Claude Opus 4.1 and GPT5, the accuracy gap is 27% and 40% respectively
+  approx: false
+  note: 'text minus video risk accuracy. Fig 5a: 0.91 - 0.64 = 0.27, agrees.'
+- id: sec3_gpt5_risk_accuracy_gap_text_minus_video
+  figure: null
+  section: '3'
+  benchmark: video
+  model: GPT5
+  metric: risk_accuracy
+  value: 40.0
+  scale: percent
+  kind: gap
+  source: text
+  quote: For Claude Opus 4.1 and GPT5, the accuracy gap is 27% and 40% respectively
+  approx: false
+  note: 'text minus video. DISAGREEMENT: Fig 5a prints 0.92 (text) and 0.44 (video), a 48-point gap, not 40.'
+- id: sec3_gemini_2_5_pro_timing_mae_s
+  figure: null
+  section: '3'
+  benchmark: video
+  model: Gemini 2.5 Pro
+  metric: timing_mae_s
+  value: 0.75
+  scale: seconds
+  kind: bound
+  source: text
+  quote: Gemini 2.5 Pro is able to predict the last timestamp ... within 0.75 seconds of the ground truth on average
+  approx: false
+  note: 'Upper bound (''within''). Fig 5b read-off about 0.72 s: agrees.'
+- id: sec3_gemini_2_5_pro_within_0_5_rate
+  figure: null
+  section: '3'
+  benchmark: video
+  model: Gemini 2.5 Pro
+  metric: within_0_5_rate
+  value: 56.0
+  scale: percent
+  kind: value
+  source: text
+  quote: In 56% of evaluation videos, its prediction is within a 0.5-second window of the ground truth.
+  approx: false
+  note: 'Fig 5b read-off about 56.0: agrees.'
+- id: sec3_avg_violation_rate_max
+  figure: null
+  section: '3'
+  benchmark: image
+  model: null
+  metric: violation_rate
+  value: 75.0
+  scale: percent
+  kind: max
+  models: &id003
+  - Gemini 2.5 Flash-Lite
+  - Claude Sonnet 4
+  - GPT 5 Mini
+  - Gemini 2.5 Pro
+  - Gemini 2.5 Flash
+  - GPT 5
+  - GPT Nano
+  - Claude Opus 4.1
+  source: text
+  quote: violation rates on this task turned out to be high, ranging from 75% to 38.6%
+  approx: false
+  note: 'Maximum over models, unnamed in text. Fig 6a prints 75.3 (Gemini 2.5 Flash-Lite): text rounds it.'
+- id: sec3_avg_violation_rate_min
+  figure: null
+  section: '3'
+  benchmark: image
+  model: null
+  metric: violation_rate
+  value: 38.6
+  scale: percent
+  kind: min
+  models: *id003
+  source: text
+  quote: violation rates on this task turned out to be high, ranging from 75% to 38.6%
+  approx: false
+  note: 'Minimum over models, unnamed in text. Fig 6a prints 38.6 (Claude Opus 4.1): agrees.'
+- id: sec1_avg_violation_rate_floor
+  figure: null
+  section: '1'
+  benchmark: image
+  model: null
+  metric: violation_rate
+  value: 30.0
+  scale: percent
+  kind: bound
+  models: *id003
+  source: text
+  quote: no model achieves less than 30% constraint violation rate
+  approx: false
+  note: 'Lower bound over all models (Introduction), not a measured value. Fig 6a minimum is 38.6: consistent.'
+- id: appD_avg_majority_baseline_latent_severity
+  figure: null
+  section: Appendix D
+  benchmark: text
+  model: null
+  metric: majority_baseline_latent_severity
+  value: 0.4451
+  scale: fraction
+  kind: baseline
+  source: text
+  quote: 'Appendix D counts: Moderate Injury 142 of 319 (Table 2)'
+  approx: false
+  note: DERIVED by us from the printed counts; the paper does not state a majority baseline. Not a model result.
+- id: appD_avg_majority_baseline_latent_severity_severe_binary
+  figure: null
+  section: Appendix D
+  benchmark: text
+  model: null
+  metric: majority_baseline_latent_severity_severe_binary
+  value: 0.5643
+  scale: fraction
+  kind: baseline
+  source: text
+  quote: 'Appendix D counts: not-severe 319 - 139 = 180 of 319 (Table 2)'
+  approx: false
+  note: DERIVED by us from the printed counts; the paper does not state a majority baseline. Not a model result.
+- id: appD_avg_majority_baseline_effect
+  figure: null
+  section: Appendix D
+  benchmark: text
+  model: null
+  metric: majority_baseline_effect
+  value: 0.3793
+  scale: fraction
+  kind: baseline
+  source: text
+  quote: 'Appendix D counts: ''Possibility of injury same as before'' 121 of 319 (Table 3)'
+  approx: false
+  note: DERIVED by us from the printed counts; the paper does not state a majority baseline. Not a model result.
+- id: appD_avg_majority_baseline_activated_risk
+  figure: null
+  section: Appendix D
+  benchmark: text
+  model: null
+  metric: majority_baseline_activated_risk
+  value: 0.3386
+  scale: fraction
+  kind: baseline
+  source: text
+  quote: 'Appendix D counts: Severe Injury 108 of 319 (Table 4)'
+  approx: false
+  note: DERIVED by us from the printed counts; the paper does not state a majority baseline. Not a model result.
+- id: appD_avg_majority_baseline_activated_risk_severe_binary
+  figure: null
+  section: Appendix D
+  benchmark: text
+  model: null
+  metric: majority_baseline_activated_risk_severe_binary
+  value: 0.6614
+  scale: fraction
+  kind: baseline
+  source: text
+  quote: 'Appendix D counts: not-severe 319 - 108 = 211 of 319 (Table 4)'
+  approx: false
+  note: DERIVED by us from the printed counts; the paper does not state a majority baseline. Not a model result.
+- id: appD_avg_majority_baseline_risk
+  figure: null
+  section: Appendix D
+  benchmark: video
+  model: null
+  metric: majority_baseline_risk
+  value: 0.6725
+  scale: fraction
+  kind: baseline
+  source: text
+  quote: 'Appendix D: 193 videos without any realistic injury, 94 videos with realistic injuries'
+  approx: false
+  note: 'DERIVED by us: 193 of 287 (''no injury''). Video has no majority-baseline key in the agent spec; named by analogy.
+    Not a model result.'
+headline:
+- id: headline_frontier_recognise_risks
+  check: close_to_paper
+  section: '3'
+  quote: on the task of recognizing latent risk types in (text) scenarios, GPT5, Gemini 2.5 Pro and Claude Opus 4.1 all score
+    above 90%
+  models:
+  - GPT5
+  - Gemini 2.5 Pro
+  - Claude Opus 4.1
+  note: 'Also: severity average 88.7% for the same three models (see sec3 claims).'
+- id: headline_small_models_lag
+  check: size_gap
+  section: '3'
+  quote: the faster/nano versions of these models show considerable drop in performance
+  pairs:
+  - - GPT5
+    - GPT5-Mini
+  - - GPT5
+    - GPT5-Nano
+  - - Claude Opus 4.1
+    - Claude Sonnet 4
+  - - Gemini 2.5 Pro
+    - Gemini 2.5 Flash
+  note: 'Pairs per text: GPT5 vs GPT5-Mini/GPT5-Nano; Claude Sonnet 4 and Gemini 2.5 Flash ''also have a gap, albeit smaller''
+    vs their larger counterparts. Gemini 2.5 Flash-Lite is plotted in Fig 4 but not named in this paragraph (named as weaker
+    in the Action Safety paragraph). Intro calls this a ''latency gap''. Pairs set by Claude (main session) from the paper''s
+    pairing: each small model vs its own family''s large model.'
+- id: headline_actions_harder
+  check: actions_harder
+  section: '3'
+  quote: accuracy in evaluating whether an action is safe ... and post-action activated risk assessment ... is generally lower
+    than scenario-only risk and severity accuracies
+  note: 'Compares Fig 4b (effect, activated risk) with Fig 4a (latent risk, severity). Text adds: ''Except for Gemini 2.5
+    Flash'', smaller models are substantially weaker, naming GPT-5-Mini, GPT-5-Nano and Gemini 2.5 Flash-lite.'
