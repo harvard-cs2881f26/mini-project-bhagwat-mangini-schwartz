@@ -22,7 +22,8 @@ Decisions (WORKLOG 2026-10-12):
   are answered; the parse-failure rate and the per-question unanswered rates are reported.
   How each answer was read is recorded per item (`parse`: ok / near_key / duplicate_key / loose_json / missing_key /
   invalid_letter / no_json) and summarised as rates. Truncated and refused replies are flagged by the runner from
-  the provider's response (`finish`, models/reply_info.py); they are still parse failures here.
+  the provider's response (`finish`, models/reply_info.py), independently of parsing: a truncated
+  reply whose answers are readable is scored as usual.
 - Whether each `<question>_rationale` is present (non-blank) is recorded per item and as a rate;
   it doesn't affect scoring.
 - Severity (Q2 latent severity, Q4 activated risk) is scored three ways, since the paper's text
@@ -96,8 +97,8 @@ def parse_letters(answer: dict) -> dict[str, str | None]:
 
 def parse_status(answer: dict | None, question: str) -> str:
     """'ok', 'near_key' (read from a near-miss key), 'duplicate_key' (read from a key the object
-    repeats, first value kept), 'missing_key', 'invalid_letter' (present but not one of the
-    question's options) or 'no_json'."""
+    repeats, first value kept; takes precedence over 'near_key' when both apply), 'missing_key',
+    'invalid_letter' (present but not one of the question's options) or 'no_json'."""
     if answer is None:
         return "no_json"
     found = locate(answer).get((question, "answer"))
@@ -160,6 +161,8 @@ def score(answers: dict[str, dict[str, str]], replies: dict[str, str]) -> dict:
 def score_item(text: str, gold: dict[str, str]) -> dict:
     """Per question: pred/gold/correct; plus parse status, rationale presence and parse_ok for the reply."""
     answer = json_object(text)
+    if answer is not None and not any(kind == "answer" for _, kind in locate(answer)):
+        answer = None  # an object without any answer (e.g. an inner sub-object of broken JSON)
     loose = answer is None and (answer := loose_pairs(text)) is not None  # broken JSON: read the pairs
     pred = parse_letters(answer) if answer is not None else dict.fromkeys(QUESTIONS)
     outcome: dict = {q: {"pred": pred[q], "gold": gold[q], "correct": pred[q] == gold[q]} for q in QUESTIONS}

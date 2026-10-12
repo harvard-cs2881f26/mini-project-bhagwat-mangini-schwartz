@@ -106,8 +106,10 @@ src/asimov/bench/parts.py     TextPart / ImagePart: provider-neutral request par
 src/asimov/bench/parse.py     shared: pull the JSON object out of a model reply
 src/asimov/bench/<bench>.py   build_request + BENCHMARK; scorer in <bench>_score.py
 src/asimov/models/            one client per provider + mock; get_client(provider, model)
+src/asimov/models/reply_info.py  how a reply ended (complete/truncated/refused), cached tokens
 src/asimov/runner.py          benchmark-agnostic: cache, calls, errors, scoring via the registry
-configs/*.yaml                run, benchmark, prompt, thinking, models
+src/asimov/config.py          run config schema (pydantic; unknown keys fail)
+configs/*.yaml                run, benchmark, prompt, thinking, log_reasoning (optional), models
 tests/                        unit tests for our code (not model evals)
 data/README.md                schemas with real examples, read before touching a loader
 ```
@@ -157,14 +159,16 @@ says so in its docstring.
 - **Unanswered = wrong, never dropped.** Report the parse-failure rate for every model, and why
   each answer couldn't be read (missing key, invalid value, no JSON). Each owner sets when a high
   parse-failure rate stops their run for review; for text (Noa) it's above 2% for any model.
-- **Refusals, safety blocks and cut-off replies count as wrong, never excluded.** They are also
-  parse failures (no answer could be read), and on top of that each kind gets its own rate, so a
-  parse-failure rate can be broken down:
+- **Refusals, safety blocks and cut-off replies are never excluded.** Each reply is flagged with
+  how it ended, independently of whether its answers could be read:
   - `refusal_rate`: the model refused, or the provider blocked the prompt or reply for safety;
   - `truncation_rate`: the reply was cut off by the output-token limit;
   - per item, `finish` is `complete`, `refused` or `truncated` (read from the provider's
     response by `models/reply_info.py`, added in PR #4).
-  Example: 3% parse failures = 1% refused + 0% truncated + 2% malformed replies.
+
+  A blocked or refused reply usually has no answer, so it is wrong and also a parse failure. A
+  truncated reply may still have readable answers, which are scored as usual. To break down parse
+  failures, cross `finish` with the per-item parse result rather than adding the rates.
 - **Never change a scoring rule silently.** Log it in WORKLOG with the alternative, then rescore
   saved replies for free (`scripts/run.py <config> --no-calls`, added in PR #4), and say what changed.
 

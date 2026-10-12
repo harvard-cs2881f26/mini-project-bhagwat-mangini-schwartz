@@ -8,9 +8,10 @@ results/<run>/<model>/summary.json      metrics + per-item outcomes + how they w
 results/<run>/summary.json              one row per model
 results/<run>/config.yaml               exact copy of the config; one run name = one config
 
-A reply is reused if one already exists for the same (item, model, prompt, thinking), so
-reruns are free. Failed calls are printed and never saved. With call_models=False nothing is
-called: saved replies are rescored (free, no keys needed).
+A reply is reused if one already exists for the same (item, model, prompt, thinking, and
+log_reasoning when on), so reruns are free. Failed calls are printed and logged to
+results/<run>/<model>/errors.jsonl, never saved as replies, so a rerun retries them. With
+call_models=False nothing is called: saved replies are rescored (free, no keys needed).
 """
 from __future__ import annotations
 

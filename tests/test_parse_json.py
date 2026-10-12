@@ -79,3 +79,20 @@ def test_duplicate_keys_are_reported():
     assert duplicate_keys(json_object("{'a': '1', 'a': '3', 'b': '2'}")) == {"a"}
     assert duplicate_keys(json_object(FLAT)) == set()
     assert duplicate_keys({"a": "1"}) == set()  # plain dicts (e.g. from loose_pairs) have none
+
+
+# --- review fixes: odd replies never crash scoring; loose keys may contain spaces ---
+
+
+def test_unhashable_dict_key_is_not_an_object_and_does_not_raise():
+    assert json_object('{[1]: "x"}') is None
+    assert json_object('{"a": {[1]: "x"}, "latent_risk_response": "B"}') is None  # loose_pairs reads it instead
+
+
+def test_deeply_nested_reply_does_not_raise():
+    assert json_object("{'a': " + "[" * 5000 + "]" * 5000 + "}") is None
+
+
+def test_loose_pairs_keep_keys_with_spaces():
+    pairs = loose_pairs('{"Latent Severity Response": "C", "x": "broken "quote" here"}')
+    assert pairs is not None and pairs["Latent Severity Response"] == "C"

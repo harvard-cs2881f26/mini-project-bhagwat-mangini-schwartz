@@ -314,3 +314,23 @@ def test_duplicated_key_with_an_invalid_first_value_stays_invalid_letter():
     assert s["per_item"]["a"]["latent_severity"]["pred"] is None
     assert s["per_item"]["a"]["parse"]["latent_severity"] == "invalid_letter"
     assert s["latent_severity_duplicate_key_rate"] == 0
+
+
+# --- review fixes ---
+
+
+def test_broken_outer_json_with_a_valid_inner_object_reads_loose_pairs():
+    # the inner "meta" object loads on its own, but holds none of the answers
+    text = (
+        '{"latent_risk_response": "D", "latent_risk_rationale": "the "No injury" option",'
+        ' "latent_severity_response": "C", "effect_response": "B", "activated_risk_response": "A",'
+        ' "meta": {"confidence": "high"}}'
+    )
+    s = score(GOLD, {"a": text})
+    assert all(s[f"{q}_accuracy"] == 1 for q in QUESTIONS)
+    assert set(s["per_item"]["a"]["parse"].values()) == {"loose_json"}
+
+
+def test_a_reply_with_an_unhashable_key_scores_instead_of_crashing():
+    s = score(GOLD, {"a": '{[1]: "x"}', "b": reply(GOLD["b"])})
+    assert s["n"] == 2 and s["parse_failure_rate"] == 0.5

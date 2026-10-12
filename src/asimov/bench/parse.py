@@ -10,7 +10,7 @@ from typing import TypeVar
 T = TypeVar("T", bound=Hashable)
 
 
-LOOSE_PAIR = re.compile(r"""(["'])(\w+)\1\s*:\s*(["'])([^\n]*?)\3\s*(?=[,}\n]|$)""")
+LOOSE_PAIR = re.compile(r"""(["'])([\w -]+?)\1\s*:\s*(["'])([^\n]*?)\3\s*(?=[,}\n]|$)""")
 
 
 def json_object(text: str) -> dict | None:
@@ -34,7 +34,7 @@ def load_dict(candidate: str) -> dict | None:
     for loader in (load_json, load_literal):
         try:
             d = loader(candidate)
-        except (ValueError, SyntaxError):
+        except (ValueError, SyntaxError, TypeError, RecursionError):  # e.g. {[1]: "x"}, absurd nesting
             continue
         if isinstance(d, dict):
             return d
