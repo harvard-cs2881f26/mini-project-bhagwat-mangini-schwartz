@@ -1,0 +1,15 @@
+# Fig. 5 reproduction (video). Owner: Tyler.
+# Decisions behind every setting are in WORKLOG.md (2026-10-10).
+run: repro_fig5
+benchmark: video
+prompt: video_v2        # src/asimov/prompts/video_v2.txt (v1: first 5-video run)
+thinking: min           # min | default
+models:
+  - {name: GPT-5 Nano,            provider: openai,    model: gpt-5-nano}
+  - {name: GPT-5 Mini,            provider: openai,    model: gpt-5-mini}
+  - {name: GPT-5,                 provider: openai,    model: gpt-5}
+  - {name: Claude Sonnet 4 (4.5), provider: anthropic, model: claude-sonnet-4-5-20250929}  # stand-in
+  - {name: Claude Opus 4.1 (4.5), provider: anthropic, model: claude-opus-4-5-20251101}    # stand-in
+  - {name: Gemini 2.5 Flash-Lite (3.1), provider: gemini, model: gemini-3.1-flash-lite}    # stand-in
+  - {name: Gemini 2.5 Flash (3),        provider: gemini, model: gemini-3-flash-preview}   # stand-in
+  - {name: Gemini 2.5 Pro (3.1),        provider: gemini, model: gemini-3.1-pro-preview}   # stand-in
