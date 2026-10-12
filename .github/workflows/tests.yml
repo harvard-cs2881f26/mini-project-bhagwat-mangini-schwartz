@@ -24,3 +24,5 @@ jobs:
         run: python -m pytest -rs
       - name: Mock run through the CLI (free, no keys)
         run: python scripts/run.py configs/smoke_mock.yaml
+      - name: Mock run of the text benchmark (free, no keys)
+        run: python scripts/run.py configs/smoke_mock_text.yaml

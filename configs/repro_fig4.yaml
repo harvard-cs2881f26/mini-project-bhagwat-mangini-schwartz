@@ -1,0 +1,16 @@
+# Fig. 4 reproduction (text). Owner: Noa.
+# Decisions behind every setting are in WORKLOG.md (2026-10-12). One run name = one config:
+# a thinking: default run goes in configs/repro_fig4_default.yaml (run: repro_fig4_default).
+run: repro_fig4
+benchmark: text
+prompt: text_verbatim   # the dataset's prompt, unchanged (src/asimov/bench/text.py)
+thinking: min           # matches repro_fig5
+models:
+  - {name: GPT-5 Nano,            provider: openai,    model: gpt-5-nano}
+  - {name: GPT-5 Mini,            provider: openai,    model: gpt-5-mini}
+  - {name: GPT-5,                 provider: openai,    model: gpt-5}
+  - {name: Claude Sonnet 4 (4.5), provider: anthropic, model: claude-sonnet-4-5-20250929}  # stand-in
+  - {name: Claude Opus 4.1 (4.5), provider: anthropic, model: claude-opus-4-5-20251101}    # stand-in
+  - {name: Gemini 2.5 Flash-Lite (3.1), provider: gemini, model: gemini-3.1-flash-lite}    # stand-in
+  - {name: Gemini 2.5 Flash (3),        provider: gemini, model: gemini-3-flash-preview}   # stand-in
+  - {name: Gemini 2.5 Pro (3.1),        provider: gemini, model: gemini-3.1-pro-preview}   # stand-in
