@@ -12,7 +12,9 @@ sid=$(python3 -c 'import json,sys; print(json.load(sys.stdin).get("session_id","
 log=".claude/hooks/state/$sid.files"
 [ -n "$sid" ] && [ -f "$log" ] || exit 0
 
-files=$(sort -u "$log" | sed "s|^$root/||" | grep -E '\.py$' | while read -r f; do [ -f "$f" ] && echo "$f"; done)
+# Only files inside this checkout: a file edited elsewhere (e.g. another worktree) can't be checked
+# against this checkout's src/ and main, so it's left to that checkout.
+files=$(sort -u "$log" | sed "s|^$root/||" | grep -E '\.py$' | grep -v '^/' | while read -r f; do [ -f "$f" ] && echo "$f"; done)
 [ -n "$files" ] || exit 0
 base=$(git merge-base HEAD origin/main 2>/dev/null || echo HEAD)
 new=$(for f in $files; do git cat-file -e "$base:$f" 2>/dev/null || echo "$f"; done)
