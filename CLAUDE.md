@@ -106,8 +106,11 @@ Planned: `scripts/plot.py`, `experiments/*/README.md`.
 
 ## Scoring conventions (all benchmarks)
 
-The paper doesn't say how it parsed replies, so these are ours (WORKLOG 2026-10-12). Every
-scorer follows them. A benchmark that deviates says so in its scorer's docstring and in WORKLOG.
+The paper doesn't say how it parsed replies, so these are ours (WORKLOG 2026-10-12).
+**Status:** decided for text (Noa). For video (Tyler) and image (Riddhi) they are a proposal:
+the owner decides whether their scorer adopts each rule, and logs that choice in WORKLOG. Most of
+them already match the video rules (WORKLOG 2026-10-10 and 2026-10-11). A scorer that deviates
+says so in its docstring.
 
 - **Send the prompt as the paper gives it.** No structured-output settings, no wrappers. Format
   problems are measured, not prevented. Variants go in `experiments/` under their own run name.
@@ -118,8 +121,8 @@ scorer follows them. A benchmark that deviates says so in its scorer's docstring
   under the benchmark's own rule (e.g. "the key contains `severity`"); two competing near keys
   leave it unread. Count near-miss reads (a `near_key` status and rate) so slips stay visible.
 - **Unanswered = wrong, never dropped.** Report the parse-failure rate for every model, and why
-  each answer couldn't be read (missing key, invalid value, no JSON). A run stops for review if a
-  model's parse failures exceed 2%.
+  each answer couldn't be read (missing key, invalid value, no JSON). Each owner sets when a high
+  parse-failure rate stops their run for review; for text (Noa) it's above 2% for any model.
 - **Refusals, safety blocks and cut-off replies count as wrong, never excluded.** They are also
   parse failures (no answer could be read), and on top of that each kind gets its own rate, so a
   parse-failure rate can be broken down:
