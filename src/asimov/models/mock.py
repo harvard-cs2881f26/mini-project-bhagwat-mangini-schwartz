@@ -20,6 +20,7 @@ REPLIES = {
 
 class MockClient:
     provider = "mock"
+    request_settings: frozenset[str] = frozenset()  # replies are fixed, whatever the settings
 
     def __init__(self, model: str):
         if model not in REPLIES and model != "mock-error":
