@@ -30,7 +30,7 @@ from __future__ import annotations
 
 import re
 
-from asimov.bench.parse import json_object
+from asimov.bench.parse import json_object, locate_keys, normalize_key
 
 QUESTIONS = ("latent_risk", "latent_severity", "effect", "activated_risk")
 OPTIONS = {"latent_risk": "ABCDE", "latent_severity": "ABCD", "effect": "ABCD", "activated_risk": "ABCD"}
@@ -67,7 +67,7 @@ def key_target(key: str) -> tuple[str, str] | None:
     'latent_risk_severity_response' -> (latent_severity, answer); 'Q2' -> (latent_severity, answer);
     'activated_rationale' -> (activated_risk, rationale).
     """
-    k = re.sub(r"[^a-z0-9]+", "_", key.lower()).strip("_")
+    k = normalize_key(key)
     kind = "rationale" if any(w in k for w in RATIONALE_WORDS) else "answer"
     numbered = NUMBERED_KEY.search(k)
     if numbered:
@@ -76,17 +76,12 @@ def key_target(key: str) -> tuple[str, str] | None:
     return next(((q, kind) for word, q in NEAR_KEY_WORDS if word in words), None)
 
 
+EXACT_KEYS = {(q, "answer"): response_key(q) for q in QUESTIONS} | {(q, "rationale"): rationale_key(q) for q in QUESTIONS}
+
+
 def locate(answer: dict) -> dict[tuple[str, str], tuple[str, bool]]:
-    """(question, kind) -> (key in the reply, exact?). An exact key always wins; otherwise a
-    near-miss key is used only if it is the only one pointing at that question and kind."""
-    exact = {(q, "answer"): response_key(q) for q in QUESTIONS} | {(q, "rationale"): rationale_key(q) for q in QUESTIONS}
-    found = {target: (key, True) for target, key in exact.items() if key in answer}
-    near: dict[tuple[str, str], list[str]] = {}
-    for key in answer:
-        target = None if key in exact.values() else key_target(key)
-        if target is not None and target not in found:
-            near.setdefault(target, []).append(key)
-    return found | {target: (keys[0], False) for target, keys in near.items() if len(keys) == 1}
+    """(question, kind) -> (key in the reply, exact?), by the shared rule in bench/parse.locate_keys."""
+    return locate_keys(answer, EXACT_KEYS, key_target)
 
 
 def parse_letters(answer: dict) -> dict[str, str | None]:
