@@ -9,9 +9,9 @@ Machine checked for local models: Apple M1 Pro, **16 GB** unified memory, no CUD
 | System (PLAN §4) | File | Access | Hardware / cost | Status | Open before Session 3 |
 |---|---|---|---|---|---|
 | `jev` (Jev via `/v1/systemone`) | [systemone.md](systemone.md) | paid TypeSafe key (`TYPESAFE_API_KEY`); no free tier found | hosted; ~$0.042 / 1M input tokens, output free | **BLOCKED: no key** | get a key; Jev 1.13 is documented as biased toward the first option (consider permuting) |
-| `kev4b` (Kev-4B local, same protocol) | [systemone.md](systemone.md) | Apache-2.0 weights on Hugging Face | docs say 24 GB GPU or **32 GB** Mac | **BLOCKED on this Mac (16 GB)** | a bigger machine or a cloud GPU |
-| `openjev_think` | [systemone.md](systemone.md) | at least three projects use the name | depends on which | **UNKNOWN** | Noa: which OpenJev is meant |
-| `laya` | [systemone.md](systemone.md) | thin docs, auth UNVERIFIED | — | **UNKNOWN** | its model card says base checkpoints score below majority without fine-tuning |
+| `kev4b` (Kev-4B on Modal, same protocol) | [systemone.md](systemone.md) | Apache-2.0 weights; self-deployed with `modal deploy` | Modal L40S GPU time | **BLOCKED: no Modal deploy yet** | Session 3 Step C (ask before installing `modal`) |
+| `openjev` think 0 / 512 (razorback16, Codiv) | [systemone.md](systemone.md) | Codiv key (`CODIV_API_KEY`, our name) | hosted; free tier 100M input tokens | **BLOCKED: no key** | corrected 2026-10-12: razorback16/openjev on Codiv, not Zefan-Cai |
+| `laya` (Codiv `laya-1.0`) | [systemone.md](systemone.md) | same Codiv key | hosted, free tier | **BLOCKED: no key** | served by Codiv, so no local setup |
 | `luna_decide` / `luna_gen` (gpt-6-luna) | [openai_decisions.md](openai_decisions.md) | existing `OPENAI_API_KEY`; Decisions API is public beta | Decisions $0.10 / 1M input; Responses $0.10 in / $0.50 out | **READY** | `confidence` meaning and probability order; `effort: "none"` on Responses |
 | `qwen_gen` / `qwen_logprob` (Qwen3-4B) | [qwen3_4b_local.md](qwen3_4b_local.md) | Apache-2.0, not gated | 8 GB bf16 weights + ~144 KiB/token KV; fits 16 GB tightly, MPS bf16 UNVERIFIED | **READY to try** | logprob mode can't use the verbatim prompt (it asks for JSON first): needs a prompt variant in `experiments/` |
 | `nli_zeroshot` (optional) | [nli_zeroshot.md](nli_zeroshot.md) | MIT, free | CPU-feasible, ~870 MB | **READY** | 512-token limit: full prompt doesn't fit; wording rule (PLAN §4.3) decides |
