@@ -23,3 +23,6 @@ results/smoke_mock_text/
 
 # error review pages embed dataset frames
 results/error_review/
+
+# per-session edit logs for the Stop hook (.claude/hooks/track_edits.sh)
+.claude/hooks/state/
