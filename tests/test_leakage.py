@@ -1,0 +1,45 @@
+"""Leakage test for every registered benchmark: a request may only carry the prompt and the item.
+
+Searching requests for answer values doesn't work: "Yes"/"No", letters A-D and field names are
+legitimately in the prompts. Instead, for every item of every benchmark (with each prompt a config
+uses), check that:
+  1. the item's raw answer string never appears in the request (text or image bytes);
+  2. the item's ID never appears in the request;
+  3. no field of the item contains the raw answer (a loader must not put the answer on the item).
+Stricter benchmark-specific checks live next to each benchmark (e.g. tests/test_video_request.py).
+"""
+import dataclasses
+from pathlib import Path
+
+import pytest
+import yaml
+
+from asimov.bench import MODULES, get_benchmark
+from asimov.bench.parts import ImagePart, TextPart
+from asimov.data.rows import DATA_DIR, read_rows
+
+CONFIGS = sorted((Path(__file__).resolve().parents[1] / "configs").glob("*.yaml"))
+PROMPTS = sorted({(c["benchmark"], c["prompt"]) for c in (yaml.safe_load(open(p)) for p in CONFIGS)})
+
+
+def test_every_registered_benchmark_has_a_config():
+    assert set(MODULES) <= {name for name, _ in PROMPTS}
+
+
+@pytest.mark.parametrize("name,prompt", PROMPTS)
+def test_no_answer_or_id_in_any_request(name, prompt):
+    if not (DATA_DIR / name / "items.jsonl").exists():
+        pytest.skip("data not downloaded")
+    bench = get_benchmark(name)
+    raw_answers = {r["id"]: r["answer_raw"] for r in read_rows(name)}
+    items = bench.load_items()
+    assert {i.id for i in items} == set(raw_answers)
+    for item in items:
+        raw = raw_answers[item.id]
+        parts = bench.build_request(item, prompt)
+        text = "\n".join(p.text for p in parts if isinstance(p, TextPart))
+        images = b"".join(p.data for p in parts if isinstance(p, ImagePart))
+        assert raw not in text and raw.encode() not in images, f"answer leaks into {item.id}"
+        assert item.id not in text, f"ID leaks into {item.id}"
+        fields = {f.name: getattr(item, f.name) for f in dataclasses.fields(item) if f.name != "id"}
+        assert not any(raw in str(v) for v in fields.values()), f"answer stored on item {item.id}"

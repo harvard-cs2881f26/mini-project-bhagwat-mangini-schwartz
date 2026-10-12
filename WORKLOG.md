@@ -271,7 +271,7 @@ Status tags: **DECIDED**, **PROPOSED** (needs team sign-off), **OPEN** (needs a 
 
 ## 2026-10-11: benchmark names and shared benchmark interface (Noa)
 
-### Benchmarks named by input type: PROPOSED (Noa; in a PR for Tyler and Riddhi)
+### Benchmarks named by input type: DECIDED (Noa; merged 2026-10-11 as 25983b8; Tyler agreed in the PR 1 review)
 - **text** (Fig. 4, paper: Injury), **video** (Fig. 5), **image** (Fig. 6, paper: Constraints), used
   in prose and in code: data folders, modules, configs. `injury/` became `data/text/`,
   `constraints*/` became `data/image*/`, `data/constraints.py` became `data/image.py`
@@ -302,3 +302,20 @@ Status tags: **DECIDED**, **PROPOSED** (needs team sign-off), **OPEN** (needs a 
 - *Alternatives considered:* a class hierarchy (base class per benchmark), rejected as more code
   for three benchmarks; one generic scorer, rejected because the three metric sets share nothing
   but the return shape; a separate runner per benchmark, rejected as duplicated cache/error code.
+- **Tyler's review of PR 1 (2026-10-11), and what changed:** video results unchanged (he
+  re-checked keys and rescoring independently). Three points for text and image:
+  1. *Text could silently reuse old replies* if `prompt_version` were only the dataset version: an
+     H1 prompt variant under the same run name would be scored with the old prompt's replies.
+     Now a documented rule on `Benchmark.prompt_version`: it covers everything our code adds to a
+     request beyond the item (prompt file text, prompt name or variant, wrapper text, dataset
+     version). Planned for text: `"asimov_v2_injuries/0.1.0|<prompt name>|<wrapper text>"`.
+  2. *`image` and `image_rationale` could collide the same way.* They will be two registry
+     entries, one per data folder, each with its own `prompt_version`. Convention: a benchmark's
+     `name` is its data folder.
+  3. *The leakage test was video-only.* `tests/test_leakage.py` now runs on every registered
+     benchmark: for every item, neither the raw answer string nor the item ID appears in the
+     request (text or image bytes), and no field of the item contains the raw answer. Searching
+     for answer values is not used, since "Yes"/"No" and letters A–D appear in the prompts
+     themselves. The stricter video-only checks in `tests/test_video_request.py` stay.
+     *Alternative considered:* a test-only rule that request text is identical across items, as
+     for video; rejected because each text item has its own scenario.
