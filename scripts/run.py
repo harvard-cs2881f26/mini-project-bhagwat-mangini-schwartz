@@ -5,9 +5,11 @@
     python scripts/run.py configs/repro_fig5.yaml --limit 5
     python scripts/run.py configs/repro_fig5.yaml            # all 287
     python scripts/run.py configs/smoke_mock.yaml            # free, no keys
+    python scripts/run.py configs/repro_fig5.yaml --no-calls # rescore saved replies, free
 
---limit N   first N videos of a fixed shuffled order (with N <= 5, every reply is printed)
+--limit N   first N items of a fixed shuffled order (with N <= 5, every reply is printed)
 --models    names or model IDs from the config (default: all whose API key is set)
+--no-calls  make no API calls (no keys needed): rescore the saved replies and rewrite summaries
 """
 from __future__ import annotations
 
@@ -37,10 +39,12 @@ def main() -> None:
     ap.add_argument("--limit", type=int)
     ap.add_argument("--models", nargs="+")
     ap.add_argument("--workers", type=int, default=4)
+    ap.add_argument("--no-calls", action="store_true")
     args = ap.parse_args()
     load_dotenv(ROOT / ".env")
-    cfg = yaml.safe_load(open(args.config))
-    rows = run(cfg, args.limit, args.models, args.workers)
+    config_path = Path(args.config)
+    cfg = yaml.safe_load(config_path.read_text())
+    rows = run(cfg, args.limit, args.models, args.workers, config_path=config_path, call_models=not args.no_calls)
     cols = get_benchmark(cfg["benchmark"]).columns
 
     print(f"\n{'model':28s} {'n':>4s} " + " ".join(f"{label:>{len(label) + 1}s}" for label, _, _ in cols) + f" {'errors':>6s}")
