@@ -64,6 +64,33 @@ python -m pytest                       # fast, no network, no API calls; uses da
 python scripts/draw_boxes.py [ids...]  # overlay constraint boxes -> results/box_check/
 ```
 
+### Running an eval
+
+Every benchmark runs through `scripts/run.py`, which records the same information for each run.
+API keys go in `.env` (copy `.env.example`).
+
+1. Write a config in `configs/` (fields are checked by `asimov/config.py`; unknown keys fail):
+   ```yaml
+   run: repro_fig6          # results/<run>/; any new setting needs a new run name
+   benchmark: image         # a registered benchmark: text, video, ... (see "Adding a benchmark")
+   prompt: <prompt name>
+   thinking: min            # min | default
+   log_reasoning: false     # optional; true saves reasoning summaries (never scored)
+   models:
+     - {name: GPT-5, provider: openai, model: gpt-5}
+   ```
+2. `python scripts/run.py <config> --limit 5` first: it prints each reply. Check them and work out
+   the cost before any full run (ask before spending, per the hard rules).
+3. Full run: the same command without `--limit`. Run it once more to retry errors; cached replies
+   are free, and failed calls are listed in `results/<run>/<model>/errors.jsonl`.
+4. After a scoring change: `python scripts/run.py <config> --no-calls` rescores the saved replies
+   (free, no keys needed).
+5. Commit `results/<run>/`: `config.yaml`, each model's `responses.jsonl` and `summary.json`.
+   `tests/test_results_schema.py` checks them on CI.
+
+Reusing a run name with a different config stops the run (`ConfigChanged`); comment-only edits
+are fine. `--models <name or id>` runs a subset of the config's models.
+
 ## Layout
 
 ```
