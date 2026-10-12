@@ -19,11 +19,11 @@ session: Claude stops, shows the numbers, waits for a yes, and carries on.
 | Step | Who | State | Evidence / link |
 |---|---|---|---|
 | Before 1: Part 1 decisions | Noa | done | thinking = `min`; all 8 `PAPER_MODELS`; severity axis = 4-way exact letter (decided early, in Session 1). WORKLOG 2026-10-12 |
-| Session 1: build + run Fig 4 | Claude (Noa approves spend) | done (PR #4 ready for review) | [PR #4](https://github.com/gini007/mini-project-asimov-v2/pull/4); [PR #5](https://github.com/gini007/mini-project-asimov-v2/pull/5) merged; replies: 8 models × 319/319, 0 failed calls (`repro_fig4`); cost: $15.11 full run, about $15.36 for the session incl. 5-item runs (WORKLOG 2026-10-12); pytest: 168 passed on full data; 161 passed, 7 skipped on the 5-item sample; CI green |
-| Session 2: stats + Fig 4 plot | Claude | todo | |
+| Session 1: build + run Fig 4 | Claude (Noa approves spend) | done, merged (PR #4) | [PR #4](https://github.com/gini007/mini-project-asimov-v2/pull/4); [PR #5](https://github.com/gini007/mini-project-asimov-v2/pull/5) merged; replies: 8 models × 319/319, 0 failed calls (`repro_fig4`); cost: $15.11 full run, about $15.36 for the session incl. 5-item runs (WORKLOG 2026-10-12); pytest: 168 passed on full data; 161 passed, 7 skipped on the 5-item sample; CI green |
+| Session 2: stats + Fig 4 plot | Claude | in progress | branch `fig4-stats-plot` |
 | Optional: Weave export (Noa's runs) | Claude, after Noa checks dataset terms | todo | |
-| Between 2 and 3: review, Part 2 scope, hypothesis | Noa (+ team) | todo | |
-| Session 3: build decision-model systems | Claude (Noa approves smoke spend) | todo | |
+| Between 2 and 3: review, Part 2 scope, hypothesis | Noa (+ team) | Part 2 scope decided 2026-10-12; Part 1 review + hypothesis still to do | WORKLOG 2026-10-12 ("Part 2 approved") |
+| Session 3: build decision-model systems | Claude (Noa approves smoke spend) | starting | branch `decision-systems` |
 | Session 4: Part 2 runs + metrics | Claude (Noa approves spend) | todo | |
 | After 4: write-up + slides | Noa | todo | |
 
@@ -236,25 +236,29 @@ by side) for error analysis. It's an extra view only: `results/` stays the sourc
    | id | system | contrast |
    |---|---|---|
    | `gpt5`, `gpt5nano` | Part 1 runs, reused | reference |
-   | `qwen_gen` / `qwen_logprob` | Qwen3-4B local, generate vs option logits | interface, small |
+   | `qwen_gen` / `qwen_logprob` | Qwen3.5-4B-Base (Kev's base) option logits; the generate pairing is proposed in Session 3 | interface, small |
    | `luna_gen` / `luna_decide` | gpt-6-luna, Responses vs Decisions API | interface, frontier |
-   | `kev4b` | Kev-4B vs `qwen_logprob` | trained-for-decisions |
+   | `kev4b` | Kev-4B on Modal vs `qwen_logprob` | trained-for-decisions |
    | `jev` | Jev via `/v1/systemone` | headline system |
 
-   Optional, in cut order: `nli_zeroshot`, `semif`, `laya`, `openjev_think`, `qwen_think`.
+   Optional, in cut order: `nli_zeroshot`, `semif`, `laya`, `openjev_think` (razorback16 on
+   Codiv), `qwen_think`.
    Check overlap with the unowned "small model prompting / training" rows with the team.
 3. **Wording rule:** decision models get (a) the paper's full rubric text per question, or
    (b) short instructions. (a) keeps inputs equal to the LLMs; (b) is what these APIs expect.
    Log the choice and the alternative.
 4. **Hypothesis:** write `docs/HYPOTHESIS.md` (as H2 or a renamed H, to avoid clashing with
    CLAUDE.md's H1). Frozen before Session 4.
-5. **Open Part 2 questions** (from [`docs/apis/README.md`](apis/README.md); not decided):
-   - `jev`: needs a paid TypeSafe key. Jev 1.13 is documented as biased toward the first
-     option, so option order may need permuting.
-   - `kev4b`: Kev-4B doesn't fit this 16 GB Mac (docs say 24 GB GPU or 32 GB Mac). A cloud GPU,
-     or Kev-0.5B against a same-size Qwen?
-   - `openjev_think`: which OpenJev is meant (several projects use the name)? Does `semif`
-     (README: "formerly OpenJev") add anything beyond `qwen_logprob`?
+5. **Part 2 decisions** (DECIDED 2026-10-12, Noa; WORKLOG "Part 2 approved"):
+   - `jev`: paid TypeSafe key (alternative: skip Jev). Jev 1.13 is documented as biased toward
+     the first option, so option order may need permuting.
+   - `kev4b`: Kev-4B on Modal (alternative: Kev-0.8B locally; Kev-4B doesn't fit this 16 GB Mac).
+   - `openjev`: `razorback16/openjev`, hosted on Codiv, think 0 and 512 (alternatives:
+     `Zefan-Cai/Open-Jev`; local, ruled out on the 16 GB Mac).
+   - Logprob baseline: Qwen3.5-4B-Base, Kev's base (alternative: Qwen3-4B).
+   - All optional systems kept, `semif` included.
+
+   Still open:
    - `qwen_logprob` can't use the verbatim prompt (it asks for JSON first), so it needs a prompt
      variant in `experiments/`.
    - An explicit thinking level (`low|medium|high`, mapped per provider, e.g. Claude budget
@@ -298,7 +302,7 @@ order mapped by value; 429 vs 400 handling; refusal recorded as wrong and counte
 makes no call.
 
 **Step C, local models.** Heavy deps go in `requirements-local.txt`, never the main
-requirements. `models/local_hf.py`: Qwen3-4B generate (thinking off) and logprob (softmax over
+requirements. `models/local_hf.py`: Qwen3.5-4B-Base (Kev's base; the generate pairing is proposed here) generate (thinking off) and logprob (softmax over
 option letters; check each letter is one token). Kev wrapper. On 20 items, logprob argmax
 should agree with thinking-off generation on most items.
 
@@ -353,6 +357,9 @@ From `results/` and the figures. Fill the Fig 4 and H slides in the deck templat
 | Sat 10/17–Sun 10/18 | Write-up and slides |
 
 If Part 2 slips, present Part 1 with the extension as planned work. Cut order is in §4.
+
+**Change (2026-10-12):** Part 2 was approved early, before Noa's Part 1 review, so Sessions 2
+and 3 run in parallel. Session 4 is still gated on the Part 1 review and `docs/HYPOTHESIS.md`.
 
 **Branches: one per session, off an up-to-date `main`, merged by PR before the next session.**
 Each PR is one session's work, CI runs on it, and no branch stacks on an unmerged one.

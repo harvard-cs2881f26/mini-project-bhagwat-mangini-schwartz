@@ -578,3 +578,22 @@ No existing cache key changed. Each change is its own commit in PR #4.
   - The paper's "high-severity judgment" average for the three large models is 88.7%. That's
     closer to our severe recall (GPT-5 0.914) than to 4-way severity (GPT-5 0.774). Relevant to the
     severity-axis decision, to check against the plotted values in Session 2.
+
+## 2026-10-12: Part 2 approved (Noa)
+
+PART 2 APPROVED: 2026-10-12 (Noa). Systems: jev (TypeSafe, paid key), openjev
+(razorback16, hosted on Codiv, think 0 and 512), kev-4b (Modal) vs Qwen3.5-4B-Base option
+logits, luna_gen / luna_decide, qwen gen/logprob, semif, nli_zeroshot, laya. Approved
+before my Part 1 review so Session 3 can build in parallel; Part 2 paid runs (Session 4)
+still wait for the Fig 4 review and docs/HYPOTHESIS.md.
+
+### Part 2 systems: DECIDED (Noa)
+- **Jev: buy a paid TypeSafe key.** *Alternative considered:* skipping Jev.
+- **OpenJev = `razorback16/openjev`, hosted on Codiv** (think 0 and 512). *Alternatives
+  considered:* `Zefan-Cai/Open-Jev`; running it locally, ruled out because this 16 GB Mac is
+  too small.
+- **Kev-4B on Modal.** *Alternative considered:* Kev-0.8B locally.
+- **Logprob baseline = Qwen3.5-4B-Base** (Kev's base model), option logits. *Alternative
+  considered:* Qwen3-4B, as in the plan.
+- **All optional systems kept** (`semif`, `nli_zeroshot`, `laya`, `openjev` think 0/512).
+  *Alternative considered:* cutting them in the PLAN §4 cut order.
