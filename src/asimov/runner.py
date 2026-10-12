@@ -146,6 +146,8 @@ def run_model(bench: Benchmark, spec: dict, cfg: dict, items, out_dir: Path, wor
                        "log_reasoning": log_reasoning, "text": r.text, "reasoning": r.reasoning,
                        "usage": usage, "latency_s": round(r.latency_s, 2),
                        "time": time.strftime("%Y-%m-%dT%H:%M:%S"), "raw": r.raw}
+                if r.probs:  # decision models only, so LLM rows stay exactly as before
+                    row["probs"] = r.probs
                 f.write(json.dumps(row) + "\n")
                 f.flush()
                 saved[item.id] = row

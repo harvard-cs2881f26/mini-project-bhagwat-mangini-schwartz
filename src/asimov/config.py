@@ -17,7 +17,7 @@ class ModelSpec(BaseModel):
     model_config = ConfigDict(extra="forbid", frozen=True)
 
     name: str  # label in tables and figures, e.g. "Claude Opus 4.1 (4.5)" for a stand-in
-    provider: Literal["anthropic", "openai", "gemini", "mock"]  # asimov.models.get_client
+    provider: Literal["anthropic", "openai", "gemini", "mock", "mock_decision"]  # asimov.models.get_client
     model: str
 
 
