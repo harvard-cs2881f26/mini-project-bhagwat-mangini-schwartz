@@ -578,3 +578,17 @@ No existing cache key changed. Each change is its own commit in PR #4.
   - The paper's "high-severity judgment" average for the three large models is 88.7%. That's
     closer to our severe recall (GPT-5 0.914) than to 4-way severity (GPT-5 0.774). Relevant to the
     severity-axis decision, to check against the plotted values in Session 2.
+
+## 2026-10-12: Fig 4 severity axis (Noa)
+
+### Fig 4a/4b severity = normal multiple choice (exact letter, 4 options): DECIDED (Noa)
+- The paper's axis says only "Severity Accuracy". Its Fig 3 defines Q2/Q4 as 4-option questions
+  (No Injury / Minor / Moderate / Severe), so a reply counts only if it picks the key's letter
+  (`latent_severity_accuracy`, `activated_risk_accuracy`). The paper's Fig 4a read-offs are filed
+  under these keys in `configs/paper/claims.yaml`.
+- Same rule as Tyler's video severity (`video_score.py`: exact match on No/Mild/Moderate/Severe Harm).
+- *Alternative considered:* severe vs not (D vs A/B/C), suggested by one sentence in the paper's
+  text ("highly severe or not ... 88.7%"). Its numbers don't match the figure (Fig 4a averages 0.903
+  for the same three models; the Mini/Nano gaps read 18/8 points, not 19/17). The text's numbers
+  stay in claims.yaml under the severe-vs-not keys; `scripts/plot.py --severity binary|recall`
+  still draws those versions for the report if wanted.
