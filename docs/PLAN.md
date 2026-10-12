@@ -19,7 +19,7 @@ session: Claude stops, shows the numbers, waits for a yes, and carries on.
 | Step | Who | State | Evidence / link |
 |---|---|---|---|
 | Before 1: Part 1 decisions | Noa | done | thinking = `min`; all 8 `PAPER_MODELS`; severity axis = 4-way exact letter (decided early, in Session 1). WORKLOG 2026-10-12 |
-| Session 1: build + run Fig 4 | Claude (Noa approves spend) | done (PR #4 ready for review) | [PR #4](https://github.com/gini007/mini-project-asimov-v2/pull/4); [PR #5](https://github.com/gini007/mini-project-asimov-v2/pull/5) merged; replies: 8 models × 319/319, 0 failed calls (`repro_fig4`); cost: $15.11 full run, about $15.36 for the session incl. 5-item runs (WORKLOG 2026-10-12); pytest: 168 passed on full data; 161 passed, 7 skipped on the 5-item sample; CI green |
+| Session 1: build + run Fig 4 | Claude (Noa approves spend) | done (PR #4 merged) | [PR #4](https://github.com/gini007/mini-project-asimov-v2/pull/4); [PR #5](https://github.com/gini007/mini-project-asimov-v2/pull/5) merged; replies: 8 models × 319/319, 0 failed calls (`repro_fig4`); cost: $15.11 full run, about $15.36 for the session incl. 5-item runs (WORKLOG 2026-10-12); pytest: 168 passed on full data; 161 passed, 7 skipped on the 5-item sample; CI green |
 | Session 2: stats + Fig 4 plot | Claude | todo | |
 | Optional: Weave export (Noa's runs) | Claude, after Noa checks dataset terms | todo | |
 | Between 2 and 3: review, Part 2 scope, hypothesis | Noa (+ team) | todo | |
