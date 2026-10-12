@@ -122,3 +122,18 @@ def load_claims(path: Path = CLAIMS_PATH) -> Claims:
 def as_fraction(claim: Claim) -> float:
     """The claim's value on our summaries' scale (fractions; seconds stay seconds)."""
     return claim.value / 100 if claim.scale == "percent" else claim.value
+
+
+def paper_value(claims: Claims, benchmark: str, name: str, metric: str, figure: str | None = None) -> float | None:
+    """The paper's single-model value for `name` on our scale (first match), or None. `figure` narrows to e.g. "4a"."""
+    key = model_key(name)
+    for c in claims.claims:
+        if (
+            c.kind == "value"
+            and c.benchmark == benchmark
+            and c.metric == metric
+            and model_key(c.model or "") == key
+            and (figure is None or c.figure == figure)
+        ):
+            return as_fraction(c)
+    return None

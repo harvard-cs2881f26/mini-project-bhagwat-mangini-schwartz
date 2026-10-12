@@ -1,48 +1,48 @@
 approx,ci_hi,ci_lo,claim,diff,figure,kind,metric,model_paper,models_ours,ours,paper,paper_in_ci,stand_in,status
-True,0.8956211752142011,0.8199003096775432,fig4a_gemini_2_5_flash_lite_latent_risk_accuracy,0.042068965517241375,4a,value,latent_risk_accuracy,Gemini 2.5 Flash-Lite,Gemini 2.5 Flash-Lite (3.1),0.8620689655172413,0.82,True,True,checked
-True,0.7290248164086941,0.6271871782343821,fig4a_gemini_2_5_flash_lite_latent_severity_accuracy,-0.09974921630094047,4a,value,latent_severity_accuracy,Gemini 2.5 Flash-Lite,Gemini 2.5 Flash-Lite (3.1),0.6802507836990596,0.78,False,True,checked
-True,0.9514783853457629,0.8941379149808442,fig4a_gemini_2_5_flash_latent_risk_accuracy,-0.0021003134796239165,4a,value,latent_risk_accuracy,Gemini 2.5 Flash,Gemini 2.5 Flash (3),0.9278996865203761,0.93,True,True,checked
-True,0.7614997396479626,0.6628571583181369,fig4a_gemini_2_5_flash_latent_severity_accuracy,-0.22526645768025078,4a,value,latent_severity_accuracy,Gemini 2.5 Flash,Gemini 2.5 Flash (3),0.7147335423197492,0.94,False,True,checked
-True,0.9489238171707408,0.8904974919446824,fig4a_gemini_2_5_pro_latent_risk_accuracy,-0.015235109717868234,4a,value,latent_risk_accuracy,Gemini 2.5 Pro,Gemini 2.5 Pro (3.1),0.9247648902821317,0.94,True,True,checked
-True,0.7230855881659494,0.6207364240547589,fig4a_gemini_2_5_pro_latent_severity_accuracy,-0.28601880877742947,4a,value,latent_severity_accuracy,Gemini 2.5 Pro,Gemini 2.5 Pro (3.1),0.6739811912225705,0.96,False,True,checked
-True,0.9437740276026545,0.8832572990904008,fig4a_claude_opus_4_1_latent_risk_accuracy,0.008495297805642621,4a,value,latent_risk_accuracy,Claude Opus 4.1,Claude Opus 4.1 (4.5),0.9184952978056427,0.91,True,True,checked
-True,0.7819870738837454,0.6857347625606415,fig4a_claude_opus_4_1_latent_severity_accuracy,-0.19332288401253928,4a,value,latent_severity_accuracy,Claude Opus 4.1,Claude Opus 4.1 (4.5),0.7366771159874608,0.93,False,True,checked
-True,0.9065486112961869,0.8337528384402932,fig4a_claude_sonnet_4_latent_risk_accuracy,0.004608150470219452,4a,value,latent_risk_accuracy,Claude Sonnet 4,Claude Sonnet 4 (4.5),0.8746081504702194,0.87,True,True,checked
-True,0.7111765010948987,0.607865546281074,fig4a_claude_sonnet_4_latent_severity_accuracy,-0.25855799373040755,4a,value,latent_severity_accuracy,Claude Sonnet 4,Claude Sonnet 4 (4.5),0.6614420062695925,0.92,False,True,checked
-True,0.6084218698508453,0.4999904763448736,fig4a_gpt_5_nano_latent_risk_accuracy,-0.315141065830721,4a,value,latent_risk_accuracy,GPT 5 Nano,GPT-5 Nano,0.554858934169279,0.87,False,False,checked
-True,0.5869478467492952,0.478099560968136,fig4a_gpt_5_nano_latent_severity_accuracy,-0.2070846394984326,4a,value,latent_severity_accuracy,GPT 5 Nano,GPT-5 Nano,0.5329153605015674,0.74,False,False,checked
-True,0.917361716322154,0.8477196982590619,fig4a_gpt_5_mini_latent_risk_accuracy,0.16714733542319749,4a,value,latent_risk_accuracy,GPT 5 Mini,GPT-5 Mini,0.8871473354231975,0.72,False,False,checked
-True,0.749728993381888,0.6498479397394756,fig4a_gpt_5_mini_latent_severity_accuracy,0.06219435736677115,4a,value,latent_severity_accuracy,GPT 5 Mini,GPT-5 Mini,0.7021943573667712,0.64,False,False,checked
-True,0.9565428615122747,0.9014634212367002,fig4a_gpt_5_latent_risk_accuracy,0.014169278996865153,4a,value,latent_risk_accuracy,GPT 5,GPT-5,0.9341692789968652,0.92,True,False,checked
-True,0.8167488429524112,0.7253128880261832,fig4a_gpt_5_latent_severity_accuracy,-0.04570532915360492,4a,value,latent_severity_accuracy,GPT 5,GPT-5,0.774294670846395,0.82,False,False,checked
-True,0.7141575563177643,0.6110794822693922,fig4b_gemini_2_5_flash_lite_effect_accuracy,0.03457680250783701,4b,value,effect_accuracy,Gemini 2.5 Flash-Lite,Gemini 2.5 Flash-Lite (3.1),0.664576802507837,0.63,True,True,checked
-True,0.6601290252661677,0.5535981715196779,fig4b_gemini_2_5_flash_lite_activated_risk_accuracy,0.01815047021943572,4b,value,activated_risk_accuracy,Gemini 2.5 Flash-Lite,Gemini 2.5 Flash-Lite (3.1),0.6081504702194357,0.59,True,True,checked
-True,0.7379140806610035,0.6368828876156246,fig4b_gemini_2_5_flash_effect_accuracy,-0.020344827586206815,4b,value,effect_accuracy,Gemini 2.5 Flash,Gemini 2.5 Flash (3),0.6896551724137931,0.71,True,True,checked
-True,0.7201121175871656,0.6175149034223586,fig4b_gemini_2_5_flash_activated_risk_accuracy,0.010846394984325936,4b,value,activated_risk_accuracy,Gemini 2.5 Flash,Gemini 2.5 Flash (3),0.670846394984326,0.66,True,True,checked
-True,0.7349536302953231,0.6336483467701209,fig4b_gemini_2_5_pro_effect_accuracy,-0.013479623824451337,4b,value,effect_accuracy,Gemini 2.5 Pro,Gemini 2.5 Pro (3.1),0.6865203761755486,0.7,True,True,checked
-True,0.6571052283997595,0.5504269771749023,fig4b_gemini_2_5_pro_activated_risk_accuracy,-0.03498432601880874,4b,value,activated_risk_accuracy,Gemini 2.5 Pro,Gemini 2.5 Pro (3.1),0.6050156739811913,0.64,True,True,checked
-True,0.7201121175871656,0.6175149034223586,fig4b_claude_opus_4_1_effect_accuracy,-0.06915360501567402,4b,value,effect_accuracy,Claude Opus 4.1,Claude Opus 4.1 (4.5),0.670846394984326,0.74,False,True,checked
-True,0.7052069261889667,0.6014451387646379,fig4b_claude_opus_4_1_activated_risk_accuracy,0.02517241379310342,4b,value,activated_risk_accuracy,Claude Opus 4.1,Claude Opus 4.1 (4.5),0.6551724137931034,0.63,True,True,checked
-True,0.6962341417633497,0.5918329495567032,fig4b_claude_sonnet_4_effect_accuracy,-0.07423197492163003,4b,value,effect_accuracy,Claude Sonnet 4,Claude Sonnet 4 (4.5),0.64576802507837,0.72,False,True,checked
-True,0.6540791666725029,0.5472580476909751,fig4b_claude_sonnet_4_activated_risk_accuracy,-0.05811912225705329,4b,value,activated_risk_accuracy,Claude Sonnet 4,Claude Sonnet 4 (4.5),0.6018808777429467,0.66,False,True,checked
-True,0.521900439031864,0.41305215325070477,fig4b_gpt_5_nano_effect_accuracy,-0.1529153605015674,4b,value,effect_accuracy,GPT 5 Nano,GPT-5 Nano,0.4670846394984326,0.62,False,False,checked
-True,0.45907305266417936,0.3519797153947108,fig4b_gpt_5_nano_activated_risk_accuracy,-0.18561128526645765,4b,value,activated_risk_accuracy,GPT 5 Nano,GPT-5 Nano,0.4043887147335423,0.59,False,False,checked
-True,0.6145379532979364,0.5062643753201505,fig4b_gpt_5_mini_effect_accuracy,0.05112852664576806,4b,value,effect_accuracy,GPT 5 Mini,GPT-5 Mini,0.5611285266457681,0.51,True,False,checked
-True,0.5807931762372143,0.47186424905784907,fig4b_gpt_5_mini_activated_risk_accuracy,0.04664576802507836,4b,value,activated_risk_accuracy,GPT 5 Mini,GPT-5 Mini,0.5266457680250783,0.48,True,False,checked
-True,0.693238361473235,0.5886337386356341,fig4b_gpt_5_effect_accuracy,-0.027366771159874625,4b,value,effect_accuracy,GPT 5,GPT-5,0.6426332288401254,0.67,True,False,checked
-True,0.7052069261889667,0.6014451387646379,fig4b_gpt_5_activated_risk_accuracy,0.05517241379310345,4b,value,activated_risk_accuracy,GPT 5,GPT-5,0.6551724137931034,0.6,False,False,checked
-False,0.9489238171707408,0.8904974919446824,fig5a_gemini_2_5_pro_latent_risk_accuracy,-0.015235109717868234,5a,value,latent_risk_accuracy,Gemini 2.5 Pro,Gemini 2.5 Pro (3.1),0.9247648902821317,0.94,True,True,checked
-False,0.9437740276026545,0.8832572990904008,fig5a_claude_opus_4_1_latent_risk_accuracy,0.008495297805642621,5a,value,latent_risk_accuracy,Claude Opus 4.1,Claude Opus 4.1 (4.5),0.9184952978056427,0.91,True,True,checked
-False,0.9565428615122747,0.9014634212367002,fig5a_gpt_5_latent_risk_accuracy,0.014169278996865153,5a,value,latent_risk_accuracy,GPT 5,GPT-5,0.9341692789968652,0.92,True,False,checked
-False,,,sec3_avg_latent_risk_accuracy,0.002809822361546588,,mean,latent_risk_accuracy,,GPT-5;Gemini 2.5 Pro (3.1);Claude Opus 4.1 (4.5),0.9258098223615465,0.9229999999999999,,True,checked
+True,0.895621,0.8199,fig4a_gemini_2_5_flash_lite_latent_risk_accuracy,0.042069,4a,value,latent_risk_accuracy,Gemini 2.5 Flash-Lite,Gemini 2.5 Flash-Lite (3.1),0.862069,0.82,True,True,checked
+True,0.729025,0.627187,fig4a_gemini_2_5_flash_lite_latent_severity_accuracy,-0.099749,4a,value,latent_severity_accuracy,Gemini 2.5 Flash-Lite,Gemini 2.5 Flash-Lite (3.1),0.680251,0.78,False,True,checked
+True,0.951478,0.894138,fig4a_gemini_2_5_flash_latent_risk_accuracy,-0.0021,4a,value,latent_risk_accuracy,Gemini 2.5 Flash,Gemini 2.5 Flash (3),0.9279,0.93,True,True,checked
+True,0.7615,0.662857,fig4a_gemini_2_5_flash_latent_severity_accuracy,-0.225266,4a,value,latent_severity_accuracy,Gemini 2.5 Flash,Gemini 2.5 Flash (3),0.714734,0.94,False,True,checked
+True,0.948924,0.890497,fig4a_gemini_2_5_pro_latent_risk_accuracy,-0.015235,4a,value,latent_risk_accuracy,Gemini 2.5 Pro,Gemini 2.5 Pro (3.1),0.924765,0.94,True,True,checked
+True,0.723086,0.620736,fig4a_gemini_2_5_pro_latent_severity_accuracy,-0.286019,4a,value,latent_severity_accuracy,Gemini 2.5 Pro,Gemini 2.5 Pro (3.1),0.673981,0.96,False,True,checked
+True,0.943774,0.883257,fig4a_claude_opus_4_1_latent_risk_accuracy,0.008495,4a,value,latent_risk_accuracy,Claude Opus 4.1,Claude Opus 4.1 (4.5),0.918495,0.91,True,True,checked
+True,0.781987,0.685735,fig4a_claude_opus_4_1_latent_severity_accuracy,-0.193323,4a,value,latent_severity_accuracy,Claude Opus 4.1,Claude Opus 4.1 (4.5),0.736677,0.93,False,True,checked
+True,0.906549,0.833753,fig4a_claude_sonnet_4_latent_risk_accuracy,0.004608,4a,value,latent_risk_accuracy,Claude Sonnet 4,Claude Sonnet 4 (4.5),0.874608,0.87,True,True,checked
+True,0.711177,0.607866,fig4a_claude_sonnet_4_latent_severity_accuracy,-0.258558,4a,value,latent_severity_accuracy,Claude Sonnet 4,Claude Sonnet 4 (4.5),0.661442,0.92,False,True,checked
+True,0.608422,0.49999,fig4a_gpt_5_nano_latent_risk_accuracy,-0.315141,4a,value,latent_risk_accuracy,GPT 5 Nano,GPT-5 Nano,0.554859,0.87,False,False,checked
+True,0.586948,0.4781,fig4a_gpt_5_nano_latent_severity_accuracy,-0.207085,4a,value,latent_severity_accuracy,GPT 5 Nano,GPT-5 Nano,0.532915,0.74,False,False,checked
+True,0.917362,0.84772,fig4a_gpt_5_mini_latent_risk_accuracy,0.167147,4a,value,latent_risk_accuracy,GPT 5 Mini,GPT-5 Mini,0.887147,0.72,False,False,checked
+True,0.749729,0.649848,fig4a_gpt_5_mini_latent_severity_accuracy,0.062194,4a,value,latent_severity_accuracy,GPT 5 Mini,GPT-5 Mini,0.702194,0.64,False,False,checked
+True,0.956543,0.901463,fig4a_gpt_5_latent_risk_accuracy,0.014169,4a,value,latent_risk_accuracy,GPT 5,GPT-5,0.934169,0.92,True,False,checked
+True,0.816749,0.725313,fig4a_gpt_5_latent_severity_accuracy,-0.045705,4a,value,latent_severity_accuracy,GPT 5,GPT-5,0.774295,0.82,False,False,checked
+True,0.714158,0.611079,fig4b_gemini_2_5_flash_lite_effect_accuracy,0.034577,4b,value,effect_accuracy,Gemini 2.5 Flash-Lite,Gemini 2.5 Flash-Lite (3.1),0.664577,0.63,True,True,checked
+True,0.660129,0.553598,fig4b_gemini_2_5_flash_lite_activated_risk_accuracy,0.01815,4b,value,activated_risk_accuracy,Gemini 2.5 Flash-Lite,Gemini 2.5 Flash-Lite (3.1),0.60815,0.59,True,True,checked
+True,0.737914,0.636883,fig4b_gemini_2_5_flash_effect_accuracy,-0.020345,4b,value,effect_accuracy,Gemini 2.5 Flash,Gemini 2.5 Flash (3),0.689655,0.71,True,True,checked
+True,0.720112,0.617515,fig4b_gemini_2_5_flash_activated_risk_accuracy,0.010846,4b,value,activated_risk_accuracy,Gemini 2.5 Flash,Gemini 2.5 Flash (3),0.670846,0.66,True,True,checked
+True,0.734954,0.633648,fig4b_gemini_2_5_pro_effect_accuracy,-0.01348,4b,value,effect_accuracy,Gemini 2.5 Pro,Gemini 2.5 Pro (3.1),0.68652,0.7,True,True,checked
+True,0.657105,0.550427,fig4b_gemini_2_5_pro_activated_risk_accuracy,-0.034984,4b,value,activated_risk_accuracy,Gemini 2.5 Pro,Gemini 2.5 Pro (3.1),0.605016,0.64,True,True,checked
+True,0.720112,0.617515,fig4b_claude_opus_4_1_effect_accuracy,-0.069154,4b,value,effect_accuracy,Claude Opus 4.1,Claude Opus 4.1 (4.5),0.670846,0.74,False,True,checked
+True,0.705207,0.601445,fig4b_claude_opus_4_1_activated_risk_accuracy,0.025172,4b,value,activated_risk_accuracy,Claude Opus 4.1,Claude Opus 4.1 (4.5),0.655172,0.63,True,True,checked
+True,0.696234,0.591833,fig4b_claude_sonnet_4_effect_accuracy,-0.074232,4b,value,effect_accuracy,Claude Sonnet 4,Claude Sonnet 4 (4.5),0.645768,0.72,False,True,checked
+True,0.654079,0.547258,fig4b_claude_sonnet_4_activated_risk_accuracy,-0.058119,4b,value,activated_risk_accuracy,Claude Sonnet 4,Claude Sonnet 4 (4.5),0.601881,0.66,False,True,checked
+True,0.5219,0.413052,fig4b_gpt_5_nano_effect_accuracy,-0.152915,4b,value,effect_accuracy,GPT 5 Nano,GPT-5 Nano,0.467085,0.62,False,False,checked
+True,0.459073,0.35198,fig4b_gpt_5_nano_activated_risk_accuracy,-0.185611,4b,value,activated_risk_accuracy,GPT 5 Nano,GPT-5 Nano,0.404389,0.59,False,False,checked
+True,0.614538,0.506264,fig4b_gpt_5_mini_effect_accuracy,0.051129,4b,value,effect_accuracy,GPT 5 Mini,GPT-5 Mini,0.561129,0.51,True,False,checked
+True,0.580793,0.471864,fig4b_gpt_5_mini_activated_risk_accuracy,0.046646,4b,value,activated_risk_accuracy,GPT 5 Mini,GPT-5 Mini,0.526646,0.48,True,False,checked
+True,0.693238,0.588634,fig4b_gpt_5_effect_accuracy,-0.027367,4b,value,effect_accuracy,GPT 5,GPT-5,0.642633,0.67,True,False,checked
+True,0.705207,0.601445,fig4b_gpt_5_activated_risk_accuracy,0.055172,4b,value,activated_risk_accuracy,GPT 5,GPT-5,0.655172,0.6,False,False,checked
+False,0.948924,0.890497,fig5a_gemini_2_5_pro_latent_risk_accuracy,-0.015235,5a,value,latent_risk_accuracy,Gemini 2.5 Pro,Gemini 2.5 Pro (3.1),0.924765,0.94,True,True,checked
+False,0.943774,0.883257,fig5a_claude_opus_4_1_latent_risk_accuracy,0.008495,5a,value,latent_risk_accuracy,Claude Opus 4.1,Claude Opus 4.1 (4.5),0.918495,0.91,True,True,checked
+False,0.956543,0.901463,fig5a_gpt_5_latent_risk_accuracy,0.014169,5a,value,latent_risk_accuracy,GPT 5,GPT-5,0.934169,0.92,True,False,checked
+False,,,sec3_avg_latent_risk_accuracy,0.00281,,mean,latent_risk_accuracy,,GPT-5;Gemini 2.5 Pro (3.1);Claude Opus 4.1 (4.5),0.92581,0.923,,True,checked
 False,,,sec3_avg_latent_risk_accuracy_floor,,,bound,latent_risk_accuracy,,,,0.9,,False,"a bound, not a point value"
-False,,,sec3_avg_latent_severity_severe_binary_accuracy,-0.08344723092998951,,mean,latent_severity_severe_binary_accuracy,,GPT-5;Gemini 2.5 Pro (3.1);Claude Opus 4.1 (4.5),0.8035527690700105,0.887,,True,checked
-False,0.07836990595611286,0.01567398119122257,sec3_gpt5_mini_latent_risk_accuracy_gap_vs_gpt5,-0.1529780564263323,,gap,latent_risk_accuracy,GPT5-Mini,GPT-5;GPT-5 Mini,0.047021943573667714,0.2,,False,checked
-False,0.43573667711598746,0.322884012539185,sec3_gpt5_nano_latent_risk_accuracy_gap_vs_gpt5,0.3293103448275862,,gap,latent_risk_accuracy,GPT5-Nano,GPT-5;GPT-5 Nano,0.3793103448275862,0.05,,False,checked
-False,,,sec3_gpt5_mini_latent_severity_severe_binary_accuracy_gap_vs_gpt5,-0.18686520376175547,,gap,latent_severity_severe_binary_accuracy,GPT5-Mini,GPT-5;GPT-5 Mini,0.0031347962382445305,0.19,,False,checked (no paired CI for this metric)
-False,,,sec3_gpt5_nano_latent_severity_severe_binary_accuracy_gap_vs_gpt5,-0.05714733542319747,,gap,latent_severity_severe_binary_accuracy,GPT5-Nano,GPT-5;GPT-5 Nano,0.11285266457680254,0.17,,False,checked (no paired CI for this metric)
-False,,,sec3_avg_effect_accuracy_top,-0.05034482758620684,,max,effect_accuracy,,Gemini 2.5 Flash-Lite (3.1);Gemini 2.5 Flash (3);Gemini 2.5 Pro (3.1);Claude Opus 4.1 (4.5);Claude Sonnet 4 (4.5);GPT-5 Nano;GPT-5 Mini;GPT-5,0.6896551724137931,0.74,,True,checked
-False,,,sec3_avg_activated_risk_accuracy_top,0.010846394984325936,,max,activated_risk_accuracy,,Gemini 2.5 Flash-Lite (3.1);Gemini 2.5 Flash (3);Gemini 2.5 Pro (3.1);Claude Opus 4.1 (4.5);Claude Sonnet 4 (4.5);GPT-5 Nano;GPT-5 Mini;GPT-5,0.670846394984326,0.66,,True,checked
+False,,,sec3_avg_latent_severity_severe_binary_accuracy,-0.083447,,mean,latent_severity_severe_binary_accuracy,,GPT-5;Gemini 2.5 Pro (3.1);Claude Opus 4.1 (4.5),0.803553,0.887,,True,checked
+False,0.07837,0.015674,sec3_gpt5_mini_latent_risk_accuracy_gap_vs_gpt5,-0.152978,,gap,latent_risk_accuracy,GPT5-Mini,GPT-5;GPT-5 Mini,0.047022,0.2,,False,checked
+False,0.435737,0.322884,sec3_gpt5_nano_latent_risk_accuracy_gap_vs_gpt5,0.32931,,gap,latent_risk_accuracy,GPT5-Nano,GPT-5;GPT-5 Nano,0.37931,0.05,,False,checked
+False,,,sec3_gpt5_mini_latent_severity_severe_binary_accuracy_gap_vs_gpt5,-0.186865,,gap,latent_severity_severe_binary_accuracy,GPT5-Mini,GPT-5;GPT-5 Mini,0.003135,0.19,,False,checked (no paired CI for this metric)
+False,,,sec3_gpt5_nano_latent_severity_severe_binary_accuracy_gap_vs_gpt5,-0.057147,,gap,latent_severity_severe_binary_accuracy,GPT5-Nano,GPT-5;GPT-5 Nano,0.112853,0.17,,False,checked (no paired CI for this metric)
+False,,,sec3_avg_effect_accuracy_top,-0.050345,,max,effect_accuracy,,Gemini 2.5 Flash-Lite (3.1);Gemini 2.5 Flash (3);Gemini 2.5 Pro (3.1);Claude Opus 4.1 (4.5);Claude Sonnet 4 (4.5);GPT-5 Nano;GPT-5 Mini;GPT-5,0.689655,0.74,,True,checked
+False,,,sec3_avg_activated_risk_accuracy_top,0.010846,,max,activated_risk_accuracy,,Gemini 2.5 Flash-Lite (3.1);Gemini 2.5 Flash (3);Gemini 2.5 Pro (3.1);Claude Opus 4.1 (4.5);Claude Sonnet 4 (4.5);GPT-5 Nano;GPT-5 Mini;GPT-5,0.670846,0.66,,True,checked
 False,,,appD_avg_majority_baseline_latent_severity,,,baseline,majority_baseline_latent_severity,,,,0.4451,,False,"derived from the dataset's counts, no model"
 False,,,appD_avg_majority_baseline_latent_severity_severe_binary,,,baseline,majority_baseline_latent_severity_severe_binary,,,,0.5643,,False,"derived from the dataset's counts, no model"
 False,,,appD_avg_majority_baseline_effect,,,baseline,majority_baseline_effect,,,,0.3793,,False,"derived from the dataset's counts, no model"

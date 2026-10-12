@@ -20,7 +20,7 @@ SKIP_PROVIDERS = frozenset({"mock"})  # free smoke runs are gitignored, so they 
 class ModelResult:
     summary: dict  # summary.json without per_item
     per_item: dict[str, dict]
-    latencies: tuple[float, ...]  # replies under the summary's key, for the items it scored
+    latencies: tuple[float, ...]  # replies under the summary's key, for the items it scored (rows with latency_s)
     served_models: tuple[str, ...]
     replies: dict[str, str]  # item id -> reply text
 
@@ -47,7 +47,8 @@ def load_model(mdir: Path) -> ModelResult:
         row = json.loads(line)
         if row.get("key") != key or row.get("id") not in per_item:
             continue
-        latencies.append(float(row.get("latency_s", 0.0)))
+        if row.get("latency_s") is not None:  # a row without timing is left out of the latency stats, not counted as 0
+            latencies.append(float(row["latency_s"]))
         served.add(row.get("served_model") or "")
         replies[row["id"]] = row.get("text", "")
     return ModelResult(full, per_item, tuple(latencies), tuple(sorted(served - {""})), replies)

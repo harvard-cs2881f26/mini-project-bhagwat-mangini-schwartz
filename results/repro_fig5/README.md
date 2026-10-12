@@ -18,16 +18,16 @@
 
 | Model | Requested | Served | Stand-in | Replies | Errors | Parse failures | Refused | Truncated | Malformed | Near-key reads | With reasoning | Input tokens | Output tokens | Cost $ | Latency p50 / p95 s |
 |---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|
-| GPT-5 Nano | `gpt-5-nano` | `gpt-5-nano-2025-08-07` |  | 287 | 0 | 0 | 0 | 0 | 0 | 0 | – | 6443150 | 14623 | – | 2.2 / 4.3 |
-| GPT-5 Mini | `gpt-5-mini` | `gpt-5-mini-2025-08-07` |  | 287 | 0 | 0 | 0 | 0 | 0 | 0 | – | 5180350 | 14613 | – | 1.9 / 3.1 |
-| GPT-5 | `gpt-5` | `gpt-5-2025-08-07` |  | 287 | 0 | 0 | 0 | 0 | 0 | 0 | – | 4284910 | 14645 | – | 4.7 / 7.8 |
-| Claude Sonnet 4 (4.5) | `claude-sonnet-4-5-20250929` | `claude-sonnet-4-5-20250929` | yes | 287 | 0 | 0 | 0 | 0 | 0 | 0 | – | 5628070 | 30824 | – | 2.2 / 10.9 |
-| Claude Opus 4.1 (4.5) | `claude-opus-4-5-20251101` | `claude-opus-4-5-20251101` | yes | 287 | 0 | 0 | 0 | 0 | 0 | 0 | – | 5628070 | 11217 | – | 3.2 / 7.1 |
-| Gemini 2.5 Flash-Lite (3.1) | `gemini-3.1-flash-lite` | `gemini-3.1-flash-lite` | yes | 287 | 0 | 2 | 2 | 0 | 0 | 0 | – | 5121616 | 9761 | – | 4.2 / 6.8 |
-| Gemini 2.5 Flash (3) | `gemini-3-flash-preview` | `gemini-3-flash-preview` | yes | 287 | 0 | 2 | 2 | 0 | 0 | 0 | – | 5156816 | 9811 | – | 3.1 / 6.1 |
-| Gemini 2.5 Pro (3.1) | `gemini-3.1-pro-preview` | `gemini-3.1-pro-preview` | yes | 165 | 122 | 1 | 1 | 0 | 0 | 0 | – | 2964720 | 6444 | – | 7.4 / 11.7 |
+| GPT-5 Nano | `gpt-5-nano` | `gpt-5-nano-2025-08-07` |  | 287 | 0 | 0 | 0 | 0 | – | 0 | – | 6443150 | 14623 | – | 2.2 / 4.3 |
+| GPT-5 Mini | `gpt-5-mini` | `gpt-5-mini-2025-08-07` |  | 287 | 0 | 0 | 0 | 0 | – | 0 | – | 5180350 | 14613 | – | 1.9 / 3.1 |
+| GPT-5 | `gpt-5` | `gpt-5-2025-08-07` |  | 287 | 0 | 0 | 0 | 0 | – | 0 | – | 4284910 | 14645 | – | 4.7 / 7.8 |
+| Claude Sonnet 4 (4.5) | `claude-sonnet-4-5-20250929` | `claude-sonnet-4-5-20250929` | yes | 287 | 0 | 0 | 0 | 0 | – | 0 | – | 5628070 | 30824 | – | 2.2 / 10.9 |
+| Claude Opus 4.1 (4.5) | `claude-opus-4-5-20251101` | `claude-opus-4-5-20251101` | yes | 287 | 0 | 0 | 0 | 0 | – | 0 | – | 5628070 | 11217 | – | 3.2 / 7.1 |
+| Gemini 2.5 Flash-Lite (3.1) | `gemini-3.1-flash-lite` | `gemini-3.1-flash-lite` | yes | 287 | 0 | 2 | 2 | 0 | – | 0 | – | 5121616 | 9761 | – | 4.2 / 6.8 |
+| Gemini 2.5 Flash (3) | `gemini-3-flash-preview` | `gemini-3-flash-preview` | yes | 287 | 0 | 2 | 2 | 0 | – | 0 | – | 5156816 | 9811 | – | 3.1 / 6.1 |
+| Gemini 2.5 Pro (3.1) | `gemini-3.1-pro-preview` | `gemini-3.1-pro-preview` | yes | 165 | 122 | 1 | 1 | 0 | – | 0 | – | 2964720 | 6444 | – | 7.4 / 11.7 |
 
-Parse failures = refused + truncated + malformed (CLAUDE.md, scoring conventions); all count as wrong. Cost is "–" until `configs/prices.yaml` has the model.
+Parse failures: replies with no readable answer; all count as wrong (CLAUDE.md, scoring conventions). With per-item `parse_ok` in `summary.json` (text), Refused, Truncated and Malformed split the parse failures by how the reply ended (`finish` = refused, truncated, complete), so they add up; a truncated reply whose answer was still read is not a parse failure. Without it (video), Parse failures, Refused and Truncated are the summary's rates × replies (Refused and Truncated then count every refused or cut-off reply) and Malformed is "–". Cost is "–" until `configs/prices.yaml` has the model.
 
 ## Metrics (95% CI)
 

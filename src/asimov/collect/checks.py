@@ -10,14 +10,16 @@ from dataclasses import dataclass
 
 import numpy as np
 
+from asimov.bench.text_score import QUESTIONS
 from asimov.claims import Claim, Claims, Headline, as_fraction, is_stand_in, model_key
 from asimov.collect.load import ModelResult, RunData
 from asimov.collect.metrics import Estimate, Paired, correct_by_question, estimate, paired
 from asimov.stats import holm, paired_bootstrap_diff
 
-# Fig 4b questions vs Fig 4a questions, for the "actions are harder" check (names from bench/text_score.py)
-ACTION_QUESTIONS = ("effect", "activated_risk")
-LATENT_QUESTIONS = ("latent_risk", "latent_severity")
+# For the "actions are harder" check. QUESTIONS is in the paper's order Q1-Q4: Q1-Q2 are about the
+# scenario's latent risk (Fig 4a), Q3-Q4 about the proposed action (Fig 4b).
+LATENT_QUESTIONS = QUESTIONS[:2]
+ACTION_QUESTIONS = QUESTIONS[2:]
 UNCHECKED_KINDS = {"bound": "a bound, not a point value", "baseline": "derived from the dataset's counts, no model"}
 
 

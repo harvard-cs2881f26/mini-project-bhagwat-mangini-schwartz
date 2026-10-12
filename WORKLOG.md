@@ -618,3 +618,24 @@ No existing cache key changed. Each change is its own commit in PR #4.
 - *Alternative considered:* have a model re-read the paper on every run. Five reads gave the same
   numbers, so the reason against is practical: it costs a few minutes of agent time per run, CI has
   no model access, and the paper doesn't change between runs.
+
+### Statistics methods: PROPOSED (Noa to confirm)
+- Formulas live in `src/asimov/stats.py`; `scripts/collect.py` and `scripts/plot.py` import them.
+- **Accuracy CIs: Wilson score interval, 95%.** Stays inside [0, 1] and behaves at 0/n and n/n.
+  *Alternatives:* Clopper-Pearson exact (too conservative: wider than its nominal 95%); Wald
+  (bad near 0 and 1, where several of our accuracies sit, and zero width at 0/n or n/n).
+- **Paired differences (two systems on the same items): percentile bootstrap over items,
+  10,000 resamples, seed 0,** so reruns give the same CI. Also used for the CI of a mean
+  (video timing error). *Alternative:* BCa bootstrap (corrects bias and skew, more code; not
+  needed for differences of 0/1 means at our n).
+- **Paired significance: exact two-sided McNemar** (binomial on the discordant pairs).
+  *Alternative:* chi-square McNemar with continuity correction (poor with few discordant pairs,
+  which strong model pairs have).
+- **Multiple comparisons: Holm** across a family (e.g. all size-gap rows on one paper-check page).
+  *Alternative:* Bonferroni (same guarantee, more conservative).
+- **Calibration (Part 2): Brier score and ECE with 10 equal-width bins.**
+  *Alternative:* adaptive (equal-mass) bins.
+- **Video per-item rows in `results/per_item.csv`:** each video item gives two rows: `risk`
+  (correct = the scorer's `risk_ok`) and `timing` (correct = `within_0_5`; pred/gold = `pred_s` /
+  `truth_s`; status = `case`). Paired comparisons and McNemar on video use these.
+  *Alternative:* timing correct = absolute error only, no row-level correctness (then no McNemar for timing).

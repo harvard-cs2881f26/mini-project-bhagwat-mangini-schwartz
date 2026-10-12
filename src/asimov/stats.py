@@ -1,12 +1,13 @@
 """Metric formulas: the one home for them (docs/PLAN.md §9.2). Pure functions, no I/O.
 
-Choices (WORKLOG 2026-10-12, PROPOSED):
+Choices and the alternatives considered: WORKLOG.md, "2026-10-12: Session 2, stats + plots (Noa)",
+"Statistics methods: PROPOSED (Noa to confirm)".
 - Accuracy CIs: Wilson score interval, 95%. It stays inside [0, 1] and behaves at 0/n and n/n.
 - Paired differences (two systems on the same items): percentile bootstrap over items, 10,000
-  resamples, fixed seed, so reruns give the same CI.
-- Paired significance: exact McNemar (two-sided binomial on the discordant pairs); Holm across
+  resamples, seed 0, so reruns give the same CI.
+- Paired significance: exact two-sided McNemar (binomial on the discordant pairs); Holm across
   a family of comparisons.
-- Calibration (Part 2): Brier score and 10-bin expected calibration error.
+- Calibration (Part 2): Brier score and expected calibration error over 10 equal-width bins.
 """
 
 from __future__ import annotations

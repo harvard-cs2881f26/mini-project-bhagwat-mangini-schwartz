@@ -21,12 +21,27 @@ sys.path.insert(0, str(ROOT / "src"))
 from asimov.claims import CLAIMS_PATH, load_claims  # noqa: E402
 from asimov.collect.build import COMPARISONS_DEFAULT, build, headline_yaml  # noqa: E402
 from asimov.collect.load import load_results, load_yaml  # noqa: E402
+from asimov.collect.pages import GENERATED  # noqa: E402
 
 PRICES_PATH = ROOT / "configs" / "prices.yaml"
+# Paths collect.py may have written earlier. A match is orphaned when the rebuild no longer makes it and it's
+# ours: a page starting with the GENERATED marker, or a run's table.csv (hand-written files are left alone).
+GENERATED_PATTERNS = ("compare/*.md", "*/README.md", "*/paper_check.md", "*/table.csv")
 
 
 def stale_files(results_dir: Path, files: dict[str, str]) -> list[str]:
     return [p for p, text in sorted(files.items()) if not (results_dir / p).exists() or (results_dir / p).read_text() != text]
+
+
+def orphaned_files(results_dir: Path, files: dict[str, str]) -> list[str]:
+    """Generated files under results/ that the rebuild no longer produces (e.g. for a deleted run)."""
+    found = {p for pattern in GENERATED_PATTERNS for p in results_dir.glob(pattern)}
+    orphans = [
+        p
+        for p in found
+        if p.relative_to(results_dir).as_posix() not in files and (p.name == "table.csv" or p.read_text().startswith(GENERATED))
+    ]
+    return sorted(p.relative_to(results_dir).as_posix() for p in orphans)
 
 
 def main(argv: list[str] | None = None) -> int:
@@ -48,10 +63,14 @@ def main(argv: list[str] | None = None) -> int:
     comparisons = load_yaml(comparisons_path, {}).get("comparisons") or []
     files = build(runs, load_claims(args.claims), load_yaml(args.prices, {}) or {}, headline, comparisons)
 
+    orphans = orphaned_files(args.results, files)
     if args.check:
         stale = stale_files(args.results, files)
         if stale:
             print("results pages are stale: run scripts/collect.py and commit. Differs: " + ", ".join(stale))
+        if orphans:
+            print("generated files no longer produced by a rebuild: delete them. Orphaned: " + ", ".join(orphans))
+        if stale or orphans:
             return 1
         print(f"results pages are up to date ({len(files)} files)")
         return 0
@@ -60,6 +79,8 @@ def main(argv: list[str] | None = None) -> int:
         path.parent.mkdir(parents=True, exist_ok=True)
         path.write_text(text)
     print(f"collect: {len(runs)} runs, {len(files)} files under {args.results}")
+    if orphans:
+        print("collect: generated files no longer produced (delete them, --check fails on them): " + ", ".join(orphans))
     return 0
 
 

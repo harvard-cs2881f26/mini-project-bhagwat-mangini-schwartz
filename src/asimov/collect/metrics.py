@@ -25,7 +25,7 @@ DENOMINATORS: dict[str, dict[str, str | None]] = {
     "image": {"violation_rate": "n"},
 }
 MEAN_SOURCES = {"timing_mae_s": "error_s"}  # per-item field averaged by the scorer (video: "error" cases only)
-VIDEO_QUESTIONS = ("risk", "timing")
+VIDEO_QUESTIONS = ("risk", "timing")  # per_item.csv rows per video item: risk = risk_ok, timing = within_0_5 (WORKLOG 2026-10-12)
 
 
 @dataclass(frozen=True)
@@ -76,10 +76,11 @@ def item_rows(benchmark: str, outcome: dict) -> list[dict]:
             for q in QUESTIONS
         ]
     if benchmark == "video":
+        risk, timing = VIDEO_QUESTIONS
         return [
-            {"question": "risk", "pred": None, "gold": None, "correct": outcome["risk_ok"], "status": ""},
+            {"question": risk, "pred": None, "gold": None, "correct": outcome["risk_ok"], "status": ""},
             {
-                "question": "timing",
+                "question": timing,
                 "pred": outcome["pred_s"],
                 "gold": outcome["truth_s"],
                 "correct": outcome["within_0_5"],

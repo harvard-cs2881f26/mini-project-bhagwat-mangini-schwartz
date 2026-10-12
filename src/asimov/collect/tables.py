@@ -41,6 +41,7 @@ PER_ITEM_COLUMNS = ("run", "benchmark", "model", "item", "question", "pred", "go
 PER_MTOK = 1e6
 LATENCY_DIGITS = 3  # rounded so index.csv is the same on every machine
 COST_DIGITS = 6
+CSV_DIGITS = 6  # every float in a CSV, so collect.py --check gives the same bytes on every machine and numpy version
 
 
 def cost_usd(summary: dict, prices: dict) -> float | None:
@@ -99,7 +100,9 @@ def per_item_rows(runs: list[RunData]) -> list[dict]:
 
 
 def cell(v) -> str:
-    return "" if v is None else str(v)
+    if v is None:
+        return ""
+    return str(round(v, CSV_DIGITS) + 0.0) if isinstance(v, float) else str(v)  # + 0.0 turns -0.0 into 0.0
 
 
 def to_csv(rows: list[dict], leading: tuple[str, ...]) -> str:

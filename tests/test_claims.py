@@ -6,7 +6,7 @@ import pytest
 import yaml
 from pydantic import ValidationError
 
-from asimov.claims import Claims, is_stand_in, load_claims, model_key
+from asimov.claims import Claims, is_stand_in, load_claims, model_key, paper_value
 from asimov.collect.metrics import DENOMINATORS
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -91,3 +91,14 @@ def test_duplicate_ids_rejected():
     data["claims"].append(dict(data["claims"][0]))
     with pytest.raises(ValidationError):
         Claims.model_validate(data)
+
+
+def test_paper_value_converts_percent_and_filters_by_figure():
+    data = minimal(value=90.0, scale="percent")
+    data["claims"].append({**data["claims"][0], "id": "y", "figure": "4b", "value": 80.0})
+    data["claims"].append({**data["claims"][0], "id": "z", "kind": "gap", "versus": "GPT 5 Nano", "value": 5.0})
+    claims = Claims.model_validate(data)
+    assert paper_value(claims, "text", "GPT-5", "latent_risk_accuracy") == pytest.approx(0.9)  # first value claim
+    assert paper_value(claims, "text", "GPT-5", "latent_risk_accuracy", figure="4b") == pytest.approx(0.8)
+    assert paper_value(claims, "text", "GPT-5 Nano", "latent_risk_accuracy") is None  # gaps aren't values
+    assert paper_value(claims, "video", "GPT-5", "latent_risk_accuracy") is None

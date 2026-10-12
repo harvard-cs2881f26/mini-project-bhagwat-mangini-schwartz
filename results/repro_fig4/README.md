@@ -27,7 +27,7 @@
 | Gemini 2.5 Flash (3) | `gemini-3-flash-preview` | `gemini-3-flash-preview` | yes | 319 | 0 | 2 | 2 | 0 | 0 | 0 | 0 | 458555 | 99717 | – | 2.5 / 3.0 |
 | Gemini 2.5 Pro (3.1) | `gemini-3.1-pro-preview` | `gemini-3.1-pro-preview` | yes | 319 | 0 | 2 | 2 | 0 | 0 | 0 | 317 | 458555 | 76384 | – | 8.7 / 12.1 |
 
-Parse failures = refused + truncated + malformed (CLAUDE.md, scoring conventions); all count as wrong. Cost is "–" until `configs/prices.yaml` has the model.
+Parse failures: replies with no readable answer; all count as wrong (CLAUDE.md, scoring conventions). With per-item `parse_ok` in `summary.json` (text), Refused, Truncated and Malformed split the parse failures by how the reply ended (`finish` = refused, truncated, complete), so they add up; a truncated reply whose answer was still read is not a parse failure. Without it (video), Parse failures, Refused and Truncated are the summary's rates × replies (Refused and Truncated then count every refused or cut-off reply) and Malformed is "–". Cost is "–" until `configs/prices.yaml` has the model.
 
 ## Metrics (95% CI)
 
