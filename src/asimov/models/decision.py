@@ -6,6 +6,7 @@ the probabilities themselves go in `ModelResponse.probs` (saved with the reply, 
 A question the model didn't answer (e.g. a per-question refusal) is left out, so it's scored as
 unanswered = wrong.
 """
+
 from __future__ import annotations
 
 import json

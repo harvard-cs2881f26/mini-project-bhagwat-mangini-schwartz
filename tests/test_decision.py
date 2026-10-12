@@ -78,13 +78,19 @@ def test_decision_prompt_versions_differ_and_cover_the_wording_file():
 
 
 def test_reply_text_is_the_argmax_letter_json_and_scores_like_an_llm_reply():
-    probs = {"latent_risk": {"A": 0.1, "B": 0.0, "C": 0.0, "D": 0.8, "E": 0.1},
-             "latent_severity": {"A": 0.2, "B": 0.2, "C": 0.5, "D": 0.1},
-             "effect": {"A": 0.0, "B": 0.9, "C": 0.1, "D": 0.0},
-             "activated_risk": {"A": 0.6, "B": 0.4, "C": 0.0, "D": 0.0}}
+    probs = {
+        "latent_risk": {"A": 0.1, "B": 0.0, "C": 0.0, "D": 0.8, "E": 0.1},
+        "latent_severity": {"A": 0.2, "B": 0.2, "C": 0.5, "D": 0.1},
+        "effect": {"A": 0.0, "B": 0.9, "C": 0.1, "D": 0.0},
+        "activated_risk": {"A": 0.6, "B": 0.4, "C": 0.0, "D": 0.0},
+    }
     text = reply_text(probs)
-    assert json.loads(text) == {response_key("latent_risk"): "D", response_key("latent_severity"): "C",
-                                response_key("effect"): "B", response_key("activated_risk"): "A"}
+    assert json.loads(text) == {
+        response_key("latent_risk"): "D",
+        response_key("latent_severity"): "C",
+        response_key("effect"): "B",
+        response_key("activated_risk"): "A",
+    }
     gold = {"latent_risk": "D", "latent_severity": "C", "effect": "B", "activated_risk": "A"}
     outcome = score_item(text, gold)
     assert outcome["parse_ok"] and set(outcome["parse"].values()) == {"ok"}
