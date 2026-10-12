@@ -2,10 +2,12 @@
 from __future__ import annotations
 
 import json
+import os
 import re
 from pathlib import Path
 
-DATA_DIR = Path(__file__).resolve().parents[3] / "data"
+# ASIMOV_DATA_DIR points the loaders elsewhere, e.g. at the 5-item test sample in tests/fixtures/data.
+DATA_DIR = Path(os.environ.get("ASIMOV_DATA_DIR") or Path(__file__).resolve().parents[3] / "data")
 
 
 def read_rows(folder: str, data_dir: Path = DATA_DIR) -> list[dict]:

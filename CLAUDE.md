@@ -44,6 +44,9 @@ scope and owners. Point out the conflict instead of silently picking one.
   (DECIDED / PROPOSED / OPEN) and the alternative considered.
 - **Never train or tune on eval items.** Training data for H1 must come from elsewhere.
 - **Never commit keys or data.** `.env` and `data/*` (except `data/README.md`) are gitignored.
+  One exception: `tests/fixtures/data/` holds a sample of **at most 5 items per benchmark**, only
+  so end-to-end pipeline tests run without the full download (e.g. on every PR). Regenerate it with
+  `python scripts/make_fixtures.py`; never use it for results.
 - **Keep the paper's prompts verbatim** for reproduction. Prompt variants go in `experiments/`.
 - **Stop and ask** when the data contradicts the brief or a metric definition is ambiguous.
   Don't pick silently.
@@ -53,7 +56,8 @@ scope and owners. Point out the conflict instead of silently picking one.
 ```bash
 source .venv/bin/activate              # Python 3.12, created with uv
 python scripts/download_data.py        # GCS -> data/, idempotent, ~360 MB
-python -m pytest                       # fast, no network, no API calls
+python -m pytest                       # fast, no network, no API calls; uses data/ if downloaded,
+                                       # else the 5-item sample in tests/fixtures/data
 python scripts/draw_boxes.py [ids...]  # overlay constraint boxes -> results/box_check/
 ```
 

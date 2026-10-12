@@ -21,6 +21,9 @@ over HTTPS, no gcloud needed), single split `val`. Raw TFRecords stay in `data/r
 Each directory has `items.jsonl`, one JSON object per line. IDs are `<dir>_<NNNN>` in
 TFRecord order. Counts verified 2026-10-04.
 
+A 5-item sample of each folder, same layout, is committed in `tests/fixtures/data/` for tests
+(`scripts/make_fixtures.py`; video frames downscaled). It is never used for results.
+
 Renamed 2026-10-11 (WORKLOG): `injury/` became `text/` and `constraints*/` became `image*/`, so
 IDs changed prefix but not number (`constraints_0032` is now `image_0032`). Older notes in
 WORKLOG keep the old IDs.

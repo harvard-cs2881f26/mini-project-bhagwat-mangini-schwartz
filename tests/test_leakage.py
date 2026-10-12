@@ -16,7 +16,7 @@ import yaml
 
 from asimov.bench import MODULES, get_benchmark
 from asimov.bench.parts import ImagePart, TextPart
-from asimov.data.rows import DATA_DIR, read_rows
+from asimov.data.rows import read_rows
 
 CONFIGS = sorted((Path(__file__).resolve().parents[1] / "configs").glob("*.yaml"))
 PROMPTS = sorted({(c["benchmark"], c["prompt"]) for c in (yaml.safe_load(open(p)) for p in CONFIGS)})
@@ -28,8 +28,6 @@ def test_every_registered_benchmark_has_a_config():
 
 @pytest.mark.parametrize("name,prompt", PROMPTS)
 def test_no_answer_or_id_in_any_request(name, prompt):
-    if not (DATA_DIR / name / "items.jsonl").exists():
-        pytest.skip("data not downloaded")
     bench = get_benchmark(name)
     raw_answers = {r["id"]: r["answer_raw"] for r in read_rows(name)}
     items = bench.load_items()
