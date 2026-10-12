@@ -11,15 +11,21 @@ from asimov.claims import Claims
 from asimov.collect.load import load_results
 from asimov.plot_data import (
     FALLBACK_COLOR,
+    Bar,
     Box,
     Point,
+    Scene,
     baseline,
     color,
     in_paper_order,
+    leader,
+    needs_leader,
     ours,
     paper,
+    penalty,
     place_labels,
     same_spot_ranks,
+    segments_cross,
     severity_metric,
     text_vs_video,
 )
@@ -163,25 +169,67 @@ BOUNDS = Box(0, 0, 100, 100)
 
 def test_labels_keep_home_when_free():
     options = [[Box(10, 10, 30, 20)], [Box(50, 50, 70, 60)]]
-    assert place_labels(options, [], step=10, bounds=BOUNDS) == [(0, 0.0), (0, 0.0)]
+    assert place_labels(options, [], step=10, bounds=BOUNDS) == [(0, 0.0, 0.0), (0, 0.0, 0.0)]
 
 
 def test_overlapping_label_moves_down_then_up_deterministically():
     same = [[Box(10, 50, 30, 60)]] * 3
-    assert place_labels(same, [], step=10, bounds=BOUNDS) == [(0, 0.0), (0, -10), (0, 10)]
+    assert place_labels(same, [], step=10, bounds=BOUNDS) == [(0, 0.0, 0.0), (0, 0.0, -10), (0, 0.0, 10)]
 
 
 def test_label_switches_side_before_moving():
     right, left = Box(10, 50, 30, 60), Box(-15, 50, 5, 60)
     bounds = Box(-20, 0, 100, 100)
-    assert place_labels([[right], [right, left]], [], step=10, bounds=bounds) == [(0, 0.0), (1, 0.0)]
+    assert place_labels([[right], [right, left]], [], step=10, bounds=bounds) == [(0, 0.0, 0.0), (1, 0.0, 0.0)]
 
 
 def test_labels_avoid_markers_and_stay_inside_the_plot():
     marker = Box(10, 45, 30, 65)
     top = [[Box(10, 92, 30, 102)]]  # starts above the plot: must come down
-    assert place_labels(top, [], step=10, bounds=BOUNDS) == [(0, -10)]
-    assert place_labels([[Box(10, 50, 30, 60)]], [marker], step=10, bounds=BOUNDS) == [(0, -20)]
+    assert place_labels(top, [], step=10, bounds=BOUNDS) == [(0, 0.0, -10)]
+    assert place_labels([[Box(10, 50, 30, 60)]], [marker], step=10, bounds=BOUNDS) == [(0, 0.0, -20)]
+
+
+def test_label_moves_by_small_steps_not_a_full_label_height():
+    clipped = Box(0, 58, 40, 70)  # covers the label's top 2 units
+    assert place_labels([[Box(10, 50, 30, 60)]], [clipped], step=2.5, bounds=BOUNDS) == [(0, 0.0, -2.5)]
+
+
+def test_label_takes_the_nearest_free_spot_sideways_too():
+    wall = Box(0, 40, 12, 100)  # overlaps the label's left 2 units; going down would take 20
+    assert place_labels([[Box(10, 50, 30, 60)]], [wall], step=2.5, bounds=BOUNDS) == [(0, 2.5, 0.0)]
+
+
+def test_label_avoids_sitting_between_its_marker_and_another():
+    own, other = Box(40, 40, 50, 50), Box(62, 40, 72, 50)
+    right, left = Box(52, 40, 60, 50), Box(30, 40, 38, 50)  # right is as near the other marker as its own
+    options = [[right, left]]
+    assert place_labels(options, [own, other], step=2.5, bounds=BOUNDS) == [(0, 0.0, 0.0)]  # markers unknown
+    assert place_labels(options, [own, other], step=2.5, bounds=BOUNDS, markers=[own]) == [(0, 0.0, 0.0)]  # other: no label
+    both = [[right, left], [Box(74, 40, 90, 50)]]  # the other marker's own label, to its right
+    assert place_labels(both, [own, other], step=2.5, bounds=BOUNDS, markers=[own, other])[0] == (1, 0.0, 0.0)
+
+
+def test_crossings_count_labels_and_lines_a_leader_line_runs_through():
+    marker, label = Box(0, 0, 10, 10), Box(60, 0, 80, 10)
+    line = leader(label, marker)
+    assert line == ((5, 5), (70, 5))
+    in_the_way = Scene([Box(30, 0, 40, 10)], [], [], BOUNDS)
+    assert penalty(label, line, in_the_way, marker, []) == 1
+    crossing_line = Scene([], [((35, -20), (35, 30))], [], BOUNDS)
+    assert penalty(label, line, crossing_line, marker, []) == 1
+    through_the_label = Scene([], [((70, -20), (70, 30))], [], BOUNDS)  # ends of own line on it don't count twice
+    assert penalty(label, line, through_the_label, marker, []) == 1
+    assert penalty(label, line, Scene([], [], [], BOUNDS), marker, []) == 0
+
+
+def test_leader_only_when_the_label_is_away_from_its_marker():
+    marker = Box(0, 0, 10, 10)
+    assert not needs_leader(Box(12, 0, 32, 10), marker)  # 2 units off, label height 10
+    assert needs_leader(Box(16, 0, 36, 10), marker)
+    assert segments_cross(((0, 0), (10, 10)), ((0, 10), (10, 0)))
+    assert not segments_cross(((0, 0), (10, 0)), ((0, 5), (10, 5)))
+    assert Box(4, 4, 6, 6).crossed_by((0, 0), (10, 10)) and not Box(4, 4, 6, 6).crossed_by((0, 10), (2, 8))
 
 
 def test_no_model_legend_without_points():
@@ -206,3 +254,9 @@ def test_legend_moves_outside_when_it_would_cover_a_marker():
     assert legend is not None and legend.get_bbox_to_anchor().x0 > ax.get_window_extent().x1  # outside, right
     assert not plot.legend_covers(ax, legend, [])
     plt.close(fig)
+
+
+def test_fig5a_leaves_a_missing_value_out_instead_of_drawing_zero(tmp_path):
+    bars = [Bar("GPT-5", 0.9, None, (0.85, 0.95), None, None, None)]
+    paths = plot.fig5a(bars, "fig5a_test", tmp_path, comparison=True)
+    assert all(p.exists() for p in paths)

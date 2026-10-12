@@ -6,10 +6,12 @@ a figure and its page can't disagree. Paper values come from configs/paper/claim
 
 from __future__ import annotations
 
+import math
 from dataclasses import dataclass
+from functools import cache
 from typing import Protocol, TypeVar
 
-from asimov.claims import Claims, as_fraction, model_key
+from asimov.claims import Claims, as_fraction, model_key, paper_value
 from asimov.collect.load import RunData
 from asimov.collect.metrics import estimate
 
@@ -32,7 +34,13 @@ PAPER_COLORS = {
 }
 FALLBACK_COLOR = "#6b6b6b"
 SAME_SPOT_DECIMALS = 6  # points equal to this many decimals are drawn as one spot (ringed markers)
-MAX_LABEL_SHIFTS = 12  # slots tried above and below a label's home before it is left where it is
+MAX_LABEL_SHIFTS = 48  # grid steps tried each way (left, right, down, up) from a label's home before it is left there
+SIDE_SWITCH_COST = 0.5  # label heights: a free spot this much farther on the preferred side still beats another side
+CROSSING_COST = 2.0  # label heights added per leader-line crossing, or for a label nearer another marker than its own
+LEADER_GAP = 0.5  # label heights between a label and its marker beyond which a leader line is drawn
+AMBIGUITY_MARGIN = 1.0  # label heights: another marker this much farther than a label's own still makes it ambiguous
+FAR_MOVE = 2.0  # label heights: a move this long costs double its distance
+IMPROVE_ROUNDS = 5  # passes that re-place each label given all the others, after the first greedy pass
 
 
 @dataclass(frozen=True)
@@ -46,15 +54,6 @@ class Point:
 
 def severity_metric(question: str, severity: str) -> str:
     return question + SEVERITY[severity]
-
-
-def paper_value(claims: Claims, benchmark: str, name: str, metric: str, figure: str) -> float | None:
-    """The paper's single-model value for this figure, on our scale."""
-    for c in claims.claims:
-        same_model = model_key(c.model or "") == model_key(name)
-        if c.kind == "value" and c.figure == figure and c.benchmark == benchmark and c.metric == metric and same_model:
-            return as_fraction(c)
-    return None
 
 
 def ours(run: RunData, x_metric: str, y_metric: str, y_scale: float = 1.0) -> list[Point]:
@@ -146,6 +145,9 @@ def same_spot_ranks(points: list[Point]) -> list[tuple[int, int]]:
     return [(spot[:i].count(s), spot.count(s)) for i, s in enumerate(spot)]
 
 
+XY = tuple[float, float]
+
+
 @dataclass(frozen=True)
 class Box:
     """An axis-aligned box in display units (e.g. pixels): a label or a marker."""
@@ -158,32 +160,242 @@ class Box:
     def overlaps(self, other: Box) -> bool:
         return self.x0 < other.x1 and other.x0 < self.x1 and self.y0 < other.y1 and other.y0 < self.y1
 
-    def shifted(self, dy: float) -> Box:
-        return Box(self.x0, self.y0 + dy, self.x1, self.y1 + dy)
+    def shifted(self, dx: float, dy: float) -> Box:
+        return Box(self.x0 + dx, self.y0 + dy, self.x1 + dx, self.y1 + dy)
 
     def inside(self, bounds: Box) -> bool:
         return bounds.x0 <= self.x0 and self.x1 <= bounds.x1 and bounds.y0 <= self.y0 and self.y1 <= bounds.y1
 
+    def center(self) -> XY:
+        return ((self.x0 + self.x1) / 2, (self.y0 + self.y1) / 2)
 
-def place_labels(options: list[list[Box]], obstacles: list[Box], step: float, bounds: Box) -> list[tuple[int, float]]:
-    """(option index, vertical shift) per label, so labels stay inside `bounds` and clear of each other and the obstacles.
+    def distance(self, other: Box) -> float:
+        """Gap between the two boxes; 0 when they touch or overlap."""
+        gap_x = max(other.x0 - self.x1, self.x0 - other.x1, 0.0)
+        gap_y = max(other.y0 - self.y1, self.y0 - other.y1, 0.0)
+        return math.hypot(gap_x, gap_y)
 
-    Each label has home positions in order of preference (e.g. right of its marker, then left).
-    Deterministic greedy: labels are placed in input order; each tries every option at its home
-    height, then one step down, one up, two down, ..., and takes the first free slot. If none is
-    free it keeps its first option, unshifted.
-    """
-    placed: list[Box] = []
-    chosen = []
-    shifts = [0.0] + [sign * k * step for k in range(1, MAX_LABEL_SHIFTS + 1) for sign in (-1, 1)]
-    for boxes in options:
-        slots = ((i, dy) for dy in shifts for i in range(len(boxes)))
-        free = (
-            (i, dy)
-            for i, dy in slots
-            if boxes[i].shifted(dy).inside(bounds) and not any(boxes[i].shifted(dy).overlaps(t) for t in placed + obstacles)
+    def crossed_by(self, a: XY, b: XY) -> bool:
+        """Whether the segment a-b passes through the box's interior (Liang-Barsky clipping)."""
+        t0, t1 = 0.0, 1.0
+        edges = (
+            (a[0] - b[0], a[0] - self.x0),
+            (b[0] - a[0], self.x1 - a[0]),
+            (a[1] - b[1], a[1] - self.y0),
+            (b[1] - a[1], self.y1 - a[1]),
         )
-        i, dy = next(free, (0, 0.0))
-        placed.append(boxes[i].shifted(dy))
-        chosen.append((i, dy))
-    return chosen
+        for p, q in edges:
+            if p == 0:
+                if q <= 0:
+                    return False
+            elif p < 0:
+                t0 = max(t0, q / p)
+            else:
+                t1 = min(t1, q / p)
+        return t0 < t1
+
+
+Segment = tuple[XY, XY]
+Placement = tuple[int, float, float]  # option index, horizontal shift, vertical shift
+
+
+def segments_cross(s: Segment, t: Segment) -> bool:
+    """Whether two segments properly cross (touching at an end doesn't count)."""
+
+    def side(a: XY, b: XY, c: XY) -> float:
+        return (b[0] - a[0]) * (c[1] - a[1]) - (b[1] - a[1]) * (c[0] - a[0])
+
+    (a, b), (c, d) = s, t
+    return side(a, b, c) * side(a, b, d) < 0 and side(c, d, a) * side(c, d, b) < 0
+
+
+def needs_leader(label: Box, marker: Box) -> bool:
+    """A label more than LEADER_GAP of its own height away from its marker gets a line back to it."""
+    return label.distance(marker) > LEADER_GAP * (label.y1 - label.y0)
+
+
+def leader(label: Box, marker: Box) -> Segment:
+    """The line from the marker's center toward its label's center (matplotlib draws it that way, clipped at the label)."""
+    return (marker.center(), label.center())
+
+
+@cache
+def candidates(count: int, height: float, step: float) -> tuple[tuple[float, Placement], ...]:
+    """Every (option, dx, dy) on the step grid with its cost, cheapest first.
+
+    Cost is `move_cost`. Ties go to the earlier option, then to the smaller sideways move, then the smaller
+    vertical one, down before up.
+    """
+    reach = [k * step for k in range(-MAX_LABEL_SHIFTS, MAX_LABEL_SHIFTS + 1)]
+    grid = [(move_cost((i, dx, dy), height), (i, dx, dy)) for i in range(count) for dx in reach for dy in reach]
+    return tuple(sorted(grid, key=lambda c: (c[0], c[1][0], abs(c[1][1]), abs(c[1][2]), c[1][2], c[1][1])))
+
+
+@dataclass(frozen=True)
+class Scene:
+    """What one label must keep clear of: the other labels and leader lines, the obstacles and the plot edge."""
+
+    labels: list[Box]
+    lines: list[Segment]
+    obstacles: list[Box]
+    bounds: Box
+
+    def free(self, box: Box) -> bool:
+        return box.inside(self.bounds) and not any(box.overlaps(t) for t in self.labels + self.obstacles)
+
+
+@dataclass(frozen=True)
+class Spot:
+    """A free spot for one label: its total cost, placement, box and leader line (None when beside its marker)."""
+
+    cost: float
+    placement: Placement
+    box: Box
+    line: Segment | None
+
+
+def penalty(box: Box, line: Segment | None, scene: Scene, marker: Box, dots: list[Box]) -> int:
+    """Crossings and ambiguity, in units of CROSSING_COST label heights.
+
+    Counts the leader lines this label covers and, for its own leader line, the labels, leader lines and other
+    markers it runs through. A label that is not clearly nearest its own marker (another marker is within
+    AMBIGUITY_MARGIN label heights of as near) counts too.
+    """
+    hits = sum(box.crossed_by(*s) for s in scene.lines)
+    if line is not None:
+        hits += sum(segments_cross(line, s) for s in scene.lines) + sum(b.crossed_by(*line) for b in scene.labels + dots)
+    margin = AMBIGUITY_MARGIN * (box.y1 - box.y0)
+    if any(box.distance(d) < box.distance(marker) + margin for d in dots):
+        hits += 1
+    return hits
+
+
+def spot(boxes: list[Box], placement: Placement, cost: float, scene: Scene, marker: Box | None, dots: list[Box]) -> Spot:
+    """Label `boxes` at `placement`, with `cost` (its move) plus its penalty when its marker is known."""
+    i, dx, dy = placement
+    box = boxes[i].shifted(dx, dy)
+    if marker is None:
+        return Spot(cost, placement, box, None)
+    line = leader(box, marker) if needs_leader(box, marker) else None
+    return Spot(
+        cost + CROSSING_COST * (boxes[0].y1 - boxes[0].y0) * penalty(box, line, scene, marker, dots), placement, box, line
+    )
+
+
+def best_spot(boxes: list[Box], scene: Scene, marker: Box | None, dots: list[Box], step: float) -> Spot | None:
+    """The cheapest free spot for one label; candidates come cheapest first, so the search stops once no
+    later one can beat the best found (penalties only add)."""
+    best: Spot | None = None
+    for cost, placement in candidates(len(boxes), boxes[0].y1 - boxes[0].y0, step):
+        if best is not None and cost >= best.cost:
+            break
+        i, dx, dy = placement
+        if scene.free(boxes[i].shifted(dx, dy)):
+            found = spot(boxes, placement, cost, scene, marker, dots)
+            best = found if best is None or found.cost < best.cost else best
+    return best
+
+
+def place_labels(
+    options: list[list[Box]], obstacles: list[Box], step: float, bounds: Box, markers: list[Box] | None = None
+) -> list[Placement]:
+    """(option index, dx, dy) per label, so labels stay inside `bounds` and clear of each other and the obstacles.
+
+    Each label has home positions in order of preference (e.g. below its marker, then above, then diagonals).
+    A label takes the free spot on a `step` grid around its homes that is closest to home (see `candidates`).
+    With `markers` (each label's own marker), a spot costs CROSSING_COST label heights more for each crossing
+    of its leader line with a label, leader line or marker, and for sitting nearer another marker than its own,
+    so a slightly farther clear spot wins.
+
+    Deterministic: a greedy pass, then up to IMPROVE_ROUNDS passes that move each label in turn to its best spot
+    given all the others, while that strictly lowers its cost. Without markers that runs once, in input order;
+    with markers it runs for a few label orders (`orders`) and keeps the cheapest layout, the earliest on a tie.
+    A label with no free spot keeps its first home, unshifted.
+    """
+    layouts = [Layout(options, obstacles, step, bounds, markers, order) for order in orders(len(options), markers)]
+    best = min(layouts, key=lambda layout: layout.score())
+    return [s.placement if s is not None else (0, 0.0, 0.0) for s in best.spots]
+
+
+def orders(count: int, markers: list[Box] | None) -> list[list[int]]:
+    """Label orders to try: as given (without markers, only that), reversed, and markers left to right and back."""
+    given = list(range(count))
+    if markers is None:
+        return [given]
+    by_x = sorted(given, key=lambda k: (markers[k].center()[0], k))
+    found: list[list[int]] = []
+    for order in (given, given[::-1], by_x, by_x[::-1]):
+        if order not in found:
+            found.append(order)
+    return found
+
+
+class Layout:
+    """One deterministic placement of every label, in a given order (see `place_labels`)."""
+
+    def __init__(
+        self,
+        options: list[list[Box]],
+        obstacles: list[Box],
+        step: float,
+        bounds: Box,
+        markers: list[Box] | None,
+        order: list[int],
+    ) -> None:
+        self.options, self.obstacles, self.step, self.bounds, self.markers = options, obstacles, step, bounds, markers
+        self.spots: list[Spot | None] = [None] * len(options)
+        for k in order:
+            self.spots[k] = best_spot(options[k], self.scene(k), *_own(markers, k), step)
+        for _ in range(IMPROVE_ROUNDS if markers is not None else 0):
+            moved = [self.improve(k) for k in order]  # every label gets its turn, in order
+            if not any(moved):
+                break
+
+    def scene(self, k: int) -> Scene:
+        """Everything label k must keep clear of: the other labels placed so far and their leader lines."""
+        others = [s for j, s in enumerate(self.spots) if j != k and s is not None]
+        return Scene([s.box for s in others], [s.line for s in others if s.line], self.obstacles, self.bounds)
+
+    def current(self, k: int) -> Spot | None:
+        """Label k's spot, costed against all the other labels as they are now."""
+        held = self.spots[k]
+        if held is None:
+            return None
+        boxes = self.options[k]
+        return spot(
+            boxes,
+            held.placement,
+            move_cost(held.placement, boxes[0].y1 - boxes[0].y0),
+            self.scene(k),
+            *_own(self.markers, k),
+        )
+
+    def improve(self, k: int) -> bool:
+        """Move label k to its best spot given all the others, if that is strictly cheaper."""
+        now = self.current(k)
+        better = best_spot(self.options[k], self.scene(k), *_own(self.markers, k), self.step)
+        if now is None or better is None or better.cost >= now.cost:
+            return False
+        self.spots[k] = better
+        return True
+
+    def score(self) -> tuple[int, float]:
+        """(labels with no free spot, total cost of the others): lower is better."""
+        costs = [self.current(k) for k in range(len(self.spots))]
+        return sum(c is None for c in costs), sum(c.cost for c in costs if c is not None)
+
+
+def move_cost(placement: Placement, height: float) -> float:
+    """How far a label moved from its first home: the distance, growing faster once it passes FAR_MOVE label
+    heights (so one long leader line costs more than a few short moves), plus SIDE_SWITCH_COST label heights
+    for any other home."""
+    i, dx, dy = placement
+    distance = math.hypot(dx, dy)
+    return distance * (1 + distance / (FAR_MOVE * height)) + (SIDE_SWITCH_COST * height if i else 0.0)
+
+
+def _own(markers: list[Box] | None, k: int) -> tuple[Box | None, list[Box]]:
+    """Label k's own marker and everyone else's."""
+    if markers is None:
+        return None, []
+    return markers[k], [m for j, m in enumerate(markers) if j != k]

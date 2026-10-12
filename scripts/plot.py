@@ -15,6 +15,7 @@ from __future__ import annotations
 import argparse
 import sys
 from dataclasses import dataclass
+from math import isnan, nan
 from pathlib import Path
 from typing import Any
 
@@ -28,9 +29,11 @@ from matplotlib.typing import RcKeyType  # noqa: E402
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT / "src"))
 
+from asimov.bench.text_score import QUESTIONS  # noqa: E402
 from asimov.claims import CLAIMS_PATH, Claims, load_claims, model_key  # noqa: E402
 from asimov.collect.build import default_headline  # noqa: E402
 from asimov.collect.load import RunData, load_results, load_yaml  # noqa: E402
+from asimov.collect.pages import FIGURES  # noqa: E402
 from asimov.plot_data import (  # noqa: E402
     SEVERITY,
     SEVERITY_LABEL,
@@ -40,6 +43,7 @@ from asimov.plot_data import (  # noqa: E402
     baseline,
     color,
     in_paper_order,
+    needs_leader,
     ours,
     paper,
     place_labels,
@@ -76,10 +80,15 @@ PAPER_STYLE: dict[RcKeyType, Any] = {
     "legend.title_fontsize": 14,
 }
 INK, MUTED = "#2b2b2b", "#6b6b6b"
+CI_ALPHA = 0.6  # CI bars sit behind the dots
+CONNECTOR = {"lw": 0.8, "alpha": 0.5, "zorder": 1}  # line from our dot to the paper's
+BASELINE_LINE = {"color": MUTED, "ls": "--", "lw": 1, "zorder": 1}
 PAPER_MARKER_SIZE = 40  # Fig 5a diamonds, points^2
 RING_WIDTH = 6.0  # points of diameter added per extra model on the same spot, so each shows as a ring
 AXIS_MARGIN = 0.07  # fraction of the data range (CI bars included) kept free on every side for labels
 LABEL_PAD = 2.5  # points between a marker's edge and its label
+LABEL_STEP = 0.25  # label heights per placement step: labels move in small steps so they stay near their dot
+DIAGONALS = ("below right", "below left", "above right", "above left")  # fallback homes after the look's own sides
 LEADER = {"arrowstyle": "-", "color": MUTED, "lw": 0.5}  # line from a moved label back to its marker
 OUTSIDE_LEGEND = {"loc": "upper left", "bbox_to_anchor": (1.02, 1.0), "borderaxespad": 0.0, "frameon": True}
 LEGEND_MARKER = 8.0  # points
@@ -112,7 +121,7 @@ PAPER_FIG4 = Look(
     {"boxstyle": "round,pad=0.15", "facecolor": "white", "edgecolor": "none", "alpha": 0.6},
     {"loc": "upper left", "frameon": True},
     "Model",
-    ("below", "above", "right", "left"),
+    ("below", "above", "right", "left", *DIAGONALS),
 )
 # Fig 5b in the paper: same dots, name to the right, untitled legend inside (bottom right in the paper)
 PAPER_FIG5B = Look(
@@ -123,7 +132,7 @@ PAPER_FIG5B = Look(
     PAPER_FIG4.label_box,
     {"loc": "lower right", "frameon": True},
     None,
-    ("right", "left", "below", "above"),
+    ("right", "left", "below", "above", *DIAGONALS),
 )
 # Comparison: smaller dots so CI bars and the paper's hollow dots stay readable; legend outside
 COMPARISON = Look(
@@ -134,7 +143,7 @@ COMPARISON = Look(
     {"boxstyle": "round,pad=0.15", "facecolor": STYLE["axes.facecolor"], "edgecolor": "none", "alpha": 0.85},
     OUTSIDE_LEGEND,
     "Model",
-    ("right", "left"),
+    ("right", "left", *DIAGONALS),
 )
 BAR_WIDTH = 0.38
 BAR_VALUE_RISE = 2  # points above the bar (or its CI bar) for the printed value
@@ -148,15 +157,15 @@ COMPARISON_VALUE_FONTSIZE, PAPER_VALUE_FONTSIZE = 7, 13
 TEXT_COLOR, VIDEO_COLOR = "#5975a4", "#cc8963"
 FIG4 = {  # question, y metric, x axis name, y axis title, caption
     "fig4a": (
-        "latent_severity",
-        "latent_risk_accuracy",
+        QUESTIONS[1],  # latent severity on x
+        f"{QUESTIONS[0]}_accuracy",  # latent risk type on y
         "Severity Accuracy",
         "Risk Recognition Accuracy" + HIGHER,
         "Perceiving Latent Risks Types and Severity",
     ),
     "fig4b": (
-        "activated_risk",
-        "effect_accuracy",
+        QUESTIONS[3],  # activated risk on x
+        f"{QUESTIONS[2]}_accuracy",  # action effect on y
         "Activated Risk Accuracy",
         "Action Effect Accuracy" + HIGHER,
         "Understanding Action Effects",
@@ -175,16 +184,17 @@ def scatter(ax, points: list[Point], look: Look, hollow: bool = False, with_ci: 
         if with_ci and (p.x_ci or p.y_ci):
             xerr = [[p.x - p.x_ci[0]], [p.x_ci[1] - p.x]] if p.x_ci and p.x is not None else None
             yerr = [[p.y - p.y_ci[0]], [p.y_ci[1] - p.y]] if p.y_ci and p.y is not None else None
-            ax.errorbar(p.x, p.y, xerr=xerr, yerr=yerr, fmt="none", ecolor=c, elinewidth=1, alpha=0.6, zorder=2)
+            ax.errorbar(p.x, p.y, xerr=xerr, yerr=yerr, fmt="none", ecolor=c, elinewidth=1, alpha=CI_ALPHA, zorder=2)
         face, edge = ("white", c) if hollow else (c, "white")
         alpha = 1.0 if hollow else look.marker_alpha
         ax.scatter(p.x, p.y, s=size, facecolors=face, edgecolors=edge, linewidths=1.5, alpha=alpha, zorder=3 + 1 / size)
 
 
-def label_points(ax, points: list[Point], look: Look) -> None:
-    """Name every point; a label that would overlap another label or a marker, or leave the plot, moves
-    to the marker's next preferred side or up/down (with a leader line).
+def label_points(ax, points: list[Point], look: Look, avoid: list[Point] | None = None) -> None:
+    """Name every point; a label that would overlap another label, a marker or the legend, or leave the plot,
+    moves to the nearest free spot around its marker (a leader line when it ends up away from it).
 
+    `avoid`: other dots labels must keep clear of (the paper's hollow dots on comparison figures).
     Call after the axis limits are final (inverted axes) and after the legend; placement is measured in display pixels.
     """
     ax.margins(AXIS_MARGIN)
@@ -197,14 +207,21 @@ def label_points(ax, points: list[Point], look: Look) -> None:
     homes = [label_homes(sizes[i], look) for i in order]
     options = [[measure(ax, points[i], home, look, renderer) for home in homes[k]] for k, i in enumerate(order)]
     markers = [marker_box(ax, p, size, px_per_point) for p, size in zip(points, sizes, strict=True)]
+    others = avoid or []
+    markers += [
+        marker_box(ax, p, size, px_per_point) for p, size in zip(others, marker_sizes(others, look.marker_diameter), strict=True)
+    ]
     legend = ax.get_legend()
     if legend is not None:  # draw the legend first, so labels keep clear of it
         markers.append(box_of(legend.get_window_extent(renderer)))
-    step = max((b.y1 - b.y0 for boxes in options for b in boxes), default=0.0)
-    for k, (i, (choice, shift_px)) in enumerate(zip(order, place_labels(options, markers, step, axes_box(ax)), strict=True)):
+    step = max((b.y1 - b.y0 for boxes in options for b in boxes), default=0.0) * LABEL_STEP
+    own = [markers[i] for i in order]
+    placements = place_labels(options, markers, step, axes_box(ax), own)
+    for k, (i, (choice, dx_px, dy_px)) in enumerate(zip(order, placements, strict=True)):
         (dx, dy), ha, va = homes[k][choice]
-        shift = shift_px / px_per_point
-        annotate(ax, points[i], (dx, dy + shift), ha, va, look, LEADER if shift else None)
+        moved = needs_leader(options[k][choice].shifted(dx_px, dy_px), own[k])
+        offset = (dx + dx_px / px_per_point, dy + dy_px / px_per_point)
+        annotate(ax, points[i], offset, ha, va, look, LEADER if moved else None)
 
 
 Home = tuple[tuple[float, float], str, str]  # offset from the point (points), horizontal and vertical alignment
@@ -213,11 +230,16 @@ Home = tuple[tuple[float, float], str, str]  # offset from the point (points), h
 def label_homes(size: float, look: Look) -> list[Home]:
     """Label positions around a marker of area `size`, in the look's order of preference."""
     gap = size**0.5 / 2 + LABEL_PAD
+    diagonal = gap / 2**0.5  # the label's corner sits on the same circle as the side homes
     sides: dict[str, Home] = {
         "right": ((gap, 0.0), "left", "center"),
         "left": ((-gap, 0.0), "right", "center"),
         "below": ((0.0, -gap), "center", "top"),
         "above": ((0.0, gap), "center", "bottom"),
+        "below right": ((diagonal, -diagonal), "left", "top"),
+        "below left": ((-diagonal, -diagonal), "right", "top"),
+        "above right": ((diagonal, diagonal), "left", "bottom"),
+        "above left": ((-diagonal, diagonal), "right", "bottom"),
     }
     return [sides[s] for s in look.sides]
 
@@ -328,14 +350,14 @@ def fig4(name: str, run: RunData, claims: Claims, severity: str, out: Path) -> l
         for p in theirs:
             m = next((q for q in mine if model_key(q.name) == model_key(p.name)), None)
             if m and m.x is not None and m.y is not None and p.x is not None and p.y is not None:
-                ax.plot([m.x, p.x], [m.y, p.y], color=color(p.name), lw=0.8, alpha=0.5, zorder=1)
+                ax.plot([m.x, p.x], [m.y, p.y], color=color(p.name), **CONNECTOR)
         scatter(ax, mine, COMPARISON, with_ci=True)
         scatter(ax, theirs, COMPARISON, hollow=True)
         draw_baselines(ax, claims, x_metric, y_metric)
         note = f"{OURS_NOTE}, {PAPER_NOTE}" if theirs else f"{OURS_NOTE}; no paper values for this axis"
         ax.set(xlabel=x_label, ylabel=y_label, title=f"{title}\n{note}")
         model_legend(ax, mine, COMPARISON)
-        label_points(ax, mine, COMPARISON)
+        label_points(ax, mine, COMPARISON, avoid=theirs)
         written += save(fig, out, f"{name}_comparison{suffix}")
     return written
 
@@ -343,7 +365,7 @@ def fig4(name: str, run: RunData, claims: Claims, severity: str, out: Path) -> l
 def draw_baselines(ax, claims: Claims, x_metric: str, y_metric: str) -> None:
     bx, by = baseline(claims, x_metric), baseline(claims, y_metric)
     if bx is not None:
-        ax.axvline(bx, color=MUTED, ls="--", lw=1, zorder=1)
+        ax.axvline(bx, **BASELINE_LINE)
         ax.annotate(
             "majority answer",
             (bx, 0),
@@ -354,7 +376,7 @@ def draw_baselines(ax, claims: Claims, x_metric: str, y_metric: str) -> None:
             color=MUTED,
         )
     if by is not None:
-        ax.axhline(by, color=MUTED, ls="--", lw=1, zorder=1)
+        ax.axhline(by, **BASELINE_LINE)
         ax.annotate(
             "majority answer",
             (0, by),
@@ -399,7 +421,7 @@ def fig5a(bars: list[Bar], stem: str, out: Path, comparison: bool) -> list[Path]
         tallest = 0.0
         for series, (offset, kind, c) in enumerate(((-BAR_WIDTH / 2, "text", TEXT_COLOR), (BAR_WIDTH / 2, "video", VIDEO_COLOR))):
             pos = [x + offset for x in xs]
-            values = [getattr(b, kind) or 0.0 for b in bars]
+            values = [nan if getattr(b, kind) is None else getattr(b, kind) for b in bars]  # missing: no bar, not a 0
             cis = [getattr(b, f"{kind}_ci") if comparison else None for b in bars]
             err = (
                 [
@@ -418,10 +440,10 @@ def fig5a(bars: list[Bar], stem: str, out: Path, comparison: bool) -> list[Path]
                 linewidth=1,
                 label=kind.capitalize(),
                 yerr=err,
-                error_kw={"elinewidth": 1, "ecolor": INK, "alpha": 0.6},
+                error_kw={"elinewidth": 1, "ecolor": INK, "alpha": CI_ALPHA},
             )
             tops = [ci[1] if ci else v for v, ci in zip(values, cis, strict=True)]
-            tallest = max([tallest, *tops])
+            tallest = max([tallest, *(t for t in tops if not isnan(t))])
             bar_values(ax, pos, [getattr(b, kind) for b in bars], tops, value_size)
             if comparison:
                 paper_bars(ax, pos, [getattr(b, f"paper_{kind}") for b in bars], first=series == 0)
@@ -474,7 +496,7 @@ def fig5b(run: RunData, claims: Claims, out: Path) -> list[Path]:
         ax.invert_xaxis()
         ax.set(xlabel=x_label, ylabel=y_label, title=f"{title}\n{OURS_NOTE}, {PAPER_NOTE}")
         model_legend(ax, mine, COMPARISON)
-        label_points(ax, mine, COMPARISON)
+        label_points(ax, mine, COMPARISON, avoid=theirs)
         written += save(fig, out, "fig5b_comparison")
     return written
 
@@ -482,7 +504,7 @@ def fig5b(run: RunData, claims: Claims, out: Path) -> list[Path]:
 def headline_runs(results: Path, runs: list[RunData]) -> dict[str, RunData | None]:
     figures = (load_yaml(results / "headline.yaml", {}) or default_headline(runs)).get("figures") or {}
     by_name = {r.name: r for r in runs}
-    return {fig: by_name.get((figures.get(fig) or {}).get("run") or "") for fig in ("fig4", "fig5", "fig6")}
+    return {fig: by_name.get((figures.get(fig) or {}).get("run") or "") for fig in FIGURES}
 
 
 def main(argv: list[str] | None = None) -> int:
