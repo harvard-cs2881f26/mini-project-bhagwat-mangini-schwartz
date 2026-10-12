@@ -115,7 +115,8 @@ says so in its docstring.
 - **Send the prompt as the paper gives it.** No structured-output settings, no wrappers. Format
   problems are measured, not prevented. Variants go in `experiments/` under their own run name.
 - **Read the answer object with `bench/parse.json_object`:** the last top-level `{...}`, nested
-  parts included. Code fences, prose around the JSON and single quotes are fine.
+  parts included. Code fences, prose around the JSON and single quotes are fine. A repeated key
+  keeps its first value (the answer comes before its rationale); count those reads.
 - **Broken JSON doesn't cost the answers either.** If the object won't load (e.g. an unescaped quote
   in a rationale), read the `"key": "value"` pairs from the text (`bench/parse.loose_pairs`) and
   count those reads (a `loose_json` status and rate). Nothing is sent back to the model.

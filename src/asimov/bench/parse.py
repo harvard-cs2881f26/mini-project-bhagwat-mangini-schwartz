@@ -15,6 +15,7 @@ LOOSE_PAIR = re.compile(r"""(["'])(\w+)\1\s*:\s*(["'])([^\n]*?)\3\s*(?=[,}\n]|$)
 
 def json_object(text: str) -> dict | None:
     """The answer object in a reply; tolerates code fences, prose around it and single quotes.
+    A key repeated in an object keeps its first value; `duplicate_keys` says which were repeated.
 
     Tries, in order, and returns the first that loads as a dict:
     1. the last top-level {...}, nested objects included (so a reply with an extra sub-object
@@ -30,7 +31,7 @@ def json_object(text: str) -> dict | None:
 
 
 def load_dict(candidate: str) -> dict | None:
-    for loader in (json.loads, ast.literal_eval):
+    for loader in (load_json, load_literal):
         try:
             d = loader(candidate)
         except (ValueError, SyntaxError):
@@ -38,6 +39,55 @@ def load_dict(candidate: str) -> dict | None:
         if isinstance(d, dict):
             return d
     return None
+
+
+class ReplyObject(dict):
+    """A reply's JSON object, read with the first value kept for a repeated key (the paper's format
+    puts each answer before its rationale). `duplicate_keys`: this object's own repeated keys."""
+
+    duplicate_keys: frozenset[str] = frozenset()
+
+
+def first_values(pairs: list[tuple[object, object]]) -> ReplyObject:
+    """Build one object from its (key, value) pairs in order; a repeated key keeps its first value."""
+    obj, repeated = ReplyObject(), set()
+    for key, value in pairs:
+        if key in obj:
+            repeated.add(key)
+        else:
+            obj[key] = value
+    obj.duplicate_keys = frozenset(repeated)
+    return obj
+
+
+def duplicate_keys(obj: dict | None) -> frozenset[str]:
+    """Keys repeated in a reply's object (top level only); empty for a plain dict or None."""
+    return getattr(obj, "duplicate_keys", frozenset())
+
+
+def load_json(candidate: str) -> object:
+    return json.loads(candidate, object_pairs_hook=first_values)
+
+
+def load_literal(candidate: str) -> object:
+    """`ast.literal_eval`, except that dict literals (at any depth) keep a repeated key's first value."""
+    return literal(ast.parse(candidate.lstrip(" \t"), mode="eval").body)
+
+
+def literal(node: ast.expr) -> object:
+    if isinstance(node, ast.Dict):
+        return first_values([(dict_key(k), literal(v)) for k, v in zip(node.keys, node.values, strict=True)])
+    if isinstance(node, ast.List):
+        return [literal(e) for e in node.elts]
+    if isinstance(node, ast.Tuple):
+        return tuple(literal(e) for e in node.elts)
+    return ast.literal_eval(node)
+
+
+def dict_key(node: ast.expr | None) -> object:
+    if node is None:  # {**x}: not a literal
+        raise ValueError("malformed node or string: dict unpacking")
+    return ast.literal_eval(node)
 
 
 def top_level_objects(text: str) -> list[str]:

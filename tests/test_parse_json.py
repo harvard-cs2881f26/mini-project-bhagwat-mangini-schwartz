@@ -2,7 +2,7 @@
 broken JSON falls back to reading "key": "value" pairs. Cases are shaped like real GPT-5 Nano
 replies from the Fig. 4 run (text_0267, text_0100, text_0171, text_0056, text_0226)."""
 
-from asimov.bench.parse import json_object, loose_pairs
+from asimov.bench.parse import duplicate_keys, json_object, loose_pairs
 
 FLAT = '{"latent_risk_response": "D", "effect_response": "B"}'
 
@@ -54,3 +54,28 @@ def test_loose_pairs_read_broken_json():
 
 def test_loose_pairs_none_without_any_pair():
     assert loose_pairs("I'm sorry, I can't help with that.") is None
+
+
+# --- duplicate keys keep the first value (Noa); real case: Claude Sonnet text_0245 ---
+
+
+def test_duplicate_key_keeps_the_first_value():
+    d = json_object('{"latent_severity_response": "D", "latent_severity_response": "Electric shock can be severe."}')
+    assert d == {"latent_severity_response": "D"}
+
+
+def test_nested_duplicate_keys_keep_the_first_value():
+    text = '{"a": "1", "details": {"injury": "Burn", "injury": "Shock"}, "a": "2", "list": [{"k": "x", "k": "y"}]}'
+    assert json_object(text) == {"a": "1", "details": {"injury": "Burn"}, "list": [{"k": "x"}]}
+
+
+def test_single_quoted_dict_with_duplicates_keeps_the_first_value():
+    text = "{'latent_risk_response': 'B', 'nested': {'x': 1, 'x': 2}, 'latent_risk_response': 'prose'}"
+    assert json_object(text) == {"latent_risk_response": "B", "nested": {"x": 1}}
+
+
+def test_duplicate_keys_are_reported():
+    assert duplicate_keys(json_object('{"a": "1", "b": "2", "a": "3"}')) == {"a"}
+    assert duplicate_keys(json_object("{'a': '1', 'a': '3', 'b': '2'}")) == {"a"}
+    assert duplicate_keys(json_object(FLAT)) == set()
+    assert duplicate_keys({"a": "1"}) == set()  # plain dicts (e.g. from loose_pairs) have none
