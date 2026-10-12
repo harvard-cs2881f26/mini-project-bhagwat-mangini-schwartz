@@ -605,3 +605,20 @@ No existing cache key changed. Each change is its own commit in PR #4.
 - *Alternative considered:* a colorblind-checked palette (dataviz validator: passes CVD separation).
   The paper's palette puts red (Opus) and green (Gemini Pro) side by side; every dot is also labeled
   with its model name, so color is never the only cue.
+
+### Paper claims file reviewed and frozen: DECIDED (Noa)
+- `configs/paper/claims.yaml` holds 84 paper numbers for Figs 4-6 plus the 3 headline claims, drafted
+  by the paper-reader subagent from the paper alone. Noa's calls: Fig 4 severity = normal multiple
+  choice (above); size-gap pairs = GPT 5 vs Mini, GPT 5 vs Nano, Opus 4.1 vs Sonnet 4, Gemini Pro vs
+  Flash (the pairs the paper's text names; Flash-Lite isn't paired).
+- Read-off values (Figs 4a, 4b, 5b dot positions) checked by five independent reads: all 32 Fig 4
+  values identical; Fig 5b within 0.01 s and 0.1 points.
+- The authors published no exact per-model numbers (arXiv v1/v2 HTML, appendices, TeX source; project
+  page; GitHub; dataset metadata). The TeX source has 5 tables hidden from the PDF with image-benchmark
+  violation rates by thinking level (the data behind the paper's Fig 7); not used as claims since
+  they're unpublished drafts, flagged to Riddhi for Fig 6.
+- Frozen: `.claude/hooks/block_paths.sh` blocks Claude edits to it. `scripts/check_paper_version.py`
+  warns if arXiv posts a version newer than v2; then re-run the paper-reader and review.
+- *Alternative considered:* have a model re-read the paper on every run. Five reads gave the same
+  numbers, so the reason against is practical: it costs a few minutes of agent time per run, CI has
+  no model access, and the paper doesn't change between runs.

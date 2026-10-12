@@ -1,5 +1,10 @@
 # The paper's reported numbers for Figs 4-6 (Jindal et al., arXiv 2509.21651v2).
-# Drafted by the paper-reader subagent from the paper alone; to be reviewed by Noa, then frozen.
+# Drafted by the paper-reader subagent from the paper alone. Reviewed by Noa on 2026-10-12; FROZEN.
+# Dot positions in Figs 4a, 4b and 5b were confirmed by five independent reads: all identical for
+# Fig 4, and within 0.01 s and 0.1 points for Fig 5b.
+# The authors published no exact per-model numbers (checked: arXiv v1/v2 HTML, appendices and TeX
+# source; project page; GitHub; dataset metadata).
+# Re-read only if arXiv posts a new version (scripts/check_paper_version.py).
 # Schema: src/asimov/claims.py. `kind` and the size_gap `pairs` were added by the main session after the draft.
 paper:
   arxiv: '2509.21651'
