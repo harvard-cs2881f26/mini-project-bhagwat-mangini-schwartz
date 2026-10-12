@@ -45,10 +45,14 @@ def fixed_order(items, seed: int = 0):
     return items
 
 
-def run_key(model: str, prompt_version: str, thinking: str) -> str:
-    """prompt_version: from Benchmark.prompt_version, e.g. the prompt file's full text."""
-    h = hashlib.sha256(f"{model}|{prompt_version}|{thinking}".encode()).hexdigest()
-    return h[:12]
+def run_key(model: str, prompt_version: str, thinking: str, log_reasoning: bool = False) -> str:
+    """prompt_version: from Benchmark.prompt_version, e.g. the prompt file's full text.
+
+    log_reasoning changes the request, so it changes the key; when off the key is the same as
+    before the flag existed, so earlier replies stay valid.
+    """
+    request = f"{model}|{prompt_version}|{thinking}" + ("|log_reasoning" if log_reasoning else "")
+    return hashlib.sha256(request.encode()).hexdigest()[:12]
 
 
 def guard_config(out_dir: Path, config_text: str) -> None:
@@ -107,7 +111,8 @@ def load_saved(path: Path, key: str) -> dict[str, dict]:
 def run_model(bench: Benchmark, spec: dict, cfg: dict, items, out_dir: Path, workers: int, show: bool,
               made: dict, call_models: bool = True) -> dict:
     provider, model, thinking, prompt = spec["provider"], spec["model"], cfg["thinking"], cfg["prompt"]
-    key = run_key(model, bench.prompt_version(prompt), thinking)
+    log_reasoning = cfg.get("log_reasoning", False)
+    key = run_key(model, bench.prompt_version(prompt), thinking, log_reasoning)
     mdir = out_dir / model
     mdir.mkdir(parents=True, exist_ok=True)
     resp_path = mdir / "responses.jsonl"
@@ -121,7 +126,7 @@ def run_model(bench: Benchmark, spec: dict, cfg: dict, items, out_dir: Path, wor
         client = get_client(provider, model)
 
         def call(item):
-            return client.generate(bench.build_request(item, prompt), thinking=thinking)
+            return client.generate(bench.build_request(item, prompt), thinking=thinking, log_reasoning=log_reasoning)
 
         with ThreadPoolExecutor(max_workers=workers) as pool, open(resp_path, "a") as f:
             futures = {pool.submit(call, i): i for i in todo}
@@ -137,7 +142,8 @@ def run_model(bench: Benchmark, spec: dict, cfg: dict, items, out_dir: Path, wor
                 usage = {**r.usage, "cached_input_tokens": cached_input_tokens(provider, r.raw)}
                 row = {"id": item.id, "key": key, "provider": provider, "model": model,
                        "served_model": r.model, "prompt": prompt, "thinking": thinking,
-                       "text": r.text, "usage": usage, "latency_s": round(r.latency_s, 2),
+                       "log_reasoning": log_reasoning, "text": r.text, "reasoning": r.reasoning,
+                       "usage": usage, "latency_s": round(r.latency_s, 2),
                        "time": time.strftime("%Y-%m-%dT%H:%M:%S"), "raw": r.raw}
                 f.write(json.dumps(row) + "\n")
                 f.flush()
@@ -155,8 +161,9 @@ def run_model(bench: Benchmark, spec: dict, cfg: dict, items, out_dir: Path, wor
     finishes = {r["id"]: finish(provider, r["raw"]) for r in rows}
     per_item = {i: {**outcome, "finish": finishes[i]} for i, outcome in s.pop("per_item").items()}
     summary = {"name": spec["name"], "provider": provider, "model": model, "prompt": prompt,
-               "thinking": thinking, **made, "key": key, "errors": errors,
-               **token_totals(provider, rows), **finish_rates(finishes), **s}
+               "thinking": thinking, "log_reasoning": log_reasoning, **made, "key": key, "errors": errors,
+               **token_totals(provider, rows), **finish_rates(finishes),
+               "n_with_reasoning": sum(bool(r.get("reasoning", "").strip()) for r in rows), **s}
     (mdir / "summary.json").write_text(json.dumps({**summary, "per_item": per_item}, indent=1))
     return summary
 

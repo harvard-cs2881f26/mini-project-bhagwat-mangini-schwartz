@@ -8,7 +8,7 @@ from __future__ import annotations
 
 from typing import Literal
 
-from pydantic import BaseModel, ConfigDict
+from pydantic import BaseModel, ConfigDict, StrictBool
 
 from asimov.models.base import Thinking
 
@@ -28,4 +28,5 @@ class RunConfig(BaseModel):
     benchmark: str
     prompt: str
     thinking: Thinking
+    log_reasoning: StrictBool = False  # ask for reasoning/thought summaries (asimov.models.base); part of the cache key
     models: list[ModelSpec]
