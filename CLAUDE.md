@@ -120,8 +120,14 @@ scorer follows them. A benchmark that deviates says so in its scorer's docstring
 - **Unanswered = wrong, never dropped.** Report the parse-failure rate for every model, and why
   each answer couldn't be read (missing key, invalid value, no JSON). A run stops for review if a
   model's parse failures exceed 2%.
-- **Refusals and safety blocks count as wrong, not excluded,** and are reported separately from
-  parse failures, as are replies cut off by the output limit.
+- **Refusals, safety blocks and cut-off replies count as wrong, never excluded.** They are also
+  parse failures (no answer could be read), and on top of that each kind gets its own rate, so a
+  parse-failure rate can be broken down:
+  - `refusal_rate`: the model refused, or the provider blocked the prompt or reply for safety;
+  - `truncation_rate`: the reply was cut off by the output-token limit;
+  - per item, `finish` is `complete`, `refused` or `truncated` (read from the provider's
+    response by `models/reply_info.py`, added in PR #4).
+  Example: 3% parse failures = 1% refused + 0% truncated + 2% malformed replies.
 - **Never change a scoring rule silently.** Log it in WORKLOG with the alternative, then rescore
   saved replies for free (`scripts/run.py <config> --no-calls`, added in PR #4), and say what changed.
 
