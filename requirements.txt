@@ -1,6 +1,7 @@
 # Python >= 3.10. Versions are the ones installed on 2026-10-04; see WORKLOG.md.
 numpy
 pillow
+pydantic
 pyyaml
 python-dotenv
 matplotlib

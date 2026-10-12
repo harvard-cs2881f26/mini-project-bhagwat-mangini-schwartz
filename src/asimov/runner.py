@@ -4,11 +4,14 @@ The config's `benchmark:` picks the loader, request builder and scorer (asimov.b
 file is the same for every benchmark.
 
 results/<run>/<model>/responses.jsonl   one line per reply, append-only, committed
-results/<run>/<model>/summary.json      metrics + per-item outcomes
+results/<run>/<model>/summary.json      metrics + per-item outcomes + how they were made
 results/<run>/summary.json              one row per model
+results/<run>/config.yaml               exact copy of the config; one run name = one config
 
-A reply is reused if one already exists for the same (item, model, prompt, thinking), so
-reruns are free. Failed calls are printed and never saved.
+A reply is reused if one already exists for the same (item, model, prompt, thinking, and
+log_reasoning when on), so reruns are free. Failed calls are printed and logged to
+results/<run>/<model>/errors.jsonl, never saved as replies, so a rerun retries them. With
+call_models=False nothing is called: saved replies are rescored (free, no keys needed).
 """
 from __future__ import annotations
 
@@ -16,15 +19,24 @@ import hashlib
 import json
 import os
 import random
+import subprocess
 import time
 from concurrent.futures import ThreadPoolExecutor, as_completed
 from pathlib import Path
 
+import yaml
+
 from asimov.bench import Benchmark, get_benchmark
+from asimov.config import RunConfig
 from asimov.models import get_client
+from asimov.models.reply_info import cached_input_tokens, finish
 
 ROOT = Path(__file__).resolve().parents[2]
 KEY_VARS = {"anthropic": "ANTHROPIC_API_KEY", "openai": "OPENAI_API_KEY", "gemini": "GEMINI_API_KEY"}
+
+
+class ConfigChanged(RuntimeError):
+    """results/<run>/ already holds results made with a different config."""
 
 
 def fixed_order(items, seed: int = 0):
@@ -34,10 +46,59 @@ def fixed_order(items, seed: int = 0):
     return items
 
 
-def run_key(model: str, prompt_version: str, thinking: str) -> str:
-    """prompt_version: from Benchmark.prompt_version, e.g. the prompt file's full text."""
-    h = hashlib.sha256(f"{model}|{prompt_version}|{thinking}".encode()).hexdigest()
-    return h[:12]
+def run_key(model: str, prompt_version: str, thinking: str, log_reasoning: bool = False) -> str:
+    """prompt_version: from Benchmark.prompt_version, e.g. the prompt file's full text.
+
+    log_reasoning changes the request, so it changes the key; when off the key is the same as
+    before the flag existed, so earlier replies stay valid.
+    """
+    request = f"{model}|{prompt_version}|{thinking}" + ("|log_reasoning" if log_reasoning else "")
+    return hashlib.sha256(request.encode()).hexdigest()[:12]
+
+
+def guard_config(out_dir: Path, config_text: str) -> None:
+    """Write results/<run>/config.yaml, or stop if it exists with different settings.
+
+    Settings are compared as parsed YAML, so editing a comment keeps the run name (and refreshes
+    the copy); any change to a value, including the model list, needs a new run name.
+    """
+    copy = out_dir / "config.yaml"
+    if copy.exists() and yaml.safe_load(copy.read_text()) != yaml.safe_load(config_text):
+        raise ConfigChanged(
+            f"{copy} was written by a different config. Results made with different settings must "
+            "not share a run name: give this config a new `run:` name (e.g. repro_fig4_default)."
+        )
+    out_dir.mkdir(parents=True, exist_ok=True)
+    copy.write_text(config_text)
+
+
+def git_state() -> tuple[str | None, bool | None]:
+    """(HEAD commit, edits to tracked files outside results/); (None, None) outside a git checkout."""
+    def git(*args: str) -> str:
+        return subprocess.run(["git", *args], cwd=ROOT, capture_output=True, text=True, check=True).stdout.strip()
+    try:
+        return git("rev-parse", "HEAD"), bool(git("status", "--porcelain", "--untracked-files=no", "--", ".", ":!results"))
+    except (OSError, subprocess.CalledProcessError):
+        return None, None
+
+
+def provenance(cfg: dict, config_text: str, config_path: Path | None) -> dict:
+    """How a run's summaries were made; copied into every summary.json (with the model's key)."""
+    commit, dirty = git_state()
+    path = config_path.resolve() if config_path else None
+    return {"benchmark": cfg["benchmark"], "run": cfg["run"],
+            "config_path": str(path.relative_to(ROOT)) if path and path.is_relative_to(ROOT) else (str(path) if path else None),
+            "config_sha256": hashlib.sha256(config_text.encode()).hexdigest(),
+            "git_commit": commit, "git_dirty": dirty, "scored_at": time.strftime("%Y-%m-%dT%H:%M:%S%z")}
+
+
+def last_errors(mdir: Path) -> int:
+    """Failed calls in the model's last run that made calls, from its summary.json (kept by --no-calls).
+
+    The count belongs to that run's items; a --no-calls run with another --limit still reports it.
+    """
+    path = mdir / "summary.json"
+    return json.loads(path.read_text()).get("errors", 0) if path.exists() else 0
 
 
 def load_saved(path: Path, key: str) -> dict[str, dict]:
@@ -48,35 +109,42 @@ def load_saved(path: Path, key: str) -> dict[str, dict]:
     return {r["id"]: r for r in rows if r["key"] == key}
 
 
-def run_model(bench: Benchmark, spec: dict, cfg: dict, items, out_dir: Path, workers: int, show: bool) -> dict:
+def run_model(bench: Benchmark, spec: dict, cfg: dict, items, out_dir: Path, workers: int, show: bool,
+              made: dict, call_models: bool = True) -> dict:
     provider, model, thinking, prompt = spec["provider"], spec["model"], cfg["thinking"], cfg["prompt"]
-    key = run_key(model, bench.prompt_version(prompt), thinking)
+    log_reasoning = cfg.get("log_reasoning", False)
+    key = run_key(model, bench.prompt_version(prompt), thinking, log_reasoning)
     mdir = out_dir / model
     mdir.mkdir(parents=True, exist_ok=True)
     resp_path = mdir / "responses.jsonl"
     saved = load_saved(resp_path, key)
     todo = [i for i in items if i.id not in saved]
-    print(f"\n== {spec['name']} ({model}): {len(items)} items, {len(items) - len(todo)} saved, {len(todo)} to call")
+    to_call = f"{len(todo)} to call" if call_models else "no calls"
+    print(f"\n== {spec['name']} ({model}): {len(items)} items, {len(items) - len(todo)} saved, {to_call}")
 
-    errors = 0
-    if todo:
+    errors = 0 if call_models else last_errors(mdir)
+    if todo and call_models:
         client = get_client(provider, model)
 
         def call(item):
-            return item, client.generate(bench.build_request(item, prompt), thinking=thinking)
+            return client.generate(bench.build_request(item, prompt), thinking=thinking, log_reasoning=log_reasoning)
 
         with ThreadPoolExecutor(max_workers=workers) as pool, open(resp_path, "a") as f:
-            futures = [pool.submit(call, i) for i in todo]
+            futures = {pool.submit(call, i): i for i in todo}
             for fut in as_completed(futures):
+                item = futures[fut]
                 try:
-                    item, r = fut.result()
-                except Exception as e:  # never saved; rerun to retry
+                    r = fut.result()
+                except Exception as e:  # logged to errors.jsonl, never saved as a reply; rerun to retry
                     errors += 1
+                    log_error(mdir / "errors.jsonl", item.id, key, e)
                     print(f"  ERROR {type(e).__name__}: {str(e)[:200]}")
                     continue
+                usage = {**r.usage, "cached_input_tokens": cached_input_tokens(provider, r.raw)}
                 row = {"id": item.id, "key": key, "provider": provider, "model": model,
                        "served_model": r.model, "prompt": prompt, "thinking": thinking,
-                       "text": r.text, "usage": r.usage, "latency_s": round(r.latency_s, 2),
+                       "log_reasoning": log_reasoning, "text": r.text, "reasoning": r.reasoning,
+                       "usage": usage, "latency_s": round(r.latency_s, 2),
                        "time": time.strftime("%Y-%m-%dT%H:%M:%S"), "raw": r.raw}
                 f.write(json.dumps(row) + "\n")
                 f.flush()
@@ -86,23 +154,56 @@ def run_model(bench: Benchmark, spec: dict, cfg: dict, items, out_dir: Path, wor
 
     replies = {i.id: saved[i.id]["text"] for i in items if i.id in saved}
     if not replies:
-        return {"name": spec["name"], "model": model, "n": 0, "errors": errors}
+        empty = {"name": spec["name"], "model": model, **made, "key": key, "n": 0, "errors": errors}
+        (mdir / "summary.json").write_text(json.dumps(empty, indent=1))  # keeps the error count for --no-calls
+        return empty
     s = bench.score(bench.load_answers(), replies)
-    usage = [saved[i]["usage"] for i in replies]
+    rows = [saved[i] for i in replies]
+    finishes = {r["id"]: finish(provider, r["raw"]) for r in rows}
+    per_item = {i: {**outcome, "finish": finishes[i]} for i, outcome in s.pop("per_item").items()}
     summary = {"name": spec["name"], "provider": provider, "model": model, "prompt": prompt,
-               "thinking": thinking, "errors": errors,
-               "input_tokens": sum(u.get("input_tokens") or 0 for u in usage),
-               "output_tokens": sum(u.get("output_tokens") or 0 for u in usage),
-               **{k: v for k, v in s.items() if k != "per_item"}}
-    (mdir / "summary.json").write_text(json.dumps({**summary, "per_item": s["per_item"]}, indent=1))
+               "thinking": thinking, "log_reasoning": log_reasoning, **made, "key": key, "errors": errors,
+               **token_totals(provider, rows), **finish_rates(finishes),
+               "n_with_reasoning": sum(bool(r.get("reasoning", "").strip()) for r in rows), **s}
+    (mdir / "summary.json").write_text(json.dumps({**summary, "per_item": per_item}, indent=1))
     return summary
 
 
+def log_error(path: Path, item_id: str, key: str, e: Exception) -> None:
+    """A failed call, for the record only: the cache never reads this file, so it's retried."""
+    row = {"id": item_id, "key": key, "error_type": type(e).__name__, "message": str(e)[:2000],
+           "time": time.strftime("%Y-%m-%dT%H:%M:%S%z")}
+    with open(path, "a") as f:
+        f.write(json.dumps(row) + "\n")
+
+
+def token_totals(provider: str, rows: list[dict]) -> dict:
+    """Summed usage. Cached input tokens are read from the saved raw response, so old replies count too."""
+    cached = [cached_input_tokens(provider, r["raw"]) for r in rows]
+    return {"input_tokens": sum(r["usage"].get("input_tokens") or 0 for r in rows),
+            "output_tokens": sum(r["usage"].get("output_tokens") or 0 for r in rows),
+            "cached_input_tokens": None if any(c is None for c in cached) else sum(c or 0 for c in cached)}
+
+
+def finish_rates(finishes: dict[str, str]) -> dict:
+    """Share of replies cut off by the output limit, and refused or safety-blocked (models.reply_info)."""
+    n = len(finishes)
+    return {"truncation_rate": sum(f == "truncated" for f in finishes.values()) / n,
+            "refusal_rate": sum(f == "refused" for f in finishes.values()) / n}
+
+
 def run(cfg: dict, limit: int | None = None, only: list[str] | None = None,
-        workers: int = 4, results_dir: Path | None = None) -> list[dict]:
+        workers: int = 4, results_dir: Path | None = None,
+        config_path: Path | None = None, call_models: bool = True) -> list[dict]:
+    """config_path: the YAML file cfg was read from; its exact text is kept as results/<run>/config.yaml."""
+    RunConfig.model_validate(cfg)  # unknown or missing keys and unknown providers fail here, before anything runs
     bench = get_benchmark(cfg["benchmark"])
+    bench.prompt_version(cfg["prompt"])  # an unknown prompt name fails before results/<run>/ is touched
     items = fixed_order(bench.load_items())[:limit]
     out_dir = (results_dir or ROOT / "results") / cfg["run"]
+    config_text = config_path.read_text() if config_path else yaml.safe_dump(cfg, sort_keys=False)
+    guard_config(out_dir, config_text)
+    made = provenance(cfg, config_text, config_path)
     show = limit is not None and limit <= 5
     for name in only or []:
         if not any(name in (s["name"], s["model"]) for s in cfg["models"]):
@@ -112,10 +213,9 @@ def run(cfg: dict, limit: int | None = None, only: list[str] | None = None,
         if only and spec["name"] not in only and spec["model"] not in only:
             continue
         var = KEY_VARS.get(spec["provider"])
-        if var and not os.environ.get(var):
+        if call_models and var and not os.environ.get(var):
             print(f"\n== {spec['name']}: skipped, {var} not set")
             continue
-        rows.append(run_model(bench, spec, cfg, items, out_dir, workers, show))
-    out_dir.mkdir(parents=True, exist_ok=True)
+        rows.append(run_model(bench, spec, cfg, items, out_dir, workers, show, made, call_models))
     (out_dir / "summary.json").write_text(json.dumps(rows, indent=1))
     return rows

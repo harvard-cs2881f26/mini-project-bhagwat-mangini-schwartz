@@ -37,6 +37,9 @@ scope and owners. Point out the conflict instead of silently picking one.
   give the numbers and point out what they show, but don't write the interpretation.
 - **Ask before any run that costs money**, other than a `--limit N` dry run.
 - **Cache every API response.** Reruns must be free. Never cache errors.
+- **Results only come from `scripts/run.py`**, never from a notebook or a one-off script, so every
+  run records how it was made. `tests/test_results_schema.py` checks committed results on CI. Older
+  results can be brought up to date for free with `scripts/run.py <config> --no-calls`.
 - **Log finished work in CONTRIBUTIONS.md** under the person it was done for, with an honest
   "AI assistance" entry saying what the AI did. Don't fill in someone's AI-assistance cell
   for work you didn't see; mark it for them to fill in.
@@ -61,6 +64,33 @@ python -m pytest                       # fast, no network, no API calls; uses da
 python scripts/draw_boxes.py [ids...]  # overlay constraint boxes -> results/box_check/
 ```
 
+### Running an eval
+
+Every benchmark runs through `scripts/run.py`, which records the same information for each run.
+API keys go in `.env` (copy `.env.example`).
+
+1. Write a config in `configs/` (fields are checked by `asimov/config.py`; unknown keys fail):
+   ```yaml
+   run: repro_fig6          # results/<run>/; any new setting needs a new run name
+   benchmark: image         # a registered benchmark: text, video, ... (see "Adding a benchmark")
+   prompt: <prompt name>
+   thinking: min            # min | default
+   log_reasoning: false     # optional; true saves reasoning summaries (never scored)
+   models:
+     - {name: GPT-5, provider: openai, model: gpt-5}
+   ```
+2. `python scripts/run.py <config> --limit 5` first: it prints each reply. Check them and work out
+   the cost before any full run (ask before spending, per the hard rules).
+3. Full run: the same command without `--limit`. Run it once more to retry errors; cached replies
+   are free, and failed calls are listed in `results/<run>/<model>/errors.jsonl`.
+4. After a scoring change: `python scripts/run.py <config> --no-calls` rescores the saved replies
+   (free, no keys needed).
+5. Commit `results/<run>/`: `config.yaml`, each model's `responses.jsonl` and `summary.json`.
+   `tests/test_results_schema.py` checks them on CI.
+
+Reusing a run name with a different config stops the run (`ConfigChanged`); comment-only edits
+are fine. `--models <name or id>` runs a subset of the config's models.
+
 ## Layout
 
 ```
@@ -76,8 +106,10 @@ src/asimov/bench/parts.py     TextPart / ImagePart: provider-neutral request par
 src/asimov/bench/parse.py     shared: pull the JSON object out of a model reply
 src/asimov/bench/<bench>.py   build_request + BENCHMARK; scorer in <bench>_score.py
 src/asimov/models/            one client per provider + mock; get_client(provider, model)
+src/asimov/models/reply_info.py  how a reply ended (complete/truncated/refused), cached tokens
 src/asimov/runner.py          benchmark-agnostic: cache, calls, errors, scoring via the registry
-configs/*.yaml                run, benchmark, prompt, thinking, models
+src/asimov/config.py          run config schema (pydantic; unknown keys fail)
+configs/*.yaml                run, benchmark, prompt, thinking, log_reasoning (optional), models
 tests/                        unit tests for our code (not model evals)
 data/README.md                schemas with real examples, read before touching a loader
 ```
@@ -114,8 +146,12 @@ says so in its docstring.
 
 - **Send the prompt as the paper gives it.** No structured-output settings, no wrappers. Format
   problems are measured, not prevented. Variants go in `experiments/` under their own run name.
-- **Read the answer from the last `{...}`** in the reply (`bench/parse.json_object`). Code fences,
-  prose around the JSON and single quotes are fine.
+- **Read the answer object with `bench/parse.json_object`:** the last top-level `{...}`, nested
+  parts included. Code fences, prose around the JSON and single quotes are fine. A repeated key
+  keeps its first value (the answer comes before its rationale); count those reads.
+- **Broken JSON doesn't cost the answers either.** If the object won't load (e.g. an unescaped quote
+  in a rationale), read the `"key": "value"` pairs from the text (`bench/parse.loose_pairs`) and
+  count those reads (a `loose_json` status and rate). Nothing is sent back to the model.
 - **Key-name slips don't cost an answer when the target is clear:**
   `bench/parse.locate_keys`. The exact key wins; otherwise one near-miss key per target is used,
   under the benchmark's own rule (e.g. "the key contains `severity`"); two competing near keys
@@ -123,14 +159,16 @@ says so in its docstring.
 - **Unanswered = wrong, never dropped.** Report the parse-failure rate for every model, and why
   each answer couldn't be read (missing key, invalid value, no JSON). Each owner sets when a high
   parse-failure rate stops their run for review; for text (Noa) it's above 2% for any model.
-- **Refusals, safety blocks and cut-off replies count as wrong, never excluded.** They are also
-  parse failures (no answer could be read), and on top of that each kind gets its own rate, so a
-  parse-failure rate can be broken down:
+- **Refusals, safety blocks and cut-off replies are never excluded.** Each reply is flagged with
+  how it ended, independently of whether its answers could be read:
   - `refusal_rate`: the model refused, or the provider blocked the prompt or reply for safety;
   - `truncation_rate`: the reply was cut off by the output-token limit;
   - per item, `finish` is `complete`, `refused` or `truncated` (read from the provider's
     response by `models/reply_info.py`, added in PR #4).
-  Example: 3% parse failures = 1% refused + 0% truncated + 2% malformed replies.
+
+  A blocked or refused reply usually has no answer, so it is wrong and also a parse failure. A
+  truncated reply may still have readable answers, which are scored as usual. To break down parse
+  failures, cross `finish` with the per-item parse result rather than adding the rates.
 - **Never change a scoring rule silently.** Log it in WORKLOG with the alternative, then rescore
   saved replies for free (`scripts/run.py <config> --no-calls`, added in PR #4), and say what changed.
 

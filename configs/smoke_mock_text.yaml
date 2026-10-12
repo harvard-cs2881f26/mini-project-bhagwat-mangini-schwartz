@@ -1,0 +1,11 @@
+# Free end-to-end check of the text benchmark: no API keys, no network. The mock replies are
+# video-shaped or prose, so every text reply is a parse failure (scorer correctness is tested
+# with hand-made replies in tests/test_text.py).
+run: smoke_mock_text
+benchmark: text
+prompt: text_verbatim
+thinking: min
+models:
+  - {name: Always No (video JSON), provider: mock, model: mock-always-no}
+  - {name: Garbage,                provider: mock, model: mock-garbage}
+  - {name: Refuse,                 provider: mock, model: mock-refuse}

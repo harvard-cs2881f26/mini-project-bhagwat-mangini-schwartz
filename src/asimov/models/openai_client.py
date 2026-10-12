@@ -10,7 +10,7 @@ import base64
 
 import openai
 
-from asimov.bench.parts import ImagePart, Part, TextPart
+from asimov.bench.parts import Part, TextPart
 from asimov.models.base import ModelResponse, Thinking, Timer
 
 MAX_OUTPUT_TOKENS = 8192  # includes reasoning tokens
@@ -34,8 +34,9 @@ class OpenAIClient:
         self.model = model
         self.client = openai.OpenAI()
 
-    def generate(self, parts: list[Part], thinking: Thinking = "min") -> ModelResponse:
-        kwargs = {"reasoning": {"effort": "minimal"}} if thinking == "min" else {}
+    def generate(self, parts: list[Part], thinking: Thinking = "min", log_reasoning: bool = False) -> ModelResponse:
+        reasoning = ({"effort": "minimal"} if thinking == "min" else {}) | ({"summary": "auto"} if log_reasoning else {})
+        kwargs = {"reasoning": reasoning} if reasoning else {}
         with Timer() as t:
             r = self.client.responses.create(
                 model=self.model, input=to_input(parts), max_output_tokens=MAX_OUTPUT_TOKENS, **kwargs
@@ -48,7 +49,13 @@ class OpenAIClient:
                    "reasoning_tokens": u.output_tokens_details.reasoning_tokens, "status": r.status},
             latency_s=t.seconds,
             raw=r.to_dict(),
+            reasoning=reasoning_summary(r.output) if log_reasoning else "",
         )
+
+
+def reasoning_summary(output: list) -> str:
+    """Text of the reasoning items' summaries (reasoning={"summary": "auto"})."""
+    return "\n\n".join(s.text for item in output if item.type == "reasoning" for s in item.summary or [])
 
 
 def list_model_ids() -> list[str]:

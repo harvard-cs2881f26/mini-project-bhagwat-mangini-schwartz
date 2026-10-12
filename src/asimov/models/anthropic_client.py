@@ -9,7 +9,7 @@ import base64
 
 import anthropic
 
-from asimov.bench.parts import ImagePart, Part, TextPart
+from asimov.bench.parts import Part, TextPart
 from asimov.models.base import ModelResponse, Thinking, Timer
 
 MAX_TOKENS = 2048  # the answer is a short JSON object
@@ -41,7 +41,8 @@ class AnthropicClient:
         self.model = model
         self.client = anthropic.Anthropic()
 
-    def generate(self, parts: list[Part], thinking: Thinking = "min") -> ModelResponse:
+    def generate(self, parts: list[Part], thinking: Thinking = "min", log_reasoning: bool = False) -> ModelResponse:
+        """log_reasoning sends nothing new (no thinking parameter is sent); it keeps any thinking blocks."""
         with Timer() as t:
             r = self.client.messages.create(
                 model=self.model,
@@ -56,6 +57,7 @@ class AnthropicClient:
                    "stop_reason": r.stop_reason},
             latency_s=t.seconds,
             raw=r.to_dict(),
+            reasoning="\n\n".join(b.thinking for b in r.content if b.type == "thinking") if log_reasoning else "",
         )
 
 

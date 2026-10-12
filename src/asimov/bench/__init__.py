@@ -7,16 +7,17 @@ the runner or the model clients. `get_benchmark("video")` imports modules lazily
 """
 from __future__ import annotations
 
+from collections.abc import Callable
 from dataclasses import dataclass
 from importlib import import_module
-from typing import Any, Callable
+from typing import Any
 
 from asimov.bench.parts import Part
 
 # One entry per data folder: a benchmark's `name` is its folder under data/ (tests rely on this).
 # The two Image variants will be two entries, "image" and "image_rationale", built by one
 # function, each with its own prompt_version so their saved replies never mix.
-MODULES = {"video": "asimov.bench.video"}
+MODULES = {"text": "asimov.bench.text", "video": "asimov.bench.video"}
 
 
 @dataclass(frozen=True)
@@ -29,7 +30,7 @@ class Benchmark:
     # prompt name -> text identifying the request in the saved-reply key. It must change whenever
     # anything our code sends changes, other than the item itself: prompt file text, prompt name or
     # variant, wrapper text, dataset version. Otherwise a new prompt silently reuses old replies.
-    # Video: the prompt file's full text. Text (planned): "asimov_v2_injuries/0.1.0|<prompt name>|<wrapper text>".
+    # Video: the prompt file's full text. Text: "asimov_v2_injuries/0.1.0|<prompt name>" (verbatim, no wrapper).
     prompt_version: Callable[[str], str]
     columns: tuple[tuple[str, str, bool], ...]  # (label, summary key, is percent) for scripts/run.py
 
