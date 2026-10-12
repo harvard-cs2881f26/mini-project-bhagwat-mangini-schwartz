@@ -5,6 +5,7 @@ run: repro_fig4
 benchmark: text
 prompt: text_verbatim   # the dataset's prompt, unchanged (src/asimov/bench/text.py)
 thinking: min           # matches repro_fig5
+log_reasoning: true     # save reasoning/thought summaries in each reply's `reasoning` field (never scored)
 models:
   - {name: GPT-5 Nano,            provider: openai,    model: gpt-5-nano}
   - {name: GPT-5 Mini,            provider: openai,    model: gpt-5-mini}
