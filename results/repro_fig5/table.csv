@@ -1,0 +1,25 @@
+approx,ci_hi,ci_lo,claim,diff,figure,kind,metric,model_paper,models_ours,ours,paper,paper_in_ci,stand_in,status
+False,0.7172019827675181,0.5730110984404385,fig5a_gemini_2_5_pro_risk_accuracy,-0.19151515151515153,5a,value,risk_accuracy,Gemini 2.5 Pro,Gemini 2.5 Pro (3.1),0.6484848484848484,0.84,False,True,checked
+False,0.6509656100742427,0.5381408543996131,fig5a_claude_opus_4_1_risk_accuracy,-0.04418118466898957,5a,value,risk_accuracy,Claude Opus 4.1,Claude Opus 4.1 (4.5),0.5958188153310104,0.64,True,True,checked
+False,0.5454123008889609,0.43051960363254826,fig5a_gpt_5_risk_accuracy,0.047804878048780475,5a,value,risk_accuracy,GPT 5,GPT-5,0.4878048780487805,0.44,True,False,checked
+True,1.7534722222222223,1.2256944444444444,fig5b_gemini_2_5_flash_lite_timing_mae_s,0.04569444444444448,5b,value,timing_mae_s,Gemini 2.5 Flash-lite,Gemini 2.5 Flash-Lite (3.1),1.4756944444444444,1.43,True,True,checked
+True,0.5073176644056181,0.3929716543263487,fig5b_gemini_2_5_flash_lite_within_0_5_rate,0.15947735191637635,5b,value,within_0_5_rate,Gemini 2.5 Flash-lite,Gemini 2.5 Flash-Lite (3.1),0.44947735191637633,0.29,False,True,checked
+True,1.5253164556962024,1.1075949367088607,fig5b_gemini_2_5_flash_timing_mae_s,-0.0898734177215188,5b,value,timing_mae_s,Gemini 2.5 Flash,Gemini 2.5 Flash (3),1.3101265822784811,1.4,True,True,checked
+True,0.49338150957465715,0.3794014143247488,fig5b_gemini_2_5_flash_within_0_5_rate,0.09154006968641115,5b,value,within_0_5_rate,Gemini 2.5 Flash,Gemini 2.5 Flash (3),0.4355400696864111,0.344,False,True,checked
+True,1.2241379310344827,0.7758620689655172,fig5b_gemini_2_5_pro_timing_mae_s,0.27425287356321837,5b,value,timing_mae_s,Gemini 2.5 Pro,Gemini 2.5 Pro (3.1),0.9942528735632183,0.72,False,True,checked
+True,0.6311941780568859,0.4813374248604851,fig5b_gemini_2_5_pro_within_0_5_rate,-0.00242424242424244,5b,value,within_0_5_rate,Gemini 2.5 Pro,Gemini 2.5 Pro (3.1),0.5575757575757576,0.56,True,True,checked
+True,1.5451612903225806,1.132258064516129,fig5b_claude_opus_4_1_timing_mae_s,-1.077741935483871,5b,value,timing_mae_s,Claude Opus 4.1,Claude Opus 4.1 (4.5),1.332258064516129,2.41,False,True,checked
+True,0.5177403989882986,0.4031787158680889,fig5b_claude_opus_4_1_within_0_5_rate,0.14093031358885016,5b,value,within_0_5_rate,Claude Opus 4.1,Claude Opus 4.1 (4.5),0.45993031358885017,0.319,False,True,checked
+True,1.5321428571428573,1.0678571428571428,fig5b_claude_sonnet_4_timing_mae_s,-0.5135714285714286,5b,value,timing_mae_s,Claude Sonnet 4,Claude Sonnet 4 (4.5),1.2964285714285715,1.81,False,True,checked
+True,0.5003552041796057,0.3861809171360807,fig5b_claude_sonnet_4_within_0_5_rate,0.02750871080139372,5b,value,within_0_5_rate,Claude Sonnet 4,Claude Sonnet 4 (4.5),0.4425087108013937,0.415,True,True,checked
+True,1.7093023255813953,1.313953488372093,fig5b_gpt_5_mini_timing_mae_s,0.08581395348837217,5b,value,timing_mae_s,GPT 5 Mini,GPT-5 Mini,1.505813953488372,1.42,True,False,checked
+True,0.35501266127122433,0.24958291301071334,fig5b_gpt_5_mini_within_0_5_rate,0.10665156794425085,5b,value,within_0_5_rate,GPT 5 Mini,GPT-5 Mini,0.29965156794425085,0.193,False,False,checked
+True,2.3733274647887312,1.8873239436619718,fig5b_gpt_5_nano_timing_mae_s,0.31676056338028147,5b,value,timing_mae_s,GPT 5 Nano,GPT-5 Nano,2.1267605633802815,1.81,False,False,checked
+True,0.29307859170835715,0.19461480453519694,fig5b_gpt_5_nano_within_0_5_rate,-0.05958188153310104,5b,value,within_0_5_rate,GPT 5 Nano,GPT-5 Nano,0.24041811846689895,0.3,False,False,checked
+True,2.2176470588235295,1.7352941176470589,fig5b_gpt_5_timing_mae_s,0.21058823529411774,5b,value,timing_mae_s,GPT 5,GPT-5,1.9705882352941178,1.76,True,False,checked
+True,0.3223655233844644,0.22034066252421144,fig5b_gpt_5_within_0_5_rate,0.1822926829268293,5b,value,within_0_5_rate,GPT 5,GPT-5,0.2682926829268293,0.086,False,False,checked
+False,,,sec3_claude_opus_4_1_risk_accuracy_gap_text_minus_video,,,gap,risk_accuracy,Claude Opus 4.1,,,0.27,,False,not checked by code (see note)
+False,,,sec3_gpt5_risk_accuracy_gap_text_minus_video,,,gap,risk_accuracy,GPT5,,,0.4,,False,not checked by code (see note)
+False,,,sec3_gemini_2_5_pro_timing_mae_s,,,bound,timing_mae_s,Gemini 2.5 Pro,,,0.75,,False,"a bound, not a point value"
+False,0.6311941780568859,0.4813374248604851,sec3_gemini_2_5_pro_within_0_5_rate,-0.00242424242424244,,value,within_0_5_rate,Gemini 2.5 Pro,Gemini 2.5 Pro (3.1),0.5575757575757576,0.56,True,True,checked
+False,,,appD_avg_majority_baseline_risk,,,baseline,majority_baseline_risk,,,,0.6725,,False,"derived from the dataset's counts, no model"
