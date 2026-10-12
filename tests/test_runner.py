@@ -97,4 +97,11 @@ def test_no_calls_scores_saved_replies_only(tmp_path):
     no, broken = run(CFG, limit=4, results_dir=tmp_path, call_models=False)
     assert no["n"] == 2  # the 2 saved replies, nothing new called
     assert len(lines(tmp_path / "t" / "mock-always-no" / "responses.jsonl")) == 2
-    assert broken["errors"] == 0 and broken["n"] == 0
+    assert broken["n"] == 0 and lines(tmp_path / "t" / "mock-error" / "responses.jsonl") == []
+
+
+def test_no_calls_keeps_the_last_error_count(tmp_path):
+    # rescoring makes no calls, so it must not overwrite the failures the last real run recorded
+    run(CFG, limit=2, results_dir=tmp_path)
+    broken = run(CFG, limit=2, results_dir=tmp_path, call_models=False)[1]
+    assert broken["errors"] == 2

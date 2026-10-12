@@ -82,6 +82,12 @@ def provenance(cfg: dict, config_text: str, config_path: Path | None) -> dict:
             "git_commit": commit, "git_dirty": dirty, "scored_at": time.strftime("%Y-%m-%dT%H:%M:%S")}
 
 
+def last_errors(out_dir: Path) -> dict[str, int]:
+    """Failed calls per model from the last saved results/<run>/summary.json (kept by --no-calls)."""
+    path = out_dir / "summary.json"
+    return {r["model"]: r.get("errors", 0) for r in json.loads(path.read_text())} if path.exists() else {}
+
+
 def load_saved(path: Path, key: str) -> dict[str, dict]:
     if not path.exists():
         return {}
@@ -91,7 +97,8 @@ def load_saved(path: Path, key: str) -> dict[str, dict]:
 
 
 def run_model(bench: Benchmark, spec: dict, cfg: dict, items, out_dir: Path, workers: int, show: bool,
-              made: dict, call_models: bool = True) -> dict:
+              made: dict, call_models: bool = True, errors: int = 0) -> dict:
+    """errors: failed calls to report when call_models is False (the last real run's count)."""
     provider, model, thinking, prompt = spec["provider"], spec["model"], cfg["thinking"], cfg["prompt"]
     key = run_key(model, bench.prompt_version(prompt), thinking)
     mdir = out_dir / model
@@ -102,8 +109,8 @@ def run_model(bench: Benchmark, spec: dict, cfg: dict, items, out_dir: Path, wor
     to_call = f"{len(todo)} to call" if call_models else "no calls"
     print(f"\n== {spec['name']} ({model}): {len(items)} items, {len(items) - len(todo)} saved, {to_call}")
 
-    errors = 0
     if todo and call_models:
+        errors = 0
         client = get_client(provider, model)
 
         def call(item):
@@ -153,6 +160,7 @@ def run(cfg: dict, limit: int | None = None, only: list[str] | None = None,
     config_text = config_path.read_text() if config_path else yaml.safe_dump(cfg, sort_keys=False)
     guard_config(out_dir, config_text)
     made = provenance(cfg, config_text, config_path)
+    previous = {} if call_models else last_errors(out_dir)
     show = limit is not None and limit <= 5
     for name in only or []:
         if not any(name in (s["name"], s["model"]) for s in cfg["models"]):
@@ -165,6 +173,7 @@ def run(cfg: dict, limit: int | None = None, only: list[str] | None = None,
         if call_models and var and not os.environ.get(var):
             print(f"\n== {spec['name']}: skipped, {var} not set")
             continue
-        rows.append(run_model(bench, spec, cfg, items, out_dir, workers, show, made, call_models))
+        rows.append(run_model(bench, spec, cfg, items, out_dir, workers, show, made, call_models,
+                              previous.get(spec["model"], 0)))
     (out_dir / "summary.json").write_text(json.dumps(rows, indent=1))
     return rows
