@@ -2,7 +2,7 @@
 
 import pytest
 
-from asimov.stats import brier, ece, holm, mcnemar_exact, paired_bootstrap_diff, wilson_ci
+from asimov.stats import bootstrap_mean_ci, brier, ece, holm, mcnemar_exact, paired_bootstrap_diff, wilson_ci
 
 
 def test_wilson_matches_newcombe_1998():
@@ -68,3 +68,11 @@ def test_ece_hand_value():
     # bin [0.1, 0.2): conf 0.15, acc 0 -> 0.15 x 2/4; bin [0.8, 0.9): conf 0.85, acc 0.5 -> 0.35 x 2/4
     assert ece([0.15, 0.15, 0.85, 0.85], [0, 0, 1, 0]) == pytest.approx(0.25)
     assert ece([1.0, 1.0], [1, 1]) == pytest.approx(0.0)  # p = 1 lands in the last bin
+
+
+def test_bootstrap_mean_ci():
+    assert bootstrap_mean_ci([2.0, 2.0, 2.0]) == (2.0, 2.0, 2.0)
+    mean, lo, hi = bootstrap_mean_ci([0.0, 1.0, 2.0, 3.0, 4.0] * 4)
+    assert mean == pytest.approx(2.0) and lo < 2.0 < hi
+    with pytest.raises(ValueError):
+        bootstrap_mean_ci([])

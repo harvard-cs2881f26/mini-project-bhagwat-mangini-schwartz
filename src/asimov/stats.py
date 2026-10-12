@@ -15,6 +15,7 @@ from collections.abc import Sequence
 from math import comb, sqrt
 
 import numpy as np
+from numpy.typing import ArrayLike
 
 Z95 = 1.959963984540054  # standard normal quantile for a two-sided 95% interval
 N_BOOT = 10_000
@@ -32,17 +33,23 @@ def wilson_ci(k: int, n: int, z: float = Z95) -> tuple[float, float]:
     return max(0.0, centre - half), min(1.0, centre + half)
 
 
+def bootstrap_mean_ci(x: ArrayLike, n_boot: int = N_BOOT, seed: int = SEED) -> tuple[float, float, float]:
+    """Mean of x with a 95% percentile bootstrap CI over its items: (mean, lo, hi)."""
+    v = np.asarray(x, dtype=float)
+    if not v.size:
+        raise ValueError("bootstrap_mean_ci needs a non-empty list")
+    idx = np.random.default_rng(seed).integers(0, len(v), size=(n_boot, len(v)))
+    lo, hi = np.percentile(v[idx].mean(axis=1), [2.5, 97.5])
+    return float(v.mean()), float(lo), float(hi)
+
+
 def paired_bootstrap_diff(
     a: Sequence[float], b: Sequence[float], n_boot: int = N_BOOT, seed: int = SEED
 ) -> tuple[float, float, float]:
     """mean(a) - mean(b) over paired items, with a 95% percentile bootstrap CI: (diff, lo, hi)."""
-    if len(a) != len(b) or not a:
+    if len(a) != len(b) or not len(a):
         raise ValueError(f"paired_bootstrap_diff needs two equal, non-empty lists (got {len(a)} and {len(b)})")
-    d = np.asarray(a, dtype=float) - np.asarray(b, dtype=float)
-    idx = np.random.default_rng(seed).integers(0, len(d), size=(n_boot, len(d)))
-    boots = d[idx].mean(axis=1)
-    lo, hi = np.percentile(boots, [2.5, 97.5])
-    return float(d.mean()), float(lo), float(hi)
+    return bootstrap_mean_ci(np.asarray(a, dtype=float) - np.asarray(b, dtype=float), n_boot, seed)
 
 
 def mcnemar_exact(b: int, c: int) -> float:
