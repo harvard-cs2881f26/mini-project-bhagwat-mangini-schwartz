@@ -18,8 +18,8 @@ session: Claude stops, shows the numbers, waits for a yes, and carries on.
 
 | Step | Who | State | Evidence / link |
 |---|---|---|---|
-| Before 1: Part 1 decisions | Noa | todo | |
-| Session 1: build + run Fig 4 | Claude (Noa approves spend) | todo | |
+| Before 1: Part 1 decisions | Noa | done | thinking = `min`; all 8 `PAPER_MODELS`; severity axis = 4-way exact letter (decided early, in Session 1). WORKLOG 2026-10-12 |
+| Session 1: build + run Fig 4 | Claude (Noa approves spend) | done (PR #4 ready for review) | [PR #4](https://github.com/gini007/mini-project-asimov-v2/pull/4); [PR #5](https://github.com/gini007/mini-project-asimov-v2/pull/5) merged; replies: 8 models × 319/319, 0 failed calls (`repro_fig4`); cost: $15.11 full run, about $15.36 for the session incl. 5-item runs (WORKLOG 2026-10-12); pytest: 168 passed on full data; 161 passed, 7 skipped on the 5-item sample; CI green |
 | Session 2: stats + Fig 4 plot | Claude | todo | |
 | Optional: Weave export (Noa's runs) | Claude, after Noa checks dataset terms | todo | |
 | Between 2 and 3: review, Part 2 scope, hypothesis | Noa (+ team) | todo | |
@@ -41,8 +41,8 @@ session: Claude stops, shows the numbers, waits for a yes, and carries on.
 - Majority baselines (match paper App. D): severity 4-way 142/319 = 0.445; severe-vs-not
   180/319 = 0.564; effect 121/319 = 0.379; activated risk 108/319 = 0.339.
 - The harness exists: `scripts/run.py <config>` → `asimov.runner` → `Benchmark` registry →
-  `get_client`. Cache key = (item, model, prompt text, thinking). Errors never cached. Latency
-  and tokens recorded per reply.
+  `get_client`. Cache key = (item, model, prompt version, thinking), plus `log_reasoning` when it
+  is on (`runner.run_key`). Errors never cached. Latency and tokens recorded per reply.
 - Model stand-ins (Gemini 3.x for 2.5, Claude 4.5 for Opus 4.1 / Sonnet 4) are in
   `PAPER_MODELS`, logged in WORKLOG. Only the GPT-5 family is like-for-like.
 
@@ -67,24 +67,26 @@ session: Claude stops, shows the numbers, waits for a yes, and carries on.
 
 ### Before Session 1: Part 1 decisions (Noa, ~20 min)
 
-Write each answer into WORKLOG as DECIDED:
-1. **Thinking:** `min` (matches Fig 5) or `default`?
-2. **Models:** all 8 from `PAPER_MODELS`, or a subset? Minimum useful: GPT-5 / Mini / Nano
-   (like-for-like). Gemini Pro needs credits topped up.
-3. **Severity metric:** report 4-way accuracy as the Fig 4 axis, plus severe-vs-not accuracy
-   and severe recall as extras? (Paper text and plot disagree.)
-4. **Paper values:** re-read Fig 4 off the paper and check the draft table, esp. GPT 5 Mini
-   (0.72) below GPT 5 Nano (0.87) on risk type.
-5. **Where paper values live:** `configs/paper/claims.yaml` (§11), since `data/` is gitignored.
+Outcomes are in WORKLOG 2026-10-12 ("Fig. 4 (text) benchmark and run settings").
+1. **Thinking:** DECIDED `min`, to match Fig 5. A `default` run can follow as its own config.
+2. **Models:** DECIDED, all 8 from `PAPER_MODELS`. Gemini credits were topped up in Session 1.
+3. **Severity metric:** DECIDED in Session 1 (planned for Session 2). The Fig 4 axis is 4-way
+   exact-letter accuracy. Severe-vs-not accuracy and severe recall are kept as extras in every
+   summary.
+4. **Paper values:** not done yet. Re-reading Fig 4 off the paper, incl. GPT 5 Mini (0.72) below
+   GPT 5 Nano (0.87) on risk type, is the Session 2 `paper-reader`'s job; Noa reviews.
+5. **Where paper values live:** `configs/paper/claims.yaml` (§11), as planned. No outcome
+   recorded yet; it's created in Session 2.
 
 ### Session 1: build and run Fig 4
 
-**Step 0, tooling ($0).** Set up §9.4: `requirements-dev.txt` (ruff), `[tool.ruff]` and
-`[tool.pyright]` in `pyproject.toml`, `pydantic` in `requirements.txt`, and the hooks in
-`.claude/settings.local.json`. Check that the Stop hook runs and that an edit under `data/` is
-blocked. Leave the repo-wide `ruff format` for a separate agreed commit. CI
-(`.github/workflows/`) runs pytest and the mock run on every PR; adding ruff/pyright to CI
-changes everyone's PRs, so propose it to the team rather than doing it here.
+**Step 0, tooling ($0). Done in Session 1.**
+- `requirements-dev.txt` (ruff), `[tool.ruff]` and `[tool.pyright]` in `pyproject.toml`, and
+  `pydantic` in `requirements.txt`.
+- The hooks in `.claude/hooks/`, as described in §9.4. A live Write to `data/` was blocked, and the
+  Stop hook ran.
+- Still open, for the team to agree: the repo-wide `ruff format` (as a separate commit), and adding
+  ruff/pyright to CI (`.github/workflows/`), which would change everyone's PRs.
 
 **Step A, build ($0).** Following CLAUDE.md "Adding a benchmark":
 - `src/asimov/data/text.py`: `load_text_items()` (id + prompt), `load_text_answers()`
@@ -131,9 +133,32 @@ of access and hardware needs. Reading docs is free and builds nothing, so it sav
 
 - **Subagents:** `run-monitor` (haiku) for the full run; `docs-reader` (background);
   `code-reviewer` on the diff before ending.
-- **Done when:** each model has 319 replies or is listed as blocked with the reason; parse
-  failure < 2% (otherwise stop and report, don't add a suffix to the paper prompt); cost
-  logged in WORKLOG; API docs written.
+- **Done when:**
+  - each model has 319 replies or is listed as blocked with the reason;
+  - parse failure < 2% (otherwise stop and report, don't add a suffix to the paper prompt);
+  - cost logged in WORKLOG;
+  - API docs written. Done: `docs/apis/`.
+
+**Built in Session 1 (reuse it, don't rebuild).** Details in WORKLOG 2026-10-12.
+- `scripts/run.py <config> --no-calls`: rescores saved replies for free and keeps the last real
+  run's error count.
+- `results/<run>/<model>/errors.jsonl`: failed calls, never reused as replies (a rerun retries them).
+- `src/asimov/models/reply_info.py`: `finish` per item (`complete` / `truncated` / `refused`);
+  the runner adds `truncation_rate`, `refusal_rate` and `cached_input_tokens` per model.
+- `log_reasoning` config flag: reasoning summaries go in a separate `reasoning` field, never
+  scored; part of the cache key only when on (`runner.run_key`).
+- `src/asimov/config.py`: pydantic configs (`RunConfig`, `ModelSpec`); extra keys fail at load.
+- `results/<run>/config.yaml` per run: one run name = one config (`runner.ConfigChanged`).
+- Self-describing `summary.json`: `benchmark`, `run`, `key`, `config_path`, `config_sha256`,
+  `git_commit`, `scored_at`, `n`.
+- Text benchmark: `data/text.py`, `bench/text.py`, `bench/text_score.py` (per item: pred, gold,
+  correct, parse status incl. `near_key`, rationale present).
+- `repro_fig5` summaries rescored with `--no-calls`; metrics identical to `main`.
+- `docs/apis/`: decision-model API notes plus the ready/blocked table in
+  [`docs/apis/README.md`](apis/README.md).
+- Hooks in `.claude/hooks/` (Stop, PreToolUse, PostToolUse; wired in
+  `.claude/settings.local.json`) and subagents in `.claude/agents/` (`code-reviewer`,
+  `docs-reader`, `run-monitor`).
 
 ### Session 2: stats + Fig 4 plot ($0)
 
@@ -223,6 +248,32 @@ by side) for error analysis. It's an extra view only: `results/` stays the sourc
    Log the choice and the alternative.
 4. **Hypothesis:** write `docs/HYPOTHESIS.md` (as H2 or a renamed H, to avoid clashing with
    CLAUDE.md's H1). Frozen before Session 4.
+5. **Open Part 2 questions** (from [`docs/apis/README.md`](apis/README.md); not decided):
+   - `jev`: needs a paid TypeSafe key. Jev 1.13 is documented as biased toward the first
+     option, so option order may need permuting.
+   - `kev4b`: Kev-4B doesn't fit this 16 GB Mac (docs say 24 GB GPU or 32 GB Mac). A cloud GPU,
+     or Kev-0.5B against a same-size Qwen?
+   - `openjev_think`: which OpenJev is meant (several projects use the name)? Does `semif`
+     (README: "formerly OpenJev") add anything beyond `qwen_logprob`?
+   - `qwen_logprob` can't use the verbatim prompt (it asks for JSON first), so it needs a prompt
+     variant in `experiments/`.
+   - An explicit thinking level (`low|medium|high`, mapped per provider, e.g. Claude budget
+     1024 / 4096) for Fig 7 / H1. Raise with Riddhi and Tyler.
+6. **Experiment ideas: to-dos, not decided** (H1: can prompting close the small-model gap, and at
+   what inference cost). Each is a variant under its own run name in `experiments/`. None of them
+   changes the reproduction runs.
+   - **Format-repair nudge** (`repro_fig4_repair`): when a reply isn't valid JSON, the runner sends
+     one follow-up turn ("return the same answers as valid JSON only"). Measure:
+     - how often it fixes the format;
+     - whether answers change when nudged, not only the format;
+     - the extra calls and cost.
+
+     Needs multi-turn support in the clients (Tyler's code). Caveat: only models that slip get a
+     second look.
+   - **Structured output / JSON schema** (`repro_fig4_schema`): the API enforces the four answer
+     keys and letters. This prevents invalid JSON and key slips entirely. Compare accuracy and
+     cost against the verbatim run. It changes the request, so it's per-provider client work.
+   - **Thinking `default` vs `min`** (`repro_fig4_default`): same items, paired comparison per model.
 
 ## 5. Part 2: decision models
 
@@ -266,7 +317,9 @@ version. Profile local models: warm up, median of 3 passes on 50 items, record h
 Starts with the same `PART 2 APPROVED` check.
 
 - Before any paid run, add a per-run call cap to the runner (`max_calls` in the config; PR for
-  Tyler) and a price table so cost is reported in $, not only tokens (§9.5).
+  Tyler) and a price table (`configs/prices.yaml`) so cost is reported in $, not only tokens
+  (§9.5). Both are still open. The price table must count Gemini `usage.thinking_tokens` as
+  output (WORKLOG 2026-10-12, "Cost method").
 - Full runs for every system that passed the smoke test. **Show projected cost and wait for a
   yes** before the paid ones.
 - Add to `stats.py`: Brier, 10-bin ECE. Extend `plot.py`: accuracy vs p50 latency (log x, one
@@ -293,7 +346,7 @@ From `results/` and the figures. Fill the Fig 4 and H slides in the deck templat
 
 | Day | Work |
 |---|---|
-| Mon 10/12 | Decisions, Session 1 |
+| Mon 10/12 | Decisions (incl. the severity axis, moved up from Session 2), Session 1 |
 | Tue 10/13 | Session 2, review, scope, hypothesis |
 | Wed 10/14 | Session 3 |
 | Thu 10/15–Fri 10/16 | Session 4 |
@@ -363,7 +416,9 @@ the same.
 |---|---|---|
 | Paper prompt (Part 1) | `prompt` in `data/text/items.jsonl`, verbatim | `bench/text.py` sends it unchanged |
 | Answer-key parsing | `data/rows.read_answer_json` | loaders call it |
-| Reply parsing | `bench/parse.json_object` | scorers call it |
+| Reply parsing and scoring conventions | `bench/parse.json_object` + `bench/parse.locate_keys`; rules in CLAUDE.md "Scoring conventions (all benchmarks)" ([PR #5](https://github.com/gini007/mini-project-asimov-v2/pull/5)) | scorers call them |
+| How a reply ended (`finish`), cached input tokens | `models/reply_info.py` | the runner records them; scorers don't re-read provider fields |
+| Run config schema | `asimov/config.py` (`RunConfig`, `ModelSpec`) | the runner and scripts load configs through it |
 | Question keys, letter→label maps, severe-vs-not collapse | constants at the top of `bench/text_score.py` | stats, plots and decision clients import them |
 | Decision-model wording and options | one file, chosen in Session 3 (e.g. `configs/decision_questions.yaml`) | every decision client renders from it |
 | Metric formulas (Wilson, bootstrap, McNemar, Holm, Brier, ECE) | `src/asimov/stats.py` | scorers and `plot.py` import; nothing re-derives them |
@@ -393,8 +448,8 @@ the same.
   No abbreviations a reader has to decode.
 - **Types.** Type hints everywhere; frozen dataclasses for items, answers and parsed configs.
   Configs are validated on load with pydantic models (`extra="forbid"`): an unknown key or
-  missing field fails at startup, not mid-run. pydantic is already installed (the anthropic,
-  openai and google-genai SDKs require it); add it to `requirements.txt` since we now import it.
+  missing field fails at startup, not mid-run. Done for run configs: `asimov/config.py`, with
+  `pydantic` in `requirements.txt`.
 - **Fail loudly and specifically.** No bare `except`; no swallowed errors. The runner's
   "print the error, don't save it, rerun to retry" stays, and every error is counted in the
   summary. Error messages say what to do next (e.g. "OpenJev rejected model 'jev-1.13.0';
@@ -410,17 +465,23 @@ the same.
 
 ### 9.4 Enforcement (hooks, not just prose)
 
-- **Dev tools:** a new `requirements-dev.txt` with `ruff` (install:
+All of this exists since Session 1 (scripts in `.claude/hooks/`).
+- **Dev tools:** `requirements-dev.txt` with `ruff` (install:
   `pip install -r requirements-dev.txt`). The main `requirements.txt` stays runtime-only.
   pyright runs through `npx pyright` (Node is installed), so it needs no Python package.
-- **Stop hook:** `pytest -q`, `ruff check src tests scripts`, `ruff format --check` and
-  `npx pyright --level error` on the files this session changed. A session can't end with any
-  of them failing.
-- **pyright scope:** start with new and changed files only. Existing modules (mostly Tyler's)
-  may not pass yet; fixing them is a team decision, not a side effect of a session. ruff and
-  pyright settings go in `pyproject.toml` (`[tool.ruff]`, `[tool.pyright]`, basic mode).
-- **PreToolUse on Edit|Write:** block paths under `data/`, `configs/paper/claims.yaml` (once reviewed), and
-  `docs/HYPOTHESIS.md` once frozen.
+  Settings are in `pyproject.toml` (`[tool.ruff]`, `[tool.pyright]`, basic mode).
+- **PostToolUse on Edit|Write** (`track_edits.sh`): logs which files each session edits, so the
+  Stop hook checks only that session's own work and never blocks another session in this folder.
+  Edits made through Bash aren't seen, so code edits go through Edit/Write.
+- **Stop hook** (`stop_check.sh`): runs only if the session edited `.py` files in this checkout.
+  Then it runs `pytest -q` and `ruff check` on those files. `npx pyright --level error` and
+  `ruff format --check` run only on the ones that are new on the branch. A session can't end with
+  any of them failing.
+- **pyright and format scope:** new files only. Existing modules (mostly Tyler's clients) don't pass
+  yet; fixing them is a team decision, not a side effect of a session.
+- **PreToolUse on Edit|Write** (`block_paths.sh`): blocks paths under `data/` (except
+  `data/README.md`). Add `configs/paper/claims.yaml` once it's reviewed and `docs/HYPOTHESIS.md`
+  once it's frozen.
 - **First run of ruff format** will likely reformat existing files. Do it once, as its own
   commit agreed with the team, so it doesn't get mixed into a feature diff.
 - **Where:** put these in `.claude/settings.local.json` (yours only). Moving them to
