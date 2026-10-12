@@ -338,3 +338,32 @@ Status tags: **DECIDED**, **PROPOSED** (needs team sign-off), **OPEN** (needs a 
   misses real-data quirks); downloading the public data on CI with a cache (full coverage, nothing
   committed). *Open:* the dataset's license isn't stated in its metadata or on the project page;
   the repo is private. Worth confirming with the authors.
+
+## 2026-10-12: shared scoring conventions (Noa)
+
+### Scoring conventions for every benchmark: PROPOSED (Noa; text DECIDED, video and image for Tyler and Riddhi)
+- **Why:** the paper doesn't say how it parsed replies. Checked arXiv 2509.21651v2, main text
+  and appendices, on 2026-10-12: nothing on JSON parsing, malformed output, wrong keys, refusals,
+  retries or temperature, and no evaluation code is linked. Tyler asked the first author on
+  2026-10-10; no reply yet. So the rules are ours, and the three benchmarks should share them.
+- **The rules** are now in CLAUDE.md, "Scoring conventions":
+  - verbatim prompt, no structured output;
+  - answer from the last `{...}`;
+  - near-miss keys through `bench/parse.locate_keys`;
+  - unanswered = wrong, with the parse-failure rate reported;
+  - refusals and safety blocks counted as wrong but reported separately;
+  - no silent rule changes.
+- **Most of these are already the video rules** (WORKLOG 2026-10-10 and 2026-10-11): last `{...}`,
+  code fences and prose allowed, unparseable = wrong with the rate reported, Gemini safety blocks
+  kept as wrong rather than dropped.
+- **What's new is near-miss keys.** Format slips in key names don't cost an answer when the
+  intended target is clear. Exact key first; otherwise one near-miss key per target, picked by
+  the benchmark's own rule; competing near keys leave the target unread; near-miss reads are
+  counted.
+  - Prompted by a real slip: GPT-5 Nano wrote `latent_risk_severity_response` for the severity
+    answer (text, 5-item run).
+  - Decided for text by Noa; text's rule and its effect are logged with the Fig. 4 run.
+  - *Alternative considered:* exact keys only, the current video scorer. It's stricter, but a
+    question would be marked wrong for a typo in the key rather than the answer.
+- **Video and image: PROPOSED.** Adopting `locate_keys` changes their scorers, so it's Tyler's and
+  Riddhi's call. The video run had 0 key slips, so video numbers wouldn't change today.

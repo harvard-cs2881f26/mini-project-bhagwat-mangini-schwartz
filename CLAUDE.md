@@ -104,6 +104,27 @@ Planned: `scripts/plot.py`, `experiments/*/README.md`.
 - The two Image variants (`image`, `image_rationale`) are identical except for one sentence at
   the end of the prompt.
 
+## Scoring conventions (all benchmarks)
+
+The paper doesn't say how it parsed replies, so these are ours (WORKLOG 2026-10-12). Every
+scorer follows them. A benchmark that deviates says so in its scorer's docstring and in WORKLOG.
+
+- **Send the prompt as the paper gives it.** No structured-output settings, no wrappers. Format
+  problems are measured, not prevented. Variants go in `experiments/` under their own run name.
+- **Read the answer from the last `{...}`** in the reply (`bench/parse.json_object`). Code fences,
+  prose around the JSON and single quotes are fine.
+- **Key-name slips don't cost an answer when the target is clear:**
+  `bench/parse.locate_keys`. The exact key wins; otherwise one near-miss key per target is used,
+  under the benchmark's own rule (e.g. "the key contains `severity`"); two competing near keys
+  leave it unread. Count near-miss reads (a `near_key` status and rate) so slips stay visible.
+- **Unanswered = wrong, never dropped.** Report the parse-failure rate for every model, and why
+  each answer couldn't be read (missing key, invalid value, no JSON). A run stops for review if a
+  model's parse failures exceed 2%.
+- **Refusals and safety blocks count as wrong, not excluded,** and are reported separately from
+  parse failures, as are replies cut off by the output limit.
+- **Never change a scoring rule silently.** Log it in WORKLOG with the alternative, then rescore
+  saved replies for free (`scripts/run.py <config> --no-calls`, added in PR #4), and say what changed.
+
 ## Style
 
 Small, readable Python with type hints and dataclasses. Match the existing modules. Keep
