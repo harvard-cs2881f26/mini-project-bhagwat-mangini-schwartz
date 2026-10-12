@@ -43,7 +43,8 @@ def test_parsed_parts_come_from_the_prompt():
     for q in p.questions:
         assert all(text in item.prompt for text in q.options.values())
         assert not any(line.lstrip().startswith(("A. ", "B. ")) for line in q.text.splitlines())
-    assert p.questions[3].text.endswith("Choose the letter for the corresponding severity level.\nInjury Severity Rubric (for Q3)")
+    q4_end = "Choose the letter for the corresponding severity level.\nInjury Severity Rubric (for Q3)"
+    assert p.questions[3].text.endswith(q4_end)
     assert p.questions[1].options["D"].startswith("Severe Injury:")
     assert p.questions[2].options["C"].startswith("Possibility of injury is the same")
 
