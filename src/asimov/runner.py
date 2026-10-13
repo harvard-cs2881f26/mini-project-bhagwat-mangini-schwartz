@@ -32,7 +32,8 @@ from asimov.models import get_client
 from asimov.models.reply_info import cached_input_tokens, finish
 
 ROOT = Path(__file__).resolve().parents[2]
-KEY_VARS = {"anthropic": "ANTHROPIC_API_KEY", "openai": "OPENAI_API_KEY", "gemini": "GEMINI_API_KEY"}
+KEY_VARS = {"anthropic": "ANTHROPIC_API_KEY", "openai": "OPENAI_API_KEY", "gemini": "GEMINI_API_KEY",
+            "openai_decisions": "OPENAI_API_KEY"}  # systemone models name theirs in the config (key_env)
 
 
 class ConfigChanged(RuntimeError):
@@ -46,14 +47,23 @@ def fixed_order(items, seed: int = 0):
     return items
 
 
-def run_key(model: str, prompt_version: str, thinking: str, log_reasoning: bool = False) -> str:
+def run_key(model: str, prompt_version: str, thinking: str, log_reasoning: bool = False, extra: str = "") -> str:
     """prompt_version: from Benchmark.prompt_version, e.g. the prompt file's full text.
 
-    log_reasoning changes the request, so it changes the key; when off the key is the same as
-    before the flag existed, so earlier replies stay valid.
+    log_reasoning and extra (the service and request params, `request_extra`) change the request,
+    so they change the key; when off or empty the key is the same as before they existed, so
+    earlier replies stay valid.
     """
     request = f"{model}|{prompt_version}|{thinking}" + ("|log_reasoning" if log_reasoning else "")
+    request += f"|{extra}" if extra else ""
     return hashlib.sha256(request.encode()).hexdigest()[:12]
+
+
+def request_extra(spec: dict) -> str:
+    """The parts of a model spec that change what is sent beyond the model id: which service
+    (base_url) and extra params. "" for every LLM spec, so their keys are unchanged."""
+    parts = [spec.get("base_url") or ""] + ([json.dumps(spec["params"], sort_keys=True)] if spec.get("params") else [])
+    return "|".join(parts) if any(parts) else ""
 
 
 def guard_config(out_dir: Path, config_text: str) -> None:
@@ -113,7 +123,7 @@ def run_model(bench: Benchmark, spec: dict, cfg: dict, items, out_dir: Path, wor
               made: dict, call_models: bool = True) -> dict:
     provider, model, thinking, prompt = spec["provider"], spec["model"], cfg["thinking"], cfg["prompt"]
     log_reasoning = cfg.get("log_reasoning", False)
-    key = run_key(model, bench.prompt_version(prompt), thinking, log_reasoning)
+    key = run_key(model, bench.prompt_version(prompt), thinking, log_reasoning, request_extra(spec))
     mdir = out_dir / model
     mdir.mkdir(parents=True, exist_ok=True)
     resp_path = mdir / "responses.jsonl"
@@ -124,7 +134,8 @@ def run_model(bench: Benchmark, spec: dict, cfg: dict, items, out_dir: Path, wor
 
     errors = 0 if call_models else last_errors(mdir)
     if todo and call_models:
-        client = get_client(provider, model)
+        service = {k: spec[k] for k in ("base_url", "key_env", "params") if spec.get(k)}  # decision services only
+        client = get_client(provider, model, **service)
 
         def call(item):
             return client.generate(bench.build_request(item, prompt), thinking=thinking, log_reasoning=log_reasoning)
@@ -146,6 +157,8 @@ def run_model(bench: Benchmark, spec: dict, cfg: dict, items, out_dir: Path, wor
                        "log_reasoning": log_reasoning, "text": r.text, "reasoning": r.reasoning,
                        "usage": usage, "latency_s": round(r.latency_s, 2),
                        "time": time.strftime("%Y-%m-%dT%H:%M:%S"), "raw": r.raw}
+                if r.probs:  # decision models only, so LLM rows stay exactly as before
+                    row["probs"] = r.probs
                 f.write(json.dumps(row) + "\n")
                 f.flush()
                 saved[item.id] = row
@@ -161,7 +174,8 @@ def run_model(bench: Benchmark, spec: dict, cfg: dict, items, out_dir: Path, wor
     rows = [saved[i] for i in replies]
     finishes = {r["id"]: finish(provider, r["raw"]) for r in rows}
     per_item = {i: {**outcome, "finish": finishes[i]} for i, outcome in s.pop("per_item").items()}
-    summary = {"name": spec["name"], "provider": provider, "model": model, "prompt": prompt,
+    service = {k: spec[k] for k in ("base_url", "params") if spec.get(k)}  # decision services only
+    summary = {"name": spec["name"], "provider": provider, "model": model, **service, "prompt": prompt,
                "thinking": thinking, "log_reasoning": log_reasoning, **made, "key": key, "errors": errors,
                **token_totals(provider, rows), **finish_rates(finishes),
                "n_with_reasoning": sum(bool(r.get("reasoning", "").strip()) for r in rows),
@@ -213,7 +227,7 @@ def run(cfg: dict, limit: int | None = None, only: list[str] | None = None,
     for spec in cfg["models"]:
         if only and spec["name"] not in only and spec["model"] not in only:
             continue
-        var = KEY_VARS.get(spec["provider"])
+        var = spec.get("key_env") or KEY_VARS.get(spec["provider"])
         if call_models and var and not os.environ.get(var):
             print(f"\n== {spec['name']}: skipped, {var} not set")
             continue

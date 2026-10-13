@@ -1,46 +1,55 @@
-# `/v1/systemone` (Jev, Kev, Open-Jev, Laya)
+# `/v1/systemone` (Jev, OpenJev, Laya, Kev)
 
 Read 2026-10-12. Facts below come from the official TypeSafe docs or each project's own
 README / model card unless marked **UNVERIFIED**. No endpoint was called.
+
+**Corrected 2026-10-12 (Session 3):** the first version described Zefan-Cai/Open-Jev and local
+Kev/Laya. Noa's Part 2 decisions (WORKLOG 2026-10-12, "Part 2 approved") are: OpenJev =
+**razorback16/openjev hosted on Codiv**, Laya **hosted on Codiv**, Kev-4B **self-deployed on
+Modal**. Sections 1-3 are rewritten for those; Zefan-Cai/Open-Jev is no longer used.
 
 ## 1. What it is
 
 `POST /v1/systemone` is TypeSafe's "System One" API: you send a `state` (text or JSON) and a
 map of typed questions, and you get back typed answers with probabilities. No text is generated.
-**Jev** is TypeSafe's closed hosted model (current `jev-1.13.0`). Three open projects serve the
-same request/response shape: **Kev** (jaredpalmer, LoRA + pointer head on Qwen3.5),
-**Open-Jev** (Zefan-Cai, LoRA + scalar head on Qwen), **Laya** (convaiinnovations, ModernBERT
-encoder). Sources: https://docs.typesafe.ai/api, https://docs.typesafe.ai/models,
-https://github.com/jaredpalmer/kev, https://github.com/Zefan-Cai/Open-Jev,
-https://huggingface.co/convaiinnovations/laya.
-"OpenJev" is ambiguous: TheoLeeCJ/openjev (now "SemIf", MIT) and SiliconLabAI/OpenJev are
-different projects. I took **Zefan-Cai/Open-Jev** because it serves `/v1/systemone` and lists
-`jev-latest` as an alias. **UNVERIFIED** that this is the one PLAN.md means.
+- **Jev**: TypeSafe's closed hosted model (current `jev-1.13.0`).
+- **OpenJev** (https://github.com/razorback16/openjev): `openjev-latest` (alias `openjev-0.1`),
+  DiffusionGemma 26B-A4B (26B total, 4B active; base `nvidia/diffusiongemma-26B-A4B-it-NVFP4`,
+  Apache-2.0), answers read from token probabilities. Adds an optional request field
+  `think` (0-4096 tokens, "a hard cap"; "Give multi-step problems 512 or more"); not part of
+  Jev's API; `usage.output_tokens` is 0 unless `think` is set. Default not stated (implied 0).
+- **Laya** (`laya-1.0`): 421M ModernBERT-large encoder, text only, served by Codiv.
+- **Kev** (https://github.com/jaredpalmer/kev): Qwen3.5-4B-Base + LoRA + pointer head.
+- **Codiv** (https://codiv.ai) is "an inference platform for open System One models" with "the
+  same wire API as TypeSafe's Jev". It lists `openjev-latest`, `laya-1.0`, `verdict-1.4`,
+  `clm-v0.1`, `jevk5-0.3`, `clef-flash-1.0`. It also accepts the aliases `jev-latest` and
+  `jev-preview` (OpenJev README), so the base URL, not the model name, says which service answered.
 
 ## 2. Access
 
-| System | Access | Auth | Price |
-|---|---|---|---|
-| Jev | Paid API, key from https://console.typesafe.ai/keys | `Authorization: Bearer <key>`; SDK env var `TYPESAFE_API_KEY` (base URL override `TYPESAFE_BASE_URL`) | $0.042 per M input tokens, output free |
-| Kev | Open weights, Apache-2.0 (HF `jaredpalmer/kev-0.8b/4b/9b/27b`, tag `v1.0`) | none by default; set `KEV_API_KEY` to require Bearer | free (own hardware) |
-| Open-Jev | Open weights (LoRA packages, MIT code), HF `ZefanCai/Open-Jev-2B/9B/27B-v1.1`; Qwen base weights fetched separately | none (binds to loopback) | free |
-| Laya | Open weights, Apache-2.0, `pip install "laya[serve]"` | **UNVERIFIED** | free |
+| System | Access | Auth (official) | Our env vars | Price |
+|---|---|---|---|---|
+| Jev | Paid API, key from https://console.typesafe.ai/keys | `Authorization: Bearer <key>`; SDK env var `TYPESAFE_API_KEY` | `TYPESAFE_API_KEY` | $0.042 per M input tokens, output free |
+| OpenJev, Laya | Codiv account, keys look like `sk-codiv-...` | `Authorization: Bearer`; Codiv's docs set `TYPESAFE_API_KEY` + `TYPESAFE_BASE_URL=https://api.codiv.ai` | **`CODIV_API_KEY`** (our name, see below) | free tier: 100M input tokens per account, no card; 60 requests/min per key |
+| Kev-4B | Self-deployed on Modal (Apache-2.0 weights, HF `jaredpalmer/kev-4b`, tag `v1.0`) | `Authorization: Bearer <KEV_API_KEY>` when `KEV_API_KEY` is set at deploy | `KEV_API_KEY`; the `modal.run` URL goes in `configs/part2_kev.yaml` (`base_url`) | Modal GPU time (L40S) |
 
-Secondary sites say Jev is also served via OpenRouter, Vercel AI Gateway and LLM Gateway
-(`https://api.llmgateway.io/v1/systemone`): **UNVERIFIED**, not needed.
-No free tier or trial credit found in the TypeSafe docs.
+**Key names:** Codiv's official setup reuses `TYPESAFE_API_KEY`, which would collide with the Jev
+key in one `.env`. Our client reads `CODIV_API_KEY` for Codiv instead (config `key_env`).
 
 ## 3. Endpoint / interface
 
 - Jev: `POST https://api.typesafe.ai/v1/systemone`, `Content-Type: application/json`.
-  `GET /v1/models` lists the names your account can send.
-- Kev: `uv run --extra serve python -m kev.serve --run jaredpalmer/kev-4b --port 8009` ->
-  `http://127.0.0.1:8009/v1/systemone`, model `kev-latest`. Extra endpoints:
-  `/v1/systemone/permute` (one Choice over 1-64 option orders) and `/v1/systemone/separate`.
-- Open-Jev: `python -m jev.server --checkpoint ...` -> `http://127.0.0.1:8791/v1/systemone`.
-  `/v1/models` lists aliases `open-jev`, `jev-latest`. Its example request has no `model`
-  field; whether it rejects `jev-1.13.0` is **UNVERIFIED** (I did not read `predictor.predict`).
-- Laya: `laya-serve` on `localhost:8000/v1/systemone`.
+  `GET /v1/models` lists the names your account can send. No `think` field documented.
+- OpenJev / Laya: `POST https://api.codiv.ai/v1/systemone`, models `openjev-latest`, `laya-1.0`.
+  `think` is not supported with `images` or `sequential` (we use neither).
+- Kev on Modal (Kev README): `pip install modal && modal setup`, then
+  `curl -LO https://raw.githubusercontent.com/jaredpalmer/kev/main/skills/kev-deploy/scripts/kev_serve.py`
+  and `KEV_API_KEY=$(openssl rand -hex 24) modal deploy kev_serve.py`. Serves Kev-4B on an L40S
+  at `https://<your-workspace>--kev-api.modal.run/v1/systemone`, model `kev-latest`; pin weights
+  with `jaredpalmer/kev-4b@v1.0` (revision `139fdd94`). Scales to zero when idle: the first
+  request after idle waits about 35 s (exclude from latency, warm up first). Extra endpoints:
+  `/v1/systemone/permute` (one Choice over 1-64 option orders, default 6) and
+  `/v1/systemone/separate`. Kev's response also has top-level `latency_ms`.
 
 **Request** (TypeSafe API reference):
 - `state` (required): string, object or array.
@@ -87,8 +96,8 @@ Errors (Jev API reference), JSON body:
 The Python SDK also defines 400, 403 and 404 exceptions. Its default retry policy is 2
 retries on 408, 429 and 5xx, with backoff from 0.5 s to 5 s, honoring `retry-after`, and a
 30 s timeout. Kev returns 422 for an over-long state (65,536 tokens + 8,192 per question).
-Open-Jev returns 413 (body > 4 MB), 415 (wrong content type), 422 (bad request) and 500
-(inference failed).
+Codiv: 60 requests/min per key (codiv.ai); its error codes are not documented
+(**UNVERIFIED**; we treat them like Jev's).
 
 ## 6. Example (copied from docs.typesafe.ai/api)
 
@@ -110,19 +119,15 @@ POST https://api.typesafe.ai/v1/systemone
  "usage": {"input_tokens": 318, "output_tokens": 34}}
 ```
 
-## 7. Hardware (local models)
+## 7. Hardware
 
-- **Kev-4B**: 24 GB GPU (about 16 GB free; 14.3 GB resident) or a 32 GB Apple Silicon Mac
-  (MLX, about 8.4 GB of weights). Kev-0.8B fits a 4 GB GPU or any Apple Silicon Mac.
-  CPU works (`--device cpu`, fp32), with no published speed. Python 3.12/3.13 with `uv`.
-  Install: `git clone https://github.com/jaredpalmer/kev && cd kev && uv sync --extra serve`.
-- **Open-Jev-2B**: NVIDIA GPU (6.9 GiB peak recorded), CPU (much slower), or MPS in fp32.
-  The 9B needs one 16 GB card. The 27B needs an H100 80 GB.
-  Install: `pip install -e '.[train]'` and `hf download ZefanCai/Open-Jev-2B --revision 0c7aa49...`.
-- **Laya**: 421M params (ModernBERT-large), so likely CPU-feasible (**UNVERIFIED**). Its own
-  card says the base checkpoints sit below the majority baseline on its typed-decision
-  benchmark, and that accuracy comes from fine-tuning.
+All four are hosted: Jev (TypeSafe) and OpenJev / Laya (Codiv) need nothing local. Kev-4B runs on
+a Modal L40S (Kev README); this 16 GB Mac is too small for it locally (docs: 24 GB GPU or 32 GB
+Mac). Laya's own card says its base checkpoints sit below the majority baseline on its
+typed-decision benchmark, and that accuracy comes from fine-tuning.
 
 ## 8. Status
 
-`UNKNOWN: Jev needs a paid TypeSafe key (no free tier found); confirm which "OpenJev" PLAN.md means; Kev-4B local on a 32 GB Mac is READY to try.`
+READY, smoked 2026-10-13 (5 items each, 0 errors; WORKLOG): `jev` (`jev-1.13.0`), `openjev` think 0 /
+512 (`openjev-0.1`), `laya` (`laya-1.0`), `kev4b` (`kev-latest` = `kev-4b@v1.0`, Modal app `kev`, URL in
+`configs/part2_kev.yaml`).

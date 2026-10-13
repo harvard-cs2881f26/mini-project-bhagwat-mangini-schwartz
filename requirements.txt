@@ -9,3 +9,4 @@ pytest
 anthropic>=1.11
 openai>=3.24
 google-genai>=2.28
+httpx

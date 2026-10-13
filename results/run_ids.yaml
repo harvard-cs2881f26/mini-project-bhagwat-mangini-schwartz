@@ -3,3 +3,10 @@
 repro_fig4: txt0
 repro_fig5: vid0
 repro_fig4_default: txt1
+part2_codiv: txt2
+part2_openjev_think512: txt3
+part2_jev: txt4
+part2_jev_reversed: txt5
+part2_luna_decide: txt6
+part2_luna_gen: txt7
+part2_kev: txt8

@@ -23,7 +23,7 @@ session: Claude stops, shows the numbers, waits for a yes, and carries on.
 | Session 2: stats + Fig 4 plot | Claude | done, merged (PR #8) | [PR #8](https://github.com/gini007/mini-project-asimov-v2/pull/8); pages: `results/README.md`, `results/repro_fig4/README.md`, `results/repro_fig4/paper_check.md`; figures: `figures/fig4a`, `4b`, `5a`, `5b` (paper + comparison); claims file reviewed and frozen (five matching reads, no published exact numbers); verifier: 495/496 match, 1 bootstrap bound within Monte Carlo noise (`results/verify/`); pytest 229 passed, 7 skipped; CI green incl. `collect.py --check`; stats methods DECIDED in WORKLOG |
 | Optional: Weave export (Noa's runs) | Claude, after Noa checks dataset terms | todo | |
 | Between 2 and 3: review, Part 2 scope, hypothesis | Noa (+ team) | Part 2 scope decided 2026-10-12; Part 1 review + hypothesis still to do | WORKLOG 2026-10-12 ("Part 2 approved") |
-| Session 3: build decision-model systems | Claude (Noa approves smoke spend) | starting | branch `decision-systems` |
+| Session 3: build decision-model systems | Claude (Noa approves smoke spend) | in progress: hosted part merged (PR #9); local models (Step C) next | [PR #9](https://github.com/gini007/mini-project-asimov-v2/pull/9); smoked (5 items, 0 errors): Jev, Jev reversed, luna Decisions, luna generate, OpenJev think 0/512, Laya, Kev-4B (Modal); paid smoke ~$0.002 + Modal GPU; wording, option names and question modes DECIDED (WORKLOG 2026-10-12/13); Step C (Qwen3.5-4B(-Base), NLI) not built |
 | Session 4: Part 2 runs + metrics | Claude (Noa approves spend) | todo | |
 | After 4: write-up + slides | Noa | todo | |
 

@@ -42,3 +42,10 @@ def test_mock_clients():
     assert '"No"' in get_client("mock", "mock-always-no").generate(PARTS).text
     with pytest.raises(ValueError):
         get_client("mock", "mock-perfect")
+
+
+def test_openai_min_effort_is_the_lowest_each_model_lists():
+    from asimov.models.openai_client import min_effort
+
+    assert min_effort("gpt-5-nano") == "minimal"
+    assert min_effort("gpt-6-luna") == "none"

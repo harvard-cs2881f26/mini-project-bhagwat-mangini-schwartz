@@ -668,6 +668,81 @@ still wait for the Fig 4 review and docs/HYPOTHESIS.md.
 - **2026-10-12: Gemini 3.1 Pro complete, 287/287**, 0 errors (remaining 122 run after the daily cap reset,
   2 at a time). Run by Claude at Tyler's request. Summaries rescored with `--no-calls` at a clean commit.
 
+## 2026-10-12: Session 3, decision-model interface (Noa)
+
+### Decision-model wording: DECIDED (Noa, 2026-10-12)
+Decision models (Part 2) get one `DecisionPart` per item, built from
+`src/asimov/prompts/decision_questions.yaml` (the one home for the wording; its hash is in each
+decision prompt's version). Sources: TypeSafe Choice docs (https://docs.typesafe.ai/primitives/choice),
+Jev 1.13 weaknesses (https://docs.typesafe.ai/model-jaggedness/jev-1.13), and
+`reports/System One models accuracy cost.md` (Session 3 research).
+- **Main runs use short instructions (`decision_short`)**: one self-contained sentence per question,
+  approved as drafted, with Q3 ending "compared with not doing it?". *Alternative considered:* the
+  paper's full text per question (`decision_full`). It is kept as a robustness check, because
+  wording alone moved accuracy by up to 76 points in published work (Sclar et al., arXiv 2310.11324).
+  Short wording is how these APIs are meant to be used ("a gut-check" per question, TypeSafe). It
+  also avoids the full text's cross-references ("the injury you identified in Q1"), which the APIs
+  can't honour, since they answer each question in isolation. The severity rubric still reaches the
+  model through the option descriptions (the paper's option text).
+- **Option values are short names, not letters**: Q2/Q4 `no_injury/minor/moderate/severe`; Q3
+  `eliminates/reduces/no_change/increases`; Q1 names made from each item's option text
+  (`burns_chemical`), unique within every item (checked on all 319). Descriptions are the paper's
+  option text. Our code maps answers back to the answer-key letters, so scoring is unchanged.
+  *Alternative considered:* letters A-E as values (`decision_short_letters`), kept as a check.
+  Reason: TypeSafe confirms option names are sent to the model, and letter labels carry their own
+  selection bias (PriDe, arXiv 2309.03882).
+- **State = scenario + instruction only**, without the paper's opening sentence ("You will be given
+  a hypothetical scenario..."). *Alternative considered:* including it. TypeSafe: "unrelated material
+  in the `state` costs you accuracy".
+- Questions are sent independently (one call per item). Chaining Q1 into Q2-Q4 is a possible
+  later variant, not built.
+
+### Qwen pairing for Part 2: DECIDED (Noa, by approving the Session 3 plan)
+Three local Qwen3.5-4B rows, so each contrast changes one thing: `qwen_base_logprob`
+(Qwen3.5-4B-Base, option logits) against `kev4b` changes only the decision training;
+`qwen_logprob` (post-trained Qwen3.5-4B, option logits) against `qwen_gen` (same weights, verbatim
+prompt, thinking off) changes only how the answer is produced. *Alternative considered:* two rows
+(`qwen_gen` vs `qwen_base_logprob`), which mixes the interface and training contrasts.
+
+### Codiv key name: DECIDED (Noa, by approving the Session 3 plan)
+Codiv's docs reuse `TYPESAFE_API_KEY` (+ `TYPESAFE_BASE_URL`), which would clash with the Jev key
+in one `.env`. Our client reads `CODIV_API_KEY` for Codiv (OpenJev, Laya). Kev on Modal:
+`KEV_API_KEY` (Kev README) + `KEV_BASE_URL` (ours). *Alternative considered:* one key per run via
+`TYPESAFE_API_KEY`, swapped by hand, which risks sending a run to the wrong service.
+
+### Decision question modes: DECIDED (Noa, 2026-10-12)
+The paper's Q2-Q4 refer to "the injury you identified in Q1". An LLM writes its four answers in
+order and sees its own earlier ones; a decision API answers each question in isolation. So whether
+a decision model's questions see its earlier answers is a config variant, set by the prompt name
+`decision_<wording>[_letters][_cumulative]` (`bench.text.parse_decision_prompt`; no runner or
+config schema change). Two modes; the orchestration is in one place,
+`models.decision.generate_decision`, and each client's `decide` makes one call.
+- **independent (non-cumulative)** (no suffix; main runs, unchanged): one call, all 4 questions in
+  isolation.
+- **cumulative** (`_cumulative`): one call per question; Q2 sees Q1's pick, Q3 sees Q1-Q2, Q4 sees
+  Q1-Q3, each as one line added to the state. This mirrors an LLM writing its answers in order.
+- **The model's own pick, never the key's**: the argmax option's text (the paper's option text),
+  put into that question's `context` line in `prompts/decision_questions.yaml`. An unanswered
+  question (refusal) adds no line, and the reply is still scored (unanswered = wrong, `finish` =
+  refused if any call refused). Tokens and latency are summed over the 4 calls (a token count is
+  unknown if any call didn't report it); cumulative replies save `raw = {"mode", "calls": [...]}`.
+- *Alternative considered:* a chained mode that passed only Q1's pick forward (Q1 alone, then
+  Q2-Q4 in one call). Built, then removed the same day at Noa's request: she meant one mode.
+  Also considered, not built: a weighted chain passing Q1's whole probability distribution (no
+  decision API takes a distribution as context, and it multiplies calls).
+- **Context-line wording: DECIDED (drafted by Claude, approved by Noa 2026-10-13)**: `MOST LIKELY INJURY BEFORE THE
+  ROBOT ACTS: {answer}`, `ITS SEVERITY BEFORE THE ROBOT ACTS: {answer}`, `EFFECT OF CARRYING OUT
+  THE INSTRUCTION: {answer}`.
+- **Prompt versions now hash the wording sections a request uses** (state, short, names; plus
+  context for cumulative), not the file's bytes, so editing the context lines or a comment doesn't
+  move the independent versions. Those moved once (hash `126e444fcb3b` -> `f89d5ee7e6bc`); no
+  decision replies had been saved, so no cache was lost. A test pins them.
+- Paid Part 2 configs stay independent; each says how to switch to `decision_short_cumulative`
+  (new run name). The free mock config `smoke_mock_decision_cumulative` covers the mode in tests.
+- **Still OPEN (scoring):** in cumulative mode a model's Q2 rates the severity of *its own* Q1
+  injury, which need not be the key's Q1 injury, so a "wrong" Q2 may be right for its own Q1.
+  How to score that is not decided.
+
 ## 2026-10-12: Fig. 4 with `thinking: default` (`repro_fig4_default`), Noa
 
 ### Run settings: DECIDED (Noa)
@@ -810,3 +885,58 @@ still wait for the Fig 4 review and docs/HYPOTHESIS.md.
   it ignores false positives.
 - **Open:** ask the first author which scoring Fig 4a plots, given that Fig 3 and the plotted values
   disagree (a follow-up to Tyler's 2026-10-10 email). `configs/paper/claims.yaml` is unchanged.
+
+## 2026-10-13: Session 3 smoke runs, hosted decision models (5 items each)
+
+Numbers only. 5-item accuracy is not reported (too few items to mean anything). All runs:
+`decision_short` (or `text_verbatim` for luna_gen), 0 errors, 0 parse failures.
+
+| Run | Served model | Input / output tokens per item | p50 latency | Cost, 5 items | Projected, 319 |
+|---|---|---|---|---|---|
+| `part2_codiv` OpenJev think 0 | `openjev-0.1` | 724 / 0 | 0.50 s | $0 (Codiv free tier) | $0 |
+| `part2_codiv` Laya | `laya-1.0` | 866 / 0 | 0.48 s | $0 | $0 |
+| `part2_openjev_think512` | `openjev-0.1` | 1,936 / 478 | 2.39 s | $0 | $0 |
+| `part2_jev` | `jev-1.13.0` | 1,060 / 222 | 0.17 s | $0.0002 | ~$0.014 |
+| `part2_jev_reversed` | `jev-1.13.0` | 1,060 / 222 | 0.26 s | $0.0002 | ~$0.014 |
+| `part2_luna_decide` | `gpt-6-luna` | 942 / 0 | 0.99 s | $0.0005 | ~$0.030 |
+| `part2_luna_gen` | `gpt-6-luna` | 1,370 / 200 | 2.78 s | $0.0012 | ~$0.076 |
+
+- Cost = tokens x list price (Jev $0.042/M input, output free; Decisions $0.10/M input; luna on
+  Responses $0.10/M in, $0.50/M out). Paid smoke total about $0.002.
+- OpenJev think 512 reached its 512-token cap on 3/5 items; input tokens more than double (the
+  OpenJev README says thinking bills the input twice).
+- Laya reports 783-967 input tokens per item, above its documented 512-token limit; the count may
+  be summed over the 4 questions. Codiv's response has no truncation signal, so whether any Laya
+  input was cut is **UNVERIFIED**.
+- gpt-6-luna reported 0 reasoning tokens on both Decisions and Responses (effort "none").
+- Jev, normal vs reversed option order: same answer on 18/20 question-answers (2 severity
+  answers moved by one level). 5 items only; the full runs measure this properly.
+- The Decisions API reports the served model as `gpt-6-luna`, with no dated version.
+
+### Kev-4B on Modal (2026-10-13)
+- Deployed with Kev's own `skills/kev-deploy/scripts/kev_serve.py` (sha256 `65ac20e8...`, runs kev
+  package commit `fc4a17e`), `KEV_MODEL=jaredpalmer/kev-4b@v1.0`, bearer auth (`KEV_API_KEY`),
+  Modal workspace `nschwartz`, app `kev`, URL `https://nschwartz--kev-api.modal.run`, L40S (H100
+  fallback), scales to zero after 5 idle minutes (no cost while idle). `/v1/models` reports base
+  `Qwen/Qwen3.5-4B-Base`, LoRA rank 16, bf16, **temperature 2.41**: Kev scales its probabilities
+  with its own fitted temperature. Argmax (accuracy) is unchanged; Brier/ECE are not comparable to
+  an untempered model without noting this.
+- First cold start 179 s. Smoke (`part2_kev`, 5 items): 0 errors, 0 parse failures, ~590 input
+  tokens per item, server latency 248-682 ms (`raw.latency_ms`), ~1 s round trip.
+  Kev reports output tokens (~350 per item); no tokens are billed (own GPU). Cost is GPU time.
+
+### Code-review fixes before merging PR #9 (2026-10-13)
+- **Ties go to the service's own answer: DECIDED (Claude, a bug fix; Noa to confirm).** luna's
+  Decisions API rounds probabilities to 2 decimals, so exact ties happen (1 in 20 smoke answers:
+  `text_0216` severity 0.47 / 0.47). We took the first tied option (A); the API's own `choice` was B.
+  Now the pick is the highest probability, and on an exact tie the service's `choice` (all our
+  services return one), else the first tied option in paper order. *Alternative considered:*
+  always the first option in paper order. The 5 `part2_luna_decide` smoke replies were made under
+  the old rule, so they were removed and are re-called in the full run.
+- A response without an answer for every question sent (e.g. an error body with HTTP 200) now
+  raises: logged as an error, never saved as a reply.
+- Probabilities must sum to 1 within 1e-3 (`PROB_SUM_TOLERANCE`; Kev's deviate by ~1e-4).
+- Configs: `base_url` / `key_env` / `params` are rejected on providers other than `systemone`.
+- Kev's URL lives in `configs/part2_kev.yaml`; there is no `KEV_BASE_URL` env var (docs corrected).
+- Not changed, flagged for Tyler: the gpt-6-luna lowest-effort mapping is a model id in
+  `models/openai_client.py` (`MIN_EFFORT`).
