@@ -40,10 +40,10 @@ from asimov.models.remote import BACKENDS, remote_complete, remote_decide, remot
 
 MODES = ("logprob", "generate")
 LOGIT_DTYPES = ("fp32",)
-OPTIONAL = ("backend", "logit_dtype")  # checked by check_backend / check_logit_dtype
+OPTIONAL = ("backend", "logit_dtype", "max_new_tokens")  # checked by check_backend / check_logit_dtype / check_max_new_tokens
 TEMPLATES = ("plain", "chat")
 PARAMS = ("repo", "revision", "mode", "template")
-MAX_NEW_TOKENS = 1024  # generation cap; the paper's JSON reply with rationales needs a few hundred
+MAX_NEW_TOKENS = 1024  # default generation cap; params max_new_tokens overrides it
 # Rendered at load, so a letter that isn't one token fails before any item runs.
 LETTER_CHECK = DecisionQuestion(
     id="check", instructions="Which option?", options=tuple((v, v) for v in "vwxyz"), letters=tuple("ABCDE")
@@ -77,6 +77,14 @@ def check_logit_dtype(params: dict | None) -> str:
     if dtype not in LOGIT_DTYPES:
         raise ValueError(f"logit_dtype must be one of {LOGIT_DTYPES}, not {dtype!r}")
     return dtype
+
+
+def check_max_new_tokens(params: dict | None) -> int:
+    """The generation cap: params max_new_tokens (a positive int) or MAX_NEW_TOKENS."""
+    value = (params or {}).get("max_new_tokens", MAX_NEW_TOKENS)
+    if isinstance(value, bool) or not isinstance(value, int) or value < 1:
+        raise ValueError(f"max_new_tokens must be a positive integer, not {value!r}")
+    return value
 
 
 def fp32_logits(hidden: Any, weight_fp32: Any) -> Any:
@@ -119,10 +127,11 @@ class LocalHFClient:
         self.model = model
         self.repo, self.revision, self.mode, self.template = check_params(params)
         self.backend, self.logit_dtype = check_backend(params), check_logit_dtype(params)
+        self.max_new_tokens = check_max_new_tokens(params)
         self.lock = threading.Lock()
         if self.backend == "modal":
             names = {"repo": self.repo, "revision": self.revision, "mode": self.mode, "template": self.template}
-            self.remote = remote_model("LocalHF", **names, logit_dtype=self.logit_dtype)
+            self.remote = remote_model("LocalHF", **names, logit_dtype=self.logit_dtype, max_new_tokens=self.max_new_tokens)
             return
         self.load()
         if self.mode == "logprob":
@@ -200,7 +209,7 @@ class LocalHFClient:
             out = self.lm.generate(
                 torch.tensor([ids], device=self.device),
                 attention_mask=torch.ones(1, len(ids), dtype=torch.long, device=self.device),
-                max_new_tokens=MAX_NEW_TOKENS,
+                max_new_tokens=self.max_new_tokens,
                 do_sample=False,  # greedy: deterministic, so the cached reply is the reply (WORKLOG 2026-10-13)
                 temperature=None,
                 top_p=None,
@@ -209,9 +218,9 @@ class LocalHFClient:
         new = out[0, len(ids) :].tolist()
         eos = self.lm.generation_config.eos_token_id
         eos = {eos} if isinstance(eos, int) else set(eos or [])
-        reason = generation_finish(len(new), MAX_NEW_TOKENS, bool(new) and new[-1] in eos)
+        reason = generation_finish(len(new), self.max_new_tokens, bool(new) and new[-1] in eos)
         raw = {"model": self.served, "template": "chat", "thinking": "off", "decoding": "greedy",
-               "max_new_tokens": MAX_NEW_TOKENS, "finish_reason": reason}  # fmt: skip
+               "max_new_tokens": self.max_new_tokens, "finish_reason": reason}  # fmt: skip
         return ModelResponse(
             text=self.tokenizer.decode(new, skip_special_tokens=True),
             model=self.served,

@@ -1322,3 +1322,24 @@ Q2 6/32/142/139, Q3 60/97/121/41, Q4 78/43/90/108.
 | `part2_laya_cumulative` | 32/23/27/28/209 | 1/148/146/24 | 1/177/3/138 | 1/139/152/27 |
 | `part2_openjev_think512_full` | 66/82/74/67/30 | 22/68/92/137 | 49/108/105/57 | 126/50/47/96 |
 | `part2_openjev_think512_cumulative` | 54/52/49/44/120 | 110/61/62/86 | 14/159/80/66 | 189/40/30/60 |
+
+## 2026-10-14: Part 2 follow-ups (Noa's decisions this morning)
+
+- **One-shot worked example: DECIDED (Noa, 2026-10-14).** The hedge-trimmer example in the
+  `oneshot` section of `src/asimov/prompts/decision_questions.yaml` is approved as drafted (comment
+  updated; comments aren't hashed, so no prompt version changed). *Alternative considered:* a
+  different made-up example.
+- **fp32 reruns kept under the same run names: DECIDED (Noa delegated to Claude, 2026-10-14).**
+  `part2_qwen_base_logprob` (txt26) and `part2_qwen_logprob` (txt28) were rerun after the fp32 fix by
+  deleting their `results/<run>/config.yaml` copies (the ConfigChanged guard). Kept as is: the bf16
+  and fp32 replies sit under different cache keys (`logit_dtype` is in params), summaries and pages
+  use only the current (fp32) key, and every row records `logit_dtype`. *Alternative considered:*
+  new run names (`..._fp32`). Bypassing the guard is not a pattern to repeat: new settings get a
+  new run name, as for the generation-cap rerun below.
+- **Qwen generate rerun with a 2048-token cap: DECIDED (Noa, 2026-10-14).** txt27 had 11.0% parse
+  failures (29 invalid "E" answers on 4-option questions; 29 replies at the 1024-token cap, 16 of
+  them unparseable). New config `part2_qwen_gen_2048` (own run name; only change `params:
+  max_new_tokens: 2048`, now a client setting with 1024 as default). It fixes cut-off replies, not
+  the invalid "E" answers. *Alternative considered:* keep txt27 and report the 11%.
+- **Kev redeploy for the 3 missing grid cells: approved (Noa, 2026-10-14):** `part2_kev_full`,
+  `part2_kev_letters`, `part2_kev_full_cumulative` (configs from PR #21).
