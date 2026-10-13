@@ -1069,7 +1069,7 @@ Qwen generate ~7.7 tokens/s, 42-111 s/item, peak 11.2 GB, load 11-14 s; 1 of 17 
 - **The bug (found by the main session in the full runs):** Qwen's output layer runs in bf16, which
   rounds logits near 17 to steps of 0.125, so close options got exactly equal letter logits (e.g.
   `text_0216` latent severity [17.5, 17.25, 17.5, 17.5]). Exact top ties: 40 answers in
-  `part2_qwen_base_logprob` (txt10), 32 in `part2_qwen_logprob` (txt12), 0 in fp32 NLI. Ties go to
+  `part2_qwen_base_logprob` (txt26), 32 in `part2_qwen_logprob` (txt28), 0 in fp32 NLI. Ties go to
   the first tied option in paper order (`models.decision.pick`), so they leaned towards A.
 - **The fix: DECIDED (Noa, 2026-10-13).** The model body stays bf16; the last hidden state (after
   the final norm, `Qwen3_5ForCausalLM.model(...).last_hidden_state`) is projected with an fp32 copy
@@ -1077,7 +1077,7 @@ Qwen generate ~7.7 tokens/s, 42-111 s/item, peak 11.2 GB, load 11-14 s; 1 of 17 
   from the same fp32 logits. Param `logit_dtype: fp32` (the only value) is in both logprob configs,
   so it is in the cache key, and each reply's raw records it. *Alternative considered:* breaking
   ties at random or by a fixed order (keeps the precision loss).
-- **The bf16 rows are superseded:** they stay in txt10/txt12 `responses.jsonl` under their old keys
+- **The bf16 rows are superseded:** they stay in txt26/txt28 `responses.jsonl` under their old keys
   (`04e4fcd42eaf`, `e6a7133b054e`) and are not used; each run's `summary.json` is rebuilt from the
   fp32 key only. The two runs keep their names; their `config.yaml` copies were replaced by the new
   config (the runner's config guard otherwise needs a new run name for a changed setting; a
@@ -1102,7 +1102,7 @@ Qwen generate ~7.7 tokens/s, 42-111 s/item, peak 11.2 GB, load 11-14 s; 1 of 17 
   inside `local` (as first suggested) because that would have moved every `_local` version and
   orphaned the full NLI and fp32 runs. Tests check the example is not in data/text/items.jsonl
   (no substring, word overlap < 0.3 with every item) and never holds an item's answer or id.
-  Config `part2_qwen_base_logprob_oneshot` (run ID txt13), same params as the zero-shot base row.
+  Config `part2_qwen_base_logprob_oneshot` (run ID txt29), same params as the zero-shot base row.
 - **Pre-registered rule: DECIDED (Noa, 2026-10-13).** Of the two base rows, the one with the
   higher median letter mass is the main Qwen-Base row for the Kev comparison; both are reported;
   never chosen by accuracy. *Alternative considered:* keep zero-shot only.
@@ -1110,14 +1110,14 @@ Qwen generate ~7.7 tokens/s, 42-111 s/item, peak 11.2 GB, load 11-14 s; 1 of 17 
 
 | Base row (fp32) | letter mass q25 / median / q75 | risk type | severity | effect | activated |
 |---|---|---|---|---|---|
-| zero-shot (txt10) | 0.184 / 0.241 / 0.322 | 0.683 | 0.408 | 0.361 | 0.335 |
-| one-shot (txt13) | 0.956 / 0.967 / 0.979 | 0.809 | 0.539 | 0.514 | 0.357 |
+| zero-shot (txt26) | 0.184 / 0.241 / 0.322 | 0.683 | 0.408 | 0.361 | 0.335 |
+| one-shot (txt29) | 0.956 / 0.967 / 0.979 | 0.809 | 0.539 | 0.514 | 0.357 |
 
   By the pre-registered rule, the one-shot row (median letter mass 0.967 vs 0.241) is the main
   Qwen-Base row.
 
 ### Modal latency: read `raw.remote.compute_s` (2026-10-13)
-- The full NLI and qwen_gen runs (and the superseded bf16 txt10/txt12 runs) used the runner's default
+- The full NLI and qwen_gen runs (and the superseded bf16 txt26/txt28 runs) used the runner's default
   4 workers against one container (`max_containers=1`), so their `latency_s` (round trip) includes
   waiting in Modal's queue. For Modal-backend rows, latency is `raw.remote.compute_s`; round trip is
   meaningful only from `--workers 1` runs (the fp32 reruns and the one-shot run). Not rerun: compute_s
@@ -1125,18 +1125,74 @@ Qwen generate ~7.7 tokens/s, 42-111 s/item, peak 11.2 GB, load 11-14 s; 1 of 17 
 
 | Run | compute_s p50 / p95 | round trip p50 / p95 | workers |
 |---|---|---|---|
-| txt9 NLI | 0.146 / 0.156 | 0.64 / 0.79 | 4 |
-| txt10 base, bf16 (superseded) | 0.207 / 0.214 | 1.25 / 1.37 | 4 |
-| txt10 base, fp32 | 0.215 / 0.223 | 0.25 / 0.33 | 1 |
-| txt13 base one-shot | 0.225 / 0.232 | 0.27 / 0.35 | 1 |
-| txt12 logprob, bf16 (superseded) | 0.278 / 0.296 | 1.75 / 1.85 | 4 |
-| txt12 logprob, fp32 | 0.275 / 0.328 | 0.33 / 0.42 | 1 |
-| txt11 generate | 17.11 / 40.14 | 78.54 / 104.97 | 4 |
+| txt25 NLI | 0.146 / 0.156 | 0.64 / 0.79 | 4 |
+| txt26 base, bf16 (superseded) | 0.207 / 0.214 | 1.25 / 1.37 | 4 |
+| txt26 base, fp32 | 0.215 / 0.223 | 0.25 / 0.33 | 1 |
+| txt29 base one-shot | 0.225 / 0.232 | 0.27 / 0.35 | 1 |
+| txt28 logprob, bf16 (superseded) | 0.278 / 0.296 | 1.75 / 1.85 | 4 |
+| txt28 logprob, fp32 | 0.275 / 0.328 | 0.33 / 0.42 | 1 |
+| txt27 generate | 17.11 / 40.14 | 78.54 / 104.97 | 4 |
 
 ### qwen_gen parse failures, held for Noa's review (numbers only)
-- `part2_qwen_gen` (txt11, 319 items, 0 errors): parse failures 35 items (11.0%), above the 2%
+- `part2_qwen_gen` (txt27, 319 items, 0 errors): parse failures 35 items (11.0%), above the 2%
   stop line for text, so held for Noa; not rerun, cap unchanged.
 - 29 answers invalid letter "E" on 4-option questions (latent severity 20, activated risk 9), in 20
   items. 29 replies truncated at MAX_NEW_TOKENS = 1024 (9.1%); 16 of them are parse failures.
   Overlap: 2 items both truncated and with an invalid "E"; failing items = 18 invalid-only +
   14 truncated-only + 2 both + 1 other (a missing key, not truncated).
+
+## 2026-10-13: Part 2 variant runs
+
+Numbers only; interpretation is Noa's. Six runs approved by Noa (2026-10-13), all 319 items. Each
+config copies its base config with exactly one change (comment at the top of each config). Every run
+reached 319/319 with 0 errors on the first pass; a second pass called nothing (all cached).
+Severity columns are exact-level accuracy, as in Fig 4.
+
+| Run | Base run | The one change | Q1 risk type | Q2 severity | Q3 effect | Q4 activated | Parse fail | p50 latency | API cost |
+|---|---|---|---|---|---|---|---|---|---|
+| `part2_jev_cumulative` | `part2_jev` | prompt `decision_short_cumulative` | 82.8% | 60.5% | 57.4% | 55.8% | 0.0% | 0.55 s | $0.030 |
+| `part2_openjev_cumulative` | `part2_codiv` (OpenJev think 0 row) | prompt `decision_short_cumulative` | 44.5% | 25.1% | 59.6% | 36.7% | 0.0% | 1.66 s | $0 |
+| `part2_kev_cumulative` | `part2_kev` | prompt `decision_short_cumulative` | 42.0% | 32.6% | 57.1% | 42.9% | 0.0% | 0.69 s | GPU time |
+| `part2_jev_full` | `part2_jev` | prompt `decision_full` | 87.5% | 57.4% | 67.1% | 51.7% | 0.0% | 0.15 s | $0.022 |
+| `part2_openjev_full` | `part2_codiv` (OpenJev think 0 row) | prompt `decision_full` | 78.4% | 67.1% | 68.3% | 45.1% | 0.0% | 0.45 s | $0 |
+| `part2_jev_letters` | `part2_jev` | prompt `decision_short_letters` | 86.2% | 52.7% | 51.7% | 47.3% | 0.0% | 0.14 s | $0.014 |
+
+Base runs for reference (2026-10-13 full runs): `part2_jev` 82.1 / 52.7 / 49.5 / 48.0, p50 0.15 s;
+OpenJev think 0 50.5 / 24.8 / 42.6 / 30.7, p50 0.52 s; `part2_kev` 42.9 / 38.2 / 58.6 / 42.9, p50 0.39 s.
+
+- **Cost:** tokens x list price (Jev $0.042/M input, output free; Codiv free tier). API total $0.066.
+  Input tokens: Jev cumulative 719,291, full 531,665, letters 327,189; OpenJev cumulative 413,234,
+  full 429,095. Cumulative latency is the sum of the 4 calls per item. p95 latency: Jev cumulative
+  0.71 s, full 0.24 s, letters 0.23 s; OpenJev cumulative 6.80 s, full 0.63 s; Kev cumulative 1.64 s.
+- **Kev:** warmed (`/v1/models` 200), run 01:19-01:20 (319 items, 1,276 calls), then **stopped with
+  `modal app stop kev`** (Noa: take Kev down after the variants; `modal app list` shows `stopped`).
+  GPU time = warm-up + about 1 minute of calls + the smoke; exact charge on the Modal dashboard.
+  Redeploy from `kev_serve.py` (see "Kev-4B on Modal") to run Kev again.
+- **Codiv runs** used `--workers 1`; no rate-limit errors.
+
+### Bug checks (all six runs)
+Checked with a script that reads each `responses.jsonl` and replays every saved row through our
+code (`bench.text.build_request` + `models.decision.generate_decision`, with the saved provider
+responses in place of HTTP):
+- 319 rows, no duplicate ids, one cache key per run, the config's prompt on every row.
+- Served model on every call: `jev-1.13.0` (Jev), `openjev-0.1` (OpenJev), `kev-latest` (Kev).
+- Every question's probabilities sum to 1 within 0.03; every reply letter is a top-probability
+  option; replaying the saved responses gives the saved reply text on all 319 rows of every run.
+- Cumulative runs: 4 calls per item in `raw["calls"]`. Rebuilding the state each call was sent
+  matches, on all 1,276 calls per run, the scenario/instruction state plus one context line per
+  earlier question naming the model's own pick (its option text). No state contains a line naming
+  the answer key's option where the model picked a different one.
+- Refusals 0, truncations 0, parse failures 0 in every run.
+- No code bugs found; no code changed.
+
+Predicted vs key answer counts (A/B/C/D[/E]); key: Q1 78/83/74/79/5, Q2 6/32/142/139,
+Q3 60/97/121/41, Q4 78/43/90/108.
+
+| Run | Q1 | Q2 | Q3 | Q4 |
+|---|---|---|---|---|
+| `part2_jev_cumulative` | 71/82/60/77/29 | 34/66/77/142 | 0/180/64/75 | 159/38/39/83 |
+| `part2_openjev_cumulative` | 37/42/35/36/169 | 153/79/36/51 | 0/195/65/59 | 248/18/5/48 |
+| `part2_kev_cumulative` | 35/34/35/36/179 | 182/29/32/76 | 0/199/97/23 | 201/33/31/54 |
+| `part2_jev_full` | 71/85/67/74/22 | 23/76/66/154 | 19/147/83/70 | 161/31/29/98 |
+| `part2_openjev_full` | 56/84/74/66/39 | 3/66/150/100 | 26/131/99/63 | 152/74/31/62 |
+| `part2_jev_letters` | 76/89/63/74/17 | 76/51/66/126 | 0/188/41/90 | 202/11/17/89 |

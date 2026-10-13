@@ -1,0 +1,8 @@
+# Variant of part2_jev.yaml with one change: prompt decision_short -> decision_short_letters
+# (option values are the letters A-E instead of short names).
+run: part2_jev_letters
+benchmark: text
+prompt: decision_short_letters
+thinking: min
+models:
+  - {name: Jev, provider: systemone, model: jev-latest, base_url: "https://api.typesafe.ai", key_env: TYPESAFE_API_KEY}
