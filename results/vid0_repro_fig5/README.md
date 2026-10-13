@@ -18,7 +18,11 @@ These put our results and the paper's on the same chart. Filled marks are our ru
 
 ![fig5a, comparison](../../figures/vid0/fig5a_comparison.png)
 
+**Key insight:** Every model scores lower on video than on text, by 7 to 44 points.
+
 ![fig5b, comparison](../../figures/vid0/fig5b_comparison.png)
+
+**Key insight:** On stepping in within 0.5 s, the paper's value is inside our 95% range for 2 of 8 models; on timing error, for 4 of 8 models.
 
 ### Paper-style versions
 
@@ -58,6 +62,23 @@ Paper: arXiv 2509.21651v2, read on 2026-10-12 into `configs/paper/claims.yaml`. 
 | `sec3_gemini_2_5_pro_timing_mae_s` | – / 3 | bound | Gemini 2.5 Pro | – | timing_mae_s | 0.750 | – | – | – |  | a bound, not a point value |
 | `sec3_gemini_2_5_pro_within_0_5_rate` | – / 3 | value | Gemini 2.5 Pro | Gemini 2.5 Pro (3.1) | within_0_5_rate | 0.560 | 0.519 [0.461, 0.576] | -0.041 | yes | yes | checked |
 | `appD_avg_majority_baseline_risk` | – / Appendix D | baseline | – | – | majority_baseline_risk | 0.672 | – | – | – |  | derived from the dataset's counts, no model |
+
+## Cost and speed
+
+| Model | Input tokens / item | Output tokens / item | Latency p50 / p95 s | Refused | Parse failures | $ / item | $ run |
+|---|---|---|---|---|---|---|---|
+| GPT-5 Nano | 22450 | 51 | 2.2 / 4.3 | 0 | 0 | – | – |
+| GPT-5 Mini | 18050 | 51 | 1.9 / 3.1 | 0 | 0 | – | – |
+| GPT-5 | 14930 | 51 | 4.7 / 7.8 | 0 | 0 | – | – |
+| Claude Sonnet 4 (4.5) | 19610 | 107 | 2.2 / 10.9 | 0 | 0 | – | – |
+| Claude Opus 4.1 (4.5) | 19610 | 39 | 3.2 / 7.1 | 0 | 0 | – | – |
+| Gemini 2.5 Flash-Lite (3.1) | 17845 | 34 | 4.2 / 6.8 | 2 | 2 | – | – |
+| Gemini 2.5 Flash (3) | 17968 | 34 | 3.1 / 6.1 | 2 | 2 | – | – |
+| Gemini 2.5 Pro (3.1) | 17907 | 39 | 8.7 / 19.8 | 2 | 2 | – | – |
+
+Per item: the model's totals over this run divided by its replies. Refused and Parse failures as in Models below. $ comes from logged tokens × `configs/prices.yaml`; "–" until that file has the model.
+
+**Key insight:** GPT-5 Mini is the fastest per reply (median 1.9 s) and Gemini 2.5 Pro (3.1) the slowest (8.7 s); Claude Sonnet 4 (4.5) writes the most output tokens per item (107) and Gemini 2.5 Flash-Lite (3.1) and Gemini 2.5 Flash (3) the fewest (34).
 
 ## Settings
 

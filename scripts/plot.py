@@ -9,6 +9,8 @@ Two versions per figure:
 - paper:      the paper's look (chart type, axes, colors, labels, legend; no title), our values only;
 - comparison: ours filled with 95% CI bars, the paper's values hollow, majority baselines dashed.
 Every run gets its own figures, under its run ID (results/run_ids.yaml): text runs Fig 4a and 4b, video runs Fig 5b.
+Text runs also get our cross-model charts (pages.EXTRA_FIGURES): accuracy heatmap, severity scoring, accuracy vs
+cost, and one thinking comparison per run that differs from it only in thinking (thinking_vs_<twin id>).
 Fig 5a (text vs video) pairs each run with the headline run of the other benchmark (results/headline.yaml) and is
 skipped when there is none. Run pages (scripts/collect.py) link these files; Fig 6 waits for the image scorer.
 """
@@ -16,6 +18,7 @@ skipped when there is none. Run pages (scripts/collect.py) link these files; Fig
 from __future__ import annotations
 
 import argparse
+import math
 import sys
 import textwrap
 from dataclasses import dataclass
@@ -28,27 +31,31 @@ import matplotlib
 matplotlib.use("Agg")
 import matplotlib.pyplot as plt  # noqa: E402
 from matplotlib.lines import Line2D  # noqa: E402
-from matplotlib.ticker import MultipleLocator, PercentFormatter  # noqa: E402
+from matplotlib.ticker import FixedLocator, FuncFormatter, MultipleLocator, NullLocator, PercentFormatter  # noqa: E402
 from matplotlib.typing import RcKeyType  # noqa: E402
 
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT / "src"))
 
 from asimov.bench.text_score import QUESTIONS  # noqa: E402
-from asimov.claims import CLAIMS_PATH, Claims, load_claims, model_key, paper_value  # noqa: E402
+from asimov.claims import CLAIMS_PATH, Claims, load_claims, model_key  # noqa: E402
 from asimov.collect.build import default_headline  # noqa: E402
 from asimov.collect.load import RunData, load_results, load_yaml  # noqa: E402
-from asimov.collect.metrics import estimate  # noqa: E402
-from asimov.collect.pages import EXTRA_FIGURES, PAIRED_FIGURE, fig5a_partner, run_figures  # noqa: E402
+from asimov.collect.pages import PAIRED_FIGURE, extra_figures, fig5a_partner, run_figures  # noqa: E402
 from asimov.collect.run_ids import assign_ids  # noqa: E402
 from asimov.plot_data import (  # noqa: E402
+    SCORING_METRICS,
     SEVERITY,
     SEVERITY_LABEL,
     Bar,
     Box,
+    CostPoint,
     Point,
+    TwinRow,
+    accuracy_grid,
     baseline,
     color,
+    cost_points,
     in_paper_order,
     needs_leader,
     ours,
@@ -56,7 +63,11 @@ from asimov.plot_data import (  # noqa: E402
     place_labels,
     same_spot_ranks,
     severity_metric,
+    severity_scores,
     text_vs_video,
+    thinking_order,
+    thinking_value,
+    twin_rows,
 )
 from asimov.run_ids import RUN_IDS_FILE, parse_ids  # noqa: E402
 
@@ -200,6 +211,25 @@ READABLE = {
     "within_0_5_rate": "Steps in within 0.5 s of the right moment\n% of videos, higher is better",
 }
 PERCENT_STEP = 0.1  # one tick every 10 points on fraction axes
+
+
+PANEL_PERCENT_STEPS = (0.1, 0.05, 0.02, 0.01)  # small-multiple panels: the largest step giving MIN_PANEL_TICKS
+MIN_PANEL_TICKS = 2
+
+
+def panel_percent_step(lim: tuple[float, float]) -> float:
+    """The largest of PANEL_PERCENT_STEPS with at least MIN_PANEL_TICKS ticks inside `lim` (fractions)."""
+    lo, hi = sorted(lim)
+    for step in PANEL_PERCENT_STEPS:
+        if math.floor(hi / step + 1e-9) - math.ceil(lo / step - 1e-9) + 1 >= MIN_PANEL_TICKS:
+            return step
+    return PANEL_PERCENT_STEPS[-1]
+
+
+def fine_percent_axis(axis, lim: tuple[float, float]) -> None:
+    """Whole-percent ticks for one small-multiple panel, at least two of them however narrow its range."""
+    axis.set_major_locator(MultipleLocator(panel_percent_step(lim)))
+    axis.set_major_formatter(PercentFormatter(xmax=1.0, decimals=0))
 
 
 def percent_axis(axis, scale: float = 1.0) -> None:
@@ -606,10 +636,13 @@ def fig5b(run: RunData, claims: Claims, out: Path) -> list[Path]:
 
 # Severity scoring chart: one model's Q2 answers scored three ways (validated dataviz palette, slots 1-3, so
 # the series never look like the per-model colors).
-SCORING = (
-    (f"{QUESTIONS[1]}_accuracy", "Multiple choice (exact level)", "#2a78d6"),
-    (f"{QUESTIONS[1]}_severe_binary_accuracy", "Severe vs not", "#eb6834"),
-    (f"{QUESTIONS[1]}_severe_recall", "Severe recall", "#1baf7a"),
+SCORING = tuple(
+    zip(
+        SCORING_METRICS,
+        ("Multiple choice (exact level)", "Severe vs not", "Severe recall"),
+        ("#2a78d6", "#eb6834", "#1baf7a"),
+        strict=True,
+    )
 )
 SCORING_BAR = 0.26
 SCORING_NOTES = [
@@ -624,14 +657,14 @@ SCORING_NOTES = [
 
 def severity_scoring(run: RunData, claims: Claims, out: Path) -> list[Path]:
     """Grouped bars: per model, Q2 severity accuracy under each scoring rule, with 95% CIs and the paper's 4a value."""
-    models = in_paper_order(list(run.models))
+    models = severity_scores(run, claims)
     with plt.rc_context(STYLE):
         width = max(FIG5A_MIN_WIDTH, FIG5A_INCHES_PER_MODEL * len(models) + FIG5A_EXTRA_WIDTH)
         fig, ax = plt.subplots(figsize=(width, FIG5A_HEIGHT))
         xs = list(range(len(models)))
-        for k, (metric, label, c) in enumerate(SCORING):
+        for k, (_, label, c) in enumerate(SCORING):
             pos = [x + (k - 1) * SCORING_BAR for x in xs]
-            ests = [estimate(m, run.benchmark, metric) for m in models]
+            ests = [m.scores[k] for m in models]
             values = [nan if e is None else e.value for e in ests]
             err = [
                 [0 if e is None or e.lo is None else e.value - e.lo for e in ests],
@@ -648,8 +681,7 @@ def severity_scoring(run: RunData, claims: Claims, out: Path) -> list[Path]:
                 yerr=err,
                 error_kw={"elinewidth": 1, "ecolor": INK, "alpha": CI_ALPHA},
             )
-        theirs = [paper_value(claims, run.benchmark, m.name, f"{QUESTIONS[1]}_accuracy", "4a") for m in models]
-        shown = [(x, v) for x, v in zip(xs, theirs, strict=True) if v is not None]
+        shown = [(x, m.paper) for x, m in zip(xs, models, strict=True) if m.paper is not None]
         if shown:
             ax.scatter(
                 [x for x, _ in shown],
@@ -685,28 +717,25 @@ HEATMAP_COLUMNS = {
     QUESTIONS[2]: "Action effect\n(Q3)",
     QUESTIONS[3]: "Severity after\naction (Q4)",
 }
-HEATMAP_PAPER_FIGURE = {QUESTIONS[0]: "4a", QUESTIONS[1]: "4a", QUESTIONS[2]: "4b", QUESTIONS[3]: "4b"}
 
 
 def accuracy_heatmap(run: RunData, claims: Claims, out: Path) -> list[Path]:
     """Models x questions grid of our accuracy (multiple choice), with the paper's value under ours."""
-    models = in_paper_order(list(run.models))
+    rows = accuracy_grid(run, claims)
     questions = list(HEATMAP_COLUMNS)
-    grid = [[(estimate(m, run.benchmark, f"{q}_accuracy") or None) for q in questions] for m in models]
-    values = [[nan if e is None else e.value for e in row] for row in grid]
+    values = [[nan if v is None else v for v in r.ours] for r in rows]
     with plt.rc_context(HEATMAP_STYLE):
-        fig, ax = plt.subplots(figsize=(8.5, 0.55 * len(models) + 1.8))
+        fig, ax = plt.subplots(figsize=(8.5, 0.55 * len(rows) + 1.8))
         image = ax.imshow(values, cmap=HEATMAP_CMAP, vmin=HEATMAP_RANGE[0], vmax=HEATMAP_RANGE[1], aspect="auto")
-        for i, m in enumerate(models):
-            for j, q in enumerate(questions):
-                v = values[i][j]
+        for i, r in enumerate(rows):
+            for j in range(len(questions)):
+                v, theirs = values[i][j], r.paper[j]
                 if isnan(v):
                     continue
-                theirs = paper_value(claims, run.benchmark, m.name, f"{q}_accuracy", HEATMAP_PAPER_FIGURE[q])
                 text = f"{v:.0%}" + (f"\npaper {theirs:.0%}" if theirs is not None else "")
                 ax.text(j, i, text, ha="center", va="center", fontsize=9, color="white" if v >= HEATMAP_DARK_TEXT_FROM else INK)
         ax.set_xticks(range(len(questions)), [HEATMAP_COLUMNS[q] for q in questions])
-        ax.set_yticks(range(len(models)), [m.name for m in models])
+        ax.set_yticks(range(len(rows)), [r.name for r in rows])
         ax.xaxis.tick_top()
         ax.set_title("Accuracy on each question (multiple choice, % of scenarios)", pad=34)
         bar = fig.colorbar(image, ax=ax, fraction=0.04, pad=0.02)
@@ -714,8 +743,148 @@ def accuracy_heatmap(run: RunData, claims: Claims, out: Path) -> list[Path]:
         return save(fig, out, "accuracy_heatmap")
 
 
-def draw_run(run: RunData, runs: list[RunData], headline: dict, claims: Claims, severity: str, out: Path) -> list[Path]:
-    """This run's figures (pages.run_figures) into `out`, which is figures/<run_id>/."""
+# Accuracy vs cost: one panel per question, x = mean output tokens per item (log), y = accuracy
+COST_FIGSIZE = (12.5, 9)
+TOKEN_TICK_STEPS = (1, 2, 3, 4, 5, 7)  # tick at these x 10^k tokens
+TOKEN_TICK_DECADES = range(0, 7)
+TOKEN_FALLBACK_ROUND = 10  # with fewer than two ticks in range: the range's ends, rounded inward to this
+COST_NOTES = [
+    "Each dot is one model. Higher = more accurate (% of scenarios, multiple choice).",
+    "Further right = more output tokens per item on average (log scale).",
+    "No 95% ranges or paper values here: the other charts show those.",
+    "Each panel is one of the four questions.",
+]
+
+
+def token_tick(v: float) -> str:
+    """Plain tick labels for a token axis: 200, 500, 1k, 1.5k, 10k."""
+    return f"{v / 1000:g}k" if v >= 1000 else f"{v:g}"
+
+
+def token_ticks(lo: float, hi: float) -> list[float]:
+    """TOKEN_TICK_STEPS x 10^k inside [lo, hi]; the ends rounded inward when fewer than two fit."""
+    ticks = [s * 10**d for d in TOKEN_TICK_DECADES for s in TOKEN_TICK_STEPS if lo <= s * 10**d <= hi]
+    if len(ticks) >= 2:
+        return ticks
+    r = TOKEN_FALLBACK_ROUND
+    return sorted({-(-lo // r) * r, hi // r * r})
+
+
+def cost_notes(points: list[CostPoint]) -> list[str]:
+    missing = [p.name for p in points if p.tokens is None]
+    return COST_NOTES + ([f"Not shown (no output token counts): {', '.join(missing)}."] if missing else [])
+
+
+def token_axis(ax) -> None:
+    ax.set_xscale("log")
+    ax.margins(AXIS_MARGIN)
+    ax.autoscale_view()
+    ax.xaxis.set_major_locator(FixedLocator(token_ticks(*ax.get_xlim())))
+    ax.xaxis.set_major_formatter(FuncFormatter(lambda v, _: token_tick(v)))
+    ax.xaxis.set_minor_locator(NullLocator())
+
+
+def accuracy_vs_cost(run: RunData, out: Path) -> list[Path]:
+    """2x2 small multiples: accuracy per question against mean output tokens per item, one labelled dot per model."""
+    points = cost_points(run)
+    shown = [p for p in points if p.tokens is not None]
+    with plt.rc_context(STYLE):
+        fig, axes = plt.subplots(2, 2, figsize=COST_FIGSIZE)
+        panels = []
+        for j, (q, ax) in enumerate(zip(QUESTIONS, axes.flat, strict=True)):
+            pts = [Point(p.name, p.tokens, a) for p in shown if (a := p.accuracy[j]) is not None]
+            scatter(ax, pts, COMPARISON)
+            token_axis(ax)
+            fine_percent_axis(ax.yaxis, ax.get_ylim())
+            ax.set_title(HEATMAP_COLUMNS[q].replace("\n", " "))
+            ax.set(xlabel="Output tokens per item (log scale)" if j >= 2 else "", ylabel="% of scenarios" if j % 2 == 0 else "")
+            panels.append((ax, pts))
+        fig.suptitle("Accuracy vs output tokens per item", fontsize=STYLE["axes.titlesize"] + 1)
+        legend_ax = axes[0][1]
+        model_legend(legend_ax, [Point(p.name, p.tokens, 0.0) for p in shown], COMPARISON)
+        for ax, pts in panels:
+            label_points(ax, pts, COMPARISON)
+        reading_notes(legend_ax, cost_notes(points))
+        return save(fig, out, "accuracy_vs_cost")
+
+
+# Thinking comparison: per model, a dot at each thinking value joined by a line; one panel per question
+THINKING_DOT = 55  # points^2, the filled dot
+THINKING_RING = 100  # the hollow dot, larger so it shows as a ring when both values are the same
+THINKING_LINE = {"lw": 2.2, "alpha": 0.55, "zorder": 2}
+THINKING_KEY_COLOR = MUTED  # legend dots: the two runs, not a model
+THINKING_INCHES_PER_MODEL, THINKING_EXTRA_HEIGHT, THINKING_WIDTH = 0.42, 2.6, 12.5
+
+
+def thinking_legend_labels(run: RunData, twin: RunData, ids: dict[str, str]) -> list[str]:
+    """Legend entries, first thinking value first: e.g. ["min (txt0)", "default (txt1)"]."""
+    return [f"{thinking_value(r)} ({ids[r.name]})" for r in thinking_order(run, twin)]
+
+
+def thinking_notes(rows: list[TwinRow], labels: list[str], low: str, high: str) -> list[str]:
+    ratios = [f"{r.name}: " + ("no token counts" if r.token_ratio is None else f"{r.token_ratio:.1f}x") for r in rows]
+    return [
+        "One row per model, one panel per question.",
+        f"Hollow dot = thinking {labels[0]}; filled dot = thinking {labels[1]}. The line joins a model's two dots.",
+        "Further right = more accurate (% of scenarios, multiple choice).",
+        f"Output tokens per item, {high} / {low}:",
+        *ratios,
+    ]
+
+
+def thinking_dumbbell(ax, rows: list[TwinRow], j: int) -> None:
+    for y, r in enumerate(rows):
+        a, b, c = r.low[j], r.high[j], color(r.name)
+        if a is not None and b is not None:
+            ax.plot([a, b], [y, y], color=c, **THINKING_LINE)
+        if a is not None:
+            ax.scatter(a, y, s=THINKING_RING, facecolors="white", edgecolors=c, linewidths=1.5, zorder=3)
+        if b is not None:
+            ax.scatter(b, y, s=THINKING_DOT, facecolors=c, edgecolors="white", linewidths=1, zorder=4)
+
+
+def thinking_chart(run: RunData, twin: RunData, ids: dict[str, str], out: Path) -> list[Path]:
+    """2x2 dumbbells of accuracy per model under the two thinking values; saved as thinking_vs_<twin id>."""
+    low, high = thinking_order(run, twin)
+    rows = twin_rows(low, high)
+    labels = thinking_legend_labels(run, twin, ids)
+    height = THINKING_INCHES_PER_MODEL * len(rows) * 2 + THINKING_EXTRA_HEIGHT
+    with plt.rc_context(STYLE):
+        fig, axes = plt.subplots(2, 2, figsize=(THINKING_WIDTH, height), sharey=True)
+        for j, (q, ax) in enumerate(zip(QUESTIONS, axes.flat, strict=True)):
+            thinking_dumbbell(ax, rows, j)
+            ax.set_title(HEATMAP_COLUMNS[q].replace("\n", " "))
+            ax.margins(x=AXIS_MARGIN)
+            ax.autoscale_view()
+            fine_percent_axis(ax.xaxis, ax.get_xlim())
+            ax.set_yticks(range(len(rows)), [r.name for r in rows])
+            if j >= 2:
+                ax.set_xlabel("% of scenarios correct")
+        axes[0][0].invert_yaxis()  # shared: the paper's first model on top in every panel
+        lo, hi = thinking_value(low), thinking_value(high)
+        fig.suptitle(f"Accuracy with thinking {lo} vs {hi}", fontsize=STYLE["axes.titlesize"] + 1)
+        key = [
+            Line2D(
+                [],
+                [],
+                marker="o",
+                ls="",
+                markersize=LEGEND_MARKER,
+                markerfacecolor=f,
+                markeredgecolor=THINKING_KEY_COLOR,
+                label=t,
+            )
+            for f, t in zip(("white", THINKING_KEY_COLOR), labels, strict=True)
+        ]
+        axes[0][1].legend(handles=key, title="Thinking (run)", **OUTSIDE_LEGEND)
+        reading_notes(axes[0][1], thinking_notes(rows, labels, lo, hi))
+        return save(fig, out, f"thinking_vs_{ids[twin.name]}")
+
+
+def draw_run(
+    run: RunData, runs: list[RunData], headline: dict, claims: Claims, severity: str, out: Path, ids: dict[str, str]
+) -> list[Path]:
+    """This run's figures (pages.run_figures, pages.extra_figures) into `out`, which is figures/<run_id>/."""
     names = run_figures(run, runs, headline)
     written: list[Path] = []
     for name in (n for n in names if n in FIG4):
@@ -727,11 +896,15 @@ def draw_run(run: RunData, runs: list[RunData], headline: dict, claims: Claims, 
         written += fig5a(text_vs_video(text, video, claims, only_paper_models=False), "fig5a_comparison", out, True)
     if "fig5b" in names:
         written += fig5b(run, claims, out)
-    extras = EXTRA_FIGURES.get(run.benchmark, ())
-    if "accuracy_heatmap" in extras:
-        written += accuracy_heatmap(run, claims, out)
-    if "severity_scoring" in extras:
-        written += severity_scoring(run, claims, out)
+    for _, kind, twin in extra_figures(run, runs, ids):
+        if kind == "accuracy_heatmap":
+            written += accuracy_heatmap(run, claims, out)
+        elif kind == "severity_scoring":
+            written += severity_scoring(run, claims, out)
+        elif kind == "accuracy_vs_cost":
+            written += accuracy_vs_cost(run, out)
+        elif twin is not None:
+            written += thinking_chart(run, twin, ids, out)
     return written
 
 
@@ -749,7 +922,7 @@ def main(argv: list[str] | None = None) -> int:
     ids = assign_ids(parse_ids(load_yaml(args.results / RUN_IDS_FILE, {})), runs)  # new runs: the IDs collect.py gives
     written: list[Path] = []
     for run in runs:
-        written += draw_run(run, runs, headline, claims, args.severity, args.out / ids[run.name])
+        written += draw_run(run, runs, headline, claims, args.severity, args.out / ids[run.name], ids)
     print("fig6: not drawn yet, waiting for the image scorer (Riddhi)")
     unpaired = [ids[r.name] for r in runs if r.benchmark in ("text", "video") and fig5a_partner(r, runs, headline) is None]
     if unpaired:

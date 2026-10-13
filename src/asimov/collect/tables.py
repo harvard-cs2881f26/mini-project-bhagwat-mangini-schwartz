@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import csv
 import io
+from dataclasses import dataclass
 
 import numpy as np
 
@@ -90,6 +91,38 @@ def index_row(run: RunData, model: ModelResult, prices: dict, labels: dict[str, 
         "cost_usd": cost_usd(s, prices),
     }
     return {**s, **made}
+
+
+def per_item(values: dict, key: str) -> float | None:
+    """A run total (tokens, $) divided by the model's replies `n`; None when either is missing. Takes a summary
+    or an index row (which holds the summary's keys)."""
+    total, n = values.get(key), values.get("n")
+    return None if total is None or not n else total / n
+
+
+@dataclass(frozen=True)
+class SpeedRow:
+    """One model's cost and speed, as the run page's "Cost and speed" table shows it (from its index row)."""
+
+    name: str
+    input_per_item: float | None
+    output_per_item: float | None
+    latency_p50_s: float | None
+    latency_p95_s: float | None
+    cost_per_item: float | None  # $; None until configs/prices.yaml has the model
+    cost: float | None  # $ for all its replies in the run
+
+
+def speed_row(row: dict) -> SpeedRow:
+    return SpeedRow(
+        row["name"],
+        per_item(row, "input_tokens"),
+        per_item(row, "output_tokens"),
+        row.get("latency_p50_s"),
+        row.get("latency_p95_s"),
+        per_item(row, "cost_usd"),
+        row.get("cost_usd"),
+    )
 
 
 def index_rows(runs: list[RunData], prices: dict, labels: dict[str, RunLabel]) -> list[dict]:

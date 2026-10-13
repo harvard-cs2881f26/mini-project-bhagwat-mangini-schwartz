@@ -430,6 +430,8 @@ RUN_PAGE_SECTIONS = [
     "## Write-up",
     "## Figures",
     "## Comparison with the paper",
+    "## Cost and speed",
+    "## Settings",
     "## Models",
     "## Metrics (95% CI)",
     "## Files",
@@ -464,6 +466,7 @@ def test_run_page_lists_the_runs_figures_comparison_first(results, claims):
     assert links == [f"../../figures/txt0/{f}_{v}.png" for v in ("comparison", "paper") for f in ("fig4a", "fig4b", "fig5a")] + [
         "../../figures/txt0/accuracy_heatmap.png",  # text runs' extra charts, after both versions
         "../../figures/txt0/severity_scoring.png",
+        "../../figures/txt0/accuracy_vs_cost.png",  # no thinking twin in this tree: no thinking_vs chart
     ]
     video = run_page(results, claims, "video_run")
     assert re.findall(r"\]\(\.\./\.\./figures/vid0/([^)]+)\)", video) == [
@@ -598,3 +601,68 @@ def test_text_run_page_shows_the_scoring_chart(results):
     assert "figures/txt0/accuracy_heatmap.png" in text_page
     video_page = next(v for k, v in files.items() if k.endswith("README.md") and "video_run" in k)
     assert EXTRA_SUBHEADING not in video_page
+
+
+# ---- thinking twins, cost and speed, key insights ------------------------------------------------
+
+
+def test_thinking_twins_differ_only_in_thinking(tmp_path):
+    from asimov.collect.run_ids import thinking_twins
+
+    res = tmp_path / "results"
+    text_run(res, "a_min", [[True] * 4] * 4)
+    text_run(res, "b_default", [[True] * 4] * 4, thinking="default")
+    text_run(res, "c_other_prompt", [[True] * 4] * 4, thinking="default", prompt="other")
+    text_run(res, "d_fewer_models", [[True] * 4] * 4, thinking="default", drop_models=("gpt-5-nano",))
+    text_run(res, "e_min_again", [[True] * 4] * 4)
+    text_run(res, "f_logged", [[True] * 4] * 4, thinking="default", log_reasoning=True)
+    runs = {r.name: r for r in load_results(res)}
+    twins = {name: [t.name for t in thinking_twins(r, runs.values())] for name, r in runs.items()}
+    assert twins["a_min"] == ["b_default"]  # not c (prompt), d (models), e (same thinking) or f (log_reasoning)
+    assert twins["b_default"] == ["a_min", "e_min_again"]
+    assert twins["c_other_prompt"] == [] and twins["d_fewer_models"] == [] and twins["f_logged"] == []
+
+
+def twin_results(results: Path) -> dict[str, str]:
+    """make_results plus a thinking: default twin of text_run; returns its pages."""
+    text_run(results, "text_run_default", [[True, False, True, True]] * 4, thinking="default")
+    return build(load_results(results), empty_claims(), {}, HEADLINE, [], {**IDS, "text_run_default": "txt1"})
+
+
+def test_run_page_shows_cost_and_speed_between_the_paper_and_settings(results):
+    page = twin_results(results)["text_run/README.md"]
+    sections = ["## Figures", "## Comparison with the paper", "## Cost and speed", "## Settings", "## Models"]
+    positions = [page.index(s + "\n") for s in sections]
+    assert positions == sorted(positions)
+    cost = page[page.index("## Cost and speed") : page.index("## Settings")]
+    assert "| Model | Input tokens / item | Output tokens / item | Latency p50 / p95 s | Refused | Parse failures |" in cost
+    assert "| GPT-5 | 250 | 25 | 2.5 / 3.9 | 0 | 0 | – | – |" in cost  # 1000 / 4 items, 100 / 4; latencies 1-4 s
+    assert re.search(r"\n\n\*\*Key insight:\*\* [^\n]+\.\n", cost)
+
+
+def test_key_insight_under_every_comparison_and_cross_model_chart(results):
+    files = twin_results(results)
+    page = files["text_run/README.md"]
+    with_insight = ["fig4a_comparison", "fig4b_comparison", "fig5a_comparison", "accuracy_heatmap", "severity_scoring"]
+    with_insight += ["accuracy_vs_cost", "thinking_vs_txt1"]
+    for stem in with_insight:
+        assert re.search(rf"\(\.\./\.\./figures/txt0/{stem}\.png\)\n\n\*\*Key insight:\*\* [^\n]+\.\n", page), stem
+    for stem in ("fig4a_paper", "fig4b_paper", "fig5a_paper"):
+        assert re.search(rf"\(\.\./\.\./figures/txt0/{stem}\.png\)\n", page)
+        assert not re.search(rf"{stem}\.png\)\n\n\*\*Key insight", page), stem
+    assert "figures/txt1/thinking_vs_txt0.png" in files["text_run_default/README.md"]
+    video = files["video_run/README.md"]
+    for stem in ("fig5a_comparison", "fig5b_comparison"):
+        assert re.search(rf"figures/vid0/{stem}\.png\)\n\n\*\*Key insight:\*\* ", video), stem
+    assert "thinking_vs" not in video and "accuracy_vs_cost" not in video
+
+
+def test_cross_model_charts_each_have_a_note(results):
+    from asimov.collect.pages import EXTRA_FIGURES, EXTRA_NOTES
+
+    page = twin_results(results)["text_run/README.md"]
+    assert set(EXTRA_NOTES) == set(EXTRA_FIGURES["text"])
+    for note in EXTRA_NOTES.values():
+        assert note in page
+    across = page[page.index("### Across models") : page.index("## Comparison with the paper")]
+    assert "`txt1` [`text_run_default`](../text_run_default/README.md)" in across  # the twin, linked

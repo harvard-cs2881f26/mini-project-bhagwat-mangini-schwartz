@@ -46,9 +46,15 @@ These put our results and the paper's on the same chart. Filled marks are our ru
 
 ![fig4a, comparison](../../figures/txt0/fig4a_comparison.png)
 
+**Key insight:** On injury type, the paper's value is inside our 95% range for 6 of 8 models; on severity, for 0 of 8 models.
+
 ![fig4b, comparison](../../figures/txt0/fig4b_comparison.png)
 
+**Key insight:** On action effect, the paper's value is inside our 95% range for 5 of 8 models; on severity after action, for 5 of 8 models.
+
 ![fig5a, comparison](../../figures/txt0/fig5a_comparison.png)
+
+**Key insight:** Every model scores lower on video than on text, by 7 to 44 points.
 
 ### Paper-style versions
 
@@ -66,9 +72,25 @@ Every model on all four questions in one grid: darker means more accurate. Each 
 
 ![accuracy_heatmap](../../figures/txt0/accuracy_heatmap.png)
 
+**Key insight:** Q4 (severity after action) is the lowest-scoring question for 7 of 8 models; the largest gap to the paper is GPT-5 Nano on injury type (55% vs 87%).
+
 The same severity answers (Q2) scored three ways, per model: the exact level (multiple choice, the score Fig 4a uses), severe vs not, and severe recall. It shows how much each model's severity score depends on the scoring rule. The diamond is the paper's Fig 4a severity value, whose metric the paper doesn't state.
 
 ![severity_scoring](../../figures/txt0/severity_scoring.png)
+
+**Key insight:** Severe recall is higher than multiple-choice accuracy for every model, by 3 to 29 points.
+
+Accuracy against cost, one panel per question: each dot is a model, placed by its accuracy and by the output tokens it writes per item on average (log scale). Models that report no output tokens are left out and named in the chart's note.
+
+![accuracy_vs_cost](../../figures/txt0/accuracy_vs_cost.png)
+
+**Key insight:** GPT-5 uses the fewest output tokens per item (220, vs 534 for Claude Sonnet 4 (4.5), the most) and is within 5 points of the most accurate model on every question.
+
+This run next to a run with the same prompt, models and settings except thinking. For each model, a line joins its accuracy under the two thinking settings, one panel per question. The note box gives each model's output tokens per item under the second setting divided by the first. Thinking min here vs default in run `txt1` [`repro_fig4_default`](../txt1_repro_fig4_default/README.md):
+
+![thinking_vs_txt1](../../figures/txt0/thinking_vs_txt1.png)
+
+**Key insight:** From min to default thinking, GPT-5 Nano changes the most (+32 points on injury type, at 6.2x the output tokens); every other model changes by at most 11 points on any question.
 
 ## Comparison with the paper
 
@@ -183,6 +205,23 @@ Per item: mean correct on effect + activated_risk minus mean correct on latent_r
 | Gemini 2.5 Pro (3.1) | 0.646 | 0.799 | -0.154 [-0.194, -0.113] |
 
 Note: Compares Fig 4b (effect, activated risk) with Fig 4a (latent risk, severity). Text adds: 'Except for Gemini 2.5 Flash', smaller models are substantially weaker, naming GPT-5-Mini, GPT-5-Nano and Gemini 2.5 Flash-lite.
+
+## Cost and speed
+
+| Model | Input tokens / item | Output tokens / item | Latency p50 / p95 s | Refused | Parse failures | $ / item | $ run |
+|---|---|---|---|---|---|---|---|
+| GPT-5 Nano | 1361 | 365 | 2.7 / 3.8 | 0 | 1 | – | – |
+| GPT-5 Mini | 1361 | 348 | 2.9 / 4.0 | 0 | 0 | – | – |
+| GPT-5 | 1361 | 220 | 3.3 / 6.1 | 0 | 0 | – | – |
+| Claude Sonnet 4 (4.5) | 1572 | 534 | 12.7 / 15.9 | 0 | 0 | – | – |
+| Claude Opus 4.1 (4.5) | 1572 | 372 | 8.0 / 10.0 | 0 | 0 | – | – |
+| Gemini 2.5 Flash-Lite (3.1) | 1437 | 284 | 1.5 / 1.9 | 2 | 2 | – | – |
+| Gemini 2.5 Flash (3) | 1437 | 313 | 2.5 / 3.0 | 2 | 2 | – | – |
+| Gemini 2.5 Pro (3.1) | 1437 | 239 | 8.7 / 12.1 | 2 | 2 | – | – |
+
+Per item: the model's totals over this run divided by its replies. Refused and Parse failures as in Models below. $ comes from logged tokens × `configs/prices.yaml`; "–" until that file has the model.
+
+**Key insight:** Gemini 2.5 Flash-Lite (3.1) is the fastest per reply (median 1.5 s) and Claude Sonnet 4 (4.5) the slowest (12.7 s); Claude Sonnet 4 (4.5) writes the most output tokens per item (534) and GPT-5 the fewest (220).
 
 ## Settings
 

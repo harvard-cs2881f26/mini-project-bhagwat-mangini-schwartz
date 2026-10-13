@@ -105,5 +105,23 @@ def describe(run: RunData) -> str:
     return f"{text} {TEMPLATES['reasoning_logged']}" if s.log_reasoning else text
 
 
+def thinking_twins(run: RunData, runs: Iterable[RunData]) -> list[RunData]:
+    """Runs that differ from `run` only in `thinking`: same benchmark, prompt, log_reasoning and set of model ids.
+    By run name."""
+    mine = settings(run)
+
+    def same_but_thinking(other: RunData) -> bool:
+        theirs = settings(other)
+        return (
+            other.benchmark == run.benchmark
+            and theirs.prompt == mine.prompt
+            and theirs.log_reasoning == mine.log_reasoning
+            and {m for m, _ in theirs.models} == {m for m, _ in mine.models}
+            and theirs.thinking != mine.thinking
+        )
+
+    return sorted((r for r in runs if r.name != run.name and same_but_thinking(r)), key=lambda r: r.name)
+
+
 def run_labels(runs: list[RunData], ids: dict[str, str]) -> dict[str, RunLabel]:
     return {r.name: RunLabel(ids[r.name], describe(r)) for r in runs}
