@@ -1,7 +1,8 @@
 # Router search (EXPLORATORY), text benchmark. Read by scripts/router_search.py, checked by
 # asimov.router_search.SearchConfig (unknown keys fail). Outputs: results/router_search/, figures/router_search/.
 # Protocol (5-fold CV over items, repeated with fixed seeds; nothing chosen on held-out items):
-# WORKLOG 2026-10-13, "Router search (exploratory)". Labels are the names in the tables; LLMs carry their thinking.
+# WORKLOG 2026-10-13, "Router search (exploratory)", and 2026-10-14, "Router search: rerun + extensions (exploratory)".
+# Labels are the names in the tables; LLMs carry their thinking. A `note` is printed wherever that system appears.
 decision:                                     # first-stage decision models (replies with `probs`)
   - {run: part2_jev, model: jev-latest, label: Jev}
   - {run: part2_jev_reversed, model: jev-latest, label: Jev reversed}
@@ -17,7 +18,11 @@ decision:                                     # first-stage decision models (rep
   - {run: part2_luna_decide_letters, model: gpt-6-luna, label: luna Decisions letters}
   - {run: part2_openjev_full, model: openjev-latest, label: OpenJev think 0 full}
   - {run: part2_openjev_think512_full, model: openjev-latest, label: OpenJev think 512 full}
-  - {run: part2_laya_full, model: laya-1.0, label: Laya full}
+  - {run: part2_laya_full, model: laya-1.0, label: Laya full,
+     note: "Q3 input likely over Laya's 512-token limit (unverified)"}
+  # Rerun 2026-10-14 (v2): Kev-4B full wording and letters (txt30, txt31; Kev full cumulative, txt32, joins through cumulative_runs)
+  - {run: part2_kev_full, model: kev-latest, label: Kev-4B full}
+  - {run: part2_kev_letters, model: kev-latest, label: Kev-4B letters}
   - {run: part2_nli, model: deberta-v3-large-zeroshot-v2.0, label: NLI DeBERTa-v3-large}         # Modal
   - {run: part2_qwen_base_logprob, model: qwen3.5-4b-base, label: Qwen3.5-4B-Base logprob}       # Modal
   - {run: part2_qwen_base_logprob_oneshot, model: qwen3.5-4b-base, label: Qwen3.5-4B-Base logprob one-shot}  # Modal
@@ -41,8 +46,9 @@ llms:
   - {run: repro_fig4_default, model: gemini-3-flash-preview, label: "Gemini 3 Flash [default]"}
   - {run: repro_fig4_default, model: gemini-3.1-pro-preview, label: "Gemini 3.1 Pro [default]"}
   - {run: part2_luna_gen, model: gpt-6-luna, label: luna generate}
-  - {run: part2_qwen_gen, model: qwen3.5-4b, label: Qwen3.5-4B generate,                          # Modal
-     note: "11% parse failures; a rerun with a higher output cap is planned (new run name)"}
+  # txt33 (output cap 2048) supersedes txt27 part2_qwen_gen (cap 1024, 11% parse failures)
+  - {run: part2_qwen_gen_2048, model: qwen3.5-4b, label: Qwen3.5-4B generate 2048,                 # Modal
+     note: "8.2% parse failures, above Noa's 2% line, held for her review"}
 cheap:                                        # agreement partners and the three-stage middle stage
   - "GPT-5 Nano [min]"
   - "GPT-5 Nano [default]"

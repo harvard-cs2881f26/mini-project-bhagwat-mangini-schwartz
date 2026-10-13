@@ -1550,3 +1550,92 @@ injury the model picked.
   fields and provenance (`git_commit`, `scored_at`, `git_dirty`). The regenerated results pages
   differ only in commit and scored date; `collect.py --check` and pytest pass. The new fields are
   in `summary.json` only; the results pages don't show them yet.
+
+## 2026-10-14: Router search: rerun + extensions (exploratory)
+
+EXPLORATORY, $0 (saved replies only, no model calls). Same CV protocol as "Router search (exploratory)"
+above (5 folds x seeds 0-4, every pick made on training folds, scored on the held-out fold), same
+cheap/strong tiers, shares and grids, plus a "no cap" budget. Branch `router-search-v2` (origin/router-search
+merged with main at 9a038cc). Outputs: `results/router_search/`, `figures/router_search/`. Numbers only;
+interpretation is Noa's. Every choice below: PROPOSED (Claude; Noa to confirm).
+
+### Pools and flags
+- **Added:** Kev-4B full (`part2_kev_full`, txt30) and Kev-4B letters (`part2_kev_letters`, txt31) to the
+  decision list. Kev-4B full + cumulative (txt32) joined through `part2_*_cumulative` (checked: it is listed
+  as `kev-latest (part2_kev_full_cumulative)`). Decision pool 30 (was 27); 0 cumulative runs skipped.
+- **Replaced:** Qwen3.5-4B generate txt27 (`part2_qwen_gen`, superseded) by txt33 `part2_qwen_gen_2048`,
+  label "Qwen3.5-4B generate 2048". LLM pool 18. *Alternative:* keep both (rejected: txt27 is superseded).
+- **Flags** (config `note`), printed in `tables.md` after the system's name in every table row, pool list
+  and frontier point that uses it: Qwen3.5-4B generate 2048 "8.2% parse failures, above Noa's 2% line, held
+  for her review"; Laya full (txt21) "Q3 input likely over Laya's 512-token limit (unverified)".
+  *Alternative:* a note line under the pools only (the previous behaviour; a reader of one table misses it).
+- **Candidates:** 60,078 (was 37,791): single 48, d_cascade 4,860, agreement 10,350, three-stage 22,680,
+  per-question mix 4,860, split by question 7,560, parallel 4,860, parallel per-question mix 4,860.
+
+### New combination types (`src/asimov/router_search.py`, pure; chosen by the same CV)
+- **Split by question (design B):** per decision model x LLM, the 14 splits where both sides answer at
+  least one question (the other 2 of the 16 are the single systems, already candidates). Both calls paid;
+  latency = sum (sequential). Nothing is fitted. *Alternative:* list all 16 per pair (duplicates of the
+  singles; ties would go to the first listed anyway).
+- **Parallel:** decision model and LLM called at once on every item: both always paid, latency = the
+  slower; the LLM's answers on the lowest-confidence share (same 10-90% training quantiles as d_cascade),
+  the decision model's elsewhere. **Parallel per-question mix:** the same, with per_question_mix's
+  per-question choice (fitted on the training items in that share; ties to the LLM). *Alternative:*
+  parallel calls with the LLM answering every item (that is the LLM alone plus a wasted call).
+- **Best of each family:** the same CV selection run within each family's candidates (picks.csv `pool`
+  column; tables.md shows no cap and $1). *Alternative:* report each family's in-sample best (rejected:
+  picked on all items).
+
+### Perfect-router bound
+- Per decision model x LLM (540 pairs): items go to the LLM after the decision model only where it gets
+  strictly more of the mean of 4 right, largest gain first, then cheaper LLM call, then item id. The ordering
+  is `asimov.cascade.gain_order`, factored out of `cascade.perfect_router` (which now calls it; cascade
+  outputs unchanged, `scripts/cascade.py --check` passes). Checked: Jev full -> GPT-5 [min] gives the same
+  140 points as `cascade.perfect_router` (last point 0.804, $1.77 per 1,000).
+- Drawn as one frontier (Pareto envelope over all pairs' points) on the accuracy-vs-$ figure and in
+  `frontier.csv` (`set = bound`), labelled "perfect-router bound, not a system". Fitted on all 319 items by
+  definition. Envelope: 0.805 at $0 (OpenJev think 512 full -> Qwen3.5-4B generate 2048, self-hosted counted
+  $0, flagged), 0.806 at $0.05 (-> luna generate), 0.842 at $1.18 (-> GPT-5 [min]), 0.843 at $5.13
+  (-> Opus 4.5 [default]). *Alternative:* one bound curve per pair (540 curves; unreadable).
+
+### Second scoring rule beside each pick (Noa's option c)
+- Each held-out pick reports Q2-Q4 accuracy on the items whose combined Q1 answer matched the key, and
+  `n_q1_matched` (`picks.csv`: `held_out_<q>_q1_matched`, `held_out_n_q1_matched`; tables: "Q2/Q3/Q4 on
+  Q1-matched (n)"). Matched item-repeat pairs are pooled over the 5 repeats; n = mean per repeat. Strict
+  mean of 4 stays the only selection metric. *Alternative:* average the per-repeat matched accuracies
+  (weights repeats equally rather than items). Single systems and `candidates.csv` get the same columns.
+- Held out, all candidates, Q2/Q3/Q4 on Q1-matched (n): $1 0.720/0.737/0.648 (290.2); $2 0.774/0.742/0.673
+  (294.2); $4-no cap 0.805/0.752/0.677 (299.2); p50 ≤ 1 s 0.788/0.750/0.690 (296.6).
+
+### GPU time for self-hosted rows
+- Single systems table: self-hosted rows show "self-hosted" instead of $, plus GPU seconds per item
+  (mean) and parameters (`params_b`, configs/prices.yaml). GPU seconds = `raw.remote.compute_s` via
+  `ModelResult.item_compute_s` (Modal rows); Kev-4B has none saved, so its round trip (`latency_s`) is used
+  and flagged "round trip". Mean GPU s per item: NLI 0.156 (0.435B); Qwen3.5-4B-Base logprob 0.328,
+  one-shot 0.226, Qwen3.5-4B logprob 0.407, Qwen3.5-4B generate 2048 21.866 (4B); Kev-4B 0.415, full 0.534,
+  letters 0.415, cumulative 0.824, full cumulative 1.490 (round trip; 4B).
+- Combinations: GPU seconds of self-hosted calls are added up per item, also when the calls run in
+  parallel (`held_out_gpu_s_per_item`). In cost-capped selection self-hosted models still count as $0 and
+  every name using one carries `[flag: self-hosted: counted as $0]`. *Alternative:* price GPU seconds at the
+  Modal L40S rate (not itemised per call on the bill; rejected, as in "Price table").
+- `self_hosted_pick_share` is 0 at every cap for the all-candidates pool; within families it is above 0 at
+  low caps (e.g. split by question and parallel at $0.1: 1.0).
+
+### Results (held out, all 60,078 candidates; mean of 4 [95% CI], $ per 1,000, p50 s)
+- $0.1: 0.728 [0.698, 0.758], $0.07, 4.94; $0.25: 0.726 [0.699, 0.753], $0.22, 3.55; $0.5: 0.725
+  [0.698, 0.752], $0.45, 2.17; $1: 0.733 [0.706, 0.759], $0.82, 1.58; $2: 0.759 [0.732, 0.786], $1.69, 1.95;
+  $4-$32 and no cap: 0.780 [0.752, 0.808], $3.10, 3.88. p50 ≤ 0.5 s: 0.718 [0.691, 0.745], $3.73, 0.25;
+  ≤ 1 s: 0.774 [0.746, 0.802], $2.09, 0.82; ≤ 2 s: 0.776 [0.748, 0.804], $2.16, 0.84; ≤ 4 s: 0.782
+  [0.754, 0.810], $3.12, 3.79; ≤ 8 s: 0.780 [0.752, 0.808], $3.10, 3.88.
+- Best split by question (within family): no cap 0.773 [0.744, 0.802], $3.94, 6.71 s; $1 0.715
+  [0.689, 0.741], $0.57, 3.49 s. Best parallel: no cap 0.746 [0.721, 0.773], $6.89, 5.56 s; $1 0.728
+  [0.700, 0.757], $0.86, 1.46 s. Best parallel per-question mix: no cap 0.780 [0.752, 0.808], $4.01,
+  3.39 s; $1 0.732 [0.704, 0.761], $0.85, 1.47 s. Most-picked candidates: `tables.md`.
+- References (single systems): GPT-5 [min] 0.752 [0.723, 0.781], $3.90, 3.29 s; GPT-5 Mini [min] 0.669
+  [0.639, 0.700], $1.04, 2.89 s; GPT-5 [default] 0.733 [0.702, 0.763], $11.54, 10.34 s; GPT-5 Mini [default]
+  0.723 [0.694, 0.751], $2.26, 7.53 s.
+- In-sample vs held-out (all candidates): in-sample picks are 0.003-0.030 higher in mean of 4. The
+  held-out numbers are the result; in-sample numbers are not.
+- **Every table** in `tables.md` has a bold EXPLORATORY line above it; both figure titles start with
+  "EXPLORATORY". Held-out frontier points carry their bootstrap 95% CIs (`stats.bootstrap_mean_ci`, in
+  `frontier.csv` `lo`/`hi` and as error bars).

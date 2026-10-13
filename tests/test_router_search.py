@@ -22,15 +22,22 @@ from asimov.router_search import (
     SearchConfig,
     agreement,
     alone,
+    candidates,
     cross_validate,
+    cross_validate_groups,
     d_cascade,
     disagree,
     fold_ids,
     member_from,
     metrics_on,
+    parallel,
+    parallel_per_question_mix,
     pareto,
     per_question_mix,
+    perfect_router_bound,
+    q1_matched,
     select,
+    split_by_question,
     three_stage,
 )
 
@@ -342,3 +349,126 @@ def test_script_uses_compute_time_and_prints_pool_notes(tree):
     tables = (out / "tables.md").read_text()
     assert "Cheap: 11% parse failures" in tables
     assert "Cheap (10 of 10 items)" in tables  # which members' latency is Modal compute time
+
+
+# --- extensions: split by question, parallel calls, the bound, Q1-matched, GPU time ----------------------------
+
+
+def test_split_by_question_takes_each_question_from_its_side_and_pays_both_calls(dec, llm):
+    o = split_by_question(dec, llm, (True, False, False, False)).fit(EVERY)
+    # Q1 from Dec ([T, T, F, T] on the 4 items), Q2-Q4 from the LLM ([T, F, T, T])
+    assert o.correct.tolist() == [ALL, [True, False, False, False], [False, True, True, True], ALL]
+    assert o.cost.tolist() == pytest.approx([0.011] * 4)
+    assert o.latency.tolist() == pytest.approx([2.1] * 4)  # sequential: the sum
+    only_dec = split_by_question(dec, llm, (True,) * 4).fit(EVERY)
+    assert only_dec.cost.tolist() == pytest.approx([0.001] * 4)  # one side answers nothing: its call isn't made
+    assert only_dec.latency.tolist() == pytest.approx([0.1] * 4)
+    only_llm = split_by_question(dec, llm, (False,) * 4).fit(EVERY)
+    assert only_llm.cost.tolist() == pytest.approx([0.01] * 4)
+
+
+def test_parallel_pays_both_calls_on_every_item_and_waits_for_the_slower(dec, llm):
+    o = parallel(dec, llm, 0.5).fit(EVERY)
+    # items 1 and 2 (lowest confidence) take the LLM's answers; the others keep Dec's
+    assert o.correct.tolist() == [ALL, NONE, ALL, ALL]
+    assert o.cost.tolist() == pytest.approx([0.011] * 4)
+    assert o.latency.tolist() == pytest.approx([2.0] * 4)  # max(0.1, 2.0)
+
+
+def test_parallel_per_question_mix_keeps_better_questions_and_pays_both(dec):
+    llm = member("LLM", [[False, True, True, True], [False, True, True, True], [False, True, True, True], ALL], 0.01, 2.0)
+    o = parallel_per_question_mix(dec, llm, 0.5).fit(EVERY)
+    assert o.correct.tolist() == [ALL, ALL, [False, True, True, True], ALL]
+    assert o.cost.tolist() == pytest.approx([0.011] * 4)
+    assert o.latency.tolist() == pytest.approx([2.0] * 4)
+
+
+def test_candidate_members_name_every_system_used(dec, llm):
+    assert split_by_question(dec, llm, (True, False, False, False)).members == ("Dec", "LLM")
+    assert parallel(dec, llm, 0.5).members == ("Dec", "LLM")
+    strong = member("S", [ALL] * 4, 0.01, 3.0)
+    assert three_stage(dec, llm, strong, 0.5, "any").members == ("Dec", "LLM", "S")
+
+
+def test_candidates_add_14_splits_and_both_parallel_families_per_pair(dec, llm):
+    cands = candidates([dec], [llm], [llm], [llm], (0.5,), ("any",))
+    by_family: dict[str, int] = {}
+    for c in cands:
+        by_family[c.family] = by_family.get(c.family, 0) + 1
+    assert by_family["split_by_question"] == 14  # the 2 one-sided splits are the single systems
+    assert by_family["parallel"] == 1 and by_family["parallel_per_question_mix"] == 1
+
+
+def test_gpu_seconds_count_self_hosted_calls_only_and_add_up_in_parallel():
+    hosted = member("H", [ALL] * 4, 0.0, 0.3, confidence=[0.9, 0.5, 0.2, 0.6], self_hosted=True)
+    api = member("A", [ALL] * 4, 0.01, 2.0)
+    assert alone(hosted).gpu.tolist() == pytest.approx([0.3] * 4)
+    assert alone(api).gpu.tolist() == [0.0] * 4
+    assert parallel(hosted, api, 0.5).fit(EVERY).gpu.tolist() == pytest.approx([0.3] * 4)
+    both = member("H2", [ALL] * 4, 0.0, 0.5, self_hosted=True)
+    assert parallel(hosted, both, 0.5).fit(EVERY).gpu.tolist() == pytest.approx([0.8] * 4)  # GPU time is paid twice
+
+
+def test_perfect_router_bound_sends_only_items_where_the_llm_gains(dec, llm):
+    sent, acc, cost = perfect_router_bound(dec, llm)
+    # only item 2 gains (Dec 0/4, LLM 4/4); item 1 would lose
+    assert sent.tolist() == [0, 1]
+    assert acc.tolist() == pytest.approx([0.75, 1.0])
+    assert cost.tolist() == pytest.approx([1.0, 3.5])  # ($0.004 + $0.01) / 4 items x 1,000
+
+
+def test_q1_matched_scores_q2_to_q4_on_items_whose_q1_is_right():
+    one = np.array([[1, 1, 0, 1], [0, 1, 1, 1], [1, 0, 0, 1]], dtype=float)
+    n, acc = q1_matched(one[None])
+    assert n == 2
+    assert acc == pytest.approx({"latent_severity": 0.5, "effect": 0.0, "activated_risk": 1.0})
+    # two repeats pool their matched items: 2 + 1 matched, mean 1.5 per repeat
+    other = np.array([[0, 1, 1, 1], [0, 0, 0, 0], [1, 1, 1, 1]], dtype=float)
+    n, acc = q1_matched(np.stack([one, other]))
+    assert n == 1.5
+    assert acc["effect"] == pytest.approx(1 / 3)
+    n, acc = q1_matched(np.zeros((1, 2, 4)))
+    assert n == 0 and acc == dict.fromkeys(QUESTIONS[1:])
+
+
+def test_group_selection_picks_within_each_group_only():
+    n = 10
+    good = member("Good", [ALL] * n, 0.0, 1.0)
+    bad = member("Bad", [NONE] * n, 0.0, 1.0)
+    cands = [Candidate("single", "Good", False, lambda t: alone(good)), Candidate("other", "Bad", False, lambda t: alone(bad))]
+    groups = {"all": np.array([0, 1]), "other": np.array([1])}
+    cv = cross_validate_groups(cands, n, 5, (0,), {"cost": (1.0,)}, groups)
+    assert {p.candidate for p in cv[("all", "cost", 1.0)].picks} == {0}
+    assert {p.candidate for p in cv[("other", "cost", 1.0)].picks} == {1}
+    assert cross_validate(cands, n, 5, (0,), {"cost": (1.0,)})[("cost", 1.0)].picks == cv[("all", "cost", 1.0)].picks
+
+
+def test_script_flags_noted_systems_everywhere_and_marks_every_table_exploratory(tree):
+    cfg = yaml.safe_load(tree["config"].read_text())
+    cfg["llms"][1]["note"] = "held for review"
+    tree["config"].write_text(yaml.safe_dump(cfg))
+    assert script.main(args(tree)) == 0
+    out = tree["results"] / "router_search"
+    lines = (out / "tables.md").read_text().splitlines()
+    # every table (a header row followed by a --- row) has a bold EXPLORATORY line right above it
+    headers = [k for k in range(1, len(lines)) if lines[k].startswith("| ---")]
+    assert headers and all(lines[k - 3].startswith("**EXPLORATORY") for k in headers)
+    rows_naming = [ln for ln in lines if ln.startswith("| ") and "Strong" in ln and not ln.startswith("| ---")]
+    assert rows_naming and all("held for review" in ln for ln in rows_naming)
+    frontier = list(csv.DictReader(io.StringIO((out / "frontier.csv").read_text())))
+    assert any(r["set"] == "bound" for r in frontier)
+    assert "bound, not a system" in "\n".join(lines)
+    picks = list(csv.DictReader(io.StringIO((out / "picks.csv").read_text())))
+    assert {"held_out_n_q1_matched", "held_out_effect_q1_matched", "held_out_gpu_s_per_item", "pool"} <= set(picks[0])
+    assert {"split_by_question", "parallel"} <= {r["pool"] for r in picks}
+    assert "EXPLORATORY" in script.figure_title("cost") and "EXPLORATORY" in script.figure_title("latency")
+
+
+def test_script_reports_gpu_seconds_and_parameters_for_self_hosted_rows_never_dollars(tree):
+    prices = yaml.safe_load(tree["prices"].read_text())
+    prices["models"]["dec-1"] = {"self_hosted": "GPU", "params_b": 4}
+    tree["prices"].write_text(yaml.safe_dump(prices))
+    assert script.main(args(tree)) == 0
+    lines = (tree["results"] / "router_search" / "tables.md").read_text().splitlines()
+    dec_row = next(ln for ln in lines if ln.startswith("| Dec |"))
+    assert "$" not in dec_row and "| 4 |" in dec_row and "round trip" in dec_row

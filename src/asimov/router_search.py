@@ -16,10 +16,21 @@ Families:
    with the decision model to a strong LLM.
 5. per_question_mix: design D, but on items sent on, each question keeps the decision model's answer when it beat
    the LLM's on the training items sent on (design B within D). One LLM call still answers all 4.
+6. split_by_question (design B): the decision model answers some questions on every item, the LLM the rest. Both
+   calls are paid, one after the other (latency: the sum); the 2 one-sided splits are the single systems.
+7. parallel: the decision model and the LLM are called at once on every item (both paid; latency: the slower).
+   The LLM's answers are kept on the lowest-confidence share of items, the decision model's elsewhere.
+8. parallel_per_question_mix: parallel, with per_question_mix's per-question choice on the low-confidence items.
+
+Also: the perfect-router bound per decision model x LLM (a bound, not a system; asimov.cascade.gain_order) and
+Q2-Q4 accuracy on the items whose Q1 matched the key (WORKLOG 2026-10-14, "Cumulative-mode scoring").
+GPU seconds: a self-hosted member's latency counts as GPU time on each call it makes, added up even when calls run
+in parallel. WORKLOG 2026-10-14, "Router search: rerun + extensions (exploratory)".
 """
 
 from __future__ import annotations
 
+import itertools
 from collections.abc import Callable, Mapping, Sequence
 from dataclasses import dataclass, field
 from typing import Literal
@@ -28,13 +39,23 @@ import numpy as np
 from pydantic import BaseModel, ConfigDict, field_validator, model_validator
 
 from asimov.bench.text_score import QUESTIONS
-from asimov.cascade import MEAN, PER_THOUSAND, Accuracy, accuracy, system_from
+from asimov.cascade import MEAN, PER_THOUSAND, Accuracy, accuracy, gain_order, system_from
 from asimov.collect.load import ModelResult
 from asimov.prices import Price
 
 Rule = Literal["any", "q1"]
 CapKind = Literal["cost", "latency"]
-FAMILIES = ("single", "d_cascade", "agreement", "three_stage", "per_question_mix")
+FAMILIES = (
+    "single",
+    "d_cascade",
+    "agreement",
+    "three_stage",
+    "per_question_mix",
+    "split_by_question",
+    "parallel",
+    "parallel_per_question_mix",
+)
+Q1 = QUESTIONS[0]  # latent_risk: the question the second scoring rule conditions on
 UNANSWERED = ""  # a missing answer never agrees with anything
 
 
@@ -95,6 +116,12 @@ class Member:
     confidence: np.ndarray | None  # (n,) decision models only
     self_hosted: bool
     compute_rows: int = 0  # items whose latency is Modal compute time (raw.remote.compute_s), not the round trip
+    params_b: float | None = None  # parameters in billions (configs/prices.yaml), where stated
+
+    @property
+    def gpu(self) -> np.ndarray:
+        """GPU seconds per item: a self-hosted model's latency (compute time where saved, else the round trip)."""
+        return self.latency if self.self_hosted else np.zeros_like(self.latency)
 
 
 def member_from(label: str, model: ModelResult, price: Price, ids: Sequence[str], rule: str | None) -> Member:
@@ -117,6 +144,7 @@ def member_from(label: str, model: ModelResult, price: Price, ids: Sequence[str]
         np.array([system.confidence[i] for i in ids]) if rule else None,
         bool(price.self_hosted),
         sum(i in model.item_compute_s for i in ids),
+        price.params_b,
     )
 
 
@@ -125,6 +153,7 @@ class Outcome:
     correct: np.ndarray  # (n, 4)
     cost: np.ndarray  # (n,)
     latency: np.ndarray  # (n,)
+    gpu: np.ndarray  # (n,) GPU seconds of self-hosted calls, added up
 
 
 @dataclass(frozen=True)
@@ -133,10 +162,19 @@ class Candidate:
     name: str  # its full definition
     self_hosted: bool  # uses a self-hosted model, whose cost is not in $
     fit: Callable[[np.ndarray], Outcome]  # training item indices -> outcome on every item
+    members: tuple[str, ...] = ()  # labels of the systems it uses (for the notes printed beside them)
 
 
 def alone(m: Member) -> Outcome:
-    return Outcome(m.correct, m.cost, m.latency)
+    return Outcome(m.correct, m.cost, m.latency, m.gpu)
+
+
+def hosted(*ms: Member) -> bool:
+    return any(m.self_hosted for m in ms)
+
+
+def labels(*ms: Member) -> tuple[str, ...]:
+    return tuple(m.label for m in ms)
 
 
 def sent_below(confidence: np.ndarray, train: np.ndarray, fraction: float) -> np.ndarray:
@@ -147,7 +185,30 @@ def sent_below(confidence: np.ndarray, train: np.ndarray, fraction: float) -> np
 def escalate(base: Outcome, to: Member, sent: np.ndarray, keep: np.ndarray | None = None) -> Outcome:
     """Sent items also call `to` (sequentially); its answers replace base's except on `keep` questions."""
     take = sent[:, None] & ~(np.zeros(len(QUESTIONS), bool) if keep is None else keep)[None, :]
-    return Outcome(np.where(take, to.correct, base.correct), base.cost + to.cost * sent, base.latency + to.latency * sent)
+    return Outcome(
+        np.where(take, to.correct, base.correct),
+        base.cost + to.cost * sent,
+        base.latency + to.latency * sent,
+        base.gpu + to.gpu * sent,
+    )
+
+
+def in_parallel(a: Member, b: Member) -> Outcome:
+    """a's answers, with a and b both called at once on every item: both paid, the slower one's latency."""
+    return Outcome(a.correct, a.cost + b.cost, np.maximum(a.latency, b.latency), a.gpu + b.gpu)
+
+
+def take_answers(base: Outcome, src: Member, sent: np.ndarray, keep: np.ndarray | None = None) -> Outcome:
+    """src was already called on every item (in parallel): its answers replace base's on sent items, except on `keep`
+    questions. Cost and latency don't change."""
+    take = sent[:, None] & ~(np.zeros(len(QUESTIONS), bool) if keep is None else keep)[None, :]
+    return Outcome(np.where(take, src.correct, base.correct), base.cost, base.latency, base.gpu)
+
+
+def better_on_training(dec: Member, llm: Member, train: np.ndarray, sent: np.ndarray) -> np.ndarray | None:
+    """Per question, True where the decision model beat the LLM on the training items sent on (ties: the LLM)."""
+    mine = train[sent[train]]
+    return dec.correct[mine].mean(axis=0) > llm.correct[mine].mean(axis=0) if len(mine) else None
 
 
 def disagree(a: np.ndarray, b: np.ndarray, rule: Rule) -> np.ndarray:
@@ -164,14 +225,18 @@ def needs_confidence(m: Member) -> np.ndarray:
 
 
 def single(m: Member) -> Candidate:
-    return Candidate("single", m.label, m.self_hosted, lambda train: alone(m))
+    return Candidate("single", m.label, m.self_hosted, lambda train: alone(m), labels(m))
 
 
 def d_cascade(dec: Member, llm: Member, fraction: float) -> Candidate:
     conf = needs_confidence(dec)
     name = f"{dec.label} -> {llm.label} (lowest {fraction:.0%} by confidence)"
     return Candidate(
-        "d_cascade", name, dec.self_hosted or llm.self_hosted, lambda t: escalate(alone(dec), llm, sent_below(conf, t, fraction))
+        "d_cascade",
+        name,
+        hosted(dec, llm),
+        lambda t: escalate(alone(dec), llm, sent_below(conf, t, fraction)),
+        labels(dec, llm),
     )
 
 
@@ -180,21 +245,18 @@ def per_question_mix(dec: Member, llm: Member, fraction: float) -> Candidate:
 
     def fit(train: np.ndarray) -> Outcome:
         sent = sent_below(conf, train, fraction)
-        mine = train[sent[train]]
-        keep = dec.correct[mine].mean(axis=0) > llm.correct[mine].mean(axis=0) if len(mine) else None  # ties: the LLM
-        return escalate(alone(dec), llm, sent, keep)
+        return escalate(alone(dec), llm, sent, better_on_training(dec, llm, train, sent))
 
     name = f"{dec.label} -> {llm.label} (lowest {fraction:.0%} by confidence; per question, the better on training)"
-    return Candidate("per_question_mix", name, dec.self_hosted or llm.self_hosted, fit)
+    return Candidate("per_question_mix", name, hosted(dec, llm), fit, labels(dec, llm))
 
 
 def agreement(a: Member, b: Member, strong: Member, rule: Rule) -> Candidate:
     """a and b answer in parallel (latency: the slower); b's answers are kept where they agree under `rule`."""
-    first = Outcome(b.correct, a.cost + b.cost, np.maximum(a.latency, b.latency))
+    first = in_parallel(b, a)
     sent = disagree(a.pred, b.pred, rule)
     name = f"{a.label} + {b.label} agree ({rule}) else {strong.label}"
-    hosted = a.self_hosted or b.self_hosted or strong.self_hosted
-    return Candidate("agreement", name, hosted, lambda train: escalate(first, strong, sent))
+    return Candidate("agreement", name, hosted(a, b, strong), lambda train: escalate(first, strong, sent), labels(a, b, strong))
 
 
 def three_stage(dec: Member, cheap: Member, strong: Member, fraction: float, rule: Rule) -> Candidate:
@@ -206,7 +268,51 @@ def three_stage(dec: Member, cheap: Member, strong: Member, fraction: float, rul
         return escalate(escalate(alone(dec), cheap, low), strong, low & differ)
 
     name = f"{dec.label} -> {cheap.label} (lowest {fraction:.0%}) -> {strong.label} if they disagree ({rule})"
-    return Candidate("three_stage", name, dec.self_hosted or cheap.self_hosted or strong.self_hosted, fit)
+    return Candidate("three_stage", name, hosted(dec, cheap, strong), fit, labels(dec, cheap, strong))
+
+
+def split_by_question(dec: Member, llm: Member, from_decision: tuple[bool, ...]) -> Candidate:
+    """Design B: each question's answer from the decision model (True) or the LLM (False), on every item. A side
+    that answers nothing isn't called; otherwise both calls are paid, one after the other."""
+    keep = np.array(from_decision, dtype=bool)
+    calls = [m for m, used in ((dec, keep.any()), (llm, not keep.all())) if used]
+    correct = np.where(keep[None, :], dec.correct, llm.correct)
+    outcome = Outcome(
+        correct,
+        np.sum([m.cost for m in calls], axis=0),
+        np.sum([m.latency for m in calls], axis=0),  # sequential calls
+        np.sum([m.gpu for m in calls], axis=0),
+    )
+    mine = ", ".join(f"Q{k + 1}" for k in np.flatnonzero(keep)) or "none"
+    name = f"{dec.label} answers {mine}; {llm.label} the rest"
+    return Candidate("split_by_question", name, hosted(*calls), lambda train: outcome, labels(dec, llm))
+
+
+def parallel(dec: Member, llm: Member, fraction: float) -> Candidate:
+    conf = needs_confidence(dec)
+    both = in_parallel(dec, llm)
+    name = f"{dec.label} || {llm.label} in parallel; {llm.label}'s answers on the lowest {fraction:.0%} by confidence"
+    return Candidate(
+        "parallel", name, hosted(dec, llm), lambda t: take_answers(both, llm, sent_below(conf, t, fraction)), labels(dec, llm)
+    )
+
+
+def parallel_per_question_mix(dec: Member, llm: Member, fraction: float) -> Candidate:
+    conf = needs_confidence(dec)
+    both = in_parallel(dec, llm)
+
+    def fit(train: np.ndarray) -> Outcome:
+        sent = sent_below(conf, train, fraction)
+        return take_answers(both, llm, sent, better_on_training(dec, llm, train, sent))
+
+    name = (
+        f"{dec.label} || {llm.label} in parallel; {llm.label}'s answers on the lowest {fraction:.0%} by confidence "
+        "(per question, the better on training)"
+    )
+    return Candidate("parallel_per_question_mix", name, hosted(dec, llm), fit, labels(dec, llm))
+
+
+SPLITS = [mask for mask in itertools.product((True, False), repeat=len(QUESTIONS)) if any(mask) and not all(mask)]
 
 
 def candidates(
@@ -218,7 +324,8 @@ def candidates(
     rules: Sequence[Rule],
 ) -> list[Candidate]:
     """The finite search space. Agreement pairs: decision + decision (unordered for `any`, where the kept answers are
-    the same; ordered for `q1`), and decision + cheap LLM (the LLM's answers kept)."""
+    the same; ordered for `q1`), and decision + cheap LLM (the LLM's answers kept). Split by question: the 14 splits
+    where both sides answer something (the other 2 are the single systems)."""
     out = [single(m) for m in [*decisions, *llms]]
     out += [d_cascade(d, m, f) for d in decisions for m in llms for f in fractions]
     for rule in rules:
@@ -227,7 +334,36 @@ def candidates(
         out += [agreement(a, b, s, rule) for a, b in pairs for s in strong]
     out += [three_stage(d, c, s, f, r) for r in rules for d in decisions for c in cheap for s in strong for f in fractions]
     out += [per_question_mix(d, m, f) for d in decisions for m in llms for f in fractions]
+    out += [split_by_question(d, m, mask) for d in decisions for m in llms for mask in SPLITS]
+    out += [parallel(d, m, f) for d in decisions for m in llms for f in fractions]
+    out += [parallel_per_question_mix(d, m, f) for d in decisions for m in llms for f in fractions]
     return out
+
+
+# --- perfect-router bound and the Q1-matched rule --------------------------------------------------------------
+
+
+def perfect_router_bound(dec: Member, llm: Member) -> tuple[np.ndarray, np.ndarray, np.ndarray]:
+    """The best possible per-item routing (a bound, not a system): items go to the LLM, after the decision model, only
+    where the LLM gets strictly more of the 4 questions right, in asimov.cascade.gain_order. Fitted on every item by
+    definition. Returns items sent, mean of 4 and $ per 1,000 items, one entry per number of items sent."""
+    dec_score, llm_score = dec.correct.mean(axis=1), llm.correct.mean(axis=1)
+    gain = llm_score - dec_score
+    order = np.array(gain_order(dict(enumerate(gain.tolist())), dict(enumerate(llm.cost.tolist()))), dtype=int)
+    n = len(gain)
+    acc = (dec_score.sum() + np.concatenate([[0.0], np.cumsum(gain[order])])) / n
+    cost = (dec.cost.sum() + np.concatenate([[0.0], np.cumsum(llm.cost[order])])) / n * PER_THOUSAND
+    return np.arange(len(order) + 1), acc, cost
+
+
+def q1_matched(correct: np.ndarray) -> tuple[float, dict[str, float | None]]:
+    """Second scoring rule (Noa's option c): Q2-Q4 accuracy on the items whose Q1 answer matched the key.
+    `correct`: (repeats, n, 4). Matched items are pooled over repeats; also returns the mean number matched per repeat.
+    None for a question when no item matched."""
+    matched = correct[..., 0] == 1
+    total = int(matched.sum())
+    acc = {q: (float(correct[..., j][matched].mean()) if total else None) for j, q in enumerate(QUESTIONS) if j}
+    return total / correct.shape[0], acc
 
 
 # --- metrics and selection ------------------------------------------------------------------------------------
@@ -293,31 +429,56 @@ class HeldOut:
     correct: list[np.ndarray] = field(default_factory=list)  # per repeat, (n, 4) float; NaN where nothing fit
     cost: list[np.ndarray] = field(default_factory=list)
     latency: list[np.ndarray] = field(default_factory=list)
+    gpu: list[np.ndarray] = field(default_factory=list)  # GPU seconds of self-hosted calls
+
+    def start_repeat(self, n: int) -> None:
+        self.correct.append(np.full((n, len(QUESTIONS)), np.nan))
+        for part in (self.cost, self.latency, self.gpu):
+            part.append(np.full(n, np.nan))
+
+    def record(self, o: Outcome, test: np.ndarray) -> None:
+        self.correct[-1][test] = o.correct[test]
+        self.cost[-1][test], self.latency[-1][test], self.gpu[-1][test] = o.cost[test], o.latency[test], o.gpu[test]
+
+
+def within(m: Metrics, idx: np.ndarray) -> Metrics:
+    return Metrics(m.accuracy[idx], m.cost[idx], m.latency[idx])
+
+
+def cross_validate_groups(
+    cands: Sequence[Candidate],
+    n: int,
+    folds: int,
+    seeds: Sequence[int],
+    caps: Mapping[str, Sequence[float]],
+    groups: Mapping[str, np.ndarray],
+) -> dict[tuple[str, str, float], HeldOut]:
+    """For each repeat and fold: fit every candidate on the training folds, pick per group (candidate indices) and cap
+    on them, and record the pick's outcome on the held-out fold. Picks are indices into `cands`."""
+    out = {(g, kind, cap): HeldOut() for g in groups for kind, values in caps.items() for cap in values}
+    for seed in seeds:
+        fold = fold_ids(n, folds, seed)
+        for h in out.values():
+            h.start_repeat(n)
+        for k in range(folds):
+            train, test = np.flatnonzero(fold != k), np.flatnonzero(fold == k)
+            outcomes = [c.fit(train) for c in cands]
+            on_train = metrics_on(outcomes, train)
+            for (g, kind, cap), h in out.items():
+                local = select(within(on_train, groups[g]), kind, cap)  # pyright: ignore[reportArgumentType]
+                pick = None if local is None else int(groups[g][local])
+                h.picks.append(Pick(seed, k, pick))
+                if pick is not None:
+                    h.record(outcomes[pick], test)
+    return out
 
 
 def cross_validate(
     cands: Sequence[Candidate], n: int, folds: int, seeds: Sequence[int], caps: Mapping[str, Sequence[float]]
 ) -> dict[tuple[str, float], HeldOut]:
-    """For each repeat and fold: fit every candidate on the training folds, pick per cap on them, and record the pick's
-    outcome on the held-out fold."""
-    out = {(kind, cap): HeldOut() for kind, values in caps.items() for cap in values}
-    for seed in seeds:
-        fold = fold_ids(n, folds, seed)
-        for h in out.values():
-            h.correct.append(np.full((n, len(QUESTIONS)), np.nan))
-            h.cost.append(np.full(n, np.nan))
-            h.latency.append(np.full(n, np.nan))
-        for k in range(folds):
-            train, test = np.flatnonzero(fold != k), np.flatnonzero(fold == k)
-            outcomes = [c.fit(train) for c in cands]
-            on_train = metrics_on(outcomes, train)
-            for (kind, cap), h in out.items():
-                pick = select(on_train, kind, cap)  # pyright: ignore[reportArgumentType]
-                h.picks.append(Pick(seed, k, pick))
-                if pick is not None:
-                    o = outcomes[pick]
-                    h.correct[-1][test], h.cost[-1][test], h.latency[-1][test] = o.correct[test], o.cost[test], o.latency[test]
-    return out
+    """cross_validate_groups with one group: every candidate."""
+    cv = cross_validate_groups(cands, n, folds, seeds, caps, {"all": np.arange(len(cands))})
+    return {(kind, cap): h for (_, kind, cap), h in cv.items()}
 
 
 @dataclass(frozen=True)
@@ -327,16 +488,23 @@ class CapSummary:
     per_question: dict[str, float]
     cost: float | None  # $ per 1,000 items, averaged over repeats
     latency: float | None  # p50 s, averaged over repeats
+    gpu: float | None = None  # mean GPU seconds per item (self-hosted calls), averaged over repeats
+    n_q1_matched: float | None = None  # items whose Q1 matched the key, mean per repeat
+    q1_matched: dict[str, float | None] = field(default_factory=dict)  # Q2-Q4 accuracy on those items
 
 
 def summarise_held_out(h: HeldOut) -> CapSummary:
     if any(p.candidate is None for p in h.picks):
         return CapSummary(False, None, {}, None, None)
     correct = np.mean(h.correct, axis=0)  # (n, 4): averaged over repeats
+    n_matched, matched = q1_matched(np.stack(h.correct))
     return CapSummary(
         True,
         accuracy(correct.mean(axis=1).tolist(), MEAN),
         {q: float(correct[:, j].mean()) for j, q in enumerate(QUESTIONS)},
         float(np.mean([c.mean() for c in h.cost]) * PER_THOUSAND),
         float(np.mean([np.median(lat) for lat in h.latency])),
+        float(np.mean([g.mean() for g in h.gpu])),
+        n_matched,
+        matched,
     )

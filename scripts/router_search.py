@@ -6,13 +6,15 @@
 
 Free: reads results/ and configs/prices.yaml only. No model calls, no data/. Every choice of system, threshold or
 combination is made on training folds and scored on the held-out fold (5-fold CV, repeated with fixed seeds).
-Logic: src/asimov/router_search.py. Protocol: WORKLOG 2026-10-13, "Router search (exploratory)". Numbers only.
+Logic: src/asimov/router_search.py. Protocol: WORKLOG 2026-10-13, "Router search (exploratory)", and 2026-10-14,
+"Router search: rerun + extensions (exploratory)". Numbers only.
 """
 
 from __future__ import annotations
 
 import argparse
 import fnmatch
+import math
 import sys
 from collections import Counter
 from dataclasses import dataclass
@@ -44,10 +46,12 @@ from asimov.router_search import (  # noqa: E402
     PoolEntry,
     SearchConfig,
     candidates,
-    cross_validate,
+    cross_validate_groups,
     member_from,
     metrics_on,
     pareto,
+    perfect_router_bound,
+    q1_matched,
     select,
     summarise_held_out,
 )
@@ -58,13 +62,19 @@ EXPLORATORY = (
     "**EXPLORATORY: a search over many combinations on one 319-item benchmark. Held-out numbers are the result; "
     "in-sample numbers are optimistic and not a result.**"
 )
+EXPLORATORY_TAG = "**EXPLORATORY**"  # above every table
 OPTIMISTIC = "in-sample, optimistic, not a result"
+BOUND = "perfect-router bound, not a system"
+SELF_HOSTED_FLAG = "self-hosted: counted as $0"
+ALL = "all"  # the selection pool with every candidate
+NO_CAP = math.inf
 DIGITS = 3
 COST_FLOOR = 0.01  # $ per 1,000 items: where $0 systems sit on the log axis
 FIG_FORMATS = ("png", "pdf")
 FIG_SIZE = (9, 6)
 FIG_DPI = 150
-COLORS = {"held_out": "#1f4e9c", "in_sample": "0.45", "decision": "#d9822b", "llm": "#5b8c5a"}
+COLORS = {"held_out": "#1f4e9c", "in_sample": "0.45", "bound": "#b03a2e", "decision": "#d9822b", "llm": "#5b8c5a"}
+LATER_QUESTIONS = QUESTIONS[1:]  # Q2-Q4: scored on Q1-matched items by the second rule
 
 
 @dataclass(frozen=True)
@@ -75,16 +85,27 @@ class Pool:
     strong: list[Member]
     skipped: list[str]  # cumulative runs left out, with the reason
     n: int
+    notes: dict[str, str]  # label -> note printed wherever the system appears
 
 
 @dataclass(frozen=True)
 class CapResult:
+    pool: str  # ALL or one family: the candidates the pick was made among
     kind: str
     cap: float
     held: CapSummary
     counts: Counter[int]  # candidate index -> picks over every fold and repeat
     total: int
     in_sample: int | None  # the candidate picked on all items (optimistic)
+
+
+@dataclass(frozen=True)
+class BoundPoint:
+    pair: str
+    sent: int
+    accuracy: float
+    cost: float  # $ per 1,000 items
+    members: tuple[str, str]
 
 
 def find_model(runs: list[RunData], e: PoolEntry):
@@ -119,11 +140,19 @@ def build_pool(cfg: SearchConfig, runs: list[RunData], prices: PriceTable) -> Po
             label = f"{m.summary['model']} ({run.name})"
             decisions.append(member_from(label, m, price(m.summary["model"]), ids, cfg.confidence))
     by_label = {m.label: m for m in llms}
-    return Pool(decisions, llms, [by_label[x] for x in cfg.cheap], [by_label[x] for x in cfg.strong], skipped, len(ids))
+    notes = {e.label: e.note for e in [*cfg.decision, *cfg.llms] if e.note}
+    cheap, strong = [by_label[x] for x in cfg.cheap], [by_label[x] for x in cfg.strong]
+    return Pool(decisions, llms, cheap, strong, skipped, len(ids), notes)
 
 
 def per_question(o: Outcome) -> dict[str, float]:
     return {q: float(o.correct[:, j].mean()) for j, q in enumerate(QUESTIONS)}
+
+
+def groups_of(cands: list[Candidate]) -> dict[str, np.ndarray]:
+    """Selection pools: every candidate, then each family on its own (the best of that family, still CV-selected)."""
+    families = {f: np.array([i for i, c in enumerate(cands) if c.family == f], dtype=int) for f in FAMILIES}
+    return {ALL: np.arange(len(cands)), **{f: idx for f, idx in families.items() if len(idx)}}
 
 
 def search(cfg: SearchConfig, pool: Pool) -> tuple[list[Candidate], list[Outcome], Metrics, list[CapResult]]:
@@ -131,15 +160,49 @@ def search(cfg: SearchConfig, pool: Pool) -> tuple[list[Candidate], list[Outcome
     every = np.arange(pool.n)
     outcomes = [c.fit(every) for c in cands]  # fitted on all items: in-sample only
     in_sample = metrics_on(outcomes, every)
-    caps = {"cost": cfg.budgets_per_1000, "latency": cfg.latency_caps_s}
-    cv = cross_validate(cands, pool.n, cfg.folds, cfg.seeds, caps)
-    results = [cap_result(kind, cap, h, in_sample) for (kind, cap), h in cv.items()]
+    caps = {"cost": (*cfg.budgets_per_1000, NO_CAP), "latency": cfg.latency_caps_s}
+    groups = groups_of(cands)
+    cv = cross_validate_groups(cands, pool.n, cfg.folds, cfg.seeds, caps, groups)
+    results = [cap_result(g, kind, cap, h, in_sample, groups[g]) for (g, kind, cap), h in cv.items()]
     return cands, outcomes, in_sample, results
 
 
-def cap_result(kind: str, cap: float, h: HeldOut, in_sample: Metrics) -> CapResult:
+def cap_result(pool: str, kind: str, cap: float, h: HeldOut, in_sample: Metrics, idx: np.ndarray) -> CapResult:
     counts = Counter(p.candidate for p in h.picks if p.candidate is not None)
-    return CapResult(kind, cap, summarise_held_out(h), counts, len(h.picks), select(in_sample, kind, cap))  # pyright: ignore[reportArgumentType]
+    local = select(Metrics(in_sample.accuracy[idx], in_sample.cost[idx], in_sample.latency[idx]), kind, cap)  # pyright: ignore[reportArgumentType]
+    ins = None if local is None else int(idx[local])
+    return CapResult(pool, kind, cap, summarise_held_out(h), counts, len(h.picks), ins)
+
+
+def bound_points(pool: Pool) -> list[BoundPoint]:
+    """Every decision model x LLM pair's perfect-router points, fitted on all items (a bound, not a system)."""
+    out = []
+    for d in pool.decisions:
+        for m in pool.llms:
+            sent, acc, cost = perfect_router_bound(d, m)
+            pair = f"{d.label} -> {m.label}"
+            out += [
+                BoundPoint(pair, int(k), float(a), float(c), (d.label, m.label)) for k, a, c in zip(sent, acc, cost, strict=True)
+            ]
+    return out
+
+
+def bound_frontier(points: list[BoundPoint]) -> list[BoundPoint]:
+    return [points[i] for i in pareto([p.accuracy for p in points], [p.cost for p in points])]
+
+
+# --- names and flags ------------------------------------------------------------------------------------------
+
+
+def flagged(name: str, members: tuple[str, ...], notes: dict[str, str], self_hosted: bool = False) -> str:
+    """A system's name with the note of every flagged member, and the self-hosted flag ($ counted as 0)."""
+    flags = [f"{m}: {notes[m]}" for m in dict.fromkeys(members) if m in notes]
+    flags += [SELF_HOSTED_FLAG] if self_hosted else []
+    return name + "".join(f" [flag: {f}]" for f in flags)
+
+
+def cand_name(c: Candidate, notes: dict[str, str]) -> str:
+    return flagged(c.name, c.members, notes, c.self_hosted)
 
 
 # --- tables ---------------------------------------------------------------------------------------------------
@@ -161,64 +224,84 @@ def row(cells: list[str]) -> str:
     return "| " + " | ".join(cells) + " |"
 
 
+def table(cells: list[str]) -> list[str]:
+    """A table's head: the EXPLORATORY line, then the header and its rule."""
+    return [EXPLORATORY_TAG, "", row(cells), row(["---"] * len(cells))]
+
+
 def cap_label(kind: str, cap: float) -> str:
+    if math.isinf(cap):
+        return "no cap"
     return f"${cap:g} per 1,000" if kind == "cost" else f"p50 ≤ {cap:g} s"
 
 
-def most_picked(r: CapResult, cands: list[Candidate]) -> tuple[str, float]:
+def matched_cell(n: float | None, acc: dict[str, float | None]) -> str:
+    """Q2-Q4 accuracy on Q1-matched items, then n matched."""
+    if n is None:
+        return "–"
+    vals = "/".join("–" if acc.get(q) is None else f"{acc[q]:.{DIGITS}f}" for q in LATER_QUESTIONS)
+    return f"{vals} (n {n:g})"
+
+
+def most_picked(r: CapResult) -> tuple[int | None, float]:
     if not r.counts:
-        return "–", 0.0
+        return None, 0.0
     best, count = sorted(r.counts.items(), key=lambda kv: (-kv[1], kv[0]))[0]
-    return cands[best].name, count / r.total
+    return best, count / r.total
 
 
 def candidate_rows(cands: list[Candidate], outcomes: list[Outcome], m: Metrics) -> list[dict]:
     on_cost = set(pareto(m.accuracy.tolist(), m.cost.tolist()))
     on_latency = set(pareto(m.accuracy.tolist(), m.latency.tolist()))
-    return [
-        {
-            "family": c.family,
-            "candidate": c.name,
-            "self_hosted": c.self_hosted,
-            "mean_of_4": float(m.accuracy[i]),
-            **{q: v for q, v in per_question(outcomes[i]).items()},
-            "cost_per_1000_usd": float(m.cost[i]),
-            "latency_p50_s": float(m.latency[i]),
-            "in_sample_frontier_cost": i in on_cost,
-            "in_sample_frontier_latency": i in on_latency,
-        }
-        for i, c in enumerate(cands)
-    ]
-
-
-def pick_rows(results: list[CapResult], cands: list[Candidate], m: Metrics) -> list[dict]:
     rows = []
-    for r in results:
-        name, share = most_picked(r, cands)
-        h, ins = r.held, r.in_sample
-        hosted = sum(n for i, n in r.counts.items() if cands[i].self_hosted) / r.total
+    for i, c in enumerate(cands):
+        n_matched, matched = q1_matched(outcomes[i].correct[None].astype(float))
         rows.append(
             {
-                "cap_kind": r.kind,
-                "cap": r.cap,
-                "complete": h.complete,
-                "held_out_mean_of_4": h.accuracy.value if h.accuracy else None,
-                "held_out_mean_of_4_lo": h.accuracy.lo if h.accuracy else None,
-                "held_out_mean_of_4_hi": h.accuracy.hi if h.accuracy else None,
-                **{f"held_out_{q}": v for q, v in h.per_question.items()},
-                "held_out_cost_per_1000_usd": h.cost,
-                "held_out_latency_p50_s": h.latency,
-                "most_picked": name,
-                "most_picked_share": share,
-                "distinct_picks": len(r.counts),
-                "self_hosted_pick_share": hosted,
-                "in_sample_pick": cands[ins].name if ins is not None else None,
-                "in_sample_mean_of_4": float(m.accuracy[ins]) if ins is not None else None,
-                "in_sample_cost_per_1000_usd": float(m.cost[ins]) if ins is not None else None,
-                "in_sample_latency_p50_s": float(m.latency[ins]) if ins is not None else None,
+                "family": c.family,
+                "candidate": c.name,
+                "self_hosted": c.self_hosted,
+                "mean_of_4": float(m.accuracy[i]),
+                **per_question(outcomes[i]),
+                "n_q1_matched": n_matched,
+                **{f"{q}_q1_matched": v for q, v in matched.items()},
+                "cost_per_1000_usd": float(m.cost[i]),
+                "latency_p50_s": float(m.latency[i]),
+                "gpu_s_per_item": float(outcomes[i].gpu.mean()),
+                "in_sample_frontier_cost": i in on_cost,
+                "in_sample_frontier_latency": i in on_latency,
             }
         )
     return rows
+
+
+def pick_row(r: CapResult, cands: list[Candidate], m: Metrics) -> dict:
+    best, share = most_picked(r)
+    h, ins = r.held, r.in_sample
+    hosted = sum(n for i, n in r.counts.items() if cands[i].self_hosted) / r.total
+    return {
+        "pool": r.pool,
+        "cap_kind": r.kind,
+        "cap": r.cap,
+        "complete": h.complete,
+        "held_out_mean_of_4": h.accuracy.value if h.accuracy else None,
+        "held_out_mean_of_4_lo": h.accuracy.lo if h.accuracy else None,
+        "held_out_mean_of_4_hi": h.accuracy.hi if h.accuracy else None,
+        **{f"held_out_{q}": v for q, v in h.per_question.items()},
+        "held_out_n_q1_matched": h.n_q1_matched,
+        **{f"held_out_{q}_q1_matched": h.q1_matched.get(q) for q in LATER_QUESTIONS},
+        "held_out_cost_per_1000_usd": h.cost,
+        "held_out_latency_p50_s": h.latency,
+        "held_out_gpu_s_per_item": h.gpu,
+        "most_picked": cands[best].name if best is not None else "–",
+        "most_picked_share": share,
+        "distinct_picks": len(r.counts),
+        "self_hosted_pick_share": hosted,
+        "in_sample_pick": cands[ins].name if ins is not None else None,
+        "in_sample_mean_of_4": float(m.accuracy[ins]) if ins is not None else None,
+        "in_sample_cost_per_1000_usd": float(m.cost[ins]) if ins is not None else None,
+        "in_sample_latency_p50_s": float(m.latency[ins]) if ins is not None else None,
+    }
 
 
 def frequency_rows(results: list[CapResult], cands: list[Candidate]) -> list[dict]:
@@ -232,34 +315,99 @@ def frequency_rows(results: list[CapResult], cands: list[Candidate]) -> list[dic
             "share": n / r.total,
         }
         for r in results
+        if r.pool == ALL
         for i, n in sorted(r.counts.items(), key=lambda kv: (-kv[1], kv[0]))
     ]
 
 
 def held_out_frontier(results: list[CapResult], kind: str) -> list[CapResult]:
-    done = [r for r in results if r.kind == kind and r.held.accuracy is not None]
+    done = [r for r in results if r.pool == ALL and r.kind == kind and r.held.accuracy is not None]
     xs = [(r.held.cost if kind == "cost" else r.held.latency) or 0.0 for r in done]
     return [done[i] for i in pareto([r.held.accuracy.value for r in done], xs)]  # pyright: ignore[reportOptionalMemberAccess]
 
 
-def frontier_rows(results: list[CapResult], cands: list[Candidate], m: Metrics) -> list[dict]:
+def frontier_rows(results: list[CapResult], cands: list[Candidate], m: Metrics, bound: list[BoundPoint]) -> list[dict]:
     rows = []
     for kind in ("cost", "latency"):
         for r in held_out_frontier(results, kind):
+            a = r.held.accuracy
+            assert a is not None  # the frontier keeps complete caps only
             x = r.held.cost if kind == "cost" else r.held.latency
-            acc = r.held.accuracy.value if r.held.accuracy else None
-            rows.append({"set": "held_out", "axis": kind, "point": cap_label(kind, r.cap), "mean_of_4": acc, "x": x})
+            rows.append(
+                {
+                    "set": "held_out",
+                    "axis": kind,
+                    "point": cap_label(kind, r.cap),
+                    "mean_of_4": a.value,
+                    "lo": a.lo,
+                    "hi": a.hi,
+                    "x": x,
+                }
+            )
         xs = m.cost if kind == "cost" else m.latency
         for i in pareto(m.accuracy.tolist(), xs.tolist()):
             rows.append(
                 {"set": "in_sample", "axis": kind, "point": cands[i].name, "mean_of_4": float(m.accuracy[i]), "x": float(xs[i])}
             )
+    for p in bound:
+        rows.append(
+            {"set": "bound", "axis": "cost", "point": f"{p.pair} ({p.sent} items sent)", "mean_of_4": p.accuracy, "x": p.cost}
+        )
     return rows
+
+
+DEFINITIONS = {
+    "single": "one system alone",
+    "d_cascade": "decision model; the lowest-confidence share of items (training quantile) also to the LLM, "
+    "whose answers replace it",
+    "agreement": "two first-stage systems (decision + decision, or decision + cheap LLM); items where they disagree "
+    "(any question, or Q1 only) to a strong LLM; else the second system's answers",
+    "three_stage": "decision model; low-confidence items to a cheap LLM; of those, items where it disagrees with the "
+    "decision model (any / Q1) to a strong LLM",
+    "per_question_mix": "d_cascade, but on items sent on each question keeps the decision model's answer where it beat "
+    "the LLM on the training items sent on",
+    "split_by_question": "design B: the decision model answers a fixed subset of the 4 questions on every item, the LLM "
+    "the rest; both calls paid, latency added (the 14 splits where both sides answer; the other 2 are single systems)",
+    "parallel": "decision model and LLM called at once on every item (both paid; latency: the slower); the LLM's "
+    "answers on the lowest-confidence share of items, the decision model's elsewhere",
+    "parallel_per_question_mix": "parallel, but on the low-confidence items each question keeps the decision model's "
+    "answer where it beat the LLM on the training items in that share",
+}
+
+
+def method_lines(cfg: SearchConfig, prices: PriceTable, n: int) -> list[str]:
+    seeds = ", ".join(map(str, cfg.seeds))
+    return [
+        f"- n = {n} items. Accuracy: mean of 4 = each item's share of its 4 questions right, averaged over items. "
+        "It is the selection metric.",
+        '- **Second scoring rule** (WORKLOG 2026-10-14, "Cumulative-mode scoring", option c): Q2-Q4 accuracy on the '
+        "items whose combined Q1 answer matched the key, with n matched. Reported beside each pick, never used to pick. "
+        "Held out: matched items pooled over repeats; n = mean per repeat. The matched subset differs per system.",
+        f"- $: logged tokens x `configs/prices.yaml` (checked {prices.checked.isoformat()}), per 1,000 items. Free-tier "
+        "services are $0. Self-hosted models (Kev-4B, and the local models run on Modal) have no $ price: their cost is "
+        "GPU seconds per item, reported instead of $. In cost-capped selection they count as $0, flagged "
+        f"`[flag: {SELF_HOSTED_FLAG}]`. Latency: median over items of the item's calls added up; agreement's two "
+        "first-stage calls and the parallel families' two calls run at once (the slower counts). A reply made on Modal "
+        "counts its GPU compute time (`raw.remote.compute_s`), not its round trip (`latency_s`, which includes queue "
+        "wait when the run used several workers); every other reply counts `latency_s`.",
+        "- **GPU seconds per item:** a self-hosted call's latency, added up over the item's self-hosted calls (also "
+        "when they run in parallel). Modal rows: `raw.remote.compute_s`. Kev-4B has no compute time saved: its GPU "
+        "seconds are the round trip (`latency_s`), flagged in the table of single systems.",
+        f"- **Cross-validation:** items are shuffled with numpy `default_rng(seed)` and dealt into {cfg.folds} folds "
+        f"(no stratification), for seeds {seeds}. For each fold, every candidate is fitted on the other folds (its "
+        "confidence threshold = a quantile of their confidences; the per-question choice = their correctness), the "
+        "highest-accuracy candidate within the cap on those folds is picked (ties: cheaper, faster, listed first), and "
+        "it is scored on the held-out fold. Held-out numbers pool the folds and average over repeats; the mean-of-4 CI "
+        "is a bootstrap over items of each item's held-out score averaged over repeats. The best of each family is "
+        "picked the same way, among that family's candidates only.",
+        f"- **In-sample** numbers fit and pick on all {n} items: {OPTIMISTIC}.",
+        f"- **Perfect-router bound** ({BOUND}): per decision model x LLM, items go to the LLM only where it gets "
+        "strictly more of the 4 questions right (`asimov.cascade.gain_order`), fitted on all items by definition.",
+    ]
 
 
 def intro(cfg: SearchConfig, cfg_path: Path, pool: Pool, cands: list[Candidate], prices: PriceTable) -> list[str]:
     counts = Counter(c.family for c in cands)
-    seeds = ", ".join(map(str, cfg.seeds))
     lines = [
         GENERATED,
         "",
@@ -267,157 +415,206 @@ def intro(cfg: SearchConfig, cfg_path: Path, pool: Pool, cands: list[Candidate],
         "",
         "# Router search (text benchmark)",
         "",
-        f'From saved replies only (`{cfg_path.name}`); protocol in WORKLOG 2026-10-13, "Router search (exploratory)".',
+        f'From saved replies only (`{cfg_path.name}`); protocol in WORKLOG 2026-10-13, "Router search (exploratory)", '
+        'and 2026-10-14, "Router search: rerun + extensions (exploratory)".',
         "",
-        f"- n = {pool.n} items. Accuracy: mean of 4 = each item's share of its 4 questions right, averaged over items.",
-        f"- $: logged tokens x `configs/prices.yaml` (checked {prices.checked.isoformat()}), per 1,000 items. Free-tier "
-        "services are $0. Self-hosted models (Kev-4B, and the local models run on Modal) have no $ price (their cost is "
-        "GPU time): they count as $0 and are flagged. Latency: median over items of the item's calls added up; "
-        "agreement's two first-stage calls run in parallel (the slower counts). A reply made on Modal counts its GPU "
-        "compute time (`raw.remote.compute_s`), not its round trip (`latency_s`, which includes queue wait when the run "
-        "used several workers); every other reply counts `latency_s`.",
-        f"- **Cross-validation:** items are shuffled with numpy `default_rng(seed)` and dealt into {cfg.folds} folds "
-        f"(no stratification), for seeds {seeds}. For each fold, every candidate is fitted on the other folds (its "
-        "confidence threshold = a quantile of their confidences; the per-question choice = their correctness), the "
-        "highest-accuracy candidate within the cap on those folds is picked (ties: cheaper, faster, listed first), and "
-        "it is scored on the held-out fold. Held-out numbers pool the folds and average over repeats; the mean-of-4 CI "
-        "is a bootstrap over items of each item's held-out score averaged over repeats.",
-        f"- **In-sample** numbers fit and pick on all {pool.n} items: {OPTIMISTIC}.",
+        *method_lines(cfg, prices, pool.n),
         "",
         "## Families",
         "",
-        row(["Family", "Definition", "Candidates"]),
-        row(["---"] * 3),
+        *table(["Family", "Definition", "Candidates"]),
     ]
-    definitions = {
-        "single": "one system alone",
-        "d_cascade": "decision model; the lowest-confidence share of items (training quantile) also to the LLM, "
-        "whose answers replace it",
-        "agreement": "two first-stage systems (decision + decision, or decision + cheap LLM); items where they disagree "
-        "(any question, or Q1 only) to a strong LLM; else the second system's answers",
-        "three_stage": "decision model; low-confidence items to a cheap LLM; of those, items where it disagrees with the "
-        "decision model (any / Q1) to a strong LLM",
-        "per_question_mix": "d_cascade, but on items sent on each question keeps the decision model's answer where it beat "
-        "the LLM on the training items sent on",
-    }
-    lines += [row([f, definitions[f], str(counts[f])]) for f in FAMILIES]
+    lines += [row([f, DEFINITIONS[f], str(counts[f])]) for f in FAMILIES]
     lines += [row(["total", "", str(len(cands))]), "", "Every candidate's definition: `candidates.csv`.", ""]
+    return lines + pool_lines(cfg, pool)
+
+
+def pool_lines(cfg: SearchConfig, pool: Pool) -> list[str]:
     members = [*pool.decisions, *pool.llms]
-    lines += [
+
+    def names(ms: list[Member]) -> str:
+        return ", ".join(flagged(m.label, (m.label,), pool.notes) for m in ms)
+
+    return [
         "## Pools and grids",
         "",
-        f"- Decision models: {', '.join(m.label for m in pool.decisions)}.",
-        f"- LLMs: {', '.join(m.label for m in pool.llms)}.",
-        f"- Cheap: {', '.join(cfg.cheap)}. Strong: {', '.join(cfg.strong)}.",
+        f"- Decision models: {names(pool.decisions)}.",
+        f"- LLMs: {names(pool.llms)}.",
+        f"- Cheap: {names(pool.cheap)}. Strong: {names(pool.strong)}.",
         f"- Cumulative runs (`{cfg.cumulative_runs}`): " + ("; ".join(pool.skipped) if pool.skipped else "none skipped") + ".",
         "- Latency from Modal compute time: "
         + (", ".join(f"{m.label} ({m.compute_rows} of {pool.n} items)" for m in members if m.compute_rows) or "none")
         + ".",
-        *(f"- **Note:** {e.label}: {e.note}." for e in [*cfg.decision, *cfg.llms] if e.note),
+        *(f"- **Note:** {label}: {note}." for label, note in pool.notes.items()),
         f"- Shares sent on: {', '.join(f'{f:.0%}' for f in cfg.fractions)}. Agreement rules: {', '.join(cfg.agreement_rules)}.",
-        f"- Budgets ($ per 1,000 items): {', '.join(f'{b:g}' for b in cfg.budgets_per_1000)}. "
+        f"- Budgets ($ per 1,000 items): {', '.join(f'{b:g}' for b in cfg.budgets_per_1000)}, and no cap. "
         f"Latency caps (p50 s): {', '.join(f'{c:g}' for c in cfg.latency_caps_s)}.",
         "",
     ]
-    return lines
 
 
-def cap_table(results: list[CapResult], kind: str, cands: list[Candidate], m: Metrics) -> list[str]:
-    lines = [
-        row(
-            [
-                "Cap",
-                "Held-out mean of 4 [95% CI]",
-                *(f"Q{k}" for k in range(1, 5)),
-                "$ per 1,000",
-                "p50 (s)",
-                "Most picked (share of folds)",
-                "Distinct picks",
-                f"In-sample pick: mean of 4 ({OPTIMISTIC})",
-                "Gap",
-            ]
-        ),
-        row(["---"] * 12),
+CAP_HEAD = [
+    "Cap",
+    "Held-out mean of 4 [95% CI]",
+    *(f"Q{k}" for k in range(1, 5)),
+    "Q2/Q3/Q4 on Q1-matched (n)",
+    "$ per 1,000",
+    "p50 (s)",
+    "GPU s per item",
+]
+
+
+def cap_cells(r: CapResult) -> list[str]:
+    h = r.held
+    if h.accuracy is None:
+        return [cap_label(r.kind, r.cap), "no candidate within the cap on some fold", *["–"] * (len(CAP_HEAD) - 2)]
+    return [
+        cap_label(r.kind, r.cap),
+        fmt(h.accuracy),
+        *(f"{h.per_question[q]:.{DIGITS}f}" for q in QUESTIONS),
+        matched_cell(h.n_q1_matched, h.q1_matched),
+        money(h.cost),
+        seconds(h.latency),
+        seconds(h.gpu),
     ]
-    for r in (r for r in results if r.kind == kind):
-        name, share = most_picked(r, cands)
+
+
+def cap_table(results: list[CapResult], kind: str, cands: list[Candidate], m: Metrics, notes: dict[str, str]) -> list[str]:
+    head = [*CAP_HEAD, "Most picked (share of folds)", "Distinct picks", f"In-sample pick: mean of 4 ({OPTIMISTIC})", "Gap"]
+    lines = table(head)
+    for r in (r for r in results if r.pool == ALL and r.kind == kind):
+        best, share = most_picked(r)
         ins = r.in_sample
         ins_acc = float(m.accuracy[ins]) if ins is not None else None
-        if r.held.accuracy is None:
-            lines.append(row([cap_label(kind, r.cap), "no candidate within the cap on some fold", *["–"] * 10]))
-            continue
-        gap = f"{ins_acc - r.held.accuracy.value:+.{DIGITS}f}" if ins_acc is not None else "–"
-        lines.append(
-            row(
-                [
-                    cap_label(kind, r.cap),
-                    fmt(r.held.accuracy),
-                    *(f"{r.held.per_question[q]:.{DIGITS}f}" for q in QUESTIONS),
-                    money(r.held.cost),
-                    seconds(r.held.latency),
-                    f"{name} ({share:.0%})",
-                    str(len(r.counts)),
-                    f"{ins_acc:.{DIGITS}f}" if ins_acc is not None else "–",
-                    gap,
-                ]
-            )
-        )
+        held = r.held.accuracy
+        gap = f"{ins_acc - held.value:+.{DIGITS}f}" if ins_acc is not None and held else "–"
+        picked = f"{cand_name(cands[best], notes)} ({share:.0%})" if best is not None and held else "–"
+        ins_cell = f"{ins_acc:.{DIGITS}f}" if ins_acc is not None and held else "–"
+        lines.append(row([*cap_cells(r), picked, str(len(r.counts)) if held else "–", ins_cell, gap]))
     return [*lines, ""]
 
 
-def singles_table(cands: list[Candidate], outcomes: list[Outcome], m: Metrics) -> list[str]:
+def family_table(results: list[CapResult], cands: list[Candidate], notes: dict[str, str]) -> list[str]:
+    lines = [
+        "## Best of each family (CV-selected within the family), no cap and $1 per 1,000",
+        "",
+        "Each family's pick is made on training folds among that family's candidates only, then scored held out.",
+        "",
+        *table(["Family", *CAP_HEAD, "Most picked (share of folds)"]),
+    ]
+    for f in FAMILIES:
+        for r in (r for r in results if r.pool == f and r.kind == "cost" and (math.isinf(r.cap) or r.cap == 1)):
+            best, share = most_picked(r)
+            picked = f"{cand_name(cands[best], notes)} ({share:.0%})" if best is not None and r.held.accuracy else "–"
+            lines.append(row([f, *cap_cells(r), picked]))
+    return [*lines, "", "All caps per family: `picks.csv` (`pool` column).", ""]
+
+
+def singles_table(cands: list[Candidate], outcomes: list[Outcome], m: Metrics, pool: Pool) -> list[str]:
     lines = [
         "## Single systems (nothing fitted or picked)",
         "",
-        row(["System", "Mean of 4 [95% CI]", *(f"Q{k}" for k in range(1, 5)), "$ per 1,000", "p50 (s)", "Self-hosted"]),
-        row(["---"] * 9),
+        "Self-hosted rows: no $; GPU seconds per item (mean) and parameters instead.",
+        "",
+        *table(
+            ["System", "Mean of 4 [95% CI]", *(f"Q{k}" for k in range(1, 5)), "Q2/Q3/Q4 on Q1-matched (n)"]
+            + ["$ per 1,000", "p50 (s)", "GPU s per item (mean)", "Params (B)"]
+        ),
     ]
+    members = {mb.label: mb for mb in [*pool.decisions, *pool.llms]}
     for i, c in enumerate(cands):
         if c.family != "single":
             continue
-        acc = accuracy(outcomes[i].correct.mean(axis=1).tolist(), MEAN)
-        qs = per_question(outcomes[i])
+        mb, o = members[c.name], outcomes[i]
+        qs = per_question(o)
+        n_matched, matched = q1_matched(o.correct[None].astype(float))
+        gpu = "–"
+        if mb.self_hosted:
+            how = "compute_s" if mb.compute_rows == pool.n else f"round trip; compute_s on {mb.compute_rows} of {pool.n} items"
+            gpu = f"{o.gpu.mean():.{DIGITS}f} ({how})"
         lines.append(
             row(
                 [
-                    c.name,
-                    fmt(acc),
+                    flagged(c.name, c.members, pool.notes),
+                    fmt(accuracy(o.correct.mean(axis=1).tolist(), MEAN)),
                     *(f"{qs[q]:.{DIGITS}f}" for q in QUESTIONS),
-                    money(float(m.cost[i])),
+                    matched_cell(n_matched, matched),
+                    "self-hosted" if mb.self_hosted else money(float(m.cost[i])),
                     seconds(float(m.latency[i])),
-                    "yes" if c.self_hosted else "",
+                    gpu,
+                    f"{mb.params_b:g}" if mb.params_b is not None else "–",
                 ]
             )
         )
     return [*lines, ""]
 
 
-def frontier_table(rows: list[dict]) -> list[str]:
+def frontier_table(rows: list[dict], names: dict[str, str]) -> list[str]:
     lines = ["## Frontiers", ""]
+    sets = (("held_out", "held-out (cap picks), 95% CI"), ("in_sample", OPTIMISTIC), ("bound", BOUND))
     for axis, unit in (("cost", "$ per 1,000"), ("latency", "p50 (s)")):
-        for which, title in (("held_out", "held-out (budget picks)"), ("in_sample", OPTIMISTIC)):
-            lines += [f"### Accuracy vs {axis}: {title}", "", row(["Point", "Mean of 4", unit]), row(["---"] * 3)]
-            for r in (r for r in rows if r["set"] == which and r["axis"] == axis):
+        for which, title in sets:
+            chosen = [r for r in rows if r["set"] == which and r["axis"] == axis]
+            if not chosen:
+                continue
+            lines += [f"### Accuracy vs {axis}: {title}", "", *table(["Point", "Mean of 4", unit])]
+            for r in chosen:
                 x = money(r["x"]) if axis == "cost" else seconds(r["x"])
-                lines.append(row([r["point"], f"{r['mean_of_4']:.{DIGITS}f}", x]))
+                acc = f"{r['mean_of_4']:.{DIGITS}f}" + (f" [{r['lo']:.{DIGITS}f}, {r['hi']:.{DIGITS}f}]" if "lo" in r else "")
+                point: str = r["point"]
+                lines.append(row([names.get(point, point), acc, x]))
             lines.append("")
     return lines
 
 
-def tables_md(cfg, cfg_path, pool, cands, outcomes, m, results, frontier, prices) -> str:
+def point_names(cands: list[Candidate], bound: list[BoundPoint], notes: dict[str, str]) -> dict[str, str]:
+    """Frontier point -> its name with flags."""
+    out = {c.name: cand_name(c, notes) for c in cands}
+    out |= {f"{p.pair} ({p.sent} items sent)": flagged(f"{p.pair} ({p.sent} items sent)", p.members, notes) for p in bound}
+    return out
+
+
+def tables_md(cfg, cfg_path, pool, cands, outcomes, m, results, frontier, prices, bound) -> str:
     lines = intro(cfg, cfg_path, pool, cands, prices)
-    lines += ["## Held-out picks per budget ($ per 1,000 items)", "", *cap_table(results, "cost", cands, m)]
-    lines += ["## Held-out picks per latency cap (p50 s)", "", *cap_table(results, "latency", cands, m)]
+    lines += ["## Held-out picks per budget ($ per 1,000 items)", "", *cap_table(results, "cost", cands, m, pool.notes)]
+    lines += ["## Held-out picks per latency cap (p50 s)", "", *cap_table(results, "latency", cands, m, pool.notes)]
     lines += ["Gap = in-sample pick's mean of 4 minus the held-out mean of 4.", ""]
-    lines += singles_table(cands, outcomes, m)
-    lines += frontier_table(frontier)
+    lines += family_table(results, cands, pool.notes)
+    lines += singles_table(cands, outcomes, m, pool)
+    lines += frontier_table(frontier, point_names(cands, bound, pool.notes))
     return "\n".join(lines).rstrip() + "\n"
 
 
 # --- figures --------------------------------------------------------------------------------------------------
 
 
-def draw(kind: str, results, cands: list[Candidate], m: Metrics, decisions: set[str], path: Path) -> None:
+def figure_title(kind: str) -> str:
+    return f"EXPLORATORY. Router search: accuracy vs {'$' if kind == 'cost' else 'latency'} (text, n = 319)"
+
+
+def draw_held_out(ax, results: list[CapResult], kind: str, floor) -> None:
+    held = held_out_frontier(results, kind)
+    hx = [floor((r.held.cost if kind == "cost" else r.held.latency) or 0.0) for r in held]
+    accs = [r.held.accuracy for r in held if r.held.accuracy]  # the frontier keeps complete caps only
+    hy = [a.value for a in accs]
+    err = [[a.value - a.lo for a in accs], [a.hi - a.value for a in accs]]
+    ax.step(hx, hy, where="post", color=COLORS["held_out"], lw=2, label="frontier, held-out (cap picks, 5x5 CV; 95% CI)")
+    ax.errorbar(hx, hy, yerr=err, fmt="o", color=COLORS["held_out"], ms=6, capsize=3, lw=1)
+
+
+def draw_singles(ax, cands: list[Candidate], m: Metrics, xs_all: np.ndarray, decisions: set[str], floor) -> None:
+    for i, c in enumerate(cands):
+        if c.family != "single":
+            continue
+        tier = "decision" if c.name in decisions else "llm"
+        x, y = floor(float(xs_all[i])), float(m.accuracy[i])
+        ax.plot(x, y, "s" if tier == "llm" else "^", color=COLORS[tier], ms=6, mec="white", mew=0.8)
+        ax.annotate(c.name, (x, y), textcoords="offset points", xytext=(4, 3), fontsize=6.5, color="0.25")
+    ax.plot([], [], "^", color=COLORS["decision"], label="decision model alone")
+    ax.plot([], [], "s", color=COLORS["llm"], label="LLM alone")
+
+
+def draw(kind: str, results, cands: list[Candidate], m: Metrics, decisions: set[str], bound, path: Path) -> None:
     fig, ax = plt.subplots(figsize=FIG_SIZE)
     xs_all = m.cost if kind == "cost" else m.latency
     floor = (lambda x: max(x, COST_FLOOR)) if kind == "cost" else (lambda x: x)
@@ -431,27 +628,18 @@ def draw(kind: str, results, cands: list[Candidate], m: Metrics, decisions: set[
         lw=1.2,
         label=f"frontier, {OPTIMISTIC}",
     )
-    held = held_out_frontier(results, kind)
-    hx = [floor((r.held.cost if kind == "cost" else r.held.latency) or 0.0) for r in held]
-    hy = [r.held.accuracy.value for r in held if r.held.accuracy]  # the frontier keeps complete caps only
-    ax.step(hx, hy, where="post", color=COLORS["held_out"], lw=2, label="frontier, held-out (budget/cap picks, 5x5 CV)")
-    ax.plot(hx, hy, "o", color=COLORS["held_out"], ms=6)
-    for i, c in enumerate(cands):
-        if c.family != "single":
-            continue
-        tier = "decision" if c.name in decisions else "llm"
-        x, y = floor(float(xs_all[i])), float(m.accuracy[i])
-        ax.plot(x, y, "s" if tier == "llm" else "^", color=COLORS[tier], ms=6, mec="white", mew=0.8)
-        ax.annotate(c.name, (x, y), textcoords="offset points", xytext=(4, 3), fontsize=6.5, color="0.25")
-    ax.plot([], [], "^", color=COLORS["decision"], label="decision model alone")
-    ax.plot([], [], "s", color=COLORS["llm"], label="LLM alone")
+    if kind == "cost" and bound:
+        bx, by = [floor(p.cost) for p in bound], [p.accuracy for p in bound]
+        ax.step(bx, by, where="post", ls=":", color=COLORS["bound"], lw=1.6, label=f"{BOUND} (best pair at each $)")
+    draw_held_out(ax, results, kind, floor)
+    draw_singles(ax, cands, m, xs_all, decisions, floor)
     ax.set_xscale("log")
-    cost_label = f"\\$ per 1,000 items (log; \\$0 shown at {COST_FLOOR:g})"  # \$: not matplotlib math
+    cost_label = f"\\$ per 1,000 items (log; \\$0 and self-hosted shown at {COST_FLOOR:g})"  # \$: not matplotlib math
     ax.set_xlabel(cost_label if kind == "cost" else "p50 latency per item (s, log)")
     ax.set_ylabel("accuracy, mean of 4 questions")
     ax.grid(alpha=0.3)
     ax.legend(loc="lower right", fontsize=8, frameon=False)
-    ax.set_title(f"Router search (exploratory): accuracy vs {'$' if kind == 'cost' else 'latency'}", fontsize=11)
+    ax.set_title(figure_title(kind).replace("$", "\\$"), fontsize=11, fontweight="bold")
     fig.tight_layout()
     path.parent.mkdir(parents=True, exist_ok=True)
     for ext in FIG_FORMATS:
@@ -472,13 +660,14 @@ def main(argv: list[str] | None = None) -> int:
     prices = load_prices(args.prices)
     pool = build_pool(cfg, load_results(args.results), prices)
     cands, outcomes, m, results = search(cfg, pool)
-    frontier = frontier_rows(results, cands, m)
+    bound = bound_frontier(bound_points(pool))
+    frontier = frontier_rows(results, cands, m, bound)
     files = {
         "candidates.csv": to_csv(candidate_rows(cands, outcomes, m), ("family", "candidate")),
-        "picks.csv": to_csv(pick_rows(results, cands, m), ("cap_kind", "cap")),
+        "picks.csv": to_csv([pick_row(r, cands, m) for r in results], ("pool", "cap_kind", "cap")),
         "pick_frequency.csv": to_csv(frequency_rows(results, cands), ("cap_kind", "cap", "family", "candidate")),
         "frontier.csv": to_csv(frontier, ("set", "axis", "point")),
-        "tables.md": tables_md(cfg, args.config, pool, cands, outcomes, m, results, frontier, prices),
+        "tables.md": tables_md(cfg, args.config, pool, cands, outcomes, m, results, frontier, prices, bound),
     }
     out = args.results / args.config.stem
     if args.check:
@@ -491,7 +680,7 @@ def main(argv: list[str] | None = None) -> int:
         (out / name).write_text(text)
     decisions = {d.label for d in pool.decisions}
     for kind, name in (("cost", "accuracy_vs_cost"), ("latency", "accuracy_vs_latency")):
-        draw(kind, results, cands, m, decisions, args.figures / args.config.stem / name)
+        draw(kind, results, cands, m, decisions, bound, args.figures / args.config.stem / name)
     print(f"wrote {len(files)} tables to {out} and 2 figures to {args.figures / args.config.stem} ({len(cands)} candidates)")
     return 0
 
