@@ -31,7 +31,7 @@ map of typed questions, and you get back typed answers with probabilities. No te
 |---|---|---|---|---|
 | Jev | Paid API, key from https://console.typesafe.ai/keys | `Authorization: Bearer <key>`; SDK env var `TYPESAFE_API_KEY` | `TYPESAFE_API_KEY` | $0.042 per M input tokens, output free |
 | OpenJev, Laya | Codiv account, keys look like `sk-codiv-...` | `Authorization: Bearer`; Codiv's docs set `TYPESAFE_API_KEY` + `TYPESAFE_BASE_URL=https://api.codiv.ai` | **`CODIV_API_KEY`** (our name, see below) | free tier: 100M input tokens per account, no card; 60 requests/min per key |
-| Kev-4B | Self-deployed on Modal (Apache-2.0 weights, HF `jaredpalmer/kev-4b`, tag `v1.0`) | `Authorization: Bearer <KEV_API_KEY>` when `KEV_API_KEY` is set at deploy | `KEV_API_KEY`, `KEV_BASE_URL` (our name: the `modal.run` URL) | Modal GPU time (L40S) |
+| Kev-4B | Self-deployed on Modal (Apache-2.0 weights, HF `jaredpalmer/kev-4b`, tag `v1.0`) | `Authorization: Bearer <KEV_API_KEY>` when `KEV_API_KEY` is set at deploy | `KEV_API_KEY`; the `modal.run` URL goes in `configs/part2_kev.yaml` (`base_url`) | Modal GPU time (L40S) |
 
 **Key names:** Codiv's official setup reuses `TYPESAFE_API_KEY`, which would collide with the Jev
 key in one `.env`. Our client reads `CODIV_API_KEY` for Codiv instead (config `key_env`).
@@ -128,6 +128,6 @@ typed-decision benchmark, and that accuracy comes from fine-tuning.
 
 ## 8. Status
 
-`jev`: BLOCKED until `TYPESAFE_API_KEY` exists. `openjev` (think 0 / 512), `laya`: BLOCKED until
-`CODIV_API_KEY` exists (free tier). `kev4b`: BLOCKED until the Modal deploy (`KEV_BASE_URL`,
-`KEV_API_KEY`).
+READY, smoked 2026-10-13 (5 items each, 0 errors; WORKLOG): `jev` (`jev-1.13.0`), `openjev` think 0 /
+512 (`openjev-0.1`), `laya` (`laya-1.0`), `kev4b` (`kev-latest` = `kev-4b@v1.0`, Modal app `kev`, URL in
+`configs/part2_kev.yaml`).

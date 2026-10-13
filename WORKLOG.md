@@ -897,3 +897,19 @@ Numbers only. 5-item accuracy is not reported (too few items to mean anything). 
 - First cold start 179 s. Smoke (`part2_kev`, 5 items): 0 errors, 0 parse failures, ~590 input
   tokens per item, server latency 248-682 ms (`raw.latency_ms`), ~1 s round trip.
   Kev reports output tokens (~350 per item); no tokens are billed (own GPU). Cost is GPU time.
+
+### Code-review fixes before merging PR #9 (2026-10-13)
+- **Ties go to the service's own answer: DECIDED (Claude, a bug fix; Noa to confirm).** luna's
+  Decisions API rounds probabilities to 2 decimals, so exact ties happen (1 in 20 smoke answers:
+  `text_0216` severity 0.47 / 0.47). We took the first tied option (A); the API's own `choice` was B.
+  Now the pick is the highest probability, and on an exact tie the service's `choice` (all our
+  services return one), else the first tied option in paper order. *Alternative considered:*
+  always the first option in paper order. The 5 `part2_luna_decide` smoke replies were made under
+  the old rule, so they were removed and are re-called in the full run.
+- A response without an answer for every question sent (e.g. an error body with HTTP 200) now
+  raises: logged as an error, never saved as a reply.
+- Probabilities must sum to 1 within 1e-3 (`PROB_SUM_TOLERANCE`; Kev's deviate by ~1e-4).
+- Configs: `base_url` / `key_env` / `params` are rejected on providers other than `systemone`.
+- Kev's URL lives in `configs/part2_kev.yaml`; there is no `KEV_BASE_URL` env var (docs corrected).
+- Not changed, flagged for Tyler: the gpt-6-luna lowest-effort mapping is a model id in
+  `models/openai_client.py` (`MIN_EFFORT`).
