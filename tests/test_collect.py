@@ -16,15 +16,24 @@ from asimov.claims import Claims
 from asimov.collect.build import build
 from asimov.collect.checks import ACTION_QUESTIONS, LATENT_QUESTIONS
 from asimov.collect.load import ModelResult, RunData, load_model, load_results
-from asimov.collect.pages import FIGURES, GENERATED, FailureCounts, failure_counts, severity_section
-from asimov.collect.run_ids import PREFIXES, assign_ids, describe, next_number, parse_ids
+from asimov.collect.pages import (
+    FIGURE_SUBHEADINGS,
+    FIGURE_VERSION_NOTES,
+    FIGURES,
+    GENERATED,
+    FailureCounts,
+    failure_counts,
+    severity_section,
+)
+from asimov.collect.run_ids import assign_ids, describe
 from asimov.collect.severity import mean_abs_gap
 from asimov.collect.tables import CSV_DIGITS, to_csv
+from asimov.run_ids import PREFIXES, next_number, parse_ids
 
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT / "scripts"))
 import collect  # noqa: E402  # pyright: ignore[reportMissingImports]
-from results_tree import make_results, text_run  # noqa: E402  # pyright: ignore[reportMissingImports]
+from results_tree import make_results, text_run, write_model  # noqa: E402  # pyright: ignore[reportMissingImports]
 
 
 @pytest.fixture
@@ -423,6 +432,251 @@ def test_cli_writes_run_ids_and_check_fails_when_one_is_missing(results, tmp_pat
     assert collect.main([*args, "--check"]) == 0
 
 
+# ---- run page as a report --------------------------------------------------------------------
+
+RUN_PAGE_SECTIONS = [
+    "# Run `txt0`: `text_run`",
+    "## Write-up",
+    "## Figures",
+    "## Comparison with the paper",
+    "## Cost and speed",
+    "## Settings",
+    "## Models",
+    "## Metrics (95% CI)",
+    "## Files",
+]
+IDS = {"text_run": "txt0", "video_run": "vid0"}
+HEADLINE = {"figures": {"fig4": {"run": "text_run"}, "fig5": {"run": "video_run"}, "fig6": {"run": None}}}
+
+
+def run_page(results: Path, claims: Claims, run: str = "text_run", headline: dict | None = None) -> str:
+    return build(load_results(results), claims, {}, HEADLINE if headline is None else headline, [], IDS)[f"{run}/README.md"]
+
+
+def test_run_page_has_its_sections_in_order(results, claims):
+    page = run_page(results, claims)
+    positions = [page.index(s + "\n") for s in RUN_PAGE_SECTIONS]
+    assert positions == sorted(positions)
+    assert page.index("Text benchmark,") < page.index("## Write-up")  # description right under the title
+
+
+def test_run_page_folds_in_the_paper_check(results, claims):
+    page = run_page(results, claims)
+    comparison = page[page.index("## Comparison with the paper") : page.index("## Models")]
+    assert "fig4a_gpt5_latent_risk" in comparison and "[paper_check.md](paper_check.md)" in comparison
+    assert "Headline claims" in comparison and "Holm" in comparison and "effect + activated_risk" in comparison
+    assert "fig5b_gpt5_within" in run_page(results, claims, "video_run")
+
+
+def test_run_page_lists_the_runs_figures_comparison_first(results, claims):
+    page = run_page(results, claims)
+    figures = page[page.index("## Figures") : page.index("## Comparison with the paper")]
+    links = re.findall(r"\]\((\.\./\.\./figures/[^)]+)\)", figures)
+    assert links == [f"../../figures/txt0/{f}_{v}.png" for v in ("comparison", "paper") for f in ("fig4a", "fig4b", "fig5a")] + [
+        "../../figures/txt0/accuracy_heatmap.png",  # text runs' extra charts, after both versions
+        "../../figures/txt0/severity_scoring.png",
+        "../../figures/txt0/accuracy_vs_cost.png",  # no thinking twin in this tree: no thinking_vs chart
+    ]
+    video = run_page(results, claims, "video_run")
+    assert re.findall(r"\]\(\.\./\.\./figures/vid0/([^)]+)\)", video) == [
+        "fig5a_comparison.png",
+        "fig5b_comparison.png",
+        "fig5a_paper.png",
+        "fig5b_paper.png",
+    ]
+
+
+def test_fig5a_is_left_out_without_a_headline_run_of_the_other_benchmark(results, claims):
+    page = run_page(results, claims, headline={"figures": {"fig4": {"run": "text_run"}, "fig5": {"run": None}}})
+    assert "fig4a_comparison.png" in page and "fig5a" not in page
+
+
+def test_writeup_is_included_verbatim_when_present(results, claims):
+    assert "No write-up yet: add results/text_run/writeup.md" in run_page(results, claims)
+    writeup = "### What we see\n\nGPT-5 | table pipes and *markdown* stay as written.\n"
+    (results / "text_run" / "writeup.md").write_text(writeup)
+    page = run_page(results, claims)
+    assert writeup.strip() in page and "No write-up yet" not in page
+    assert page.index("## Write-up") < page.index(writeup.strip()) < page.index("## Figures")
+
+
+def test_collect_never_writes_writeup(results, tmp_path):
+    args = ["--results", str(results), "--claims", str(write_claims(tmp_path))]
+    assert collect.main(args) == 0
+    assert not (results / "text_run" / "writeup.md").exists()  # no placeholder file
+    path = results / "video_run" / "writeup.md"
+    path.write_text("Hand-written.\n")
+    files = build(load_results(results), empty_claims(), {}, {}, [])
+    assert not any(p.endswith("writeup.md") for p in files)
+    assert collect.orphaned_files(results, files) == []
+    assert collect.main([*args, "--check"]) == 1  # the run page includes the write-up: rerun collect
+    assert collect.main(args) == 0 and path.read_text() == "Hand-written.\n"
+    assert collect.main([*args, "--check"]) == 0
+    assert "Hand-written." in (results / "video_run" / "README.md").read_text()
+
+
+def test_summary_links_the_headline_runs_figures(results, claims):
+    summary = build(load_results(results), claims, {}, HEADLINE, [], IDS)["README.md"]
+    assert "![fig4a](../figures/txt0/fig4a_comparison.png)" in summary
+    assert "![fig4b](../figures/txt0/fig4b_comparison.png)" in summary
+    assert "![fig5a](../figures/vid0/fig5a_comparison.png)" in summary
+    assert "![fig5b](../figures/vid0/fig5b_comparison.png)" in summary
+    assert "](../figures/fig" not in summary  # no old top-level figure paths
+
+
+# ---- run folders: results/<id>_<run>/ -----------------------------------------------------------
+
+
+def id_folder_results(tmp_path: Path) -> Path:
+    """Runs in results/<id>_<run>/ folders, a comparison and headline runs, as the runner now writes them."""
+    res = tmp_path / "results"
+    text_run(res, "repro_a", [[True, True, False, True]] * 4, folder="txt0_repro_a")
+    text_run(res, "repro_b", [[False, False, False, True]] * 4, folder="txt1_repro_b")
+    video = {"v0": {"case": "error", "truth_s": 2.0, "pred_s": 2.0, "error_s": 0.0, "within_0_5": True, "risk_ok": True}}
+    write_model(res / "vid0_vid_a", "GPT-5", "gpt-5", "openai", "video", video, {"risk_accuracy": 1.0}, run="vid_a")
+    (res / "run_ids.yaml").write_text(yaml.safe_dump({"repro_a": "txt0", "repro_b": "txt1", "vid_a": "vid0"}))
+    (res / "comparisons.yaml").write_text(yaml.safe_dump({"comparisons": [{"name": "a_vs_b", "a": "repro_a", "b": "repro_b"}]}))
+    figures = {"fig4": {"run": "repro_a", "note": ""}, "fig5": {"run": "vid_a", "note": ""}}
+    (res / "headline.yaml").write_text(yaml.safe_dump({"figures": figures}))
+    return res
+
+
+def test_run_name_comes_from_the_config_not_the_folder(tmp_path):
+    res = tmp_path / "results"
+    text_run(res, "logical_name", [[True] * 4] * 4, folder="txt9_something_else")
+    (run,) = load_results(res)
+    assert (run.name, run.folder) == ("logical_name", "txt9_something_else")
+    files = build([run], empty_claims(), {}, {}, [], {"logical_name": "txt9"})
+    assert "txt9_something_else/README.md" in files and "# Run `txt9`: `logical_name`" in files["txt9_something_else/README.md"]
+
+
+def test_run_name_falls_back_to_the_summaries(tmp_path):
+    res = tmp_path / "results"
+    text_run(res, "from_summaries", [[True] * 4] * 4, folder="txt0_from_summaries")
+    (res / "txt0_from_summaries" / "config.yaml").unlink()
+    assert [r.name for r in load_results(res)] == ["from_summaries"]
+
+
+def test_page_links_point_to_existing_files(tmp_path):
+    res = id_folder_results(tmp_path)
+    args = ["--results", str(res), "--claims", str(write_claims(tmp_path))]
+    assert collect.main(args) == 0 and collect.main([*args, "--check"]) == 0
+    files = build(load_results(res), empty_claims(), {}, load_yaml_file(res / "headline.yaml"), load_comparisons(res))
+    assert {"txt0_repro_a/README.md", "txt1_repro_b/README.md", "vid0_vid_a/README.md", "compare/a_vs_b.md"} <= set(files)
+    checked = 0
+    for rel in (p for p in files if p.endswith(".md")):
+        page = res / rel
+        for link in re.findall(r"\]\(([^)#\s]+)\)", page.read_text()):
+            target = (page.parent / link).resolve()
+            if link.startswith("http") or not target.is_relative_to(res.resolve()):
+                continue  # figures/ and WORKLOG.md sit outside this temporary results/
+            assert target.exists(), f"{rel}: broken link {link}"
+            checked += 1
+    assert checked > 10
+    summary = (res / "README.md").read_text()
+    assert "(txt0_repro_a/README.md)" in summary and "(vid0_vid_a/README.md)" in summary
+
+
+def load_yaml_file(path: Path) -> dict:
+    return yaml.safe_load(path.read_text())
+
+
+def load_comparisons(res: Path) -> list[dict]:
+    return load_yaml_file(res / "comparisons.yaml")["comparisons"]
+
+
+def test_each_figure_subheading_has_its_plain_language_note(results, claims):
+    page = run_page(results, claims)
+    for version, heading in FIGURE_SUBHEADINGS.items():
+        note = FIGURE_VERSION_NOTES[version]
+        assert f"### {heading}\n\n{note}\n\n![" in page
+    assert page.index(FIGURE_VERSION_NOTES["comparison"]) < page.index(FIGURE_VERSION_NOTES["paper"])
+
+
+def test_mock_runs_get_no_id_and_keep_a_plain_folder(tmp_path):
+    from asimov.run_ids import run_dir
+
+    assert run_dir(tmp_path, "smoke_mock", "video", ["mock"]) == tmp_path / "smoke_mock"
+    assert not (tmp_path / "run_ids.yaml").exists()
+    assert run_dir(tmp_path, "real_run", "video", ["openai", "mock"]).name == "vid0_real_run"
+
+
+def test_text_run_page_shows_the_scoring_chart(results):
+    from asimov.collect.pages import EXTRA_SUBHEADING
+
+    files = build(load_results(results), empty_claims(), {}, {}, [], {"text_run": "txt0", "video_run": "vid0"})
+    text_page = next(v for k, v in files.items() if k.endswith("README.md") and "text_run" in k)
+    assert f"### {EXTRA_SUBHEADING}" in text_page and "figures/txt0/severity_scoring.png" in text_page
+    assert "figures/txt0/accuracy_heatmap.png" in text_page
+    video_page = next(v for k, v in files.items() if k.endswith("README.md") and "video_run" in k)
+    assert EXTRA_SUBHEADING not in video_page
+
+
+# ---- thinking twins, cost and speed, key insights ------------------------------------------------
+
+
+def test_thinking_twins_differ_only_in_thinking(tmp_path):
+    from asimov.collect.run_ids import thinking_twins
+
+    res = tmp_path / "results"
+    text_run(res, "a_min", [[True] * 4] * 4)
+    text_run(res, "b_default", [[True] * 4] * 4, thinking="default")
+    text_run(res, "c_other_prompt", [[True] * 4] * 4, thinking="default", prompt="other")
+    text_run(res, "d_fewer_models", [[True] * 4] * 4, thinking="default", drop_models=("gpt-5-nano",))
+    text_run(res, "e_min_again", [[True] * 4] * 4)
+    text_run(res, "f_logged", [[True] * 4] * 4, thinking="default", log_reasoning=True)
+    runs = {r.name: r for r in load_results(res)}
+    twins = {name: [t.name for t in thinking_twins(r, runs.values())] for name, r in runs.items()}
+    assert twins["a_min"] == ["b_default"]  # not c (prompt), d (models), e (same thinking) or f (log_reasoning)
+    assert twins["b_default"] == ["a_min", "e_min_again"]
+    assert twins["c_other_prompt"] == [] and twins["d_fewer_models"] == [] and twins["f_logged"] == []
+
+
+def twin_results(results: Path) -> dict[str, str]:
+    """make_results plus a thinking: default twin of text_run; returns its pages."""
+    text_run(results, "text_run_default", [[True, False, True, True]] * 4, thinking="default")
+    return build(load_results(results), empty_claims(), {}, HEADLINE, [], {**IDS, "text_run_default": "txt1"})
+
+
+def test_run_page_shows_cost_and_speed_between_the_paper_and_settings(results):
+    page = twin_results(results)["text_run/README.md"]
+    sections = ["## Figures", "## Comparison with the paper", "## Cost and speed", "## Settings", "## Models"]
+    positions = [page.index(s + "\n") for s in sections]
+    assert positions == sorted(positions)
+    cost = page[page.index("## Cost and speed") : page.index("## Settings")]
+    assert "| Model | Input tokens / item | Output tokens / item | Latency p50 / p95 s | Refused | Parse failures |" in cost
+    assert "| GPT-5 | 250 | 25 | 2.5 / 3.9 | 0 | 0 | – | – |" in cost  # 1000 / 4 items, 100 / 4; latencies 1-4 s
+    assert re.search(r"\n\n\*\*Key insight:\*\* [^\n]+\.\n", cost)
+
+
+def test_key_insight_under_every_comparison_and_cross_model_chart(results):
+    files = twin_results(results)
+    page = files["text_run/README.md"]
+    with_insight = ["fig4a_comparison", "fig4b_comparison", "fig5a_comparison", "accuracy_heatmap", "severity_scoring"]
+    with_insight += ["accuracy_vs_cost", "thinking_vs_txt1"]
+    for stem in with_insight:
+        assert re.search(rf"\(\.\./\.\./figures/txt0/{stem}\.png\)\n\n\*\*Key insight:\*\* [^\n]+\.\n", page), stem
+    for stem in ("fig4a_paper", "fig4b_paper", "fig5a_paper"):
+        assert re.search(rf"\(\.\./\.\./figures/txt0/{stem}\.png\)\n", page)
+        assert not re.search(rf"{stem}\.png\)\n\n\*\*Key insight", page), stem
+    assert "figures/txt1/thinking_vs_txt0.png" in files["text_run_default/README.md"]
+    video = files["video_run/README.md"]
+    for stem in ("fig5a_comparison", "fig5b_comparison"):
+        assert re.search(rf"figures/vid0/{stem}\.png\)\n\n\*\*Key insight:\*\* ", video), stem
+    assert "thinking_vs" not in video and "accuracy_vs_cost" not in video
+
+
+def test_cross_model_charts_each_have_a_note(results):
+    from asimov.collect.pages import EXTRA_FIGURES, EXTRA_NOTES
+
+    page = twin_results(results)["text_run/README.md"]
+    assert set(EXTRA_NOTES) == set(EXTRA_FIGURES["text"])
+    for note in EXTRA_NOTES.values():
+        assert note in page
+    across = page[page.index("### Across models") : page.index("## Comparison with the paper")]
+    assert "`txt1` [`text_run_default`](../text_run_default/README.md)" in across  # the twin, linked
+
+
 # ---- ways to score severity (text run pages) ------------------------------------------------
 
 
@@ -462,7 +716,7 @@ def severity_run() -> RunData:
         "latent_severity_n_severe": 4,
         "activated_risk_accuracy": 0.5,
     }
-    return RunData("sev_run", "text", None, (ModelResult(summary, {}, (), (), {}),))
+    return RunData("sev_run", "txt0_sev_run", "text", None, (ModelResult(summary, {}, (), (), {}),))
 
 
 def test_mean_abs_gap_on_a_hand_example():

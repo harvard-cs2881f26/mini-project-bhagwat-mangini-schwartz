@@ -276,7 +276,7 @@ models:
     run(cfg, limit=3, results_dir=tmp_path)
     run(cfg, limit=3, results_dir=tmp_path)
     assert len(calls) == 3
-    rows = [json.loads(line) for line in open(tmp_path / "test_systemone" / "jev-latest" / "responses.jsonl")]
+    rows = [json.loads(line) for line in open(tmp_path / "txt0_test_systemone" / "jev-latest" / "responses.jsonl")]
     assert len(rows) == 3 and all(set(r["probs"]) == set(QUESTIONS) for r in rows)
 
 

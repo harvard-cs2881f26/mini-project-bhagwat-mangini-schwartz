@@ -137,7 +137,7 @@ def test_cache_key_unchanged_when_off_and_different_when_on():
 
 
 def test_saved_video_replies_keep_their_key():
-    summary = json.loads((ROOT / "results/repro_fig5/gpt-5/summary.json").read_text())
+    summary = json.loads((ROOT / "results/vid0_repro_fig5/gpt-5/summary.json").read_text())
     prompt_version = get_benchmark("video").prompt_version(summary["prompt"])
     assert run_key("gpt-5", prompt_version, summary["thinking"]) == summary["key"]
 

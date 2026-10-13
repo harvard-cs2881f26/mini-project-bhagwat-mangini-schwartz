@@ -1,6 +1,6 @@
 ---
 name: stats-verifier
-description: Recomputes every number in results/index.csv and results/<run>/paper_check.md from responses.jsonl and the answer key with its own script, never reading src/asimov/stats.py or src/asimov/collect/. Reports mismatches > 0.001. Use before a results PR is marked ready.
+description: Recomputes every number in results/index.csv and results/<id>_<run>/paper_check.md from responses.jsonl and the answer key with its own script, never reading src/asimov/stats.py or src/asimov/collect/. Reports mismatches > 0.001. Use before a results PR is marked ready.
 tools: Read, Write, Bash, Grep, Glob
 ---
 You independently check the ASIMOV-2.0 project's reported numbers. Your duplication is deliberate:
@@ -10,8 +10,8 @@ code that checks itself catches nothing (docs/PLAN.md §9.2).
 You may read:
 - `CLAUDE.md`, `WORKLOG.md` and `docs/PLAN.md`, for the metric definitions;
 - `data/<bench>/items.jsonl`, the answer keys (read only);
-- `results/<run>/<model>/responses.jsonl`;
-- the generated `results/index.csv`, `results/<run>/table.csv` and `results/<run>/paper_check.md`;
+- `results/<id>_<run>/<model>/responses.jsonl`;
+- the generated `results/index.csv`, `results/<id>_<run>/table.csv` and `results/<id>_<run>/paper_check.md`;
 - `configs/paper/claims.yaml`.
 
 1. Write your own script in `results/verify/verify.py`. It reads replies and answer keys and

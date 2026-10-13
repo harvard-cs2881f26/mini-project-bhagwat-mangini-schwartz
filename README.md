@@ -42,7 +42,7 @@ python scripts/run.py configs/repro_fig5.yaml --limit 5               # 5 videos
 python scripts/run.py configs/repro_fig5.yaml                         # all 287 (ask the team first: costs money)
 ```
 
-Replies are saved to `results/repro_fig5/<model>/responses.jsonl` (committed, so the team shares
+Replies are saved to `results/vid0_repro_fig5/<model>/responses.jsonl` (committed, so the team shares
 them) and reused on reruns. Metrics go to `summary.json` next to them. Growing `--limit` only calls
 the new videos.
 

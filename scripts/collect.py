@@ -1,12 +1,14 @@
 #!/usr/bin/env python
 """Rebuild the results tables and pages from results/ (docs/PLAN.md §11). Free: no API calls, no data/.
 
-    python scripts/collect.py           # write results/index.csv, per_item.csv, README.md, <run>/README.md, ...
+    python scripts/collect.py           # write results/index.csv, per_item.csv, README.md, <id>_<run>/README.md, ...
     python scripts/collect.py --check   # exit 1 if the committed pages differ from a fresh rebuild (CI)
 
-Reads results/<run>/*/summary.json and responses.jsonl, configs/paper/claims.yaml, and
+Reads results/<id>_<run>/*/summary.json and responses.jsonl, configs/paper/claims.yaml, and
 configs/prices.yaml if it exists. Hand-edited inputs: results/headline.yaml (created once if
-missing) and results/comparisons.yaml. results/run_ids.yaml (run name -> short run ID) is maintained here:
+missing), results/comparisons.yaml, and each run's results/<id>_<run>/writeup.md, which is included verbatim
+in its run page and never written here: after editing a write-up, rerun this (--check fails until you do).
+results/run_ids.yaml (run name -> short run ID) is maintained here:
 new runs are added, existing IDs never change. Every other file it writes is generated: never edit it.
 """
 
@@ -23,7 +25,8 @@ from asimov.claims import CLAIMS_PATH, load_claims  # noqa: E402
 from asimov.collect.build import COMPARISONS_DEFAULT, build, headline_yaml  # noqa: E402
 from asimov.collect.load import load_results, load_yaml  # noqa: E402
 from asimov.collect.pages import GENERATED  # noqa: E402
-from asimov.collect.run_ids import RUN_IDS_FILE, assign_ids, missing_ids, parse_ids, run_ids_yaml  # noqa: E402
+from asimov.collect.run_ids import assign_ids, missing_ids  # noqa: E402
+from asimov.run_ids import RUN_IDS_FILE, parse_ids, run_ids_yaml  # noqa: E402
 
 PRICES_PATH = ROOT / "configs" / "prices.yaml"
 # Paths collect.py may have written earlier. A match is orphaned when the rebuild no longer makes it and it's
