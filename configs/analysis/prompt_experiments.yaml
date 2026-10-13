@@ -1,0 +1,11 @@
+# Part 2 prompt experiments (EXPLORATORY), text benchmark. Read by scripts/prompt_experiments.py, checked by
+# asimov.prompt_experiments.ExperimentConfig (unknown keys fail). Output: results/prompt_experiments/.
+# Each LLM with a hint prompt variant against the same LLM alone in repro_fig4 (verbatim prompt, thinking min).
+# WORKLOG 2026-10-14, "Part 2 prompt experiments (exploratory, paid)".
+label: "EXPLORATORY: prompt wording PROPOSED (Claude, 2026-10-14), not pre-registered"
+first: {run: part2_jev, model: jev-latest}       # Jev: its saved picks are the hints
+comparisons:
+  - {kind: hints, baseline: {run: repro_fig4, model: gpt-5},      variant: {run: part2_gpt5_jev_hints,     model: gpt-5}}
+  - {kind: q2_q4, baseline: {run: repro_fig4, model: gpt-5},      variant: {run: part2_gpt5_q2q4_jev,      model: gpt-5}}
+  - {kind: hints, baseline: {run: repro_fig4, model: gpt-5-mini}, variant: {run: part2_gpt5mini_jev_hints, model: gpt-5-mini}}
+  - {kind: q2_q4, baseline: {run: repro_fig4, model: gpt-5-mini}, variant: {run: part2_gpt5mini_q2q4_jev, model: gpt-5-mini}}

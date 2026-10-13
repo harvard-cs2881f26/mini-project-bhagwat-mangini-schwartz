@@ -74,7 +74,9 @@ def test_every_item_has_a_saved_jev_pick():
 
 def test_hint_letters_match_the_scorers_reading_of_jev():
     answers, replies = load_text_answers(), {r["id"]: r["text"] for r in jev_rows()}
-    source = text.variant(HINTS).source
+    v = text.variant(HINTS)
+    assert v is not None
+    source = v.source
     for item in load_text_items():
         scored = score_item(replies[item.id], answers[item.id], parse_options(item.prompt))
         assert text.item_hints(item, source) == {q: scored[q]["pred"] for q in QUESTIONS}, item.id

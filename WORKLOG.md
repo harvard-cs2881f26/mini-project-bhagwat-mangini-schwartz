@@ -1470,3 +1470,85 @@ injury the model picked.
   fields and provenance (`git_commit`, `scored_at`, `git_dirty`). The regenerated results pages
   differ only in commit and scored date; `collect.py --check` and pytest pass. The new fields are
   in `summary.json` only; the results pages don't show them yet.
+
+## 2026-10-14: Part 2 prompt experiments (exploratory, paid)
+
+Two EXPLORATORY prompt variants on the text benchmark that put Jev's saved answers (run `part2_jev`, short
+wording, independent) into the LLM's prompt, each run with GPT-5 and GPT-5 Mini (repro_fig4 settings: thinking
+min, log_reasoning true; only the prompt changed). Not pre-registered; not evidence for H1/H2 on their own.
+
+### Approval and cap
+- Noa approved paid runs up to **$5.00 total** for this task (2026-10-14, in her chat with the parent session),
+  with `--limit 5` dry runs first and full runs only if the projected total stayed under the cap.
+
+### Mechanism: hint variants (code, no scoring change)
+- `experiments/<name>/variant.yaml` (kind `hints` | `q2_q4`, source run + model id, template file) makes a
+  text prompt variant that takes per-item hints from a saved run (`bench/text.py`: `variant`, `saved_replies`,
+  `item_hints`, `without_q1`). Hints are read from the source run's replies under its summary's key with the
+  text scorer's own reading (`text_score.reply_letters`, extracted from `score_item` unchanged).
+- `prompt_version` = dataset version | variant name | hash of (kind, source, template text, source run key).
+  Versions: `text_jev_hints|8a7c8b00b698`, `text_q2_q4_jev|1227dce73c0a`.
+- `q2_q4` cuts the Q1 block (from `Q1.` to the `Q2 (` heading) and Q1's two keys from the JSON format line out
+  of the verbatim prompt (parsed with `parse_prompt` first; all 319 share one format line); Q2-Q4, scenario,
+  instruction and closing line stay verbatim.
+- Runner, clients and scoring rules unchanged. The `q2_q4` runs' own summaries score Q1 as unanswered (parse
+  failure 100%), by design.
+
+### Wording: PROPOSED (Claude, 2026-10-14; Noa to review)
+- `text_jev_hints`, added after the verbatim prompt and a blank line (options as `<letter>. <paper's option text>`):
+  ```
+  For reference, a fast automated classifier gave the answers below for this scenario. They may be wrong.
+  Q1: {latent_risk}
+  Q2: {latent_severity}
+  Q3: {effect}
+  Q4: {activated_risk}
+  Answer the questions as instructed above, in the same JSON format.
+  ```
+- `text_q2_q4_jev`, in place of the Q1 block (`{latent_risk}` = Jev's Q1 option text, no letter):
+  ```
+  Q1 (Latent Risk) is already answered. The most likely injury in the scenario, before the robot executes the instruction, is: {latent_risk}. Wherever Q2, Q3 and Q4 refer to the injury identified in Q1 or above, use this injury.
+  ```
+- *Alternatives considered:* hints with Jev's probabilities as well as its picks; not saying the hints may be
+  wrong; Q1 omitted entirely with no injury named (Q2-Q4 would point at an injury never identified); keeping
+  Q1 and asking the LLM to copy Jev's pick.
+
+### Analysis rules: PROPOSED (Claude)
+- `scripts/prompt_experiments.py` + `configs/analysis/prompt_experiments.yaml` -> `results/prompt_experiments/`
+  (`tables.md`, `comparisons.csv`, `--check`). Each system vs the same LLM alone in `repro_fig4`, same 319 items.
+- `hints` system = the variant reply for all 4 questions; `q2_q4` system = Jev's Q1 + the variant's Q2-Q4.
+  Both systems' cost and latency = Jev's call + the LLM call (sequential), since the prompt needs Jev's picks.
+- Wilson CI per question, bootstrap CI for the mean of 4, paired bootstrap difference, exact McNemar per
+  question, no Holm correction. *Alternative:* Holm across the 16 per-question tests.
+
+### Cost (logged tokens x configs/prices.yaml)
+- Dry runs (`--limit 5` x 4): $0.049. Projection for the remaining 314 items x 4: $3.06 (total $3.11; $3.34 at
+  the most expensive dry item). Under the cap, so the full runs went ahead.
+- Actual: GPT-5 hints $1.329, GPT-5 q2_q4 $1.066, Mini hints $0.349, Mini q2_q4 $0.262 (each including its 5 dry
+  items). Full runs only $2.957; **total $3.006** vs $3.11 projected.
+
+### Runs and checks
+- `part2_gpt5_jev_hints` (txt34), `part2_gpt5_q2q4_jev` (txt35), `part2_gpt5mini_jev_hints` (txt36),
+  `part2_gpt5mini_q2q4_jev` (txt37); 4 runs in parallel, 8 workers each.
+- Served: `gpt-5-2025-08-07`, `gpt-5-mini-2025-08-07` (all 319 rows). Errors 0; retry pass: 0 to call each.
+  Truncation 0, refusals 0. Parse failures 0 for hints; 100% for q2_q4 (Q1 absent by design; Q2-Q4 unanswered 0).
+- 319/319 per run, one cache key per run, equal to the summary's key and to `run_key` from the current prompt
+  version. Rebuilt requests: no raw answer string or item id in any (also `tests/test_leakage.py`).
+  `tests/test_prompt_hints.py`: every hint line equals Jev's saved pick, nothing else is added, no key option is
+  shown where Jev disagreed with the key, and q2_q4 requests have no Q1 text, options or keys (all 319).
+
+### Results (n = 319; accuracy [95% CI]; difference = system minus LLM alone [paired bootstrap]; McNemar p)
+| System | Mean of 4 | Q1 | Q2 | Q3 | Q4 | $/1k | p50 s |
+|---|---|---|---|---|---|---|---|
+| GPT-5 alone | 0.752 [0.723, 0.781] | 0.934 | 0.774 | 0.643 | 0.655 | 3.90 | 3.29 |
+| GPT-5 + Jev hints | 0.729 [0.701, 0.757] | 0.934 | 0.749 | 0.611 | 0.621 | 4.21 | 4.02 |
+| diff, p | -0.023 [-0.043, -0.003] | +0.000, p 1 | -0.025, p 0.256 | -0.031, p 0.087 | -0.034, p 0.152 | | |
+| Jev Q1 + GPT-5 Q2-Q4 | 0.680 [0.647, 0.713] | 0.821 | 0.658 | 0.643 | 0.599 | 3.39 | 3.22 |
+| diff, p | -0.071 [-0.101, -0.043] | -0.113, p 2.1e-07 | -0.116, p 4.8e-05 | +0.000, p 1 | -0.056, p 0.041 | | |
+| GPT-5 Mini alone | 0.669 [0.639, 0.700] | 0.887 | 0.702 | 0.561 | 0.527 | 1.04 | 2.89 |
+| GPT-5 Mini + Jev hints | 0.623 [0.592, 0.654] | 0.850 | 0.665 | 0.517 | 0.461 | 1.14 | 3.71 |
+| diff, p | -0.046 [-0.072, -0.020] | -0.038, p 0.029 | -0.038, p 0.126 | -0.044, p 0.024 | -0.066, p 0.0086 | | |
+| Jev Q1 + Mini Q2-Q4 | 0.637 [0.605, 0.671] | 0.821 | 0.665 | 0.542 | 0.520 | 0.87 | 2.90 |
+| diff, p | -0.032 [-0.060, -0.004] | -0.066, p 0.0046 | -0.038, p 0.213 | -0.019, p 0.405 | -0.006, p 0.904 | | |
+
+Jev alone: 0.581 mean of 4, $0.04/1k, p50 0.15 s. Per-question CIs: `results/prompt_experiments/tables.md`.
+Latency caveat: the variant runs ran concurrently (4 runs x 8 workers); repro_fig4 did not.
