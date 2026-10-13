@@ -62,13 +62,15 @@ class LocalHF:
     revision: str = modal.parameter()
     mode: str = modal.parameter()
     template: str = modal.parameter()
+    logit_dtype: str = modal.parameter(default="fp32")
 
     @modal.enter()
     def load(self) -> None:
         from asimov.models.local_hf import LocalHFClient
 
         t0 = time.perf_counter()
-        params = {"repo": self.repo, "revision": self.revision, "mode": self.mode, "template": self.template}
+        params = {"repo": self.repo, "revision": self.revision, "mode": self.mode, "template": self.template,
+                  "logit_dtype": self.logit_dtype}  # fmt: skip
         self.client = LocalHFClient("modal", params)
         self.info = where(self.client, time.perf_counter() - t0)
         weights.commit()

@@ -996,12 +996,13 @@ Built rows 7-10 of the Part 2 matrix: `part2_qwen_base_logprob`, `part2_qwen_log
   prefill up to the JSON answer key (docs/apis/qwen3_4b_local.md §4); NLI premise = the full
   verbatim prompt (needs an 8k-token NLI model, docs/apis/nli_zeroshot.md (b)); one generic
   hypothesis "{instructions} {description}".
-- **`_local` prompt names: PROPOSED (Claude, design; Noa to confirm).** `decision_short_local` etc.
+- **`_local` prompt names: DECIDED (Noa, 2026-10-13), designed by Claude.** `decision_short_local` etc.
   build the same DecisionPart as `decision_short`, and only their version hashes the `local`
   section, so the hosted prompt versions are unchanged (pin test untouched) and editing the local
   wording never reuses old local replies. `config.py` requires a `_local` prompt for local
-  option-probability and NLI models. *Alternative:* hashing `local` into every decision prompt
-  (would move the pinned hosted versions and invalidate saved hosted replies).
+  option-probability and NLI models. *Alternatives considered:* reusing `decision_short` for local
+  models (the local wording would then not be in the cache key), or hashing `local` into every
+  decision prompt (would move the pinned hosted versions and invalidate saved hosted replies).
 - **Letters are checked to be one token at load and on every call** (`letter_token_ids`): the
   letter written right after the prompt must add exactly one token, without merging into the
   prompt's end, else the run fails. Passed for both Qwen tokenizers.
@@ -1015,7 +1016,8 @@ Built rows 7-10 of the Part 2 matrix: `part2_qwen_base_logprob`, `part2_qwen_log
   also keeps the top-1 next token over the whole vocabulary and the probability mass on the
   letters, so a model that wouldn't answer with a letter is visible.
 - **NLI inputs over the model's limit raise instead of being cut** (the pipeline truncates
-  silently). NLI runs in fp32 (DeBERTa-v3 is known to be unstable in half precision); Qwen in bf16.
+  silently). NLI runs in fp32 (DeBERTa-v3 is known to be unstable in half precision); Qwen in bf16,
+  except the logprob letter logits (next entry).
 - **Where the models run: Modal L40S, DECIDED (Noa, 2026-10-13)**, after the laptop smoke heated
   the Mac. `params: {backend: modal}` sends each request to the deployed app
   `asimov-local-models` (`PYTHONPATH=src modal deploy -m asimov.models.modal_app`), whose container
@@ -1024,7 +1026,8 @@ Built rows 7-10 of the Part 2 matrix: `part2_qwen_base_logprob`, `part2_qwen_log
   after 300 s. Same GPU as Kev-4B (part2_kev). Rows record `raw.remote` = {backend, device, gpu,
   kernels, compute_s, load_s}; `latency_s` is the round trip. A container whose `local` wording
   differs from the checkout's raises (redeploy). *Alternative:* the laptop (MPS), measured below.
-- **PROPOSED (Claude, for Noa): `flash-linear-attention==0.5.2` in the Modal image.** Qwen3.5 has
+- **`flash-linear-attention==0.5.2` in the Modal image: DECIDED (Noa, 2026-10-13), proposed by
+  Claude.** *Alternative considered:* the plain PyTorch kernels (no extra package). Qwen3.5 has
   linear-attention layers; without these Triton kernels transformers falls back to a PyTorch
   reference implementation (the laptop's path, 2.2 s per 250-token forward pass on MPS). Replies
   record `kernels: fla`. Numerics differ slightly from the reference path (e.g. `text_0216`

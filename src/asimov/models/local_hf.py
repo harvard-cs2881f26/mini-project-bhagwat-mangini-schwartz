@@ -13,6 +13,10 @@ params (config):
     template:  plain    the text as is, ending in the answer cue (base model; logprob only)
                chat     the model's chat template with thinking off (enable_thinking=False: an empty
                         think block, so the reply starts with the answer)
+    logit_dtype: fp32   (default, the only value) logprob letter logits come from the last hidden state
+                        projected with an fp32 copy of the output weights; the model's own bf16 output
+                        layer rounds logits near 17 to steps of 0.125, so close options tied exactly
+                        (WORKLOG 2026-10-13, "bf16 letter logits")
     backend:   local    (default) load the model here
                modal    send each request to the deployed Modal app (models/modal_app.py, L40S), which
                         runs this same client with backend local (models/remote.py)
@@ -35,6 +39,8 @@ from asimov.models.local_text import letter_token_ids, option_letters, option_pr
 from asimov.models.remote import BACKENDS, remote_complete, remote_decide, remote_model
 
 MODES = ("logprob", "generate")
+LOGIT_DTYPES = ("fp32",)
+OPTIONAL = ("backend", "logit_dtype")  # checked by check_backend / check_logit_dtype
 TEMPLATES = ("plain", "chat")
 PARAMS = ("repo", "revision", "mode", "template")
 MAX_NEW_TOKENS = 1024  # generation cap; the paper's JSON reply with rationales needs a few hundred
@@ -46,7 +52,7 @@ LETTER_CHECK = DecisionQuestion(
 
 def check_params(params: dict | None) -> tuple[str, str, str, str]:
     """(repo, revision, mode, template); ValueError naming what's wrong."""
-    params = {k: v for k, v in (params or {}).items() if k != "backend"}  # backend: check_backend
+    params = {k: v for k, v in (params or {}).items() if k not in OPTIONAL}
     unknown = sorted(set(params) - set(PARAMS))
     missing = [k for k in PARAMS if not params.get(k)]
     if unknown or missing:
@@ -64,6 +70,18 @@ def check_backend(params: dict | None) -> str:
     if backend not in BACKENDS:
         raise ValueError(f"backend must be one of {BACKENDS}, not {backend!r}")
     return backend
+
+
+def check_logit_dtype(params: dict | None) -> str:
+    dtype = str((params or {}).get("logit_dtype", "fp32"))
+    if dtype not in LOGIT_DTYPES:
+        raise ValueError(f"logit_dtype must be one of {LOGIT_DTYPES}, not {dtype!r}")
+    return dtype
+
+
+def fp32_logits(hidden: Any, weight_fp32: Any) -> Any:
+    """Next-token logits in fp32 from the final (normed) hidden state: hidden @ W.T, no bias."""
+    return hidden.float() @ weight_fp32.T
 
 
 def device(torch: Any) -> str:
@@ -95,14 +113,16 @@ def text_prompt(parts: list[Part]) -> str:
 class LocalHFClient:
     provider = "local_hf"
     request_settings: frozenset[str] = frozenset()  # thinking is always off; there is no reasoning to log
+    logit_dtype = "fp32"
 
     def __init__(self, model: str, params: dict | None = None):
         self.model = model
         self.repo, self.revision, self.mode, self.template = check_params(params)
-        self.backend = check_backend(params)
+        self.backend, self.logit_dtype = check_backend(params), check_logit_dtype(params)
         self.lock = threading.Lock()
         if self.backend == "modal":
-            self.remote = remote_model("LocalHF", repo=self.repo, revision=self.revision, mode=self.mode, template=self.template)
+            names = {"repo": self.repo, "revision": self.revision, "mode": self.mode, "template": self.template}
+            self.remote = remote_model("LocalHF", **names, logit_dtype=self.logit_dtype)
             return
         self.load()
         if self.mode == "logprob":
@@ -121,6 +141,10 @@ class LocalHFClient:
         self.tokenizer = AutoTokenizer.from_pretrained(self.repo, revision=self.revision)
         lm: Any = AutoModelForCausalLM.from_pretrained(self.repo, revision=self.revision, dtype=torch.bfloat16)
         self.lm = lm.to(self.device).eval()
+        if self.mode == "logprob":  # the output layer in fp32, once (2.5 GB for Qwen3.5-4B's 248k vocabulary)
+            if self.lm.lm_head.bias is not None:
+                raise ValueError("fp32_logits assumes an output layer without bias")
+            self.head_fp32 = self.lm.lm_head.weight.detach().float()
         self.load_s = time.perf_counter() - t0
         print(f"  loaded {self.served} as {type(self.lm).__name__} (bf16, {self.device}) in {self.load_s:.1f} s")
 
@@ -157,15 +181,16 @@ class LocalHFClient:
             chosen[q.id] = argmax(by_value[q.id])
             questions[q.id] = {"letter_logits": scores, **info, "input_tokens": len(ids)}
         n_in = sum(q["input_tokens"] for q in questions.values())
-        raw = {"model": self.served, "template": self.template, "questions": questions}
+        raw = {"model": self.served, "template": self.template, "logit_dtype": self.logit_dtype, "questions": questions}
         return Decided(by_value, raw, {"input_tokens": n_in, "output_tokens": 0}, self.served, chosen)
 
     def letter_logits(self, ids: list[int], letter_ids: list[int]) -> tuple[list[float], dict]:
         import torch
 
-        with torch.inference_mode():
-            out = self.lm(input_ids=torch.tensor([ids], device=self.device), logits_to_keep=1)
-        return letter_stats(out.logits[0, -1].cpu(), letter_ids, self.tokenizer.decode)
+        with torch.inference_mode():  # model body in bf16; `.model` ends with the final norm (Qwen3_5ForCausalLM)
+            hidden = self.lm.model(input_ids=torch.tensor([ids], device=self.device)).last_hidden_state[0, -1]
+            logits = fp32_logits(hidden, self.head_fp32)
+        return letter_stats(logits.cpu(), letter_ids, self.tokenizer.decode)
 
     def complete(self, text: str) -> ModelResponse:
         import torch

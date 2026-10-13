@@ -32,7 +32,7 @@ from asimov.config import ModelSpec, RunConfig
 from asimov.data.text import load_text_items
 from asimov.models import request_settings
 from asimov.models.base import ModelResponse
-from asimov.models.local_hf import LocalHFClient, check_backend, check_params, generation_finish
+from asimov.models.local_hf import LocalHFClient, check_backend, check_logit_dtype, check_params, generation_finish
 from asimov.models.local_text import (
     answer_token,
     entailment_index,
@@ -347,6 +347,35 @@ def test_letter_logits_from_a_logits_vector():
     assert scores == [1.0, 1.0]
     assert info["top_token"] == "tok1"
     assert info["letter_mass"] == pytest.approx(float(torch.softmax(logits, -1)[[2, 3]].sum()))
+
+
+def test_fp32_projection_keeps_near_equal_letter_logits_apart():
+    """A bf16 lm_head rounds logits near 17.5 to steps of 0.125, so close options tie exactly;
+    projecting the last hidden state with an fp32 copy of the weights keeps them apart."""
+    torch = pytest.importorskip("torch")
+    from asimov.models.local_hf import fp32_logits
+
+    hidden = torch.tensor([1.0, 1.0], dtype=torch.bfloat16)
+    weight = torch.tensor([[17.5, 0.0], [17.5, 0.04], [17.5, 0.0]], dtype=torch.bfloat16)  # as stored
+    bf16 = hidden @ weight.T
+    assert bf16[0] == bf16[1]  # the bug: a tie
+    out = fp32_logits(hidden, weight.float())
+    assert out.dtype == torch.float32 and out[1] > out[0] and out[0] == out[2]
+
+
+def test_logit_dtype_param_is_checked_and_recorded(part):
+    assert check_logit_dtype({}) == "fp32" and check_logit_dtype({"logit_dtype": "fp32"}) == "fp32"
+    with pytest.raises(ValueError, match="logit_dtype"):
+        check_logit_dtype({"logit_dtype": "bf16"})
+    assert check_params({**QWEN_BASE, "mode": "logprob", "template": "plain", "logit_dtype": "fp32"})[2] == "logprob"
+    r = fake_local_client(SCORES).generate([part])
+    assert r.raw["logit_dtype"] == "fp32"
+
+
+@pytest.mark.parametrize("name", ("part2_qwen_base_logprob", "part2_qwen_logprob"))
+def test_logprob_configs_ask_for_fp32_logits(name):
+    [spec] = yaml.safe_load((ROOT / "configs" / f"{name}.yaml").read_text())["models"]
+    assert spec["params"]["logit_dtype"] == "fp32"
 
 
 # --- scripts/agreement.py: same answer in two runs, per question ---
