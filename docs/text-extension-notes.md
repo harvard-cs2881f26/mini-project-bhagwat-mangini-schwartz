@@ -57,5 +57,7 @@ think 0 vs 512, full vs short wording, letters vs option names (WORKLOG 2026-10-
    and suggested Q1-Q2; in the free simulation B cannot lower cost (see the table).
 4. The scoring question still OPEN: how Q2-Q4 are read when a model's Q1 injury differs from the key's.
 
+**Choices made 2026-10-13:** WORKLOG "Part 2 design analysis, B and D" (D and B built in `scripts/cascade.py`).
+
 **Guard rail:** choosing a split, threshold or model *because* it scored best on the 319 items is
 tuning on the eval set (CLAUDE.md hard rule). Fix choices first, or report every option.

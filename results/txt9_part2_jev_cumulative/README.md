@@ -150,11 +150,11 @@ Note: Compares Fig 4b (effect, activated risk) with Fig 4a (latent risk, severit
 
 | Model | Input tokens / item | Output tokens / item | Latency p50 / p95 s | Refused | Parse failures | $ / item | $ run |
 |---|---|---|---|---|---|---|---|
-| Jev | 2255 | 233 | 0.6 / 0.7 | 0 | 0 | – | – |
+| Jev | 2255 | 233 | 0.6 / 0.7 | 0 | 0 | 0.0001 | 0.03 |
 
 Per item: the model's totals over this run divided by its replies. Refused and Parse failures as in Models below. $ comes from logged tokens × `configs/prices.yaml`; "–" until that file has the model.
 
-**Key insight:** Jev takes a median 0.6 s per reply and writes 233 output tokens per item.
+**Key insight:** Jev takes a median 0.6 s per reply and writes 233 output tokens per item; the whole run cost $0.03.
 
 ## Settings
 
@@ -172,7 +172,7 @@ Per item: the model's totals over this run divided by its replies. Refused and P
 
 | Model | Requested | Served | Stand-in | Replies | Errors | Parse failures | Refused | Truncated | Malformed | Near-key reads | With reasoning | Input tokens | Output tokens | Cost $ | Latency p50 / p95 s |
 |---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|
-| Jev | `jev-latest` | `jev-1.13.0` |  | 319 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 719291 | 74459 | – | 0.6 / 0.7 |
+| Jev | `jev-latest` | `jev-1.13.0` |  | 319 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 719291 | 74459 | 0.03 | 0.6 / 0.7 |
 
 Parse failures: replies with no readable answer; all count as wrong (CLAUDE.md, scoring conventions). With per-item `parse_ok` in `summary.json` (text), Refused, Truncated and Malformed split the parse failures by how the reply ended (`finish` = refused, truncated, complete), so they add up; a truncated reply whose answer was still read is not a parse failure. Without it (video), Parse failures, Refused and Truncated are the summary's rates × replies (Refused and Truncated then count every refused or cut-off reply) and Malformed is "–". Cost is "–" until `configs/prices.yaml` has the model.
 

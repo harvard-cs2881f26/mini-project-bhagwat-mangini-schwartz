@@ -26,9 +26,9 @@ from asimov.collect.build import COMPARISONS_DEFAULT, build, headline_yaml  # no
 from asimov.collect.load import load_results, load_yaml  # noqa: E402
 from asimov.collect.pages import GENERATED  # noqa: E402
 from asimov.collect.run_ids import assign_ids, missing_ids  # noqa: E402
+from asimov.prices import PRICES_PATH, load_prices  # noqa: E402
 from asimov.run_ids import RUN_IDS_FILE, parse_ids, run_ids_yaml  # noqa: E402
 
-PRICES_PATH = ROOT / "configs" / "prices.yaml"
 # Paths collect.py may have written earlier. A match is orphaned when the rebuild no longer makes it and it's
 # ours: a page starting with the GENERATED marker, or a run's table.csv (hand-written files are left alone).
 GENERATED_PATTERNS = ("compare/*.md", "*/README.md", "*/paper_check.md", "*/table.csv")
@@ -69,7 +69,8 @@ def main(argv: list[str] | None = None) -> int:
     run_ids_path = args.results / RUN_IDS_FILE
     existing = parse_ids(load_yaml(run_ids_path, {}))
     ids = assign_ids(existing, runs)
-    files = build(runs, load_claims(args.claims), load_yaml(args.prices, {}) or {}, headline, comparisons, ids)
+    prices = load_prices(args.prices).models if args.prices.exists() else {}
+    files = build(runs, load_claims(args.claims), prices, headline, comparisons, ids)
 
     orphans = orphaned_files(args.results, files)
     if args.check:

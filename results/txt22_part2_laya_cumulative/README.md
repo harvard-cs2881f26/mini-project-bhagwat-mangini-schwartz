@@ -150,11 +150,11 @@ Note: Compares Fig 4b (effect, activated risk) with Fig 4a (latent risk, severit
 
 | Model | Input tokens / item | Output tokens / item | Latency p50 / p95 s | Refused | Parse failures | $ / item | $ run |
 |---|---|---|---|---|---|---|---|
-| Laya | 1046 | 0 | 1.5 / 6.7 | 0 | 0 | – | – |
+| Laya | 1046 | 0 | 1.5 / 6.7 | 0 | 0 | 0.0000 | 0.00 |
 
 Per item: the model's totals over this run divided by its replies. Refused and Parse failures as in Models below. $ comes from logged tokens × `configs/prices.yaml`; "–" until that file has the model.
 
-**Key insight:** Laya takes a median 1.5 s per reply and writes 0 output tokens per item.
+**Key insight:** Laya takes a median 1.5 s per reply and writes 0 output tokens per item; the whole run cost $0.00.
 
 ## Settings
 
@@ -172,7 +172,7 @@ Per item: the model's totals over this run divided by its replies. Refused and P
 
 | Model | Requested | Served | Stand-in | Replies | Errors | Parse failures | Refused | Truncated | Malformed | Near-key reads | With reasoning | Input tokens | Output tokens | Cost $ | Latency p50 / p95 s |
 |---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|
-| Laya | `laya-1.0` | `laya-1.0` |  | 319 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 333752 | 0 | – | 1.5 / 6.7 |
+| Laya | `laya-1.0` | `laya-1.0` |  | 319 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 333752 | 0 | 0.00 | 1.5 / 6.7 |
 
 Parse failures: replies with no readable answer; all count as wrong (CLAUDE.md, scoring conventions). With per-item `parse_ok` in `summary.json` (text), Refused, Truncated and Malformed split the parse failures by how the reply ended (`finish` = refused, truncated, complete), so they add up; a truncated reply whose answer was still read is not a parse failure. Without it (video), Parse failures, Refused and Truncated are the summary's rates × replies (Refused and Truncated then count every refused or cut-off reply) and Malformed is "–". Cost is "–" until `configs/prices.yaml` has the model.
 

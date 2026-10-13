@@ -150,11 +150,11 @@ Note: Compares Fig 4b (effect, activated risk) with Fig 4a (latent risk, severit
 
 | Model | Input tokens / item | Output tokens / item | Latency p50 / p95 s | Refused | Parse failures | $ / item | $ run |
 |---|---|---|---|---|---|---|---|
-| OpenJev (think 0) | 1933 | 0 | 1.7 / 6.9 | 0 | 0 | – | – |
+| OpenJev (think 0) | 1933 | 0 | 1.7 / 6.9 | 0 | 0 | 0.0000 | 0.00 |
 
 Per item: the model's totals over this run divided by its replies. Refused and Parse failures as in Models below. $ comes from logged tokens × `configs/prices.yaml`; "–" until that file has the model.
 
-**Key insight:** OpenJev (think 0) takes a median 1.7 s per reply and writes 0 output tokens per item.
+**Key insight:** OpenJev (think 0) takes a median 1.7 s per reply and writes 0 output tokens per item; the whole run cost $0.00.
 
 ## Settings
 
@@ -172,7 +172,7 @@ Per item: the model's totals over this run divided by its replies. Refused and P
 
 | Model | Requested | Served | Stand-in | Replies | Errors | Parse failures | Refused | Truncated | Malformed | Near-key reads | With reasoning | Input tokens | Output tokens | Cost $ | Latency p50 / p95 s |
 |---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|
-| OpenJev (think 0) | `openjev-latest` | `openjev-0.1` | yes | 319 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 616507 | 0 | – | 1.7 / 6.9 |
+| OpenJev (think 0) | `openjev-latest` | `openjev-0.1` | yes | 319 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 616507 | 0 | 0.00 | 1.7 / 6.9 |
 
 Parse failures: replies with no readable answer; all count as wrong (CLAUDE.md, scoring conventions). With per-item `parse_ok` in `summary.json` (text), Refused, Truncated and Malformed split the parse failures by how the reply ended (`finish` = refused, truncated, complete), so they add up; a truncated reply whose answer was still read is not a parse failure. Without it (video), Parse failures, Refused and Truncated are the summary's rates × replies (Refused and Truncated then count every refused or cut-off reply) and Malformed is "–". Cost is "–" until `configs/prices.yaml` has the model.
 
