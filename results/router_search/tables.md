@@ -7,7 +7,7 @@
 From saved replies only (`router_search.yaml`); protocol in WORKLOG 2026-10-13, "Router search (exploratory)".
 
 - n = 319 items. Accuracy: mean of 4 = each item's share of its 4 questions right, averaged over items.
-- $: logged tokens x `configs/prices.yaml` (checked 2026-10-12), per 1,000 items. Free-tier services are $0. A self-hosted model (Kev-4B) has no $ price: it counts as $0 and is flagged. Latency: median over items of the item's calls added up; agreement's two first-stage calls run in parallel (the slower counts).
+- $: logged tokens x `configs/prices.yaml` (checked 2026-10-12), per 1,000 items. Free-tier services are $0. Self-hosted models (Kev-4B, and the local models run on Modal) have no $ price (their cost is GPU time): they count as $0 and are flagged. Latency: median over items of the item's calls added up; agreement's two first-stage calls run in parallel (the slower counts). A reply made on Modal counts its GPU compute time (`raw.remote.compute_s`), not its round trip (`latency_s`, which includes queue wait when the run used several workers); every other reply counts `latency_s`.
 - **Cross-validation:** items are shuffled with numpy `default_rng(seed)` and dealt into 5 folds (no stratification), for seeds 0, 1, 2, 3, 4. For each fold, every candidate is fitted on the other folds (its confidence threshold = a quantile of their confidences; the per-question choice = their correctness), the highest-accuracy candidate within the cap on those folds is picked (ties: cheaper, faster, listed first), and it is scored on the held-out fold. Held-out numbers pool the folds and average over repeats; the mean-of-4 CI is a bootstrap over items of each item's held-out score averaged over repeats.
 - **In-sample** numbers fit and pick on all 319 items: in-sample, optimistic, not a result.
 
@@ -15,21 +15,23 @@ From saved replies only (`router_search.yaml`); protocol in WORKLOG 2026-10-13, 
 
 | Family | Definition | Candidates |
 | --- | --- | --- |
-| single | one system alone | 24 |
-| d_cascade | decision model; the lowest-confidence share of items (training quantile) also to the LLM, whose answers replace it | 1071 |
-| agreement | two first-stage systems (decision + decision, or decision + cheap LLM); items where they disagree (any question, or Q1 only) to a strong LLM; else the second system's answers | 966 |
-| three_stage | decision model; low-confidence items to a cheap LLM; of those, items where it disagrees with the decision model (any / Q1) to a strong LLM | 5292 |
-| per_question_mix | d_cascade, but on items sent on each question keeps the decision model's answer where it beat the LLM on the training items sent on | 1071 |
-| total |  | 8424 |
+| single | one system alone | 45 |
+| d_cascade | decision model; the lowest-confidence share of items (training quantile) also to the LLM, whose answers replace it | 4374 |
+| agreement | two first-stage systems (decision + decision, or decision + cheap LLM); items where they disagree (any question, or Q1 only) to a strong LLM; else the second system's answers | 8586 |
+| three_stage | decision model; low-confidence items to a cheap LLM; of those, items where it disagrees with the decision model (any / Q1) to a strong LLM | 20412 |
+| per_question_mix | d_cascade, but on items sent on each question keeps the decision model's answer where it beat the LLM on the training items sent on | 4374 |
+| total |  | 37791 |
 
 Every candidate's definition: `candidates.csv`.
 
 ## Pools and grids
 
-- Decision models: Jev, Jev reversed, luna Decisions, OpenJev think 0, OpenJev think 512, Laya, Kev-4B.
-- LLMs: GPT-5 Nano [min], GPT-5 Mini [min], GPT-5 [min], Sonnet 4.5 [min], Opus 4.5 [min], Gemini 3.1 Flash-Lite [min], Gemini 3 Flash [min], Gemini 3.1 Pro [min], GPT-5 Nano [default], GPT-5 Mini [default], GPT-5 [default], Sonnet 4.5 [default], Opus 4.5 [default], Gemini 3.1 Flash-Lite [default], Gemini 3 Flash [default], Gemini 3.1 Pro [default], luna generate.
+- Decision models: Jev, Jev reversed, luna Decisions, OpenJev think 0, OpenJev think 512, Laya, Kev-4B, Jev full, Jev letters, luna Decisions full, luna Decisions letters, OpenJev think 0 full, OpenJev think 512 full, Laya full, NLI DeBERTa-v3-large, Qwen3.5-4B-Base logprob, Qwen3.5-4B-Base logprob one-shot, Qwen3.5-4B logprob, jev-latest (part2_jev_cumulative), jev-latest (part2_jev_full_cumulative), kev-latest (part2_kev_cumulative), laya-1.0 (part2_laya_cumulative), gpt-6-luna (part2_luna_decide_cumulative), gpt-6-luna (part2_luna_decide_full_cumulative), openjev-latest (part2_openjev_cumulative), openjev-latest (part2_openjev_full_cumulative), openjev-latest (part2_openjev_think512_cumulative).
+- LLMs: GPT-5 Nano [min], GPT-5 Mini [min], GPT-5 [min], Sonnet 4.5 [min], Opus 4.5 [min], Gemini 3.1 Flash-Lite [min], Gemini 3 Flash [min], Gemini 3.1 Pro [min], GPT-5 Nano [default], GPT-5 Mini [default], GPT-5 [default], Sonnet 4.5 [default], Opus 4.5 [default], Gemini 3.1 Flash-Lite [default], Gemini 3 Flash [default], Gemini 3.1 Pro [default], luna generate, Qwen3.5-4B generate.
 - Cheap: GPT-5 Nano [min], GPT-5 Nano [default], Gemini 3.1 Flash-Lite [min], Gemini 3.1 Flash-Lite [default], GPT-5 Mini [min], GPT-5 Mini [default], luna generate. Strong: GPT-5 [min], GPT-5 [default], Gemini 3.1 Pro [min], Gemini 3.1 Pro [default], Opus 4.5 [min], Opus 4.5 [default].
 - Cumulative runs (`part2_*_cumulative`): none skipped.
+- Latency from Modal compute time: NLI DeBERTa-v3-large (319 of 319 items), Qwen3.5-4B-Base logprob (319 of 319 items), Qwen3.5-4B-Base logprob one-shot (319 of 319 items), Qwen3.5-4B logprob (319 of 319 items), Qwen3.5-4B generate (319 of 319 items).
+- **Note:** Qwen3.5-4B generate: 11% parse failures; a rerun with a higher output cap is planned (new run name).
 - Shares sent on: 10%, 20%, 30%, 40%, 50%, 60%, 70%, 80%, 90%. Agreement rules: any, q1.
 - Budgets ($ per 1,000 items): 0.1, 0.25, 0.5, 1, 2, 4, 8, 16, 32. Latency caps (p50 s): 0.5, 1, 2, 4, 8.
 
@@ -37,25 +39,25 @@ Every candidate's definition: `candidates.csv`.
 
 | Cap | Held-out mean of 4 [95% CI] | Q1 | Q2 | Q3 | Q4 | $ per 1,000 | p50 (s) | Most picked (share of folds) | Distinct picks | In-sample pick: mean of 4 (in-sample, optimistic, not a result) | Gap |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
-| $0.1 per 1,000 | 0.600 [0.573, 0.626] | 0.783 | 0.564 | 0.551 | 0.501 | $0.09 | 0.33 | Jev reversed -> luna generate (lowest 20% by confidence; per question, the better on training) (84%) | 3 | 0.612 | +0.012 |
-| $0.25 per 1,000 | 0.686 [0.655, 0.716] | 0.834 | 0.690 | 0.643 | 0.577 | $0.23 | 2.66 | luna generate (100%) | 1 | 0.686 | +0.000 |
-| $0.5 per 1,000 | 0.686 [0.655, 0.716] | 0.834 | 0.690 | 0.643 | 0.577 | $0.23 | 2.66 | luna generate (100%) | 1 | 0.686 | +0.000 |
-| $1 per 1,000 | 0.700 [0.672, 0.729] | 0.875 | 0.692 | 0.650 | 0.586 | $0.91 | 2.46 | Jev + luna generate agree (q1) else GPT-5 [min] (40%) | 5 | 0.717 | +0.017 |
-| $2 per 1,000 | 0.740 [0.712, 0.769] | 0.918 | 0.698 | 0.681 | 0.664 | $1.66 | 2.41 | Gemini 3 Flash [min] (68%) | 3 | 0.751 | +0.010 |
-| $4 per 1,000 | 0.748 [0.720, 0.776] | 0.935 | 0.757 | 0.651 | 0.649 | $3.42 | 5.65 | OpenJev think 512 + GPT-5 Nano [min] agree (any) else GPT-5 [min] (80%) | 4 | 0.758 | +0.010 |
-| $8 per 1,000 | 0.749 [0.722, 0.776] | 0.926 | 0.718 | 0.692 | 0.660 | $6.12 | 8.50 | Gemini 3 Flash [default] (64%) | 3 | 0.761 | +0.012 |
-| $16 per 1,000 | 0.749 [0.722, 0.776] | 0.926 | 0.718 | 0.692 | 0.660 | $6.12 | 8.50 | Gemini 3 Flash [default] (64%) | 3 | 0.761 | +0.012 |
-| $32 per 1,000 | 0.746 [0.719, 0.773] | 0.926 | 0.710 | 0.692 | 0.655 | $7.15 | 9.14 | Gemini 3 Flash [default] (64%) | 4 | 0.761 | +0.015 |
+| $0.1 per 1,000 | 0.728 [0.698, 0.758] | 0.868 | 0.668 | 0.758 | 0.616 | $0.07 | 4.94 | OpenJev think 512 full -> Gemini 3.1 Flash-Lite [default] (lowest 10% by confidence) (40%) | 5 | 0.739 | +0.011 |
+| $0.25 per 1,000 | 0.726 [0.699, 0.753] | 0.873 | 0.671 | 0.749 | 0.611 | $0.22 | 3.55 | OpenJev think 512 full -> GPT-5 Mini [default] (lowest 10% by confidence) (32%) | 7 | 0.746 | +0.020 |
+| $0.5 per 1,000 | 0.725 [0.698, 0.752] | 0.880 | 0.680 | 0.730 | 0.608 | $0.45 | 2.17 | jev-latest (part2_jev_full_cumulative) -> luna generate (lowest 30%) -> GPT-5 [min] if they disagree (q1) (24%) | 11 | 0.749 | +0.025 |
+| $1 per 1,000 | 0.733 [0.706, 0.759] | 0.910 | 0.677 | 0.724 | 0.619 | $0.82 | 1.58 | luna Decisions letters + jev-latest (part2_jev_full_cumulative) agree (q1) else GPT-5 [min] (32%) | 11 | 0.763 | +0.030 |
+| $2 per 1,000 | 0.760 [0.733, 0.787] | 0.922 | 0.735 | 0.738 | 0.643 | $1.68 | 1.72 | jev-latest (part2_jev_full_cumulative) -> GPT-5 [min] (lowest 50% by confidence; per question, the better on training) (36%) | 9 | 0.773 | +0.013 |
+| $4 per 1,000 | 0.780 [0.752, 0.808] | 0.938 | 0.778 | 0.747 | 0.656 | $3.10 | 3.88 | jev-latest (part2_jev_full_cumulative) -> GPT-5 [min] (lowest 80% by confidence; per question, the better on training) (80%) | 4 | 0.786 | +0.006 |
+| $8 per 1,000 | 0.780 [0.752, 0.808] | 0.938 | 0.778 | 0.747 | 0.656 | $3.10 | 3.88 | jev-latest (part2_jev_full_cumulative) -> GPT-5 [min] (lowest 80% by confidence; per question, the better on training) (80%) | 4 | 0.786 | +0.006 |
+| $16 per 1,000 | 0.780 [0.752, 0.808] | 0.938 | 0.778 | 0.747 | 0.656 | $3.10 | 3.88 | jev-latest (part2_jev_full_cumulative) -> GPT-5 [min] (lowest 80% by confidence; per question, the better on training) (80%) | 4 | 0.786 | +0.006 |
+| $32 per 1,000 | 0.780 [0.752, 0.808] | 0.938 | 0.778 | 0.747 | 0.656 | $3.10 | 3.88 | jev-latest (part2_jev_full_cumulative) -> GPT-5 [min] (lowest 80% by confidence; per question, the better on training) (80%) | 4 | 0.786 | +0.006 |
 
 ## Held-out picks per latency cap (p50 s)
 
 | Cap | Held-out mean of 4 [95% CI] | Q1 | Q2 | Q3 | Q4 | $ per 1,000 | p50 (s) | Most picked (share of folds) | Distinct picks | In-sample pick: mean of 4 (in-sample, optimistic, not a result) | Gap |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
-| p50 ≤ 0.5 s | 0.687 [0.660, 0.714] | 0.888 | 0.692 | 0.560 | 0.608 | $2.06 | 0.48 | Jev -> GPT-5 [min] (lowest 50% by confidence) (84%) | 5 | 0.690 | +0.003 |
-| p50 ≤ 1 s | 0.689 [0.662, 0.716] | 0.892 | 0.697 | 0.560 | 0.609 | $1.99 | 0.25 | Jev -> GPT-5 [min] (lowest 50% by confidence) (84%) | 5 | 0.690 | +0.000 |
-| p50 ≤ 2 s | 0.746 [0.717, 0.775] | 0.915 | 0.701 | 0.692 | 0.678 | $1.67 | 1.42 | Jev + Gemini 3.1 Flash-Lite [default] agree (q1) else GPT-5 [min] (52%) | 2 | 0.748 | +0.002 |
-| p50 ≤ 4 s | 0.735 [0.708, 0.762] | 0.925 | 0.717 | 0.651 | 0.647 | $2.47 | 2.75 | Gemini 3 Flash [min] (44%) | 5 | 0.752 | +0.017 |
-| p50 ≤ 8 s | 0.746 [0.718, 0.775] | 0.930 | 0.757 | 0.651 | 0.647 | $3.86 | 4.91 | Kev-4B + Gemini 3.1 Flash-Lite [default] agree (any) else GPT-5 [min] (48%) | 7 | 0.759 | +0.012 |
+| p50 ≤ 0.5 s | 0.718 [0.691, 0.745] | 0.917 | 0.717 | 0.651 | 0.587 | $3.73 | 0.25 | Jev full -> GPT-5 [min] (lowest 50% by confidence; per question, the better on training) (52%) | 5 | 0.731 | +0.013 |
+| p50 ≤ 1 s | 0.774 [0.746, 0.802] | 0.930 | 0.754 | 0.747 | 0.665 | $2.09 | 0.82 | jev-latest (part2_jev_full_cumulative) -> GPT-5 [min] (lowest 50% by confidence; per question, the better on training) (80%) | 3 | 0.778 | +0.004 |
+| p50 ≤ 2 s | 0.776 [0.748, 0.804] | 0.933 | 0.756 | 0.747 | 0.666 | $2.16 | 0.84 | jev-latest (part2_jev_full_cumulative) -> GPT-5 [min] (lowest 50% by confidence; per question, the better on training) (92%) | 3 | 0.778 | +0.003 |
+| p50 ≤ 4 s | 0.782 [0.754, 0.810] | 0.939 | 0.783 | 0.749 | 0.657 | $3.12 | 3.79 | jev-latest (part2_jev_full_cumulative) -> GPT-5 [min] (lowest 80% by confidence; per question, the better on training) (84%) | 4 | 0.786 | +0.004 |
+| p50 ≤ 8 s | 0.780 [0.752, 0.808] | 0.938 | 0.778 | 0.747 | 0.656 | $3.10 | 3.88 | jev-latest (part2_jev_full_cumulative) -> GPT-5 [min] (lowest 80% by confidence; per question, the better on training) (80%) | 4 | 0.786 | +0.006 |
 
 Gap = in-sample pick's mean of 4 minus the held-out mean of 4.
 
@@ -70,6 +72,26 @@ Gap = in-sample pick's mean of 4 minus the held-out mean of 4.
 | OpenJev think 512 | 0.537 [0.503, 0.570] | 0.614 | 0.392 | 0.658 | 0.483 | $0.00 | 1.55 |  |
 | Laya | 0.299 [0.272, 0.326] | 0.235 | 0.379 | 0.301 | 0.279 | $0.00 | 0.41 |  |
 | Kev-4B | 0.457 [0.426, 0.488] | 0.429 | 0.382 | 0.586 | 0.429 | $0.00 | 0.39 | yes |
+| Jev full | 0.659 [0.632, 0.687] | 0.875 | 0.574 | 0.671 | 0.517 | $0.07 | 0.15 |  |
+| Jev letters | 0.595 [0.568, 0.621] | 0.862 | 0.527 | 0.517 | 0.473 | $0.04 | 0.14 |  |
+| luna Decisions full | 0.566 [0.539, 0.592] | 0.831 | 0.451 | 0.580 | 0.401 | $0.15 | 0.12 |  |
+| luna Decisions letters | 0.498 [0.474, 0.524] | 0.815 | 0.310 | 0.408 | 0.461 | $0.09 | 0.12 |  |
+| OpenJev think 0 full | 0.647 [0.620, 0.675] | 0.784 | 0.671 | 0.683 | 0.451 | $0.00 | 0.45 |  |
+| OpenJev think 512 full | 0.727 [0.697, 0.758] | 0.862 | 0.665 | 0.752 | 0.630 | $0.00 | 4.92 |  |
+| Laya full | 0.278 [0.254, 0.303] | 0.270 | 0.364 | 0.229 | 0.251 | $0.00 | 0.35 |  |
+| NLI DeBERTa-v3-large | 0.386 [0.361, 0.411] | 0.608 | 0.364 | 0.323 | 0.248 | $0.00 | 0.15 | yes |
+| Qwen3.5-4B-Base logprob | 0.447 [0.418, 0.474] | 0.683 | 0.408 | 0.361 | 0.335 | $0.00 | 0.21 | yes |
+| Qwen3.5-4B-Base logprob one-shot | 0.555 [0.528, 0.582] | 0.809 | 0.539 | 0.514 | 0.357 | $0.00 | 0.23 | yes |
+| Qwen3.5-4B logprob | 0.466 [0.436, 0.496] | 0.571 | 0.389 | 0.458 | 0.445 | $0.00 | 0.27 | yes |
+| jev-latest (part2_jev_cumulative) | 0.641 [0.611, 0.671] | 0.828 | 0.605 | 0.574 | 0.558 | $0.09 | 0.55 |  |
+| jev-latest (part2_jev_full_cumulative) | 0.732 [0.702, 0.762] | 0.865 | 0.680 | 0.749 | 0.633 | $0.12 | 0.70 |  |
+| kev-latest (part2_kev_cumulative) | 0.437 [0.406, 0.467] | 0.420 | 0.326 | 0.571 | 0.429 | $0.00 | 0.69 | yes |
+| laya-1.0 (part2_laya_cumulative) | 0.244 [0.216, 0.271] | 0.235 | 0.288 | 0.226 | 0.226 | $0.00 | 1.49 |  |
+| gpt-6-luna (part2_luna_decide_cumulative) | 0.592 [0.563, 0.623] | 0.818 | 0.511 | 0.502 | 0.539 | $0.13 | 0.50 |  |
+| gpt-6-luna (part2_luna_decide_full_cumulative) | 0.678 [0.647, 0.708] | 0.824 | 0.652 | 0.627 | 0.608 | $0.19 | 0.52 |  |
+| openjev-latest (part2_openjev_cumulative) | 0.415 [0.386, 0.444] | 0.445 | 0.251 | 0.596 | 0.367 | $0.00 | 1.66 |  |
+| openjev-latest (part2_openjev_full_cumulative) | 0.545 [0.509, 0.582] | 0.614 | 0.451 | 0.699 | 0.414 | $0.00 | 1.72 |  |
+| openjev-latest (part2_openjev_think512_cumulative) | 0.544 [0.510, 0.578] | 0.596 | 0.458 | 0.627 | 0.495 | $0.00 | 4.54 |  |
 | GPT-5 Nano [min] | 0.490 [0.458, 0.523] | 0.555 | 0.533 | 0.467 | 0.404 | $0.21 | 2.69 |  |
 | GPT-5 Mini [min] | 0.669 [0.639, 0.700] | 0.887 | 0.702 | 0.561 | 0.527 | $1.04 | 2.89 |  |
 | GPT-5 [min] | 0.752 [0.723, 0.781] | 0.934 | 0.774 | 0.643 | 0.655 | $3.90 | 3.29 |  |
@@ -87,6 +109,7 @@ Gap = in-sample pick's mean of 4 minus the held-out mean of 4.
 | Gemini 3 Flash [default] | 0.761 [0.731, 0.791] | 0.925 | 0.708 | 0.730 | 0.680 | $7.16 | 10.71 |  |
 | Gemini 3.1 Pro [default] | 0.734 [0.702, 0.766] | 0.937 | 0.696 | 0.671 | 0.630 | $22.32 | 16.21 |  |
 | luna generate | 0.686 [0.655, 0.716] | 0.834 | 0.690 | 0.643 | 0.577 | $0.23 | 2.66 |  |
+| Qwen3.5-4B generate | 0.631 [0.597, 0.666] | 0.771 | 0.608 | 0.583 | 0.561 | $0.00 | 17.11 | yes |
 
 ## Frontiers
 
@@ -94,80 +117,65 @@ Gap = in-sample pick's mean of 4 minus the held-out mean of 4.
 
 | Point | Mean of 4 | $ per 1,000 |
 | --- | --- | --- |
-| $0.1 per 1,000 | 0.600 | $0.09 |
-| $0.25 per 1,000 | 0.686 | $0.23 |
-| $1 per 1,000 | 0.700 | $0.91 |
-| $2 per 1,000 | 0.740 | $1.66 |
-| $4 per 1,000 | 0.748 | $3.42 |
-| $8 per 1,000 | 0.749 | $6.12 |
+| $0.1 per 1,000 | 0.728 | $0.07 |
+| $1 per 1,000 | 0.733 | $0.82 |
+| $2 per 1,000 | 0.760 | $1.68 |
+| $4 per 1,000 | 0.780 | $3.10 |
 
 ### Accuracy vs cost: in-sample, optimistic, not a result
 
 | Point | Mean of 4 | $ per 1,000 |
 | --- | --- | --- |
-| OpenJev think 512 | 0.537 | $0.00 |
-| OpenJev think 512 -> GPT-5 Nano [min] (lowest 10% by confidence; per question, the better on training) | 0.545 | $0.02 |
-| OpenJev think 512 -> luna generate (lowest 10% by confidence) | 0.563 | $0.02 |
-| Jev reversed | 0.584 | $0.04 |
-| Jev reversed -> GPT-5 Nano [min] (lowest 10% by confidence; per question, the better on training) | 0.585 | $0.06 |
-| Jev -> luna generate (lowest 10% by confidence; per question, the better on training) | 0.588 | $0.06 |
-| Jev reversed -> luna generate (lowest 10% by confidence; per question, the better on training) | 0.597 | $0.07 |
-| Jev reversed -> luna generate (lowest 20% by confidence; per question, the better on training) | 0.612 | $0.09 |
-| Jev reversed -> luna generate (lowest 30% by confidence) | 0.618 | $0.11 |
-| Jev -> luna generate (lowest 40% by confidence; per question, the better on training) | 0.625 | $0.13 |
-| Jev reversed -> luna generate (lowest 40% by confidence) | 0.635 | $0.14 |
-| Jev reversed -> luna generate (lowest 50% by confidence) | 0.647 | $0.15 |
-| Jev -> luna generate (lowest 60% by confidence) | 0.659 | $0.18 |
-| Jev -> luna generate (lowest 70% by confidence) | 0.660 | $0.20 |
-| Jev reversed -> luna generate (lowest 70% by confidence) | 0.662 | $0.20 |
-| OpenJev think 512 -> luna generate (lowest 90% by confidence; per question, the better on training) | 0.666 | $0.21 |
-| Kev-4B -> luna generate (lowest 90% by confidence) | 0.674 | $0.21 |
-| Jev -> luna generate (lowest 80% by confidence) | 0.677 | $0.23 |
-| luna generate | 0.686 | $0.23 |
-| Jev reversed -> Gemini 3.1 Flash-Lite [default] (lowest 80% by confidence) | 0.687 | $0.67 |
-| Jev -> Gemini 3.1 Flash-Lite [default] (lowest 80% by confidence) | 0.687 | $0.68 |
-| Kev-4B -> Gemini 3.1 Flash-Lite [default] (lowest 90% by confidence) | 0.691 | $0.71 |
-| Jev reversed -> Gemini 3.1 Flash-Lite [default] (lowest 90% by confidence) | 0.697 | $0.75 |
-| Gemini 3.1 Flash-Lite [min] | 0.704 | $0.78 |
-| Gemini 3.1 Flash-Lite [default] | 0.712 | $0.79 |
-| Jev + luna generate agree (q1) else GPT-5 [min] | 0.717 | $0.95 |
-| Jev reversed + luna generate agree (q1) else GPT-5 [min] | 0.719 | $1.00 |
-| Jev reversed -> Gemini 3.1 Flash-Lite [default] (lowest 80%) -> GPT-5 [min] if they disagree (q1) | 0.720 | $1.42 |
-| OpenJev think 512 -> Gemini 3 Flash [min] (lowest 90% by confidence) | 0.726 | $1.49 |
-| Kev-4B -> Gemini 3 Flash [min] (lowest 90% by confidence) | 0.734 | $1.50 |
-| Jev reversed -> Gemini 3 Flash [min] (lowest 90% by confidence) | 0.735 | $1.52 |
-| luna Decisions -> Gemini 3 Flash [min] (lowest 90% by confidence) | 0.741 | $1.59 |
-| Gemini 3 Flash [min] | 0.751 | $1.66 |
-| Jev reversed + luna generate agree (any) else GPT-5 [min] | 0.753 | $3.63 |
-| OpenJev think 512 + GPT-5 Nano [min] agree (any) else GPT-5 [min] | 0.758 | $3.88 |
-| Kev-4B + Gemini 3.1 Flash-Lite [default] agree (any) else GPT-5 [min] | 0.759 | $4.41 |
-| Gemini 3 Flash [default] | 0.761 | $7.16 |
+| OpenJev think 512 full | 0.727 | $0.00 |
+| OpenJev think 512 full -> luna generate (lowest 10% by confidence; per question, the better on training) | 0.736 | $0.02 |
+| OpenJev think 512 full -> Gemini 3.1 Flash-Lite [default] (lowest 10% by confidence) | 0.739 | $0.08 |
+| OpenJev think 512 full -> luna generate (lowest 10%) -> GPT-5 [min] if they disagree (q1) | 0.741 | $0.16 |
+| jev-latest (part2_jev_full_cumulative) -> luna generate (lowest 40% by confidence; per question, the better on training) | 0.743 | $0.20 |
+| OpenJev think 512 full -> GPT-5 Mini [default] (lowest 10% by confidence) | 0.745 | $0.24 |
+| OpenJev think 512 full -> GPT-5 Mini [min] (lowest 10%) -> GPT-5 [min] if they disagree (q1) | 0.746 | $0.24 |
+| jev-latest (part2_jev_full_cumulative) -> Gemini 3.1 Flash-Lite [default] (lowest 30% by confidence; per question, the better on training) | 0.748 | $0.36 |
+| jev-latest (part2_jev_full_cumulative) -> luna generate (lowest 30%) -> GPT-5 [min] if they disagree (q1) | 0.749 | $0.48 |
+| jev-latest (part2_jev_full_cumulative) -> luna generate (lowest 40%) -> GPT-5 [min] if they disagree (q1) | 0.753 | $0.53 |
+| jev-latest (part2_jev_full_cumulative) -> Gemini 3 Flash [min] (lowest 30% by confidence; per question, the better on training) | 0.755 | $0.61 |
+| OpenJev think 512 full -> Gemini 3 Flash [min] (lowest 40% by confidence; per question, the better on training) | 0.756 | $0.67 |
+| jev-latest (part2_jev_full_cumulative) -> Gemini 3 Flash [min] (lowest 40% by confidence; per question, the better on training) | 0.759 | $0.72 |
+| luna Decisions + jev-latest (part2_jev_full_cumulative) agree (q1) else GPT-5 [min] | 0.759 | $0.92 |
+| luna Decisions letters + jev-latest (part2_jev_full_cumulative) agree (q1) else GPT-5 [min] | 0.763 | $0.92 |
+| jev-latest (part2_jev_full_cumulative) -> GPT-5 [min] (lowest 30% by confidence; per question, the better on training) | 0.769 | $1.28 |
+| jev-latest (part2_jev_full_cumulative) -> Gemini 3 Flash [min] (lowest 80% by confidence; per question, the better on training) | 0.770 | $1.43 |
+| jev-latest (part2_jev_full_cumulative) -> GPT-5 [min] (lowest 40% by confidence; per question, the better on training) | 0.773 | $1.52 |
+| jev-latest (part2_jev_full_cumulative) -> GPT-5 [min] (lowest 50% by confidence; per question, the better on training) | 0.778 | $2.09 |
+| jev-latest (part2_jev_full_cumulative) -> GPT-5 [min] (lowest 70% by confidence; per question, the better on training) | 0.782 | $2.87 |
+| jev-latest (part2_jev_full_cumulative) -> GPT-5 [min] (lowest 80% by confidence; per question, the better on training) | 0.786 | $3.20 |
 
 ### Accuracy vs latency: held-out (budget picks)
 
 | Point | Mean of 4 | p50 (s) |
 | --- | --- | --- |
-| p50 ≤ 1 s | 0.689 | 0.25 |
-| p50 ≤ 2 s | 0.746 | 1.42 |
+| p50 ≤ 0.5 s | 0.718 | 0.25 |
+| p50 ≤ 1 s | 0.774 | 0.82 |
+| p50 ≤ 2 s | 0.776 | 0.84 |
+| p50 ≤ 4 s | 0.782 | 3.79 |
 
 ### Accuracy vs latency: in-sample, optimistic, not a result
 
 | Point | Mean of 4 | p50 (s) |
 | --- | --- | --- |
-| luna Decisions -> Gemini 3.1 Pro [default] (lowest 10% by confidence) | 0.549 | 0.13 |
-| luna Decisions -> GPT-5 Mini [min] (lowest 20%) -> Gemini 3.1 Pro [default] if they disagree (any) | 0.589 | 0.14 |
-| luna Decisions -> GPT-5 Mini [min] (lowest 30%) -> Gemini 3.1 Pro [default] if they disagree (any) | 0.613 | 0.15 |
-| luna Decisions -> GPT-5 Mini [min] (lowest 40%) -> Gemini 3.1 Pro [default] if they disagree (any) | 0.635 | 0.16 |
-| luna Decisions + Jev reversed agree (q1) else GPT-5 [min] | 0.641 | 0.17 |
-| Jev -> luna generate (lowest 40%) -> GPT-5 [min] if they disagree (any) | 0.657 | 0.19 |
-| Jev reversed -> Gemini 3 Flash [default] (lowest 40% by confidence) | 0.661 | 0.20 |
-| Jev -> GPT-5 [min] (lowest 50% by confidence) | 0.690 | 0.24 |
-| Jev -> Gemini 3.1 Flash-Lite [default] (lowest 60%) -> GPT-5 [min] if they disagree (q1) | 0.692 | 1.34 |
-| Gemini 3.1 Flash-Lite [default] | 0.712 | 1.37 |
-| Jev reversed + Gemini 3.1 Flash-Lite [default] agree (q1) else GPT-5 [min] | 0.748 | 1.42 |
-| Gemini 3 Flash [min] | 0.751 | 2.54 |
-| GPT-5 [min] | 0.752 | 3.29 |
-| luna Decisions + Laya agree (any) else GPT-5 [min] | 0.752 | 3.80 |
-| Jev reversed + Gemini 3.1 Flash-Lite [default] agree (any) else GPT-5 [min] | 0.754 | 4.53 |
-| Kev-4B + Gemini 3.1 Flash-Lite [default] agree (any) else GPT-5 [min] | 0.759 | 4.65 |
-| Gemini 3 Flash [default] | 0.761 | 10.71 |
+| luna Decisions full | 0.566 | 0.12 |
+| luna Decisions full -> luna generate (lowest 10%) -> GPT-5 [min] if they disagree (q1) | 0.589 | 0.13 |
+| luna Decisions full -> GPT-5 [min] (lowest 20% by confidence) | 0.607 | 0.14 |
+| Jev full | 0.659 | 0.15 |
+| Jev full -> GPT-5 [min] (lowest 20% by confidence; per question, the better on training) | 0.690 | 0.16 |
+| Jev full -> GPT-5 [min] (lowest 30% by confidence; per question, the better on training) | 0.701 | 0.17 |
+| Jev full -> Opus 4.5 [default] (lowest 40% by confidence) | 0.719 | 0.20 |
+| Jev full -> GPT-5 [min] (lowest 50% by confidence; per question, the better on training) | 0.731 | 0.40 |
+| Qwen3.5-4B-Base logprob one-shot + gpt-6-luna (part2_luna_decide_full_cumulative) agree (q1) else GPT-5 [min] | 0.734 | 0.54 |
+| gpt-6-luna (part2_luna_decide_full_cumulative) -> GPT-5 Nano [min] (lowest 30%) -> GPT-5 [min] if they disagree (any) | 0.735 | 0.57 |
+| gpt-6-luna (part2_luna_decide_full_cumulative) -> Gemini 3 Flash [min] (lowest 40% by confidence) | 0.736 | 0.64 |
+| luna Decisions + jev-latest (part2_jev_full_cumulative) agree (q1) else GPT-5 [min] | 0.759 | 0.71 |
+| luna Decisions letters + jev-latest (part2_jev_full_cumulative) agree (q1) else GPT-5 [min] | 0.763 | 0.72 |
+| jev-latest (part2_jev_full_cumulative) -> GPT-5 [min] (lowest 30% by confidence; per question, the better on training) | 0.769 | 0.73 |
+| jev-latest (part2_jev_full_cumulative) -> GPT-5 [min] (lowest 40% by confidence; per question, the better on training) | 0.773 | 0.74 |
+| jev-latest (part2_jev_full_cumulative) -> GPT-5 [min] (lowest 50% by confidence; per question, the better on training) | 0.778 | 0.92 |
+| jev-latest (part2_jev_full_cumulative) -> GPT-5 [min] (lowest 70% by confidence; per question, the better on training) | 0.782 | 3.67 |
+| jev-latest (part2_jev_full_cumulative) -> GPT-5 [min] (lowest 80% by confidence; per question, the better on training) | 0.786 | 3.86 |

@@ -1,7 +1,10 @@
 """Router search (src/asimov/router_search.py, scripts/router_search.py) on synthetic data: no results/ needed."""
 
+import csv
+import io
 import json
 import sys
+from dataclasses import replace
 from pathlib import Path
 
 import numpy as np
@@ -9,6 +12,8 @@ import pytest
 import yaml
 
 from asimov.bench.text_score import QUESTIONS
+from asimov.collect.load import ModelResult
+from asimov.prices import Price
 from asimov.router_search import (
     Candidate,
     Member,
@@ -21,6 +26,7 @@ from asimov.router_search import (
     d_cascade,
     disagree,
     fold_ids,
+    member_from,
     metrics_on,
     pareto,
     per_question_mix,
@@ -297,3 +303,42 @@ def test_script_adds_cumulative_runs_without_errors_and_skips_the_rest(tree):
     assert script.main(args(tree)) == 0
     tables = (tree["results"] / "router_search" / "tables.md").read_text()
     assert "skipped" in tables and "part2_dec_cumulative" in tables
+
+
+# --- Modal compute time and pool notes ------------------------------------------------------------------------
+
+
+def test_member_latency_is_modal_compute_time_where_a_row_has_it():
+    ids = ["a", "b"]
+    model = ModelResult(
+        summary={"name": "m", "model": "m", "errors": 0},
+        per_item={i: text_outcome(ALL) for i in ids},
+        latencies=(5.0, 6.0),
+        served_models=(),
+        replies={},
+        usage={i: {"input_tokens": 10, "output_tokens": 0} for i in ids},
+        item_latency={"a": 5.0, "b": 6.0},
+        item_compute_s={"a": 0.2},
+    )
+    m = member_from("M", model, Price(self_hosted="Modal L40S"), ids, None)
+    assert m.latency.tolist() == [0.2, 6.0]  # compute_s where the row has it, else the round trip
+    assert m.compute_rows == 1
+    plain = member_from("P", replace(model, item_compute_s={}), Price(self_hosted="Modal L40S"), ids, None)
+    assert plain.latency.tolist() == [5.0, 6.0] and plain.compute_rows == 0
+
+
+def test_script_uses_compute_time_and_prints_pool_notes(tree):
+    path = tree["results"] / "llm_run" / "cheap-1" / "responses.jsonl"
+    rows = [json.loads(line) for line in path.read_text().splitlines()]
+    path.write_text("".join(json.dumps(r | {"raw": {"remote": {"compute_s": 0.01}}}) + "\n" for r in rows))
+    cfg = yaml.safe_load(tree["config"].read_text())
+    cfg["llms"][0]["note"] = "11% parse failures"
+    tree["config"].write_text(yaml.safe_dump(cfg))
+    assert script.main(args(tree)) == 0
+    out = tree["results"] / "router_search"
+    rows = list(csv.DictReader(io.StringIO((out / "candidates.csv").read_text())))
+    single = next(r for r in rows if r["candidate"] == "Cheap")
+    assert float(single["latency_p50_s"]) == 0.01
+    tables = (out / "tables.md").read_text()
+    assert "Cheap: 11% parse failures" in tables
+    assert "Cheap (10 of 10 items)" in tables  # which members' latency is Modal compute time

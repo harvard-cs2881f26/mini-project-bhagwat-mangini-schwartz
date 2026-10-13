@@ -44,6 +44,7 @@ class PoolEntry(BaseModel):
     run: str  # run name (config `run`)
     model: str  # model id in that run
     label: str  # unique name in the tables
+    note: str | None = None  # printed beside the pools in tables.md (e.g. a known problem with the run)
 
 
 class SearchConfig(BaseModel):
@@ -93,10 +94,14 @@ class Member:
     latency: np.ndarray  # (n,) s
     confidence: np.ndarray | None  # (n,) decision models only
     self_hosted: bool
+    compute_rows: int = 0  # items whose latency is Modal compute time (raw.remote.compute_s), not the round trip
 
 
 def member_from(label: str, model: ModelResult, price: Price, ids: Sequence[str], rule: str | None) -> Member:
-    """Validated by cascade.system_from (no failed calls, usage and latency for every item)."""
+    """Validated by cascade.system_from (no failed calls, usage and latency for every item).
+
+    Latency: a reply made on Modal counts its GPU compute time (raw.remote.compute_s), because its round-trip latency_s
+    includes queue wait when the run used several workers; every other reply counts latency_s."""
     system = system_from(model, price, rule)
     missing = sorted(set(ids) - set(system.items))
     if missing:
@@ -108,9 +113,10 @@ def member_from(label: str, model: ModelResult, price: Price, ids: Sequence[str]
         np.array([it.correct for it in items], dtype=bool),
         np.array(pred, dtype=object),
         np.array([it.cost or 0.0 for it in items]),
-        np.array([it.latency for it in items], dtype=float),
+        np.array([model.item_compute_s.get(i, it.latency) for i, it in zip(ids, items, strict=True)], dtype=float),
         np.array([system.confidence[i] for i in ids]) if rule else None,
         bool(price.self_hosted),
+        sum(i in model.item_compute_s for i in ids),
     )
 
 

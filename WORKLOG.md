@@ -1104,6 +1104,43 @@ In-sample picks are 0.000-0.017 higher in mean-of-4 accuracy than the held-out p
 (e.g. $1: 0.717 vs 0.700; $2: 0.751 vs 0.740; p50 ≤ 4 s: 0.752 vs 0.735). The held-out numbers are the
 result; in-sample numbers are not.
 
+### Rerun 2026-10-14 with all Part 2 runs
+EXPLORATORY, same protocol, families, cheap/strong tiers, shares and grids as above; $0, saved replies only.
+- **Pools:** every text run in `results/run_ids.yaml` (txt0-txt29). Decision pool 27 (was 7): the 7 above; Jev
+  full and letters, luna Decisions full and letters, OpenJev think 0 full, OpenJev think 512 full, Laya full (listed
+  in the config); the 9 `part2_*_cumulative` runs (Jev, Jev full, Kev, Laya, luna, luna full, OpenJev think 0,
+  OpenJev think 0 full, OpenJev think 512; joined through the pattern, labelled `<model> (<run>)`); and the local
+  rows on Modal with `probs`: NLI DeBERTa-v3-large (txt25), Qwen3.5-4B-Base logprob (txt26), Qwen3.5-4B-Base
+  logprob one-shot (txt29), Qwen3.5-4B logprob (txt28). LLM pool 18 (was 17): + Qwen3.5-4B generate (txt27),
+  flagged in `tables.md`: 11% parse failures; a rerun with a higher output cap is planned (new run name). The
+  cheap and strong tiers are unchanged (Qwen generate is not a cheap-tier member).
+- **Excluded runs:** none. Every text run's summary has errors == 0.
+- **Candidates:** 37,791 (was 8,424): single 45, d_cascade 4,374, agreement 8,586, three-stage 20,412,
+  per-question mix 4,374.
+- **Latency of Modal rows: PROPOSED (Claude, implementing Noa's request; Noa to confirm).** For txt25-txt29
+  (all 319 rows of each have it) latency = `raw.remote.compute_s` (GPU compute), not `latency_s` (round trip,
+  which includes queue wait for runs made with 4 workers). p50 compute_s vs latency_s: NLI 0.146 vs 0.640 s;
+  Qwen-Base logprob 0.215 vs 0.250; Qwen logprob 0.275 vs 0.330; Qwen-Base one-shot 0.225 vs 0.270; Qwen generate
+  17.11 vs 78.54. Code: `collect.load.ModelResult.item_compute_s` (new field; `latencies`/`item_latency` and the
+  results pages unchanged), used per row by `router_search.member_from`. *Alternative:* latency_s for all rows
+  (rejected: queue wait isn't the model's latency). Kev-4B (txt8, txt12) has no `raw.remote`; its rows have
+  Kev's own `raw.latency_ms` (txt12: per call in `raw.calls`), whose meaning isn't documented
+  (docs/apis/systemone.md), so Kev keeps `latency_s` (p50 0.39 s txt8, 0.69 s txt12; `latency_ms` p50 0.128 s
+  and 0.153 s summed per item). Kev's and the Modal rows' latencies are therefore not measured the same way.
+- **Cost of local rows:** no token price. `configs/prices.yaml` has self_hosted entries (Modal L40S) for
+  `deberta-v3-large-zeroshot-v2.0` (params_b 0.435, from the Hugging Face model page), `qwen3.5-4b-base` and
+  `qwen3.5-4b` (params_b 4); they count as $0 and are flagged like Kev. No self-hosted candidate was picked in
+  any fold at any cap (`self_hosted_pick_share` = 0 throughout `picks.csv`).
+- **Held-out picks (mean of 4 [95% CI], $ per 1,000, p50 s):** $0.1: 0.728 [0.698, 0.758], $0.07, 4.94;
+  $0.25: 0.726, $0.22, 3.55; $0.5: 0.725, $0.45, 2.17; $1: 0.733 [0.706, 0.759], $0.82, 1.58; $2: 0.760
+  [0.733, 0.787], $1.68, 1.72; $4-$32: 0.780 [0.752, 0.808], $3.10, 3.88. p50 ≤ 0.5 s: 0.718 [0.691, 0.745],
+  $3.73, 0.25; ≤ 1 s: 0.774 [0.746, 0.802], $2.09, 0.82; ≤ 2 s: 0.776, $2.16, 0.84; ≤ 4 s: 0.782 [0.754, 0.810],
+  $3.12, 3.79; ≤ 8 s: 0.780, $3.10, 3.88. Most-picked candidates and shares: `tables.md`, `pick_frequency.csv`.
+- **References (single systems, nothing fitted):** GPT-5 [min] 0.752 [0.723, 0.781], $3.90, 3.29 s; best single
+  decision model `part2_jev_full_cumulative` (Jev) 0.732 [0.702, 0.762], $0.12, 0.70 s.
+- **In-sample vs held-out:** in-sample picks are 0.003-0.030 higher in mean of 4 than the held-out picks at the
+  same cap. The held-out numbers are the result; in-sample numbers are not.
+
 ## 2026-10-13: Session 3 Step C, local decision models
 
 Built rows 7-10 of the Part 2 matrix: `part2_qwen_base_logprob`, `part2_qwen_logprob`,

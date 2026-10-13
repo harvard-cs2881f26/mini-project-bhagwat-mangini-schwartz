@@ -271,8 +271,11 @@ def intro(cfg: SearchConfig, cfg_path: Path, pool: Pool, cands: list[Candidate],
         "",
         f"- n = {pool.n} items. Accuracy: mean of 4 = each item's share of its 4 questions right, averaged over items.",
         f"- $: logged tokens x `configs/prices.yaml` (checked {prices.checked.isoformat()}), per 1,000 items. Free-tier "
-        "services are $0. A self-hosted model (Kev-4B) has no $ price: it counts as $0 and is flagged. Latency: median "
-        "over items of the item's calls added up; agreement's two first-stage calls run in parallel (the slower counts).",
+        "services are $0. Self-hosted models (Kev-4B, and the local models run on Modal) have no $ price (their cost is "
+        "GPU time): they count as $0 and are flagged. Latency: median over items of the item's calls added up; "
+        "agreement's two first-stage calls run in parallel (the slower counts). A reply made on Modal counts its GPU "
+        "compute time (`raw.remote.compute_s`), not its round trip (`latency_s`, which includes queue wait when the run "
+        "used several workers); every other reply counts `latency_s`.",
         f"- **Cross-validation:** items are shuffled with numpy `default_rng(seed)` and dealt into {cfg.folds} folds "
         f"(no stratification), for seeds {seeds}. For each fold, every candidate is fitted on the other folds (its "
         "confidence threshold = a quantile of their confidences; the per-question choice = their correctness), the "
@@ -299,6 +302,7 @@ def intro(cfg: SearchConfig, cfg_path: Path, pool: Pool, cands: list[Candidate],
     }
     lines += [row([f, definitions[f], str(counts[f])]) for f in FAMILIES]
     lines += [row(["total", "", str(len(cands))]), "", "Every candidate's definition: `candidates.csv`.", ""]
+    members = [*pool.decisions, *pool.llms]
     lines += [
         "## Pools and grids",
         "",
@@ -306,6 +310,10 @@ def intro(cfg: SearchConfig, cfg_path: Path, pool: Pool, cands: list[Candidate],
         f"- LLMs: {', '.join(m.label for m in pool.llms)}.",
         f"- Cheap: {', '.join(cfg.cheap)}. Strong: {', '.join(cfg.strong)}.",
         f"- Cumulative runs (`{cfg.cumulative_runs}`): " + ("; ".join(pool.skipped) if pool.skipped else "none skipped") + ".",
+        "- Latency from Modal compute time: "
+        + (", ".join(f"{m.label} ({m.compute_rows} of {pool.n} items)" for m in members if m.compute_rows) or "none")
+        + ".",
+        *(f"- **Note:** {e.label}: {e.note}." for e in [*cfg.decision, *cfg.llms] if e.note),
         f"- Shares sent on: {', '.join(f'{f:.0%}' for f in cfg.fractions)}. Agreement rules: {', '.join(cfg.agreement_rules)}.",
         f"- Budgets ($ per 1,000 items): {', '.join(f'{b:g}' for b in cfg.budgets_per_1000)}. "
         f"Latency caps (p50 s): {', '.join(f'{c:g}' for c in cfg.latency_caps_s)}.",
