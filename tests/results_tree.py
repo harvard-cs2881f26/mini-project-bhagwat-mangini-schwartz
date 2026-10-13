@@ -30,7 +30,9 @@ def write_model(
     metrics: dict,
     scored_at: str = SCORED_AT,
     settings: dict | None = None,
+    run: str | None = None,
 ) -> None:
+    """`run`: the run name in the summary (default: the folder's name, as in a legacy results/<run>/ folder)."""
     mdir = run_dir / model
     mdir.mkdir(parents=True)
     key = f"k-{model}"
@@ -41,7 +43,7 @@ def write_model(
         "prompt": "p",
         "thinking": "min",
         "benchmark": benchmark,
-        "run": run_dir.name,
+        "run": run or run_dir.name,
         "key": key,
         "errors": 0,
         "input_tokens": 1000,
@@ -72,11 +74,12 @@ def text_run(
     scored_at: str = SCORED_AT,
     extra_models: tuple[str, ...] = (),
     drop_models: tuple[str, ...] = (),
+    folder: str | None = None,
     **settings,
 ) -> None:
-    """A text run of GPT-5 and GPT-5 Nano (plus `extra_models`, minus `drop_models`); `settings` override the config's
-    prompt (p), thinking (min) and log_reasoning, in config.yaml and in every summary."""
-    run_dir = results / run
+    """A text run of GPT-5 and GPT-5 Nano (plus `extra_models`, minus `drop_models`) in results/<folder or run>/;
+    `settings` override the config's prompt (p), thinking (min) and log_reasoning, in config.yaml and every summary."""
+    run_dir = results / (folder or run)
     small = [[False, True, False, True]] * 4
     models = [("GPT-5", "gpt-5", large_correct), ("GPT-5 Nano", "gpt-5-nano", small)] + [(m, m, small) for m in extra_models]
     models = [x for x in models if x[1] not in drop_models]
@@ -93,7 +96,7 @@ def text_run(
         per_item = {i: text_outcome(c) for i, c in zip(ITEMS, by_item, strict=True)}
         metrics = {f"{q}_accuracy": sum(per_item[i][q]["correct"] for i in ITEMS) / 4 for q in QUESTIONS}
         metrics |= {"parse_failure_rate": 0.0, "latent_severity_n_severe": 2, "latent_severity_severe_recall": 0.5}
-        write_model(run_dir, name, model, "openai", "text", per_item, metrics, scored_at, settings)
+        write_model(run_dir, name, model, "openai", "text", per_item, metrics, scored_at, settings, run)
 
 
 def make_results(tmp_path: Path) -> Path:

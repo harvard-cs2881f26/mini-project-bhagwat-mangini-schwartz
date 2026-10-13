@@ -667,6 +667,8 @@ still wait for the Fig 4 review and docs/HYPOTHESIS.md.
   truth; the per-model summaries already hold everything.
 - **2026-10-12: Gemini 3.1 Pro complete, 287/287**, 0 errors (remaining 122 run after the daily cap reset,
   2 at a time). Run by Claude at Tyler's request. Summaries rescored with `--no-calls` at a clean commit.
+- **2026-10-12: run folders renamed to `results/<id>_<run>/`** (`repro_fig4` -> `txt0_repro_fig4`, `repro_fig5` -> `vid0_repro_fig5`, `asimov/run_ids.py`); run names, summaries and cache keys unchanged, so the paths in the entries above are the old ones.
+
 
 ## 2026-10-12: Session 3, decision-model interface (Noa)
 

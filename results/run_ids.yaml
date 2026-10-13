@@ -1,5 +1,6 @@
-# run name -> run ID. Maintained by scripts/collect.py, which adds every new run: don't edit by hand.
-# An ID is the benchmark prefix plus a number, in scoring order; it is never changed or reused, even after a run is deleted.
+# run name -> run ID. Maintained by the runner and scripts/collect.py, which add every new run: don't edit by hand.
+# An ID is the benchmark prefix plus a number; it is never changed or reused, even after a run is deleted.
+# Each run's folder is results/<id>_<run>/.
 repro_fig4: txt0
 repro_fig5: vid0
 repro_fig4_default: txt1

@@ -11,9 +11,12 @@ from dataclasses import dataclass
 from functools import cache
 from typing import Protocol, TypeVar
 
+from asimov.bench.text_score import QUESTIONS
 from asimov.claims import Claims, as_fraction, model_key, paper_value
 from asimov.collect.load import RunData
-from asimov.collect.metrics import estimate
+from asimov.collect.metrics import Estimate, estimate
+from asimov.collect.run_ids import settings
+from asimov.collect.tables import per_item
 
 # Fig 4a/4b severity axis: DECIDED, 4-way (multiple choice, exact level right), WORKLOG 2026-10-12 (Noa).
 # The other two stay available as `scripts/plot.py --severity binary|recall` for comparison.
@@ -144,6 +147,136 @@ def same_spot_ranks(points: list[Point]) -> list[tuple[int, int]]:
     """
     spot = [(round(p.x or 0.0, SAME_SPOT_DECIMALS), round(p.y or 0.0, SAME_SPOT_DECIMALS)) for p in points]
     return [(spot[:i].count(s), spot.count(s)) for i, s in enumerate(spot)]
+
+
+# ---- cross-model charts (accuracy heatmap, severity scoring, accuracy vs cost, thinking twins) ----------
+
+HEATMAP_PAPER_FIGURE = {QUESTIONS[0]: "4a", QUESTIONS[1]: "4a", QUESTIONS[2]: "4b", QUESTIONS[3]: "4b"}
+# Q2 severity scored three ways: multiple choice (Fig 4a's score), severe vs not, severe recall
+SCORING_METRICS = tuple(f"{QUESTIONS[1]}{suffix}" for suffix in ("_accuracy", "_severe_binary_accuracy", "_severe_recall"))
+THINKING_ORDER = ("min", "default")  # a thinking-twin chart puts the earlier value first; others follow, by name
+
+
+@dataclass(frozen=True)
+class GridRow:
+    """One model's row of the accuracy heatmap: ours and the paper's accuracy per question (QUESTIONS order)."""
+
+    name: str
+    ours: tuple[float | None, ...]
+    paper: tuple[float | None, ...]
+
+
+def accuracy_grid(run: RunData, claims: Claims) -> list[GridRow]:
+    rows = []
+    for m in in_paper_order(list(run.models)):
+        ests = [estimate(m, run.benchmark, f"{q}_accuracy") for q in QUESTIONS]
+        theirs = [paper_value(claims, run.benchmark, m.name, f"{q}_accuracy", HEATMAP_PAPER_FIGURE[q]) for q in QUESTIONS]
+        rows.append(GridRow(m.name, tuple(None if e is None else e.value for e in ests), tuple(theirs)))
+    return rows
+
+
+@dataclass(frozen=True)
+class ScoringRow:
+    """One model's group on the severity scoring chart: an estimate per SCORING_METRICS, and the paper's 4a value."""
+
+    name: str
+    scores: tuple[Estimate | None, ...]
+    paper: float | None
+
+
+def severity_scores(run: RunData, claims: Claims) -> list[ScoringRow]:
+    return [
+        ScoringRow(
+            m.name,
+            tuple(estimate(m, run.benchmark, k) for k in SCORING_METRICS),
+            paper_value(claims, run.benchmark, m.name, SCORING_METRICS[0], "4a"),
+        )
+        for m in in_paper_order(list(run.models))
+    ]
+
+
+@dataclass(frozen=True)
+class CostPoint:
+    """One model on the accuracy-vs-cost chart: mean output tokens per item, accuracy per question (QUESTIONS order)."""
+
+    name: str
+    tokens: float | None  # None when the model reports no output tokens: left off the chart
+    accuracy: tuple[float | None, ...]
+
+
+def output_per_item(summary: dict) -> float | None:
+    """Mean output tokens per reply; None when the summary has none (or zero, which a log axis can't show)."""
+    tokens = per_item(summary, "output_tokens")
+    return tokens if tokens else None
+
+
+def accuracies(summary: dict) -> tuple[float | None, ...]:
+    return tuple(summary.get(f"{q}_accuracy") for q in QUESTIONS)
+
+
+def cost_points(run: RunData) -> list[CostPoint]:
+    return [CostPoint(m.name, output_per_item(m.summary), accuracies(m.summary)) for m in in_paper_order(list(run.models))]
+
+
+@dataclass(frozen=True)
+class TwinRow:
+    """One model in two runs that differ only in thinking: accuracy per question and output tokens per item in each."""
+
+    name: str
+    low: tuple[float | None, ...]  # the run first in THINKING_ORDER
+    high: tuple[float | None, ...]
+    low_tokens: float | None
+    high_tokens: float | None
+
+    @property
+    def token_ratio(self) -> float | None:
+        """Output tokens per item, high run / low run."""
+        return self.high_tokens / self.low_tokens if self.low_tokens and self.high_tokens else None
+
+
+def thinking_value(run: RunData) -> str:
+    return settings(run).thinking
+
+
+def thinking_order(a: RunData, b: RunData) -> tuple[RunData, RunData]:
+    """The two runs, the one whose thinking comes first in THINKING_ORDER (then by value, then name) first."""
+
+    def rank(r: RunData) -> tuple[int, str, str]:
+        t = thinking_value(r)
+        return (THINKING_ORDER.index(t) if t in THINKING_ORDER else len(THINKING_ORDER), t, r.name)
+
+    low, high = sorted((a, b), key=rank)
+    return low, high
+
+
+def twin_rows(low: RunData, high: RunData) -> list[TwinRow]:
+    """Per model in both runs (matched by model id), in the paper's order."""
+    theirs = {m.summary["model"]: m for m in high.models}
+    rows = [
+        TwinRow(m.name, accuracies(m.summary), accuracies(h.summary), output_per_item(m.summary), output_per_item(h.summary))
+        for m in low.models
+        if (h := theirs.get(m.summary["model"])) is not None
+    ]
+    return in_paper_order(rows)
+
+
+@dataclass(frozen=True)
+class RangeCount:
+    """One axis of a comparison chart: models with a paper value, and how many of those sit inside our 95% CI."""
+
+    metric: str
+    inside: int
+    with_paper: int
+
+
+def paper_in_range(run: RunData, claims: Claims, figure: str, metric: str) -> RangeCount:
+    found = [
+        (e, p)
+        for m in run.models
+        if (e := estimate(m, run.benchmark, metric)) is not None
+        and (p := paper_value(claims, run.benchmark, m.name, metric, figure)) is not None
+    ]
+    return RangeCount(metric, sum(bool(e.contains(p)) for e, p in found), len(found))
 
 
 XY = tuple[float, float]

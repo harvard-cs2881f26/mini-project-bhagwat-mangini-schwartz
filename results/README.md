@@ -6,7 +6,7 @@ Headline numbers per figure, from the run chosen in [`headline.yaml`](headline.y
 
 ## Fig 4 (text)
 
-Run: `txt0` [`repro_fig4`](repro_fig4/README.md) · [paper check](repro_fig4/paper_check.md)
+Run: `txt0` [`repro_fig4`](txt0_repro_fig4/README.md) · [paper check](txt0_repro_fig4/paper_check.md)
 
 | Model | latent_risk_accuracy | paper | latent_severity_accuracy | paper | effect_accuracy | paper | activated_risk_accuracy | paper |
 |---|---|---|---|---|---|---|---|---|
@@ -22,11 +22,11 @@ Run: `txt0` [`repro_fig4`](repro_fig4/README.md) · [paper check](repro_fig4/pap
 - `latent_severity_accuracy`: the share of multiple-choice severity questions answered with the exact right level (none / minor / moderate / severe); the Fig 4 severity score (the paper's Fig 3 defines it this way).
 - `activated_risk_accuracy`: the share of multiple-choice severity questions answered with the exact right level (none / minor / moderate / severe); the Fig 4 severity score (the paper's Fig 3 defines it this way).
 
-![fig4a](../figures/fig4a_comparison.png) ![fig4b](../figures/fig4b_comparison.png)
+![fig4a](../figures/txt0/fig4a_comparison.png) ![fig4b](../figures/txt0/fig4b_comparison.png)
 
 ## Fig 5 (video)
 
-Run: `vid0` [`repro_fig5`](repro_fig5/README.md) · [paper check](repro_fig5/paper_check.md)
+Run: `vid0` [`repro_fig5`](vid0_repro_fig5/README.md) · [paper check](vid0_repro_fig5/paper_check.md)
 
 | Model | risk_accuracy | paper | timing_mae_s | paper | within_0_5_rate | paper |
 |---|---|---|---|---|---|---|
@@ -39,7 +39,7 @@ Run: `vid0` [`repro_fig5`](repro_fig5/README.md) · [paper check](repro_fig5/pap
 | Gemini 2.5 Flash (3) | 0.582 [0.524, 0.637] | – | 1.310 [1.108, 1.525] | 1.400 | 0.436 [0.379, 0.493] | 0.344 |
 | Gemini 2.5 Pro (3.1) | 0.631 [0.573, 0.684] | 0.840 | 1.141 [0.954, 1.333] | 0.720 | 0.519 [0.461, 0.576] | 0.560 |
 
-![fig5a](../figures/fig5a_comparison.png) ![fig5b](../figures/fig5b_comparison.png)
+![fig5a](../figures/vid0/fig5a_comparison.png) ![fig5b](../figures/vid0/fig5b_comparison.png)
 
 ## Fig 6 (image)
 
@@ -49,13 +49,13 @@ No run yet.
 
 | Run ID | Run | Description | Benchmark | Date | Models | Thinking | Prompt | Commit | Cost $ | Note |
 |---|---|---|---|---|---|---|---|---|---|---|
-| `txt3` | [`part2_openjev_think512`](part2_openjev_think512/README.md) | Text benchmark, using the decision_short prompt, with thinking set to min (the lowest reasoning each provider allows), on 1 model. | text | 2026-10-13 | 1 | min | decision_short | 60dafbf | – |  |
-| `txt7` | [`part2_luna_gen`](part2_luna_gen/README.md) | Text benchmark, using the paper's prompt sent unchanged (text_verbatim), with thinking set to min (the lowest reasoning each provider allows), on 1 model. | text | 2026-10-13 | 1 | min | text_verbatim | 60dafbf | – |  |
-| `txt6` | [`part2_luna_decide`](part2_luna_decide/README.md) | Text benchmark, using the decision_short prompt, with thinking set to min (the lowest reasoning each provider allows), on 1 model. | text | 2026-10-13 | 1 | min | decision_short | 60dafbf | – |  |
-| `txt8` | [`part2_kev`](part2_kev/README.md) | Text benchmark, using the decision_short prompt, with thinking set to min (the lowest reasoning each provider allows), on 1 model. | text | 2026-10-13 | 1 | min | decision_short | 60dafbf | – |  |
-| `txt5` | [`part2_jev_reversed`](part2_jev_reversed/README.md) | Text benchmark, using the decision_short prompt, with thinking set to min (the lowest reasoning each provider allows), on 1 model. | text | 2026-10-13 | 1 | min | decision_short | 60dafbf | – |  |
-| `txt4` | [`part2_jev`](part2_jev/README.md) | Text benchmark, using the decision_short prompt, with thinking set to min (the lowest reasoning each provider allows), on 1 model. | text | 2026-10-13 | 1 | min | decision_short | 60dafbf | – |  |
-| `txt2` | [`part2_codiv`](part2_codiv/README.md) | Text benchmark, using the decision_short prompt, with thinking set to min (the lowest reasoning each provider allows), on 2 models. | text | 2026-10-13 | 2 | min | decision_short | 60dafbf | – |  |
-| `vid0` | [`repro_fig5`](repro_fig5/README.md) | Video benchmark, using the video_v2 prompt, with thinking set to min (the lowest reasoning each provider allows), on 8 models. | video | 2026-10-12 | 8 | min | video_v2 | ae0477e | – |  |
-| `txt1` | [`repro_fig4_default`](repro_fig4_default/README.md) | Text benchmark, using the paper's prompt sent unchanged (text_verbatim), with thinking set to default (each provider decides how much to reason), on 8 models. Reasoning summaries are saved. | text | 2026-10-12 | 8 | default | text_verbatim | d687d53 | – |  |
-| `txt0` | [`repro_fig4`](repro_fig4/README.md) | Text benchmark, using the paper's prompt sent unchanged (text_verbatim), with thinking set to min (the lowest reasoning each provider allows), on 8 models. Reasoning summaries are saved. | text | 2026-10-12 | 8 | min | text_verbatim | d687d53 | – |  |
+| `txt3` | [`part2_openjev_think512`](txt3_part2_openjev_think512/README.md) | Text benchmark, using the decision_short prompt, with thinking set to min (the lowest reasoning each provider allows), on 1 model. | text | 2026-10-13 | 1 | min | decision_short | 60dafbf | – |  |
+| `txt7` | [`part2_luna_gen`](txt7_part2_luna_gen/README.md) | Text benchmark, using the paper's prompt sent unchanged (text_verbatim), with thinking set to min (the lowest reasoning each provider allows), on 1 model. | text | 2026-10-13 | 1 | min | text_verbatim | 60dafbf | – |  |
+| `txt6` | [`part2_luna_decide`](txt6_part2_luna_decide/README.md) | Text benchmark, using the decision_short prompt, with thinking set to min (the lowest reasoning each provider allows), on 1 model. | text | 2026-10-13 | 1 | min | decision_short | 60dafbf | – |  |
+| `txt8` | [`part2_kev`](txt8_part2_kev/README.md) | Text benchmark, using the decision_short prompt, with thinking set to min (the lowest reasoning each provider allows), on 1 model. | text | 2026-10-13 | 1 | min | decision_short | 60dafbf | – |  |
+| `txt5` | [`part2_jev_reversed`](txt5_part2_jev_reversed/README.md) | Text benchmark, using the decision_short prompt, with thinking set to min (the lowest reasoning each provider allows), on 1 model. | text | 2026-10-13 | 1 | min | decision_short | 60dafbf | – |  |
+| `txt4` | [`part2_jev`](txt4_part2_jev/README.md) | Text benchmark, using the decision_short prompt, with thinking set to min (the lowest reasoning each provider allows), on 1 model. | text | 2026-10-13 | 1 | min | decision_short | 60dafbf | – |  |
+| `txt2` | [`part2_codiv`](txt2_part2_codiv/README.md) | Text benchmark, using the decision_short prompt, with thinking set to min (the lowest reasoning each provider allows), on 2 models. | text | 2026-10-13 | 2 | min | decision_short | 60dafbf | – |  |
+| `vid0` | [`repro_fig5`](vid0_repro_fig5/README.md) | Video benchmark, using the video_v2 prompt, with thinking set to min (the lowest reasoning each provider allows), on 8 models. | video | 2026-10-12 | 8 | min | video_v2 | ae0477e | – |  |
+| `txt1` | [`repro_fig4_default`](txt1_repro_fig4_default/README.md) | Text benchmark, using the paper's prompt sent unchanged (text_verbatim), with thinking set to default (each provider decides how much to reason), on 8 models. Reasoning summaries are saved. | text | 2026-10-12 | 8 | default | text_verbatim | d687d53 | – |  |
+| `txt0` | [`repro_fig4`](txt0_repro_fig4/README.md) | Text benchmark, using the paper's prompt sent unchanged (text_verbatim), with thinking set to min (the lowest reasoning each provider allows), on 8 models. Reasoning summaries are saved. | text | 2026-10-12 | 8 | min | text_verbatim | d687d53 | – |  |

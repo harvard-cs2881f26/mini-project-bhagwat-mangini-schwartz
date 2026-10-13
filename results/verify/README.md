@@ -16,9 +16,9 @@ For each (run, model), using only the replies under that model's `summary.json` 
 - **video:** risk accuracy, `within_0_5_rate` over all scored videos, `timing_mae_s` over the error
   cases, and the number of error cases. Answer-key times are snapped to 0.5 s with ties going
   earlier, and each item falls into one of four timing cases.
-- **Wilson 95% CIs** against `results/<run>/README.md`.
+- **Wilson 95% CIs** against `results/<id>_<run>/README.md`.
 - **Paired large-minus-small gaps** (seeded bootstrap, 10,000 resamples, percentile), exact
-  McNemar p and Holm-adjusted p (16 tests) against `results/repro_fig4/paper_check.md`. The
+  McNemar p and Holm-adjusted p (16 tests) against `results/txt0_repro_fig4/paper_check.md`. The
   "actions harder" table is checked too.
 - **Point values** against `results/index.csv`.
 - Our reading of each item against `per_item` in `summary.json`. Every disagreement is listed.

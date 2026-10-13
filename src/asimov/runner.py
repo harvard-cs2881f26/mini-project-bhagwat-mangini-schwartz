@@ -3,14 +3,14 @@
 The config's `benchmark:` picks the loader, request builder and scorer (asimov.bench); this
 file is the same for every benchmark.
 
-results/<run>/<model>/responses.jsonl   one line per reply, append-only, committed
-results/<run>/<model>/summary.json      metrics + per-item outcomes + how they were made
-results/<run>/summary.json              one row per model
-results/<run>/config.yaml               exact copy of the config; one run name = one config
+results/<id>_<run>/<model>/responses.jsonl   one line per reply, append-only, committed
+results/<id>_<run>/<model>/summary.json      metrics + per-item outcomes + how they were made
+results/<id>_<run>/summary.json              one row per model
+results/<id>_<run>/config.yaml               exact copy of the config; one run name = one config
 
 A reply is reused if one already exists for the same (item, model, prompt, thinking, and
 log_reasoning when on), so reruns are free. Failed calls are printed and logged to
-results/<run>/<model>/errors.jsonl, never saved as replies, so a rerun retries them. With
+results/<id>_<run>/<model>/errors.jsonl, never saved as replies, so a rerun retries them. With
 call_models=False nothing is called: saved replies are rescored (free, no keys needed).
 """
 from __future__ import annotations
@@ -30,6 +30,7 @@ from asimov.bench import Benchmark, get_benchmark
 from asimov.config import RunConfig
 from asimov.models import get_client
 from asimov.models.reply_info import cached_input_tokens, finish
+from asimov.run_ids import run_dir
 
 ROOT = Path(__file__).resolve().parents[2]
 KEY_VARS = {"anthropic": "ANTHROPIC_API_KEY", "openai": "OPENAI_API_KEY", "gemini": "GEMINI_API_KEY",
@@ -37,7 +38,7 @@ KEY_VARS = {"anthropic": "ANTHROPIC_API_KEY", "openai": "OPENAI_API_KEY", "gemin
 
 
 class ConfigChanged(RuntimeError):
-    """results/<run>/ already holds results made with a different config."""
+    """results/<id>_<run>/ already holds results made with a different config."""
 
 
 def fixed_order(items, seed: int = 0):
@@ -67,7 +68,7 @@ def request_extra(spec: dict) -> str:
 
 
 def guard_config(out_dir: Path, config_text: str) -> None:
-    """Write results/<run>/config.yaml, or stop if it exists with different settings.
+    """Write results/<id>_<run>/config.yaml, or stop if it exists with different settings.
 
     Settings are compared as parsed YAML, so editing a comment keeps the run name (and refreshes
     the copy); any change to a value, including the model list, needs a new run name.
@@ -210,12 +211,13 @@ def finish_rates(finishes: dict[str, str]) -> dict:
 def run(cfg: dict, limit: int | None = None, only: list[str] | None = None,
         workers: int = 4, results_dir: Path | None = None,
         config_path: Path | None = None, call_models: bool = True) -> list[dict]:
-    """config_path: the YAML file cfg was read from; its exact text is kept as results/<run>/config.yaml."""
+    """config_path: the YAML file cfg was read from; its exact text is kept as results/<id>_<run>/config.yaml."""
     RunConfig.model_validate(cfg)  # unknown or missing keys and unknown providers fail here, before anything runs
     bench = get_benchmark(cfg["benchmark"])
-    bench.prompt_version(cfg["prompt"])  # an unknown prompt name fails before results/<run>/ is touched
+    bench.prompt_version(cfg["prompt"])  # an unknown prompt name fails before results/<id>_<run>/ is touched
     items = fixed_order(bench.load_items())[:limit]
-    out_dir = (results_dir or ROOT / "results") / cfg["run"]
+    providers = [m["provider"] for m in cfg["models"]]
+    out_dir = run_dir(results_dir or ROOT / "results", cfg["run"], cfg["benchmark"], providers)
     config_text = config_path.read_text() if config_path else yaml.safe_dump(cfg, sort_keys=False)
     guard_config(out_dir, config_text)
     made = provenance(cfg, config_text, config_path)
@@ -237,7 +239,7 @@ def run(cfg: dict, limit: int | None = None, only: list[str] | None = None,
 
 
 def write_combined(cfg: dict, out_dir: Path) -> None:
-    """results/<run>/summary.json: one row per config model, from each model's own summary.json,
+    """results/<id>_<run>/summary.json: one row per config model, from each model's own summary.json,
     so running a subset (--models) never drops the other models' rows."""
     combined = []
     for spec in cfg["models"]:
