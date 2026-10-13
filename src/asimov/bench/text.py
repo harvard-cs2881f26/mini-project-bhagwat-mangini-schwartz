@@ -271,11 +271,16 @@ def decision_request(parsed: ParsedPrompt, prompt_name: str) -> DecisionPart:
         values = option_values(q, prompt_name)
         if len(set(values)) != len(values):
             raise ValueError(f"{q.key}: option values aren't unique: {values}")
-        questions.append(DecisionQuestion(
-            id=q.key, instructions=q.text if prompt.wording == "full" else w["short"][q.key],
-            options=tuple(zip(values, q.options.values(), strict=True)), letters=tuple(q.options),
-            context=w["context"].get(q.key, ""),
-            example=example(q.key, tuple(q.options.values())) if is_oneshot_prompt(prompt_name) else None))
+        questions.append(
+            DecisionQuestion(
+                id=q.key,
+                instructions=q.text if prompt.wording == "full" else w["short"][q.key],
+                options=tuple(zip(values, q.options.values(), strict=True)),
+                letters=tuple(q.options),
+                context=w["context"].get(q.key, ""),
+                example=example(q.key, tuple(q.options.values())) if is_oneshot_prompt(prompt_name) else None,
+            )
+        )
     return DecisionPart(state=state, questions=tuple(questions), mode=prompt.mode)
 
 
