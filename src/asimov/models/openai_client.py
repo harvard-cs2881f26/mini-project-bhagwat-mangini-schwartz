@@ -1,6 +1,7 @@
 """GPT via the OpenAI Responses API (openai SDK 3.24).
 
-Thinking: GPT-5 models always reason; "min" sends reasoning.effort="minimal", "default" sends
+Thinking: GPT-5 models always reason; "min" sends the model's lowest effort (`min_effort`:
+"minimal" for GPT-5, "none" for gpt-6-luna, whose model page lists no "minimal"), "default" sends
 nothing. Images go as base64 data URLs with detail="high" so they are not downscaled (we send
 full resolution; WORKLOG 2026-10-10).
 """
@@ -14,6 +15,11 @@ from asimov.bench.parts import Part, TextPart
 from asimov.models.base import ModelResponse, Thinking, Timer
 
 MAX_OUTPUT_TOKENS = 8192  # includes reasoning tokens
+MIN_EFFORT = {"gpt-6-luna": "none"}  # lowest effort per model when it isn't "minimal"
+
+
+def min_effort(model: str) -> str:
+    return MIN_EFFORT.get(model, "minimal")
 
 
 def to_input(parts: list[Part]) -> list[dict]:
@@ -35,7 +41,8 @@ class OpenAIClient:
         self.client = openai.OpenAI()
 
     def generate(self, parts: list[Part], thinking: Thinking = "min", log_reasoning: bool = False) -> ModelResponse:
-        reasoning = ({"effort": "minimal"} if thinking == "min" else {}) | ({"summary": "auto"} if log_reasoning else {})
+        reasoning = {"effort": min_effort(self.model)} if thinking == "min" else {}
+        reasoning |= {"summary": "auto"} if log_reasoning else {}
         kwargs = {"reasoning": reasoning} if reasoning else {}
         with Timer() as t:
             r = self.client.responses.create(
