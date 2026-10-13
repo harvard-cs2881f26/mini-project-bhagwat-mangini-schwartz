@@ -1,0 +1,12 @@
+# Part 2 (optional system): NLI zero-shot, local (free): DeBERTa-v3-large zeroshot-v2.0. Per question,
+# premise = scenario + instruction, one hypothesis per option (`local.nli_hypothesis` in
+# prompts/decision_questions.yaml); the entailment logits softmaxed over the options (the zero-shot
+# pipeline with multi_label=False). The smallest system, and the only one that isn't a language model.
+# Question mode: change prompt to decision_short_cumulative_local (new run name).
+run: part2_nli
+benchmark: text
+prompt: decision_short_local
+thinking: min  # required by the schema; not used
+models:
+  - {name: DeBERTa-v3-large NLI zero-shot, provider: nli, model: deberta-v3-large-zeroshot-v2.0,
+     params: {repo: MoritzLaurer/deberta-v3-large-zeroshot-v2.0, revision: cf44676c28ba7312e5c5f8f8d2c22b3e0c9cdae2}}

@@ -14,6 +14,9 @@ prompts/decision_questions.yaml (the one home for that wording). Their names are
 `decision_<wording>[_letters][_<mode>]` (parse_decision_prompt): wording `short` or `full`,
 `_letters` for A-E option values, and `_cumulative` (none = independent, non-cumulative) for
 whether a question sees the model's own earlier picks (models.decision.generate_decision).
+A trailing `_local` (e.g. decision_short_local) marks the same request for a local model
+(models.local_hf, models.nli), which renders it as text with the wording file's `local` section;
+that section is hashed into the `_local` versions only, so the hosted versions never move.
 A name is a decision prompt only if parse_decision_prompt accepts it; every other name is a text
 prompt (verbatim or a suffix variant).
 """
@@ -49,10 +52,12 @@ TEXT_PROMPTS = (PROMPT_NAME, LETTER_ONLY)
 EXPERIMENTS = Path(__file__).resolve().parents[3] / "experiments"
 # decision_<wording>[_letters][_<mode>]: wording = the paper's full text per question or the short text
 # in the wording file; option values are short names (e.g. "severe") unless `_letters` (A-E); mode
-# `_cumulative` passes the model's own earlier picks to later questions (none = independent, non-cumulative).
+# `_cumulative` passes the model's own earlier picks to later questions (none = independent, non-cumulative);
+# a trailing `_local` = rendered as text for a local model (WORKLOG 2026-10-13, "Local decision models").
 # WORKLOG 2026-10-12 ("Decision-model wording", "Decision question modes").
 WORDINGS = ("short", "full")
-DECISION_NAME = re.compile(r"decision_(short|full)(_letters)?(?:_(cumulative))?")
+LOCAL = "_local"
+DECISION_NAME = re.compile(r"decision_(short|full)(_letters)?(?:_(cumulative))?(_local)?")
 
 
 class DecisionPrompt(NamedTuple):
@@ -66,7 +71,8 @@ def decision_prompt_name(words: str, letters: bool, mode: Mode) -> str:
 
 
 def parse_decision_prompt(name: str) -> DecisionPrompt:
-    """'decision_short_letters_cumulative' -> ('short', True, 'cumulative'); ValueError if not a decision prompt."""
+    """'decision_short_letters_cumulative' -> ('short', True, 'cumulative'); ValueError if not a decision prompt.
+    A `_local` name parses like the name without it (is_local_prompt tells them apart)."""
     m = DECISION_NAME.fullmatch(name)
     if not m:
         raise ValueError(f"not a decision prompt: {name!r}")
@@ -74,10 +80,12 @@ def parse_decision_prompt(name: str) -> DecisionPrompt:
 
 
 DECISION_PROMPTS = tuple(decision_prompt_name(w, letters, mode) for mode in MODES for w in WORDINGS for letters in (False, True))
-PROMPTS = (*TEXT_PROMPTS, *DECISION_PROMPTS)
+LOCAL_DECISION_PROMPTS = tuple(p + LOCAL for p in DECISION_PROMPTS)
+PROMPTS = (*TEXT_PROMPTS, *DECISION_PROMPTS, *LOCAL_DECISION_PROMPTS)
 WORDING = Path(__file__).resolve().parents[1] / "prompts" / "decision_questions.yaml"
 # Sections of the wording file a decision request uses; their content (not the file's bytes, so
-# comments don't count) is hashed into prompt_version. `context` only matters to cumulative.
+# comments don't count) is hashed into prompt_version. `context` only matters to cumulative, `local`
+# only to `_local` prompts.
 REQUEST_SECTIONS = ("state", "short", "names")
 
 
@@ -89,8 +97,14 @@ def suffix(prompt_name: str) -> str:
 
 
 def is_decision_prompt(prompt_name: str) -> bool:
-    """True for exactly the names parse_decision_prompt accepts (all in DECISION_PROMPTS)."""
+    """True for exactly the names parse_decision_prompt accepts (all in DECISION_PROMPTS or LOCAL_DECISION_PROMPTS)."""
     return DECISION_NAME.fullmatch(prompt_name) is not None
+
+
+def is_local_prompt(prompt_name: str) -> bool:
+    """A decision prompt for a local model: rendered as text with the wording file's `local` section."""
+    m = DECISION_NAME.fullmatch(prompt_name)
+    return bool(m and m[4])
 
 
 def prompt_version(prompt_name: str) -> str:
@@ -100,6 +114,8 @@ def prompt_version(prompt_name: str) -> str:
         sections = REQUEST_SECTIONS
         if parse_decision_prompt(prompt_name).mode != "independent":
             sections = (*sections, "context")
+        if is_local_prompt(prompt_name):
+            sections = (*sections, "local")
         used = json.dumps({k: wording()[k] for k in sections}, sort_keys=True)
         return f"{DATASET_VERSION}|{prompt_name}|{hashlib.sha256(used.encode()).hexdigest()[:12]}"
     added = suffix(prompt_name)  # rejects unknown names
