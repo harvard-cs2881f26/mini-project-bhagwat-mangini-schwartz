@@ -960,7 +960,7 @@ Built rows 7-10 of the Part 2 matrix: `part2_qwen_base_logprob`, `part2_qwen_log
   prefill up to the JSON answer key (docs/apis/qwen3_4b_local.md §4); NLI premise = the full
   verbatim prompt (needs an 8k-token NLI model, docs/apis/nli_zeroshot.md (b)); one generic
   hypothesis "{instructions} {description}".
-- **`_local` prompt names: DECIDED (Claude, design; Noa to confirm).** `decision_short_local` etc.
+- **`_local` prompt names: PROPOSED (Claude, design; Noa to confirm).** `decision_short_local` etc.
   build the same DecisionPart as `decision_short`, and only their version hashes the `local`
   section, so the hosted prompt versions are unchanged (pin test untouched) and editing the local
   wording never reuses old local replies. `config.py` requires a `_local` prompt for local
