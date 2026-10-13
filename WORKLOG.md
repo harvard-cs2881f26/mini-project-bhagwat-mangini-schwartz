@@ -1069,7 +1069,7 @@ and latency on the text benchmark (319 items). `scripts/router_search.py` with
 `src/asimov/router_search.py`. Free: saved replies in results/ only, no model calls. EXPLORATORY: a search over
 8,424 candidates on one benchmark.
 
-### Cross-validation protocol: PROPOSED (Claude; Noa to confirm)
+### Cross-validation protocol: DECIDED (Noa, 2026-10-14: confirmed as proposed by Claude)
 - Items are shuffled with numpy `default_rng(seed)` and dealt round-robin into 5 folds (no stratification),
   for seeds 0-4 (5 repeats). For each fold, every candidate is fitted on the 4 training folds, the
   highest-accuracy candidate within the cap on those folds is picked (ties: cheaper, faster, listed first),
@@ -1084,7 +1084,7 @@ and latency on the text benchmark (319 items). `scripts/router_search.py` with
 - The in-sample frontier (fit and pick on all 319) is reported beside the held-out one, labelled
   "in-sample, optimistic, not a result".
 
-### Families, pools and grids: PROPOSED (Claude)
+### Families, pools and grids: DECIDED (Noa, 2026-10-14: confirmed as proposed by Claude)
 - Families: single (24), D-cascade (1,071), agreement (966), three-stage (5,292), per-question mix (1,071).
   Every candidate's definition is in `results/router_search/candidates.csv`.
 - Decision pool: Jev, Jev reversed, luna Decisions, OpenJev think 0 and think 512, Laya, Kev-4B, plus any
@@ -1117,7 +1117,7 @@ EXPLORATORY, same protocol, families, cheap/strong tiers, shares and grids as ab
 - **Excluded runs:** none. Every text run's summary has errors == 0.
 - **Candidates:** 37,791 (was 8,424): single 45, d_cascade 4,374, agreement 8,586, three-stage 20,412,
   per-question mix 4,374.
-- **Latency of Modal rows: PROPOSED (Claude, implementing Noa's request; Noa to confirm).** For txt25-txt29
+- **Latency of Modal rows: DECIDED (Noa, 2026-10-14: confirmed as proposed by Claude, implementing Noa's request).** For txt25-txt29
   (all 319 rows of each have it) latency = `raw.remote.compute_s` (GPU compute), not `latency_s` (round trip,
   which includes queue wait for runs made with 4 workers). p50 compute_s vs latency_s: NLI 0.146 vs 0.640 s;
   Qwen-Base logprob 0.215 vs 0.250; Qwen logprob 0.275 vs 0.330; Qwen-Base one-shot 0.225 vs 0.270; Qwen generate
@@ -1557,7 +1557,7 @@ EXPLORATORY, $0 (saved replies only, no model calls). Same CV protocol as "Route
 above (5 folds x seeds 0-4, every pick made on training folds, scored on the held-out fold), same
 cheap/strong tiers, shares and grids, plus a "no cap" budget. Branch `router-search-v2` (origin/router-search
 merged with main at 9a038cc). Outputs: `results/router_search/`, `figures/router_search/`. Numbers only;
-interpretation is Noa's. Every choice below: PROPOSED (Claude; Noa to confirm).
+interpretation is Noa's. Every choice below: DECIDED (Noa, 2026-10-14: confirmed as proposed by Claude).
 
 ### Pools and flags
 - **Added:** Kev-4B full (`part2_kev_full`, txt30) and Kev-4B letters (`part2_kev_letters`, txt31) to the
