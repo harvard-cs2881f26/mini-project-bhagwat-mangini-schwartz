@@ -1,4 +1,5 @@
-"""Local Hugging Face causal LMs (Part 2, Step C): Qwen3.5-4B-Base and Qwen3.5-4B on this machine.
+"""Local Hugging Face causal LMs (Part 2, Step C): Qwen3.5-4B-Base and Qwen3.5-4B, open weights run
+by us (on this machine, or on a Modal GPU with the same code).
 
 params (config):
     repo:      Hugging Face repo id, e.g. Qwen/Qwen3.5-4B-Base
@@ -12,9 +13,12 @@ params (config):
     template:  plain    the text as is, ending in the answer cue (base model; logprob only)
                chat     the model's chat template with thinking off (enable_thinking=False: an empty
                         think block, so the reply starts with the answer)
+    backend:   local    (default) load the model here
+               modal    send each request to the deployed Modal app (models/modal_app.py, L40S), which
+                        runs this same client with backend local (models/remote.py)
 `thinking` doesn't apply: thinking is always off. torch and transformers are imported only when a
-client is built (requirements-local.txt), so CI never imports them. Weights load in bf16 on Apple
-MPS when available, else CPU. One forward pass at a time (the runner calls from threads).
+model is loaded (requirements-local.txt), so CI never imports them. Weights load in bf16 on CUDA,
+else Apple MPS, else CPU. One forward pass at a time (the runner calls from threads).
 """
 
 from __future__ import annotations
@@ -28,6 +32,7 @@ from asimov.bench.parts import DecisionPart, DecisionQuestion, Part, TextPart
 from asimov.models.base import ModelResponse, Thinking, Timer
 from asimov.models.decision import Decided, argmax, generate_decision
 from asimov.models.local_text import letter_token_ids, option_letters, option_probs, plain_prompt, question_text
+from asimov.models.remote import BACKENDS, remote_complete, remote_decide, remote_model
 
 MODES = ("logprob", "generate")
 TEMPLATES = ("plain", "chat")
@@ -41,7 +46,7 @@ LETTER_CHECK = DecisionQuestion(
 
 def check_params(params: dict | None) -> tuple[str, str, str, str]:
     """(repo, revision, mode, template); ValueError naming what's wrong."""
-    params = dict(params or {})
+    params = {k: v for k, v in (params or {}).items() if k != "backend"}  # backend: check_backend
     unknown = sorted(set(params) - set(PARAMS))
     missing = [k for k in PARAMS if not params.get(k)]
     if unknown or missing:
@@ -52,6 +57,17 @@ def check_params(params: dict | None) -> tuple[str, str, str, str]:
     if mode == "generate" and template != "chat":
         raise ValueError("local_hf generate uses the chat template with thinking off: set template: chat")
     return repo, revision, mode, template
+
+
+def check_backend(params: dict | None) -> str:
+    backend = str((params or {}).get("backend", "local"))
+    if backend not in BACKENDS:
+        raise ValueError(f"backend must be one of {BACKENDS}, not {backend!r}")
+    return backend
+
+
+def device(torch: Any) -> str:
+    return "cuda" if torch.cuda.is_available() else "mps" if torch.backends.mps.is_available() else "cpu"
 
 
 def generation_finish(n_new: int, max_new: int, ended_with_eos: bool) -> str:
@@ -83,7 +99,11 @@ class LocalHFClient:
     def __init__(self, model: str, params: dict | None = None):
         self.model = model
         self.repo, self.revision, self.mode, self.template = check_params(params)
+        self.backend = check_backend(params)
         self.lock = threading.Lock()
+        if self.backend == "modal":
+            self.remote = remote_model("LocalHF", repo=self.repo, revision=self.revision, mode=self.mode, template=self.template)
+            return
         self.load()
         if self.mode == "logprob":
             letter_token_ids(self.encode, self.prompt("SCENARIO: check", LETTER_CHECK), option_letters(LETTER_CHECK))
@@ -96,7 +116,7 @@ class LocalHFClient:
         import torch
         from transformers import AutoModelForCausalLM, AutoTokenizer
 
-        self.device = "mps" if torch.backends.mps.is_available() else "cpu"
+        self.device = device(torch)
         t0 = time.perf_counter()
         self.tokenizer = AutoTokenizer.from_pretrained(self.repo, revision=self.revision)
         lm: Any = AutoModelForCausalLM.from_pretrained(self.repo, revision=self.revision, dtype=torch.bfloat16)
@@ -119,9 +139,13 @@ class LocalHFClient:
     def generate(self, parts: list[Part], thinking: Thinking = "min", log_reasoning: bool = False) -> ModelResponse:
         if self.mode == "logprob":
             return generate_decision(self, parts)
+        if self.backend == "modal":
+            return remote_complete(self.remote, text_prompt(parts))
         return self.complete(text_prompt(parts))
 
     def decide(self, part: DecisionPart) -> Decided:
+        if self.backend == "modal":
+            return remote_decide(self.remote, part)
         by_value, chosen, questions = {}, {}, {}
         for q in part.questions:
             prompt = self.prompt(part.state, q)

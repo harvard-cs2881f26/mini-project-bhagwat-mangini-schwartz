@@ -3,10 +3,11 @@
 # `local` in prompts/decision_questions.yaml), softmaxed over the letters. Kev-4B's base weights with
 # no decision training: the untrained control for part2_kev.
 # Question mode: change prompt to decision_short_cumulative_local (new run name).
+# Runs on a Modal L40S (backend: modal; models/modal_app.py, deploy it first), same code as locally.
 run: part2_qwen_base_logprob
 benchmark: text
 prompt: decision_short_local
 thinking: min  # required by the schema; not used (no thinking on a base model)
 models:
   - {name: Qwen3.5-4B-Base (logprob), provider: local_hf, model: qwen3.5-4b-base,
-     params: {repo: Qwen/Qwen3.5-4B-Base, revision: 1001bb4d826a52d1f399e183466143f4da7b741b, mode: logprob, template: plain}}
+     params: {repo: Qwen/Qwen3.5-4B-Base, revision: 1001bb4d826a52d1f399e183466143f4da7b741b, mode: logprob, template: plain, backend: modal}}

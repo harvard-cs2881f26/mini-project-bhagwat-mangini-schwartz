@@ -45,7 +45,7 @@ context:
 # DecisionPart is rendered into text here and nowhere else (asimov.models.local_text). Used only by
 # prompts ending in `_local` (e.g. decision_short_local), and hashed into those prompts' versions
 # only, so editing this section never moves the hosted decision prompts' versions.
-# DRAFT (Claude) for Noa to approve.
+# Drafted by Claude, approved by Noa 2026-10-13.
 local:
   # Option-probability prompt, one per question. {options} = one `option` line per option, in the
   # order the part sends them; the letters A, B, ... are labels for this prompt only, read back from

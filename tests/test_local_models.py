@@ -17,7 +17,7 @@ from collections.abc import Mapping, Sequence
 import pytest
 import yaml
 
-from asimov.bench.parts import DecisionPart
+from asimov.bench.parts import DecisionPart, TextPart
 from asimov.bench.text import (
     DECISION_PROMPTS,
     LOCAL_DECISION_PROMPTS,
@@ -31,7 +31,8 @@ from asimov.bench.text_score import QUESTIONS, response_key
 from asimov.config import ModelSpec, RunConfig
 from asimov.data.text import load_text_items
 from asimov.models import request_settings
-from asimov.models.local_hf import LocalHFClient, check_params, generation_finish
+from asimov.models.base import ModelResponse
+from asimov.models.local_hf import LocalHFClient, check_backend, check_params, generation_finish
 from asimov.models.local_text import (
     answer_token,
     entailment_index,
@@ -44,6 +45,7 @@ from asimov.models.local_text import (
     softmax,
 )
 from asimov.models.nli import NLIClient
+from asimov.models.remote import part_from_dict, part_to_dict, serve_complete, serve_decide
 from asimov.models.reply_info import finish
 from asimov.runner import ROOT
 
@@ -187,7 +189,7 @@ class FakeTokenizer:
 def fake_local_client(scores: Mapping[str, Sequence[float]], template: str = "plain") -> LocalHFClient:
     """A logprob client whose next-token scores per question id are fixed; no model loaded."""
     client = LocalHFClient.__new__(LocalHFClient)
-    client.model, client.lock = "qwen3.5-4b-base", threading.Lock()
+    client.model, client.lock, client.backend = "qwen3.5-4b-base", threading.Lock(), "local"
     client.repo, client.revision, client.mode, client.template = *QWEN_BASE.values(), "logprob", template
     client.tokenizer = FakeTokenizer()
     asked = iter(QUESTIONS)
@@ -230,7 +232,7 @@ def test_logprob_client_cumulative_makes_one_pass_per_question():
 
 def test_nli_client_softmaxes_entailment_over_options(part):
     client = NLIClient.__new__(NLIClient)
-    client.model, client.lock = "deberta-v3-large-zeroshot-v2.0", threading.Lock()
+    client.model, client.lock, client.backend = "deberta-v3-large-zeroshot-v2.0", threading.Lock(), "local"
     client.repo, client.revision = "MoritzLaurer/deberta-v3-large-zeroshot-v2.0", "cf44676c"
     sent = []
 
@@ -363,3 +365,91 @@ def test_agreement_counts_shared_items_and_unanswered():
     assert out["latent_risk"] == {"n": 2, "agree": 1, "unanswered_a": 0, "unanswered_b": 0}
     assert out["effect"]["agree"] == 2
     assert out["activated_risk"] == {"n": 2, "agree": 1, "unanswered_a": 1, "unanswered_b": 1}  # both unanswered: no
+
+
+# --- Modal backend: the same client code, run remotely (models/remote.py), with a fake remote ---
+
+
+class FakeMethod:
+    def __init__(self, fn):
+        self.remote = fn
+
+
+class FakeRemote:
+    """Stands in for the deployed Modal class: runs the server-side handlers on a local fake client."""
+
+    def __init__(self, client):
+        info = {"backend": "modal", "device": "cuda", "gpu": "NVIDIA L40S", "load_s": 30.0}
+        self.decide = FakeMethod(lambda part: serve_decide(client, part, info))
+        self.complete = FakeMethod(lambda text: serve_complete(client, text, info))
+
+
+def modal_client(remote, mode: str = "logprob", template: str = "plain") -> LocalHFClient:
+    client = LocalHFClient.__new__(LocalHFClient)
+    client.model, client.lock, client.backend, client.remote = "qwen3.5-4b-base", threading.Lock(), "modal", remote
+    client.repo, client.revision, client.mode, client.template = *QWEN_BASE.values(), mode, template
+    return client
+
+
+SCORES = {"latent_risk": [0, 0, 0, 3, 0], "latent_severity": [0, 0, 1, 0], "effect": [0, 2, 0, 0], "activated_risk": [1, 0, 0, 0]}
+
+
+def test_decision_part_crosses_as_a_dict_unchanged():
+    item = load_text_items()[0]
+    for name in ("decision_short_local", "decision_full_letters_cumulative_local"):
+        [p] = build_request(item, name)
+        assert isinstance(p, DecisionPart)
+        assert part_from_dict(json.loads(json.dumps(part_to_dict(p)))) == p
+
+
+def test_modal_backend_gives_the_same_reply_and_records_where_it_ran(part):
+    here = fake_local_client(SCORES).generate([part])
+    there = modal_client(FakeRemote(fake_local_client(SCORES))).generate([part])
+    assert (there.text, there.probs, there.usage, there.model) == (here.text, here.probs, here.usage, here.model)
+    remote = there.raw["remote"]
+    assert remote["backend"] == "modal" and remote["gpu"] == "NVIDIA L40S" and remote["compute_s"] >= 0
+    assert {k: v for k, v in there.raw.items() if k != "remote"} == here.raw
+
+
+def test_modal_reply_made_with_other_wording_raises(part):
+    remote = FakeRemote(fake_local_client(SCORES))
+    real = remote.decide.remote
+    remote.decide = FakeMethod(lambda p: {**real(p), "local_wording": "000000000000"})
+    with pytest.raises(RuntimeError, match="redeploy"):
+        modal_client(remote).generate([part])
+
+
+class Generator:
+    def complete(self, text):
+        raw = {"finish_reason": "length", "max_new_tokens": 1024}
+        usage = {"input_tokens": 5, "output_tokens": 1024}
+        return ModelResponse(text="{}", model="Qwen/Qwen3.5-4B@x", usage=usage, latency_s=2.5, raw=raw)
+
+
+def test_modal_generation_keeps_finish_and_records_compute_time():
+    r = modal_client(FakeRemote(Generator()), mode="generate", template="chat").generate([TextPart("prompt")])
+    assert r.text == "{}" and r.usage["output_tokens"] == 1024
+    assert r.raw["remote"]["compute_s"] == 2.5 and finish("local_hf", r.raw) == "truncated"
+
+
+def test_backend_param_is_checked_and_optional():
+    assert check_backend({}) == "local" and check_backend({"backend": "modal"}) == "modal"
+    with pytest.raises(ValueError, match="backend"):
+        check_backend({"backend": "gpu"})
+    assert check_params({**QWEN_BASE, "mode": "logprob", "template": "plain", "backend": "modal"})[2] == "logprob"
+
+
+@pytest.mark.parametrize("name", LOCAL_CONFIGS)
+def test_local_configs_run_on_modal(name):
+    [spec] = yaml.safe_load((ROOT / "configs" / f"{name}.yaml").read_text())["models"]
+    assert spec["params"]["backend"] == "modal"
+
+
+def test_importing_the_remote_path_imports_neither_modal_nor_torch():
+    code = (
+        "import sys, asimov.models.remote, asimov.models.local_hf, asimov.models.nli; "
+        "assert 'modal' not in sys.modules and 'torch' not in sys.modules"
+    )
+    env = {**os.environ, "PYTHONPATH": str(ROOT / "src")}
+    out = subprocess.run([sys.executable, "-c", code], cwd=ROOT, capture_output=True, text=True, env=env)
+    assert out.returncode == 0, out.stderr
