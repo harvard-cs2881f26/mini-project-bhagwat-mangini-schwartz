@@ -29,6 +29,9 @@ class ModelSpec(BaseModel):
 
     @model_validator(mode="after")
     def systemone_needs_a_service(self) -> ModelSpec:
+        extras = [k for k in ("base_url", "key_env", "params") if getattr(self, k)]
+        if self.provider != "systemone" and extras:
+            raise ValueError(f"{extras} only apply to provider systemone, not {self.provider}")
         if self.provider == "systemone" and not (self.base_url and self.key_env):
             raise ValueError("a systemone model needs base_url (e.g. https://api.typesafe.ai) and key_env "
                              "(e.g. TYPESAFE_API_KEY)")

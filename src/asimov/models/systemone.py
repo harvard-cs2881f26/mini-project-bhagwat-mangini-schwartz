@@ -23,7 +23,7 @@ import httpx
 
 from asimov.bench.parts import DecisionPart, Part
 from asimov.models.base import ModelResponse, Thinking
-from asimov.models.decision import Decided, generate_decision
+from asimov.models.decision import Decided, generate_decision, require_answers
 
 PATH = "/v1/systemone"
 RETRY = {408, 429, 500, 502, 503, 504, 529}
@@ -65,12 +65,14 @@ class SystemOneClient:
     def decide(self, part: DecisionPart) -> Decided:
         raw = self.post(request_body(part, self.model, self.params))
         answers = raw.get("answers") or {}
+        require_answers(part, set(answers))
         usage = raw.get("usage") or {}
         return Decided(
             by_value={q.id: choice_probs(answers.get(q.id)) for q in part.questions},
             raw=raw,
             usage={"input_tokens": usage.get("input_tokens"), "output_tokens": usage.get("output_tokens")},
             model=raw.get("model", self.model),
+            chosen={q.id: (answers.get(q.id) or {}).get("choice") for q in part.questions},
         )
 
     def post(self, body: dict) -> dict:

@@ -327,3 +327,42 @@ def test_decisions_cumulative_sums_cached_tokens_and_flags_refusals():
     for c in r.raw["calls"]:
         c["usage"]["input_tokens_details"]["cached_tokens"] = 100
     assert cached_input_tokens("openai_decisions", r.raw) == 400
+
+
+# --- review fixes (2026-10-13) ---
+
+
+def test_tie_goes_to_the_services_own_choice(part, monkeypatch):
+    def handler(request):
+        out = systemone_answer(json.loads(request.content))
+        values = list(json.loads(request.content)["questions"]["latent_severity"]["criteria"])
+        out["answers"]["latent_severity"] = {
+            "type": "choice",
+            "choice": values[1],
+            "probabilities": {values[0]: 0.47, values[1]: 0.47, values[2]: 0.06, values[3]: 0.0},
+        }
+        return httpx.Response(200, json=out)
+
+    r = systemone_client(handler, monkeypatch).generate([part])
+    assert json.loads(r.text)[response_key("latent_severity")] == "B"  # the service chose B, tied with A
+
+
+def test_200_without_answers_is_an_error_not_a_reply(part, monkeypatch):
+    client = systemone_client(lambda r: httpx.Response(200, json={"error": "proxy timeout"}), monkeypatch)
+    with pytest.raises(ValueError, match="no answer for"):
+        client.generate([part])
+
+
+def test_probabilities_must_sum_to_one(part, monkeypatch):
+    def handler(request):
+        out = systemone_answer(json.loads(request.content))
+        out["answers"]["effect"]["probabilities"] = dict.fromkeys(out["answers"]["effect"]["probabilities"], 0.5)
+        return httpx.Response(200, json=out)
+
+    with pytest.raises(ValueError, match="sum to"):
+        systemone_client(handler, monkeypatch).generate([part])
+
+
+def test_service_fields_only_on_systemone():
+    with pytest.raises(ValueError, match="only apply to provider systemone"):
+        ModelSpec(name="x", provider="openai", model="gpt-5", params={"think": 512})
