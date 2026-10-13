@@ -57,6 +57,9 @@ LABEL = {MEAN: "Mean of 4", **{q: f"Q{k} {q}" for k, q in enumerate(QUESTIONS, 1
 SHORT = {MEAN: "mean of 4", **{q: f"Q{k}" for k, q in enumerate(QUESTIONS, 1)}}
 DIGITS = 3
 FIG_FORMATS = ("png", "pdf")
+FIG_SIZE = (13, 7.5)  # inches: 2 x 3 panels
+FIG_DPI = 150
+BAND_ALPHA = 0.15  # CI band opacity
 NOTE_WIDTH = 48  # characters per line of the note under the legend
 
 
@@ -210,7 +213,7 @@ def d_section(a: Analysis) -> list[str]:
     lines += [row(point_cells(f"{p.first.name} alone", a.curve[0]))]
     lines += [row(point_cells(f"lowest-confidence {f:.0%} sent on", pt)) for f, pt in a.fixed.items()]
     lines += [row(point_cells(f"{p.escalate.name} alone (one call)", a.llm_alone))]
-    lines += [row(point_cells("perfect router, mean of 4 (bound)", a.frontiers[MEAN][-1]))]
+    lines += [row(point_cells("perfect router, mean of 4 (bound at equal items sent)", a.frontiers[MEAN][-1]))]
     return [*lines, ""]
 
 
@@ -267,17 +270,21 @@ def tables_md(analyses: list[Analysis], cfg_path: Path, prices: PriceTable) -> s
 def draw(a: Analysis, claims: Claims, path: Path) -> None:
     """One figure per pair: mean of 4 and each question, accuracy against $ per 1,000 items."""
     p = a.pair
-    fig, axes = plt.subplots(2, 3, figsize=(13, 7.5), sharex=True)
+    fig, axes = plt.subplots(2, 3, figsize=FIG_SIZE, sharex=True)
     shade = color(p.first.name)
     for ax, m in zip(axes.flat, METRICS, strict=False):
         xs = [pt.cost_per_1000 for pt in a.curve]
         ax.fill_between(
-            xs, [pt.accuracy[m].lo for pt in a.curve], [pt.accuracy[m].hi for pt in a.curve], color=shade, alpha=0.15, lw=0
+            xs, [pt.accuracy[m].lo for pt in a.curve], [pt.accuracy[m].hi for pt in a.curve], color=shade, alpha=BAND_ALPHA, lw=0
         )
         ax.plot(xs, [pt.accuracy[m].value for pt in a.curve], color=shade, lw=1.6, label="route by confidence (95% CI band)")
         bound = a.frontiers[m]
         ax.plot(
-            [b.cost_per_1000 for b in bound], [b.accuracy[m].value for b in bound], "k--", lw=1, label="perfect router (bound)"
+            [b.cost_per_1000 for b in bound],
+            [b.accuracy[m].value for b in bound],
+            "k--",
+            lw=1,
+            label="perfect router (bound at equal items sent)",
         )
         for pt, mark, label in [(a.curve[0], "o", f"{p.first.name} alone"), (a.llm_alone, "s", f"{p.escalate.name} alone")]:
             acc = pt.accuracy[m]
@@ -310,7 +317,7 @@ def draw(a: Analysis, claims: Claims, path: Path) -> None:
     fig.tight_layout()
     path.parent.mkdir(parents=True, exist_ok=True)
     for ext in FIG_FORMATS:
-        fig.savefig(path.with_suffix(f".{ext}"), dpi=150, metadata={"CreationDate": None} if ext == "pdf" else None)
+        fig.savefig(path.with_suffix(f".{ext}"), dpi=FIG_DPI, metadata={"CreationDate": None} if ext == "pdf" else None)
     plt.close(fig)
 
 

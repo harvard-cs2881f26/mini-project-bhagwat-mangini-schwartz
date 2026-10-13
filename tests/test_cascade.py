@@ -20,7 +20,10 @@ from asimov.cascade import (
     item_confidence,
     perfect_router,
     split_table,
+    system_from,
 )
+from asimov.collect.load import ModelResult
+from asimov.prices import Price
 from asimov.stats import bootstrap_mean_ci, paired_bootstrap_diff, wilson_ci
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -154,6 +157,16 @@ def test_a_decision_item_missing_from_the_llm_run_stops_the_analysis(pair):
     short = System("LLM", {k: v for k, v in llm.items.items() if k != "i3"}, {})
     with pytest.raises(ValueError, match="i3"):
         check_pair(first, short)
+
+
+def test_a_scored_item_without_saved_usage_or_latency_stops_the_analysis():
+    per_item = {"i1": {q: {"correct": True} for q in QUESTIONS}}
+    summary = {"name": "M", "model": "m", "errors": 0}
+    no_usage = ModelResult(summary, per_item, (), (), {}, {}, {}, {"i1": 1.0})
+    no_latency = ModelResult(summary, per_item, (), (), {}, {"i1": {}}, {}, {})
+    for model, field in ((no_usage, "usage"), (no_latency, "latency")):
+        with pytest.raises(ValueError, match=f"no saved {field}"):
+            system_from(model, Price(free_tier=True))
 
 
 # --- scripts/cascade.py end to end ---------------------------------------------------------------------------

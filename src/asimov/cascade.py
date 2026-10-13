@@ -95,10 +95,12 @@ def system_from(model: ModelResult, price: Price, confidence_rule: str | None = 
     errors = model.summary.get("errors") or 0
     if errors:
         raise ValueError(f"{model.name}: {errors} failed calls; rerun scripts/run.py on its config to retry them first")
+    for field, found in (("usage", model.usage), ("latency", model.item_latency)):
+        missing = sorted(set(model.per_item) - set(found))
+        if missing:  # it would count as $0 or drop out of the latency median
+            raise ValueError(f"{model.name}: no saved {field} for {len(missing)} scored items: {missing[:10]}")
     items = {
-        i: ItemResult(
-            tuple(bool(o[q]["correct"]) for q in QUESTIONS), call_cost(model.usage.get(i, {}), price), model.item_latency.get(i)
-        )
+        i: ItemResult(tuple(bool(o[q]["correct"]) for q in QUESTIONS), call_cost(model.usage[i], price), model.item_latency[i])
         for i, o in model.per_item.items()
     }
     rule = CONFIDENCE_RULES[confidence_rule] if confidence_rule else None
@@ -112,6 +114,13 @@ def check_pair(first: System, escalate: System) -> None:
         raise ValueError(
             f"{len(missing)} {first.name} items have no {escalate.name} reply: {missing[:10]}; rerun the LLM's config"
         )
+
+
+def check_routable(first: System, escalate: System) -> None:
+    """D needs a confidence for every item the decision model answered."""
+    check_pair(first, escalate)
+    if set(first.confidence) != set(first.items):
+        raise ValueError(f"{first.name}: no confidence for some items (is it a decision model?)")
 
 
 def item_score(item: ItemResult, metric: str) -> float:
@@ -173,9 +182,7 @@ def routed(first: System, escalate: System, sent: set[str], threshold: float | N
 
 def cascade_curve(first: System, escalate: System, metrics: Sequence[str] = METRICS) -> list[Point]:
     """D: one point per distinct confidence (items below it are sent on), then everything sent on."""
-    check_pair(first, escalate)
-    if set(first.confidence) != set(first.items):
-        raise ValueError(f"{first.name}: no confidence for some items (is it a decision model?)")
+    check_routable(first, escalate)
     thresholds = [*sorted(set(first.confidence.values())), float("inf")]
     return [routed(first, escalate, {i for i, c in first.confidence.items() if c < t}, t, metrics) for t in thresholds]
 
@@ -183,15 +190,16 @@ def cascade_curve(first: System, escalate: System, metrics: Sequence[str] = METR
 def at_fraction(first: System, escalate: System, fraction: float, metrics: Sequence[str] = METRICS) -> Point:
     """D at a fixed share of items sent on: exactly round(fraction x n) items, lowest confidence first, ties by item id
     (a confidence threshold alone can't split tied items)."""
-    check_pair(first, escalate)
+    check_routable(first, escalate)
     k = math.floor(fraction * len(first.items) + 0.5)
     order = sorted(first.items, key=lambda i: (first.confidence[i], i))
     return routed(first, escalate, set(order[:k]), None, metrics)
 
 
 def perfect_router(first: System, escalate: System, metric: str) -> list[Point]:
-    """The upper bound for one metric: send items on only when the LLM scores strictly higher, largest gain first
-    (then the cheaper LLM call, then item id)."""
+    """The upper bound for one metric at each number of items sent on: send items on only when the LLM scores strictly
+    higher, largest gain first (then the cheaper LLM call, then item id). Ordered by items, not $: a bound at equal
+    items sent, which the figures draw against $."""
     check_pair(first, escalate)
     gain = {i: item_score(escalate.items[i], metric) - item_score(a, metric) for i, a in first.items.items()}
     order = sorted((i for i, g in gain.items() if g > 0), key=lambda i: (-gain[i], escalate.items[i].cost or 0.0, i))
