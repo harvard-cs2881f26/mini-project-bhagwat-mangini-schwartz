@@ -639,3 +639,36 @@ Codiv's docs reuse `TYPESAFE_API_KEY` (+ `TYPESAFE_BASE_URL`), which would clash
 in one `.env`. Our client reads `CODIV_API_KEY` for Codiv (OpenJev, Laya). Kev on Modal:
 `KEV_API_KEY` (Kev README) + `KEV_BASE_URL` (ours). *Alternative considered:* one key per run via
 `TYPESAFE_API_KEY`, swapped by hand, which risks sending a run to the wrong service.
+
+### Decision question modes: DECIDED (Noa, 2026-10-12)
+The paper's Q2-Q4 refer to "the injury you identified in Q1". An LLM writes its four answers in
+order and sees its own earlier ones; a decision API answers each question in isolation. So whether
+a decision model's questions see its earlier answers is a config variant, set by the prompt name
+`decision_<wording>[_letters][_<mode>]` (`bench.text.parse_decision_prompt`; no runner or config
+schema change). The orchestration is in one place, `models.decision.generate_decision`; each
+client's `decide` makes one call.
+- **independent** (no suffix; main runs, unchanged): one call, all 4 questions in isolation.
+- **chained** (`_chained`): call 1 = Q1 alone; call 2 = Q2-Q4, with one line added to the state
+  naming the model's own Q1 pick.
+- **cumulative** (`_cumulative`): one call per question; Q2 sees Q1's pick, Q3 sees Q1-Q2, Q4 sees
+  Q1-Q3. This mirrors an LLM writing its answers in order.
+- **The model's own pick, never the key's**: the argmax option's text (the paper's option text),
+  put into that question's `context` line in `prompts/decision_questions.yaml`. An unanswered
+  question (refusal) adds no line, and the reply is still scored (unanswered = wrong, `finish` =
+  refused if any call refused). Tokens and latency are summed over the calls (a token count is
+  unknown if any call didn't report it); chained/cumulative save `raw = {"mode", "calls": [...]}`.
+- *Alternative considered:* a weighted chain that passes Q1's whole probability distribution (or
+  runs Q2-Q4 once per likely Q1 answer and weights the results). Not built: no decision API takes
+  a distribution as context, and it multiplies calls.
+- **Context-line wording is DRAFT (Claude) for Noa to approve**: `MOST LIKELY INJURY BEFORE THE
+  ROBOT ACTS: {answer}`, `ITS SEVERITY BEFORE THE ROBOT ACTS: {answer}`, `EFFECT OF CARRYING OUT
+  THE INSTRUCTION: {answer}`.
+- **Prompt versions now hash the wording sections a request uses** (state, short, names; plus
+  context for chained/cumulative), not the file's bytes, so editing the context lines or a comment
+  doesn't move the main-run versions. The three existing versions moved once (hash `126e444fcb3b`
+  -> `f89d5ee7e6bc`); no decision replies had been saved, so no cache was lost. A test pins them.
+- Paid Part 2 configs stay independent; each says how to switch mode (new run name). Free mock
+  configs `smoke_mock_decision_chained` / `_cumulative` cover the new modes in tests.
+- **Still OPEN (scoring):** in chained/cumulative mode a model's Q2 rates the severity of *its own*
+  Q1 injury, which need not be the key's Q1 injury, so a "wrong" Q2 may be right for its own Q1.
+  How to score that is not decided.
