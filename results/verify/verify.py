@@ -5,7 +5,7 @@ This file RE-IMPLEMENTS the metrics ON PURPOSE. It was written from the rules in
 conventions"), without reading src/asimov/stats.py, src/asimov/collect/, scripts/collect.py,
 scripts/plot.py or src/asimov/bench/*_score.py. Code that checks itself catches nothing.
 
-It reads only: data/<bench>/items.jsonl (answer keys, read only), results/<run>/<model>/
+It reads only: data/<bench>/items.jsonl (answer keys, read only), results/<id>_<run>/<model>/
 responses.jsonl (replies), each summary.json's `key` (which replies count) and `per_item` (only
 to list items where our reading differs), and the generated index.csv, README.md, paper_check.md.
 
@@ -39,6 +39,7 @@ import numpy as np
 
 ROOT = Path(__file__).resolve().parents[2]
 RES = ROOT / "results"
+FOLDERS = {"repro_fig4": "txt0_repro_fig4", "repro_fig5": "vid0_repro_fig5"}  # run -> results/<id>_<run>/
 TOL = 0.001  # point values and Wilson bounds
 BOOT_SEEDS = range(20)  # bootstrap bounds: band over these seeds
 BOOT_RESAMPLES = 10_000
@@ -239,7 +240,7 @@ def gold_obj(raw: str) -> dict:
 
 
 def model_dirs(run: str) -> list[Path]:
-    return sorted(p for p in (RES / run).iterdir() if (p / "summary.json").exists())
+    return sorted(p for p in (RES / FOLDERS[run]).iterdir() if (p / "summary.json").exists())
 
 
 def replies(d: Path) -> tuple[dict, dict[str, dict]]:
@@ -300,6 +301,14 @@ def md_table(path: Path, header_start: str) -> list[list[str]]:
 CI_RE = re.compile(r"(-?[0-9.]+)\s*\[(-?[0-9.]+),\s*(-?[0-9.]+)\]")
 
 
+def ci_match(cell: str) -> re.Match[str]:
+    """A "value [lo, hi]" cell, parsed by CI_RE; fails loudly if a page's cell doesn't have that shape."""
+    mm = CI_RE.match(cell)
+    if mm is None:
+        raise ValueError(f"not a 'value [lo, hi]' cell: {cell!r}")
+    return mm
+
+
 # ---------------------------------------------------------------- text
 
 
@@ -346,7 +355,7 @@ def score_text(data: Path, ck: Checker, verbose: bool) -> dict[str, dict]:
 
 def check_text(tm: dict[str, dict], ck: Checker) -> None:
     idx = {(r["run"], r["name"]): r for r in csv.DictReader(open(RES / "index.csv"))}
-    readme = md_table(RES / "repro_fig4" / "README.md", "| Model | latent_risk_accuracy")
+    readme = md_table(RES / FOLDERS["repro_fig4"] / "README.md", "| Model | latent_risk_accuracy")
     hdr = readme[0]
     rm = {r[0]: dict(zip(hdr, r, strict=True)) for r in readme[1:]}
     for name, m in tm.items():
@@ -364,14 +373,14 @@ def check_text(tm: dict[str, dict], ck: Checker) -> None:
             cell = rm.get(name, {}).get(met)
             if cell is None:
                 continue
-            mm = CI_RE.match(cell)
+            mm = ci_match(cell)
             lo, hi = wilson(k, n)
             ck.cmp(f"repro_fig4/README.md {name} {met} point", k / n, mm.group(1), 0.0005 + 1e-9)
             ck.cmp(f"repro_fig4/README.md {name} {met} lo", lo, mm.group(2), 0.0005 + 1e-9)
             ck.cmp(f"repro_fig4/README.md {name} {met} hi", hi, mm.group(3), 0.0005 + 1e-9)
 
     # paired gaps + McNemar + Holm (paper_check.md, headline_small_models_lag)
-    pc = RES / "repro_fig4" / "paper_check.md"
+    pc = RES / FOLDERS["repro_fig4"] / "paper_check.md"
     tab = md_table(pc, "| Pair | Question")
     rows = []
     for r in tab[1:]:
@@ -387,7 +396,7 @@ def check_text(tm: dict[str, dict], ck: Checker) -> None:
     adj = holm([p for _, _, p in rows])
     for (r, diff, p), ph in zip(rows, adj, strict=True):
         where = f"repro_fig4/paper_check.md {r[0]} {r[1]}"
-        mm = CI_RE.match(r[3])
+        mm = ci_match(r[3])
         lo, hi = boot_band(diff)
         ck.cmp(f"{where} items", len(diff), r[2], 0)
         ck.cmp(f"{where} gap", diff.mean(), mm.group(1), 0.0005 + 1e-9)
@@ -407,7 +416,7 @@ def check_text(tm: dict[str, dict], ck: Checker) -> None:
         w = f"repro_fig4/paper_check.md actions_harder {r[0]}"
         ck.cmp(f"{w} action", act.mean(), r[1], 0.0005 + 1e-9)
         ck.cmp(f"{w} latent", lat.mean(), r[2], 0.0005 + 1e-9)
-        mm = CI_RE.match(r[3])
+        mm = ci_match(r[3])
         lo, hi = boot_band(d)
         ck.cmp(f"{w} diff", d.mean(), mm.group(1), 0.0005 + 1e-9)
         ck.band(f"{w} boot lo", lo, mm.group(2))
@@ -504,7 +513,7 @@ def score_video(data: Path, ck: Checker) -> dict[str, dict]:
 
 def check_video(vm: dict[str, dict], ck: Checker) -> None:
     idx = {(r["run"], r["name"]): r for r in csv.DictReader(open(RES / "index.csv"))}
-    readme = md_table(RES / "repro_fig5" / "README.md", "| Model | risk_accuracy")
+    readme = md_table(RES / FOLDERS["repro_fig5"] / "README.md", "| Model | risk_accuracy")
     hdr = readme[0]
     rm = {r[0]: dict(zip(hdr, r, strict=True)) for r in readme[1:]}
     for name, m in vm.items():
@@ -513,14 +522,14 @@ def check_video(vm: dict[str, dict], ck: Checker) -> None:
         for met in ("risk_accuracy", "within_0_5_rate"):
             k, n = m[met]
             ck.cmp(f"index.csv repro_fig5/{name} {met}", k / n, row[met])
-            mm = CI_RE.match(rm[name][met])
+            mm = ci_match(rm[name][met])
             lo, hi = wilson(k, n)
             ck.cmp(f"repro_fig5/README.md {name} {met} lo", lo, mm.group(2), 0.0005 + 1e-9)
             ck.cmp(f"repro_fig5/README.md {name} {met} hi", hi, mm.group(3), 0.0005 + 1e-9)
         e = m["_errs"]
         ck.cmp(f"index.csv repro_fig5/{name} timing_mae_s", float(e.mean()), row["timing_mae_s"])
         ck.cmp(f"index.csv repro_fig5/{name} n_timing_error_cases", len(e), row["n_timing_error_cases"], 0)
-        mm = CI_RE.match(rm[name]["timing_mae_s"])
+        mm = ci_match(rm[name]["timing_mae_s"])
         lo, hi = boot_band(e)
         ck.band(f"repro_fig5/README.md {name} timing_mae_s boot lo", lo, mm.group(2))
         ck.band(f"repro_fig5/README.md {name} timing_mae_s boot hi", hi, mm.group(3))

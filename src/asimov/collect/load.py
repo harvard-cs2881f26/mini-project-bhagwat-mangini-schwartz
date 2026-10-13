@@ -1,8 +1,9 @@
 """Read results/ into memory: the only I/O in asimov.collect (the script writes the pages).
 
-Reads `results/<run>/config.yaml`, `<run>/<model>/summary.json` and `responses.jsonl` (latency,
-served model id, reply text for comparison excerpts). Never reads data/: scorers save pred, gold
-and correct per item in summary.json (docs/PLAN.md §11).
+Reads each run folder's (results/<id>_<run>/) `config.yaml`, `<model>/summary.json` and `responses.jsonl`
+(latency, served model id, reply text for comparison excerpts), and the run's hand-written `writeup.md` if any.
+A run's name comes from its config.yaml `run`, else its summaries' `run`: never from the folder name.
+Never reads data/: scorers save pred, gold and correct per item in summary.json (docs/PLAN.md §11).
 """
 
 from __future__ import annotations
@@ -13,7 +14,10 @@ from pathlib import Path
 
 import yaml
 
-SKIP_PROVIDERS = frozenset({"mock"})  # free smoke runs are gitignored, so they never appear on pages
+from asimov.run_ids import UNREGISTERED_PROVIDERS
+
+SKIP_PROVIDERS = UNREGISTERED_PROVIDERS  # free smoke runs are gitignored, so they never appear on pages
+WRITEUP_FILE = "writeup.md"  # results/<id>_<run>/writeup.md: the owner's write-up, shown on the run page
 
 
 @dataclass(frozen=True)
@@ -31,10 +35,12 @@ class ModelResult:
 
 @dataclass(frozen=True)
 class RunData:
-    name: str
+    name: str  # the logical run name (config `run`), e.g. repro_fig4
+    folder: str  # the run's folder under results/, e.g. txt0_repro_fig4; pages link to it
     benchmark: str
-    config: dict | None  # results/<run>/config.yaml, written by the runner at run start
+    config: dict | None  # <folder>/config.yaml, written by the runner at run start
     models: tuple[ModelResult, ...]  # in the config's order
+    writeup: str | None = None  # <folder>/writeup.md, hand-written; read, never written
 
 
 def load_model(mdir: Path) -> ModelResult:
@@ -71,13 +77,25 @@ def load_run(run_dir: Path) -> RunData | None:
     benchmarks = {r.summary.get("benchmark") for r in results}
     if len(benchmarks) != 1 or None in benchmarks:
         raise ValueError(f"{run_dir}: model summaries lack or disagree on `benchmark` ({sorted(map(str, benchmarks))})")
-    return RunData(run_dir.name, str(benchmarks.pop()), config, tuple(model_order(config, results)))
+    names = {config["run"]} if config and config.get("run") else {r.summary.get("run") for r in results}
+    if len(names) != 1 or None in names:
+        found = sorted(map(str, names))
+        raise ValueError(f"{run_dir}: no run name in config.yaml, and the summaries lack or disagree on `run` ({found})")
+    writeup_path = run_dir / WRITEUP_FILE
+    writeup = writeup_path.read_text() if writeup_path.exists() else None
+    ordered = tuple(model_order(config, results))
+    return RunData(str(names.pop()), run_dir.name, str(benchmarks.pop()), config, ordered, writeup)
 
 
 def load_results(results_dir: Path) -> list[RunData]:
     """Every run under results/ that has at least one non-mock model summary, by run name."""
-    runs = (load_run(d) for d in sorted(results_dir.iterdir()) if d.is_dir())
-    return [r for r in runs if r is not None]
+    runs = [r for r in (load_run(d) for d in sorted(results_dir.iterdir()) if d.is_dir()) if r is not None]
+    seen: dict[str, str] = {}
+    for r in runs:
+        if r.name in seen:
+            raise ValueError(f"run {r.name!r} is in two folders: results/{seen[r.name]}/ and results/{r.folder}/")
+        seen[r.name] = r.folder
+    return sorted(runs, key=lambda r: r.name)
 
 
 def load_yaml(path: Path, default):

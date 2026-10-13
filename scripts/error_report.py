@@ -26,6 +26,7 @@ sys.path.insert(0, str(ROOT / "src"))
 from asimov.bench.video_score import parse_reply, snap_to_grid  # noqa: E402
 from asimov.data.video import load_video_answers, load_video_items  # noqa: E402
 from asimov.bench import get_benchmark  # noqa: E402
+from asimov.run_ids import run_dir  # noqa: E402
 from asimov.runner import load_saved, run_key  # noqa: E402
 
 GROUPS = ["No, -1", "No, timed", "Yes"]
@@ -69,7 +70,7 @@ def main() -> None:
     # replies[name][id] = (text, prediction or None)
     replies = {}
     for s in specs:
-        saved = load_saved(ROOT / "results" / cfg["run"] / s["model"] / "responses.jsonl",
+        saved = load_saved(run_dir(ROOT / "results", cfg["run"], cfg["benchmark"]) / s["model"] / "responses.jsonl",
                            run_key(s["model"], get_benchmark(cfg["benchmark"]).prompt_version(cfg["prompt"]), cfg["thinking"]))
         replies[s["name"]] = {i: (r["text"], parse_reply(r["text"])) for i, r in saved.items()}
     names = list(replies)

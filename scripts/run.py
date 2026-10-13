@@ -10,8 +10,10 @@
 --limit N   first N items of a fixed shuffled order (with N <= 5, every reply is printed)
 --models    names or model IDs from the config (default: all whose API key is set)
 --no-calls  make no API calls (no keys needed): rescore the saved replies and rewrite summaries
---no-collect  don't rebuild the results pages afterwards (scripts/collect.py; skipped for mock-only runs)
+--no-collect  don't rebuild the results pages and figures afterwards (scripts/collect.py, then scripts/plot.py;
+            both skipped for mock-only runs)
 """
+
 from __future__ import annotations
 
 import argparse
@@ -25,8 +27,10 @@ ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT / "src"))
 
 import collect  # noqa: E402  (scripts/collect.py)
+import plot  # noqa: E402  (scripts/plot.py)
 from asimov.bench import get_benchmark  # noqa: E402
 from asimov.collect.load import SKIP_PROVIDERS  # noqa: E402
+from asimov.run_ids import run_dir  # noqa: E402
 from asimov.runner import run  # noqa: E402
 
 
@@ -58,9 +62,10 @@ def main() -> None:
             continue
         cells = " ".join(f"{fmt(r[key], pct):>{len(label) + 1}s}" for label, key, pct in cols)
         print(f"{r['name']:28s} {r['n']:4d} {cells} {r['errors']:6d}")
-    print(f"\nSaved under results/{cfg['run']}/")
+    print(f"\nSaved under {run_dir(ROOT / 'results', cfg['run'], cfg['benchmark']).relative_to(ROOT)}/")
     if not args.no_collect and any(m["provider"] not in SKIP_PROVIDERS for m in cfg["models"]):
         collect.main([])  # results pages stay in step with the replies (docs/PLAN.md §11)
+        plot.main([])  # and so do the figures the run pages link
 
 
 if __name__ == "__main__":
