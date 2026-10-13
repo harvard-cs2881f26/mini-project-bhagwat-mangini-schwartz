@@ -14,6 +14,7 @@ from __future__ import annotations
 
 import argparse
 import sys
+import textwrap
 from dataclasses import dataclass
 from math import isnan, nan
 from pathlib import Path
@@ -199,6 +200,58 @@ def percent_axis(axis, scale: float = 1.0) -> None:
     """Ticks as whole percents every 10 points; `scale` is the axis value of 100% (1 for fractions, 100 for percents)."""
     axis.set_major_locator(MultipleLocator(PERCENT_STEP * scale))
     axis.set_major_formatter(PercentFormatter(xmax=scale, decimals=0))
+
+
+# "How to read this" box under the legend of each comparison figure: what the marks mean, never what the
+# results say (interpretation stays with the owners, CLAUDE.md).
+NOTE_WIDTH = 40  # characters per line
+NOTE_GAP = 0.03  # axes fraction between the legend and the box
+NOTE_BOX = {"boxstyle": "round,pad=0.5", "facecolor": "white", "edgecolor": "#cccccc"}
+NOTE_FONTSIZE = 8.5
+CI_NOTE = "Filled dot = our run. Its bars show the 95% range the true score likely falls in."
+PAPER_NOTE_LINE = "Hollow dot = the paper's value for the same model (same color)."
+CONNECTOR_NOTE = " A thin line joins each model's two dots."
+BASELINE_NOTE = "Dashed line = the score from always giving the most common answer."
+FIG5A_NOTES = [
+    "Each pair of bars is one model: the same risk question asked about text scenarios (blue) and videos (orange).",
+    "Taller is better. The gap between a model's two bars is its text-vs-video difference.",
+    "Bars = our runs, with the 95% range the true score likely falls in.",
+    "Diamonds = the paper's values (only 3 models).",
+]
+
+
+def axis_meaning(metric: str) -> str:
+    """First line of the plain-language axis title, lowercased: 'picks the right injury type'."""
+    first = READABLE[metric].split("\n")[0]
+    return first[0].lower() + first[1:]
+
+
+def scatter_notes(x_metric: str, y_metric: str, reversed_x: bool = False, connected: bool = True) -> list[str]:
+    right = (
+        "Further right = smaller timing error (axis reversed)." if reversed_x else f"Further right = {axis_meaning(x_metric)}."
+    )
+    return [
+        "Each dot is one model; up and to the right is better.",
+        f"Higher = {axis_meaning(y_metric)}.",
+        right,
+        CI_NOTE,
+        PAPER_NOTE_LINE + (CONNECTOR_NOTE if connected else ""),
+    ]
+
+
+def reading_notes(ax, lines: list[str]) -> None:
+    """Draw a "How to read this" box just under the legend (outside the plot on the right)."""
+    legend = ax.get_legend()
+    fig = ax.figure
+    fig.canvas.draw()
+    if legend is not None:
+        box = legend.get_window_extent(fig.canvas.get_renderer()).transformed(ax.transAxes.inverted())
+        x, y = box.x0, box.y0 - NOTE_GAP
+    else:
+        x, y = OUTSIDE_LEGEND["bbox_to_anchor"][0], 1.0
+    wrapped = ["\n".join(textwrap.wrap(line, NOTE_WIDTH, subsequent_indent="  ")) for line in lines]
+    text = "How to read this\n" + "\n".join("• " + w for w in wrapped)
+    ax.text(x, y, text, transform=ax.transAxes, va="top", ha="left", fontsize=NOTE_FONTSIZE, bbox=NOTE_BOX, color=INK)
 
 
 def marker_sizes(points: list[Point], diameter: float) -> list[float]:
@@ -388,6 +441,8 @@ def fig4(name: str, run: RunData, claims: Claims, severity: str, out: Path) -> l
         percent_axis(ax.yaxis)
         model_legend(ax, mine, COMPARISON)
         label_points(ax, mine, COMPARISON, avoid=theirs)
+        has_baseline = baseline(claims, x_metric) is not None or baseline(claims, y_metric) is not None
+        reading_notes(ax, scatter_notes(x_metric, y_metric) + ([BASELINE_NOTE] if has_baseline else []))
         written += save(fig, out, f"{name}_comparison{suffix}")
     return written
 
@@ -434,9 +489,15 @@ def bar_values(ax, xs, values: list[float | None], tops: list[float], fontsize: 
             )
 
 
+TICK_WRAP = 11  # characters per line of a Fig 5a model name
+
+
 def tick_name(name: str) -> str:
-    """Model name on two lines, e.g. "Claude Opus 4.1\n(4.5)", so Fig 5a's ticks stay horizontal."""
-    return name.replace(" (", "\n(")
+    """Model name wrapped to short lines, e.g. "Gemini 2.5\nFlash-Lite\n(3.1)", so Fig 5a's ticks stay horizontal
+    and don't run into each other."""
+    base, _, stand_in = name.partition(" (")
+    lines = textwrap.wrap(base, TICK_WRAP, break_on_hyphens=False)
+    return "\n".join(lines + ([f"({stand_in}"] if stand_in else []))
 
 
 def fig5a(bars: list[Bar], stem: str, out: Path, comparison: bool) -> list[Path]:
@@ -489,6 +550,8 @@ def fig5a(bars: list[Bar], stem: str, out: Path, comparison: bool) -> list[Path]
             drawn = [box_of(a.get_window_extent()) for a in [*ax.patches, *ax.texts]]
             if not comparison and legend_covers(ax, legend, drawn):  # the paper's corner is taken: move it out
                 ax.legend(title="Accuracy Type", **OUTSIDE_LEGEND)
+        if comparison and bars:
+            reading_notes(ax, FIG5A_NOTES)
         return save(fig, out, stem)
 
 
@@ -530,6 +593,7 @@ def fig5b(run: RunData, claims: Claims, out: Path) -> list[Path]:
         percent_axis(ax.yaxis, scale=100)
         model_legend(ax, mine, COMPARISON)
         label_points(ax, mine, COMPARISON, avoid=theirs)
+        reading_notes(ax, scatter_notes("timing_mae_s", "within_0_5_rate", reversed_x=True, connected=False))
         written += save(fig, out, "fig5b_comparison")
     return written
 
