@@ -579,6 +579,67 @@ No existing cache key changed. Each change is its own commit in PR #4.
     closer to our severe recall (GPT-5 0.914) than to 4-way severity (GPT-5 0.774). Relevant to the
     severity-axis decision, to check against the plotted values in Session 2.
 
+## 2026-10-12: Session 2, stats + plots (Noa)
+
+### Paper values follow the severity decision above
+- Same decision as "Severity metric for the Fig. 4 axis" (Session 1, above): normal multiple choice.
+  The paper's Fig 4a/4b read-offs are filed under `latent_severity_accuracy` / `activated_risk_accuracy`
+  in `configs/paper/claims.yaml`. The text's "highly severe or not ... 88.7%" and the "19% / 17% lower"
+  gaps are filed under the severe-vs-not keys; they don't match the figure (Fig 4a averages 0.903 for
+  the same three models; the Mini/Nano gaps read 18/8 points). `scripts/plot.py --severity binary|recall`
+  still draws those versions.
+
+### Figure colors = the paper's, in every figure: DECIDED (Noa)
+- Paper-style figures copy the paper's look (seaborn "deep" colors per model, big translucent dots,
+  labels below the dot in Fig 4 and to its right in Fig 5b, legend inside, no title), so ours and
+  the paper's can sit side by side on a slide. The comparison figures use the same colors, so a model
+  has one color everywhere (`PAPER_COLORS` in `src/asimov/plot_data.py`).
+- The paper's own Fig 5b legend swaps GPT 5 Nano (pink there) and GPT 5 Mini (brown there) relative to
+  its Fig 4. We use the Fig 4 colors in every figure.
+- The legend sits inside the plot as in the paper, but moves just outside when it would cover a dot or
+  a bar (matters on partial runs, where dots fill every corner).
+- *Alternative considered:* a colorblind-checked palette (dataviz validator: passes CVD separation).
+  The paper's palette puts red (Opus) and green (Gemini Pro) side by side; every dot is also labeled
+  with its model name, so color is never the only cue.
+
+### Paper claims file reviewed and frozen: DECIDED (Noa)
+- `configs/paper/claims.yaml` holds 84 paper numbers for Figs 4-6 plus the 3 headline claims, drafted
+  by the paper-reader subagent from the paper alone. Noa's calls: Fig 4 severity = normal multiple
+  choice (above); size-gap pairs = GPT 5 vs Mini, GPT 5 vs Nano, Opus 4.1 vs Sonnet 4, Gemini Pro vs
+  Flash (the pairs the paper's text names; Flash-Lite isn't paired).
+- Read-off values (Figs 4a, 4b, 5b dot positions) checked by five independent reads: all 32 Fig 4
+  values identical; Fig 5b within 0.01 s and 0.1 points.
+- The authors published no exact per-model numbers (arXiv v1/v2 HTML, appendices, TeX source; project
+  page; GitHub; dataset metadata). The TeX source has 5 tables hidden from the PDF with image-benchmark
+  violation rates by thinking level (the data behind the paper's Fig 7); not used as claims since
+  they're unpublished drafts, flagged to Riddhi for Fig 6.
+- Frozen: `.claude/hooks/block_paths.sh` blocks Claude edits to it. `scripts/check_paper_version.py`
+  warns if arXiv posts a version newer than v2; then re-run the paper-reader and review.
+- *Alternative considered:* have a model re-read the paper on every run. Five reads gave the same
+  numbers, so the reason against is practical: it costs a few minutes of agent time per run, CI has
+  no model access, and the paper doesn't change between runs.
+
+### Statistics methods: PROPOSED (Noa to confirm)
+- Formulas live in `src/asimov/stats.py`; `scripts/collect.py` and `scripts/plot.py` import them.
+- **Accuracy CIs: Wilson score interval, 95%.** Stays inside [0, 1] and behaves at 0/n and n/n.
+  *Alternatives:* Clopper-Pearson exact (too conservative: wider than its nominal 95%); Wald
+  (bad near 0 and 1, where several of our accuracies sit, and zero width at 0/n or n/n).
+- **Paired differences (two systems on the same items): percentile bootstrap over items,
+  10,000 resamples, seed 0,** so reruns give the same CI. Also used for the CI of a mean
+  (video timing error). *Alternative:* BCa bootstrap (corrects bias and skew, more code; not
+  needed for differences of 0/1 means at our n).
+- **Paired significance: exact two-sided McNemar** (binomial on the discordant pairs).
+  *Alternative:* chi-square McNemar with continuity correction (poor with few discordant pairs,
+  which strong model pairs have).
+- **Multiple comparisons: Holm** across a family (e.g. all size-gap rows on one paper-check page).
+  *Alternative:* Bonferroni (same guarantee, more conservative).
+- **Calibration (Part 2): Brier score and ECE with 10 equal-width bins.**
+  *Alternative:* adaptive (equal-mass) bins.
+- **Video per-item rows in `results/per_item.csv`:** each video item gives two rows: `risk`
+  (correct = the scorer's `risk_ok`) and `timing` (correct = `within_0_5`; pred/gold = `pred_s` /
+  `truth_s`; status = `case`). Paired comparisons and McNemar on video use these.
+  *Alternative:* timing correct = absolute error only, no row-level correctness (then no McNemar for timing).
+
 ## 2026-10-12: Part 2 approved (Noa)
 
 PART 2 APPROVED: 2026-10-12 (Noa). Systems: jev (TypeSafe, paid key), openjev
