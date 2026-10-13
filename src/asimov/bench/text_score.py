@@ -197,7 +197,7 @@ def score(answers: dict[str, dict[str, str]], replies: dict[str, str], options: 
         metrics[f"{q}_missing_key_rate"] = sum(o["parse"][q] == "missing_key" for o in outcomes) / n
         metrics[f"{q}_invalid_letter_rate"] = sum(o["parse"][q] == "invalid_letter" for o in outcomes) / n
         metrics[f"{q}_rationale_rate"] = sum(o["rationale"][q] for o in outcomes) / n
-    # Q2-Q4 also on the items whose Q1 matched the key (WORKLOG 2026-10-13, "Cumulative-mode
+    # Q2-Q4 also on the items whose Q1 matched the key (WORKLOG 2026-10-14, "Cumulative-mode
     # scoring"): in cumulative mode Q2-Q4 follow the model's own Q1 pick. Strict accuracy above is unchanged.
     q1_matched = [o for o in outcomes if o[QUESTIONS[0]]["correct"]]
     metrics["n_q1_matched"] = len(q1_matched)

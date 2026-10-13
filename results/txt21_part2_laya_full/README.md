@@ -164,7 +164,7 @@ Per item: the model's totals over this run divided by its replies. Refused and P
 | Prompt | decision_full |
 | Thinking | min |
 | Reasoning logged | False |
-| Git commit | aad4f47e75 |
+| Git commit | 350410d11e |
 | Scored | 2026-10-13 |
 | Config | [config.yaml](config.yaml) (sha256 e8c8da504ccd) |
 
