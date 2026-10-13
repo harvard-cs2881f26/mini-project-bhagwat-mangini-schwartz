@@ -15,3 +15,4 @@ part2_nli: txt9
 part2_qwen_base_logprob: txt10
 part2_qwen_gen: txt11
 part2_qwen_logprob: txt12
+part2_qwen_base_logprob_oneshot: txt13

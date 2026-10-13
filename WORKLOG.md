@@ -1017,7 +1017,7 @@ Built rows 7-10 of the Part 2 matrix: `part2_qwen_base_logprob`, `part2_qwen_log
   letters, so a model that wouldn't answer with a letter is visible.
 - **NLI inputs over the model's limit raise instead of being cut** (the pipeline truncates
   silently). NLI runs in fp32 (DeBERTa-v3 is known to be unstable in half precision); Qwen in bf16,
-  except the logprob letter logits (next entry).
+  except the logprob letter logits (see "bf16 letter logits" below).
 - **Where the models run: Modal L40S, DECIDED (Noa, 2026-10-13)**, after the laptop smoke heated
   the Mac. `params: {backend: modal}` sends each request to the deployed app
   `asimov-local-models` (`PYTHONPATH=src modal deploy -m asimov.models.modal_app`), whose container
@@ -1064,3 +1064,79 @@ Qwen generate ~7.7 tokens/s, 42-111 s/item, peak 11.2 GB, load 11-14 s; 1 of 17 
 1024-token cap. Transformers used its PyTorch reference path for the linear-attention layers (no
 `flash-linear-attention` on Mac): 2.2 s per 250-token forward pass. The laptop generation run
 (`--limit 20`) was stopped at 17 items by the main session.
+
+### bf16 letter logits made exact ties: fixed with fp32 logits (2026-10-13)
+- **The bug (found by the main session in the full runs):** Qwen's output layer runs in bf16, which
+  rounds logits near 17 to steps of 0.125, so close options got exactly equal letter logits (e.g.
+  `text_0216` latent severity [17.5, 17.25, 17.5, 17.5]). Exact top ties: 40 answers in
+  `part2_qwen_base_logprob` (txt10), 32 in `part2_qwen_logprob` (txt12), 0 in fp32 NLI. Ties go to
+  the first tied option in paper order (`models.decision.pick`), so they leaned towards A.
+- **The fix: DECIDED (Noa, 2026-10-13).** The model body stays bf16; the last hidden state (after
+  the final norm, `Qwen3_5ForCausalLM.model(...).last_hidden_state`) is projected with an fp32 copy
+  of `lm_head.weight` made once at load (`local_hf.fp32_logits`); top token and letter mass come
+  from the same fp32 logits. Param `logit_dtype: fp32` (the only value) is in both logprob configs,
+  so it is in the cache key, and each reply's raw records it. *Alternative considered:* breaking
+  ties at random or by a fixed order (keeps the precision loss).
+- **The bf16 rows are superseded:** they stay in txt10/txt12 `responses.jsonl` under their old keys
+  (`04e4fcd42eaf`, `e6a7133b054e`) and are not used; each run's `summary.json` is rebuilt from the
+  fp32 key only. The two runs keep their names; their `config.yaml` copies were replaced by the new
+  config (the runner's config guard otherwise needs a new run name for a changed setting; a
+  deliberate exception, since the old rows were a bug). *Alternative:* new run names (new run IDs).
+- Reruns (Modal, `--workers 1`; the first 5 base-model fp32 items ran with 4 workers): 319/319,
+  0 errors, 0 parse failures, exact ties now 0 in both, probabilities sum to 1.
+
+| Accuracy (319 items) | risk type | severity | effect | activated | exact ties |
+|---|---|---|---|---|---|
+| qwen_base_logprob, bf16 (superseded) | 0.687 | 0.386 | 0.361 | 0.317 | 40 |
+| qwen_base_logprob, fp32 | 0.683 | 0.408 | 0.361 | 0.335 | 0 |
+| qwen_logprob, bf16 (superseded) | 0.571 | 0.382 | 0.451 | 0.436 | 32 |
+| qwen_logprob, fp32 | 0.571 | 0.389 | 0.458 | 0.445 | 0 |
+
+### One-shot base-model row (2026-10-13; Noa approved the run, wording DRAFT for her)
+- **Why:** after `\nANSWER:` the zero-shot base model puts little probability on the letters.
+- **What:** prompts `decision_*_oneshot_local` (template `plain` only, checked by `config.py`): each
+  question starts with one made-up, answered example rendered exactly like the real question (same
+  instructions, option lines and answer cue; answer read as ` B` etc., one token), a blank line, then
+  the real item. Wording: a new top-level `oneshot` section of prompts/decision_questions.yaml,
+  **DRAFT (Claude) for Noa to approve**; it is hashed into the one-shot versions only. It is not
+  inside `local` (as first suggested) because that would have moved every `_local` version and
+  orphaned the full NLI and fp32 runs. Tests check the example is not in data/text/items.jsonl
+  (no substring, word overlap < 0.3 with every item) and never holds an item's answer or id.
+  Config `part2_qwen_base_logprob_oneshot` (run ID txt13), same params as the zero-shot base row.
+- **Pre-registered rule: DECIDED (Noa, 2026-10-13).** Of the two base rows, the one with the
+  higher median letter mass is the main Qwen-Base row for the Kev comparison; both are reported;
+  never chosen by accuracy. *Alternative considered:* keep zero-shot only.
+- Full run (Modal, `--workers 1`): 319/319, 0 errors, 0 parse failures, 0 exact ties.
+
+| Base row (fp32) | letter mass q25 / median / q75 | risk type | severity | effect | activated |
+|---|---|---|---|---|---|
+| zero-shot (txt10) | 0.184 / 0.241 / 0.322 | 0.683 | 0.408 | 0.361 | 0.335 |
+| one-shot (txt13) | 0.956 / 0.967 / 0.979 | 0.809 | 0.539 | 0.514 | 0.357 |
+
+  By the pre-registered rule, the one-shot row (median letter mass 0.967 vs 0.241) is the main
+  Qwen-Base row.
+
+### Modal latency: read `raw.remote.compute_s` (2026-10-13)
+- The full NLI and qwen_gen runs (and the superseded bf16 txt10/txt12 runs) used the runner's default
+  4 workers against one container (`max_containers=1`), so their `latency_s` (round trip) includes
+  waiting in Modal's queue. For Modal-backend rows, latency is `raw.remote.compute_s`; round trip is
+  meaningful only from `--workers 1` runs (the fp32 reruns and the one-shot run). Not rerun: compute_s
+  is saved on every row.
+
+| Run | compute_s p50 / p95 | round trip p50 / p95 | workers |
+|---|---|---|---|
+| txt9 NLI | 0.146 / 0.156 | 0.64 / 0.79 | 4 |
+| txt10 base, bf16 (superseded) | 0.207 / 0.214 | 1.25 / 1.37 | 4 |
+| txt10 base, fp32 | 0.215 / 0.223 | 0.25 / 0.33 | 1 |
+| txt13 base one-shot | 0.225 / 0.232 | 0.27 / 0.35 | 1 |
+| txt12 logprob, bf16 (superseded) | 0.278 / 0.296 | 1.75 / 1.85 | 4 |
+| txt12 logprob, fp32 | 0.275 / 0.328 | 0.33 / 0.42 | 1 |
+| txt11 generate | 17.11 / 40.14 | 78.54 / 104.97 | 4 |
+
+### qwen_gen parse failures, held for Noa's review (numbers only)
+- `part2_qwen_gen` (txt11, 319 items, 0 errors): parse failures 35 items (11.0%), above the 2%
+  stop line for text, so held for Noa; not rerun, cap unchanged.
+- 29 answers invalid letter "E" on 4-option questions (latent severity 20, activated risk 9), in 20
+  items. 29 replies truncated at MAX_NEW_TOKENS = 1024 (9.1%); 16 of them are parse failures.
+  Overlap: 2 items both truncated and with an invalid "E"; failing items = 18 invalid-only +
+  14 truncated-only + 2 both + 1 other (a missing key, not truncated).

@@ -84,6 +84,6 @@ Per item: mean correct on effect + activated_risk minus mean correct on latent_r
 
 | Model | Action accuracy | Latent accuracy | Action − latent [95% CI] |
 |---|---|---|---|
-| DeBERTa-v3-large NLI zero-shot | 0.300 | 0.500 | -0.200 [-0.500, 0.200] |
+| DeBERTa-v3-large NLI zero-shot | 0.285 | 0.486 | -0.201 [-0.248, -0.154] |
 
 Note: Compares Fig 4b (effect, activated risk) with Fig 4a (latent risk, severity). Text adds: 'Except for Gemini 2.5 Flash', smaller models are substantially weaker, naming GPT-5-Mini, GPT-5-Nano and Gemini 2.5 Flash-lite.

@@ -84,6 +84,6 @@ Per item: mean correct on effect + activated_risk minus mean correct on latent_r
 
 | Model | Action accuracy | Latent accuracy | Action − latent [95% CI] |
 |---|---|---|---|
-| Qwen3.5-4B-Base (logprob) | 0.300 | 0.400 | -0.100 [-0.400, 0.200] |
+| Qwen3.5-4B-Base (logprob) | 0.348 | 0.545 | -0.197 [-0.252, -0.144] |
 
 Note: Compares Fig 4b (effect, activated risk) with Fig 4a (latent risk, severity). Text adds: 'Except for Gemini 2.5 Flash', smaller models are substantially weaker, naming GPT-5-Mini, GPT-5-Nano and Gemini 2.5 Flash-lite.

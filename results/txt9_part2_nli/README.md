@@ -44,13 +44,13 @@ Every model on all four questions in one grid: darker means more accurate. Each 
 
 ![accuracy_heatmap](../../figures/txt9/accuracy_heatmap.png)
 
-**Key insight:** Q1 (injury type) and Q3 (action effect) are each the lowest-scoring question for 1 of 1 model; the paper reports no values for these models.
+**Key insight:** Q4 (severity after action) is the lowest-scoring question for 1 of 1 model; the paper reports no values for these models.
 
 The same severity answers (Q2) scored three ways, per model: the exact level (multiple choice, the score Fig 4a uses), severe vs not, and severe recall. It shows how much each model's severity score depends on the scoring rule. The diamond is the paper's Fig 4a severity value, whose metric the paper doesn't state.
 
 ![severity_scoring](../../figures/txt9/severity_scoring.png)
 
-**Key insight:** Severe recall is higher than multiple-choice accuracy for DeBERTa-v3-large NLI zero-shot, by 20 points.
+**Key insight:** Severe recall is lower than multiple-choice accuracy for DeBERTa-v3-large NLI zero-shot, by 25 points.
 
 Accuracy against cost, one panel per question: each dot is a model, placed by its accuracy and by the output tokens it writes per item on average (log scale). Models that report no output tokens are left out and named in the chart's note.
 
@@ -142,7 +142,7 @@ Per item: mean correct on effect + activated_risk minus mean correct on latent_r
 
 | Model | Action accuracy | Latent accuracy | Action − latent [95% CI] |
 |---|---|---|---|
-| DeBERTa-v3-large NLI zero-shot | 0.300 | 0.500 | -0.200 [-0.500, 0.200] |
+| DeBERTa-v3-large NLI zero-shot | 0.285 | 0.486 | -0.201 [-0.248, -0.154] |
 
 Note: Compares Fig 4b (effect, activated risk) with Fig 4a (latent risk, severity). Text adds: 'Except for Gemini 2.5 Flash', smaller models are substantially weaker, naming GPT-5-Mini, GPT-5-Nano and Gemini 2.5 Flash-lite.
 
@@ -150,11 +150,11 @@ Note: Compares Fig 4b (effect, activated risk) with Fig 4a (latent risk, severit
 
 | Model | Input tokens / item | Output tokens / item | Latency p50 / p95 s | Refused | Parse failures | $ / item | $ run |
 |---|---|---|---|---|---|---|---|
-| DeBERTa-v3-large NLI zero-shot | 2057 | 0 | 0.2 / 25.5 | 0 | 0 | – | – |
+| DeBERTa-v3-large NLI zero-shot | 1968 | 0 | 0.6 / 0.8 | 0 | 0 | – | – |
 
 Per item: the model's totals over this run divided by its replies. Refused and Parse failures as in Models below. $ comes from logged tokens × `configs/prices.yaml`; "–" until that file has the model.
 
-**Key insight:** DeBERTa-v3-large NLI zero-shot takes a median 0.2 s per reply and writes 0 output tokens per item.
+**Key insight:** DeBERTa-v3-large NLI zero-shot takes a median 0.6 s per reply and writes 0 output tokens per item.
 
 ## Settings
 
@@ -164,7 +164,7 @@ Per item: the model's totals over this run divided by its replies. Refused and P
 | Prompt | decision_short_local |
 | Thinking | min |
 | Reasoning logged | False |
-| Git commit | 486dc64cab (dirty) |
+| Git commit | 85cc8b2024 |
 | Scored | 2026-10-13 |
 | Config | [config.yaml](config.yaml) (sha256 78c1a216fd45) |
 
@@ -172,7 +172,7 @@ Per item: the model's totals over this run divided by its replies. Refused and P
 
 | Model | Requested | Served | Stand-in | Replies | Errors | Parse failures | Refused | Truncated | Malformed | Near-key reads | With reasoning | Input tokens | Output tokens | Cost $ | Latency p50 / p95 s |
 |---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|
-| DeBERTa-v3-large NLI zero-shot | `deberta-v3-large-zeroshot-v2.0` | `MoritzLaurer/deberta-v3-large-zeroshot-v2.0@cf44676c28ba7312e5c5f8f8d2c22b3e0c9cdae2` |  | 5 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 10285 | 0 | – | 0.2 / 25.5 |
+| DeBERTa-v3-large NLI zero-shot | `deberta-v3-large-zeroshot-v2.0` | `MoritzLaurer/deberta-v3-large-zeroshot-v2.0@cf44676c28ba7312e5c5f8f8d2c22b3e0c9cdae2` |  | 319 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 627791 | 0 | – | 0.6 / 0.8 |
 
 Parse failures: replies with no readable answer; all count as wrong (CLAUDE.md, scoring conventions). With per-item `parse_ok` in `summary.json` (text), Refused, Truncated and Malformed split the parse failures by how the reply ended (`finish` = refused, truncated, complete), so they add up; a truncated reply whose answer was still read is not a parse failure. Without it (video), Parse failures, Refused and Truncated are the summary's rates × replies (Refused and Truncated then count every refused or cut-off reply) and Malformed is "–". Cost is "–" until `configs/prices.yaml` has the model.
 
@@ -180,7 +180,7 @@ Parse failures: replies with no readable answer; all count as wrong (CLAUDE.md, 
 
 | Model | latent_risk_accuracy | latent_severity_accuracy | effect_accuracy | activated_risk_accuracy | latent_severity_severe_binary_accuracy | activated_risk_severe_binary_accuracy | latent_severity_severe_recall | activated_risk_severe_recall |
 |---|---|---|---|---|---|---|---|---|
-| DeBERTa-v3-large NLI zero-shot | 0.200 [0.036, 0.624] | 0.800 [0.376, 0.964] | 0.200 [0.036, 0.624] | 0.400 [0.118, 0.769] | 1.000 [0.566, 1.000] | 0.800 [0.376, 0.964] | 1.000 [0.207, 1.000] | 0.000 [0.000, 0.793] |
+| DeBERTa-v3-large NLI zero-shot | 0.608 [0.554, 0.660] | 0.364 [0.313, 0.418] | 0.323 [0.274, 0.376] | 0.248 [0.203, 0.298] | 0.592 [0.538, 0.645] | 0.661 [0.608, 0.711] | 0.108 [0.066, 0.170] | 0.000 [0.000, 0.034] |
 
 CIs: Wilson for rates, bootstrap over items for means (`src/asimov/stats.py`).
 
@@ -203,7 +203,7 @@ Fig 4 uses the first column because the paper's Fig 3 defines severity that way 
 
 | Model | Exact level right (used for Fig 4) | Severe vs not right | Truly severe caught | False negatives (severe, not called severe) | False positives (not severe, called severe) |
 |---|---|---|---|---|---|
-| DeBERTa-v3-large NLI zero-shot | 0.800 | 1.000 | 1.000 (1 / 1) | 0 / 1 (0.000) | 0 / 4 (0.000) |
+| DeBERTa-v3-large NLI zero-shot | 0.364 | 0.592 | 0.108 (15 / 139) | 124 / 139 (0.892) | 6 / 180 (0.033) |
 
 How close each scoring comes to the paper's Fig 4a severity values (mean absolute gap over models with a paper value): exact level right – · severe vs not right – · truly severe caught – (0 models).
 
@@ -211,7 +211,7 @@ How close each scoring comes to the paper's Fig 4a severity values (mean absolut
 
 | Model | Exact level right (used for Fig 4) | Severe vs not right | Truly severe caught | False negatives (severe, not called severe) | False positives (not severe, called severe) |
 |---|---|---|---|---|---|
-| DeBERTa-v3-large NLI zero-shot | 0.400 | 0.800 | 0.000 (0 / 1) | 1 / 1 (1.000) | 0 / 4 (0.000) |
+| DeBERTa-v3-large NLI zero-shot | 0.248 | 0.661 | 0.000 (0 / 108) | 108 / 108 (1.000) | 0 / 211 (0.000) |
 
 ## Files
 
