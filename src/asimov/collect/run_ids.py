@@ -2,8 +2,8 @@
 
 Pure: the I/O is in load.py and collect.py. results/run_ids.yaml maps run name -> id. An ID, once given, is never
 changed or reused, even after its run is deleted, so a run ID quoted in a slide or a note always means the same run.
-Descriptions are never hand-written: `describe` builds them from the run's settings, comparing each later run with
-its benchmark's first run. All wording is in the template tables below.
+Descriptions are never hand-written: `describe` builds one sentence from the run's own settings. It never refers
+to other runs or to the run's position, so it stays true when runs are added or deleted. All wording is in the tables below.
 """
 
 from __future__ import annotations
@@ -32,19 +32,10 @@ PROMPT_WORDS = {"text_verbatim": "the paper's prompt sent unchanged (text_verbat
 THINKING_WORDS = {
     "min": "min (the lowest reasoning each provider allows)",
     "default": "default (each provider decides how much to reason)",
-}  # used when thinking changes; other values are just named
+}  # other values are just named
 TEMPLATES = {
-    "first": "The first {benchmark} run: {prompt}, with thinking set to {thinking}, on {models}.",
+    "run": "{benchmark} benchmark, using {prompt}, with thinking set to {thinking}, on {models}.",
     "reasoning_logged": "Reasoning summaries are saved.",
-    "later": "Same as {base}, except {changes}.",
-    "rerun": "A rerun of {base} with the same settings.",
-    "prompt": "it uses the {new} prompt instead of {old}",
-    "thinking": "thinking is set to {new} instead of {old}",
-    "log_reasoning_on": "it saves reasoning summaries",
-    "log_reasoning_off": "it doesn't save reasoning summaries",
-    "added": "adds {names}",
-    "removed": "drops {names}",
-    "models_changed": "it {changes}",
 }
 
 
@@ -134,62 +125,20 @@ def settings(run: RunData) -> Settings:
     return Settings(pick("prompt"), pick("thinking"), bool(logged), models)
 
 
-def and_list(words: list[str]) -> str:
-    """ "A", "A and B", "A, B and C"."""
-    return words[0] if len(words) == 1 else ", ".join(words[:-1]) + " and " + words[-1]
-
-
-def first_sentence(run: RunData, s: Settings) -> str:
+def describe(run: RunData) -> str:
+    """One plain sentence from the run's own settings, e.g. "Text benchmark, using the paper's prompt sent
+    unchanged (text_verbatim), with thinking set to min (the lowest reasoning each provider allows), on 8 models."
+    """
+    s = settings(run)
     n = len(s.models)
-    text = TEMPLATES["first"].format(
-        benchmark=BENCHMARK_WORDS.get(run.benchmark, run.benchmark),
+    text = TEMPLATES["run"].format(
+        benchmark=BENCHMARK_WORDS.get(run.benchmark, run.benchmark).capitalize(),
         prompt=PROMPT_WORDS.get(s.prompt, f"the {s.prompt} prompt"),
-        thinking=s.thinking,
+        thinking=THINKING_WORDS.get(s.thinking, s.thinking),
         models=f"{n} model{'' if n == 1 else 's'}",
     )
     return f"{text} {TEMPLATES['reasoning_logged']}" if s.log_reasoning else text
 
 
-def changes(base: Settings, s: Settings) -> list[str]:
-    """One clause per setting that differs, in the order prompt, thinking, log_reasoning, models."""
-    out = []
-    if s.prompt != base.prompt:
-        out.append(TEMPLATES["prompt"].format(new=s.prompt, old=base.prompt))
-    if s.thinking != base.thinking:
-        out.append(
-            TEMPLATES["thinking"].format(
-                new=THINKING_WORDS.get(s.thinking, s.thinking), old=THINKING_WORDS.get(base.thinking, base.thinking)
-            )
-        )
-    if s.log_reasoning != base.log_reasoning:
-        out.append(TEMPLATES["log_reasoning_on" if s.log_reasoning else "log_reasoning_off"])
-    base_ids, ids = {m for m, _ in base.models}, {m for m, _ in s.models}
-    added = [name for m, name in s.models if m not in base_ids]
-    removed = [name for m, name in base.models if m not in ids]
-    model_parts = [TEMPLATES[k].format(names=and_list(v)) for k, v in (("added", added), ("removed", removed)) if v]
-    if model_parts:
-        out.append(TEMPLATES["models_changed"].format(changes=" and ".join(model_parts)))
-    return out
-
-
-def baseline(run: RunData, runs: Iterable[RunData], ids: dict[str, str]) -> RunData | None:
-    """The run's benchmark's first run (ID number 0), if it's still in results/."""
-    first_id = f"{prefix(run.benchmark)}0"
-    return next((r for r in runs if ids.get(r.name) == first_id), None)
-
-
-def describe(run: RunData, runs: Iterable[RunData], ids: dict[str, str]) -> str:
-    """One plain sentence: the first run's settings, or how a later run differs from its benchmark's first run."""
-    base = baseline(run, runs, ids)
-    if base is None or base.name == run.name:
-        return first_sentence(run, settings(run))
-    found = changes(settings(base), settings(run))
-    base_id = ids[base.name]
-    if not found:
-        return TEMPLATES["rerun"].format(base=base_id)
-    clauses = found[0] if len(found) == 1 else ", ".join(found[:-1]) + ", and " + found[-1]
-    return TEMPLATES["later"].format(base=base_id, changes=clauses)
-
-
 def run_labels(runs: list[RunData], ids: dict[str, str]) -> dict[str, RunLabel]:
-    return {r.name: RunLabel(ids[r.name], describe(r, runs, ids)) for r in runs}
+    return {r.name: RunLabel(ids[r.name], describe(r)) for r in runs}

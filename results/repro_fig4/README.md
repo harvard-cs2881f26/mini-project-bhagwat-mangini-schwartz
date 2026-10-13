@@ -2,7 +2,7 @@
 
 # Run `txt0`: `repro_fig4`
 
-The first text run: the paper's prompt sent unchanged (text_verbatim), with thinking set to min, on 8 models. Reasoning summaries are saved.
+Text benchmark, using the paper's prompt sent unchanged (text_verbatim), with thinking set to min (the lowest reasoning each provider allows), on 8 models. Reasoning summaries are saved.
 
 ## Settings
 

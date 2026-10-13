@@ -3,6 +3,7 @@
 import csv
 import io
 import json
+import re
 import subprocess
 import sys
 from pathlib import Path
@@ -323,9 +324,11 @@ def test_run_id_column_follows_run_in_both_tables(results):
     index = read_csv(files["index.csv"])
     assert list(index[0])[:3] == ["run", "run_id", "description"]
     assert [r["run_id"] for r in index] == ["txt0", "txt0", "vid0"]
-    assert index[0]["description"] == "The first text run: the p prompt, with thinking set to min, on 2 models."
-    assert (
-        index[2]["description"] == "The first video run: the p prompt, with thinking set to min, on 1 model."
+    assert index[0]["description"] == (
+        "Text benchmark, using the p prompt, with thinking set to min (the lowest reasoning each provider allows), on 2 models."
+    )
+    assert index[2]["description"].startswith("Video benchmark,") and index[2]["description"].endswith(
+        "on 1 model."
     )  # no config.yaml: from summaries
     per_item = read_csv(files["per_item.csv"])
     assert list(per_item[0])[:3] == ["run", "run_id", "benchmark"] and "description" not in per_item[0]
@@ -338,11 +341,13 @@ def test_run_id_and_description_appear_on_the_pages(results):
     headline = {"figures": {"fig4": {"run": "text_run", "note": ""}}}
     comparisons = [{"name": "a_vs_b", "a": "text_run", "b": "text_run_b"}]
     files = build(load_results(results), empty_claims(), {}, headline, comparisons, ids)
-    first = "The first text run: the p prompt, with thinking set to min, on 2 models."
+    first = (
+        "Text benchmark, using the p prompt, with thinking set to min (the lowest reasoning each provider allows), on 2 models."
+    )
     assert f"# Run `txt0`: `text_run`\n\n{first}\n" in files["text_run/README.md"]
     later = (
-        "Same as txt0, except thinking is set to default (each provider decides how much to reason) "
-        "instead of min (the lowest reasoning each provider allows)."
+        "Text benchmark, using the p prompt, with thinking set to default (each provider decides how much to reason), "
+        "on 2 models."
     )
     assert later in files["text_run_b/README.md"]
     summary = files["README.md"]
@@ -355,69 +360,38 @@ def test_run_id_and_description_appear_on_the_pages(results):
     assert "(auto)" not in summary
 
 
-def describe_all(results: Path, ids: dict[str, str]) -> dict[str, str]:
-    runs = load_results(results)
-    return {r.name: describe(r, runs, ids) for r in runs}
+def describe_all(results: Path) -> dict[str, str]:
+    return {r.name: describe(r) for r in load_results(results)}
 
 
-def test_paper_prompt_and_min_thinking_read_as_words(results):
-    text_run(results, "verbatim", [[True] * 4] * 4, prompt="text_verbatim", thinking="default")
-    text_run(results, "verbatim_min", [[True] * 4] * 4, prompt="text_verbatim", extra_models=("GPT-6 Luna",))
-    described = describe_all(results, {"verbatim": "txt0", "verbatim_min": "txt1", "text_run": "txt2"})
-    assert described["verbatim"] == (
-        "The first text run: the paper's prompt sent unchanged (text_verbatim), with thinking set to default, on 2 models."
+def test_description_states_the_runs_own_settings(results):
+    text_run(results, "verbatim", [[True] * 4] * 4, prompt="text_verbatim", log_reasoning=True)
+    assert describe_all(results)["verbatim"] == (
+        "Text benchmark, using the paper's prompt sent unchanged (text_verbatim), with thinking set to min "
+        "(the lowest reasoning each provider allows), on 2 models. Reasoning summaries are saved."
     )
-    assert described["verbatim_min"] == (
-        "Same as txt0, except thinking is set to min (the lowest reasoning each provider allows) instead of default "
-        "(each provider decides how much to reason), and it adds GPT-6 Luna."
-    )
-    assert described["text_run"].startswith("Same as txt0, except it uses the p prompt instead of text_verbatim, ")
 
 
-def test_first_run_describes_its_settings(results):
-    text_run(results, "logged", [[True] * 4] * 4, log_reasoning=True)
-    described = describe_all(results, {"logged": "txt0", "text_run": "txt1", "video_run": "vid0"})
-    assert (
-        described["logged"]
-        == "The first text run: the p prompt, with thinking set to min, on 2 models. Reasoning summaries are saved."
-    )
-    assert described["text_run"] == "Same as txt0, except it doesn't save reasoning summaries."
-
-
-def test_thinking_only_change(results):
+def test_thinking_default_and_other_values_read_as_words(results):
     text_run(results, "text_default", [[True] * 4] * 4, thinking="default")
-    assert describe_all(results, {"text_run": "txt0", "text_default": "txt1"})["text_default"] == (
-        "Same as txt0, except thinking is set to default (each provider decides how much to reason) "
-        "instead of min (the lowest reasoning each provider allows)."
-    )
+    text_run(results, "text_high", [[True] * 4] * 4, thinking="high")
+    described = describe_all(results)
+    assert "with thinking set to default (each provider decides how much to reason)," in described["text_default"]
+    assert "with thinking set to high," in described["text_high"]
+    assert described["video_run"].startswith("Video benchmark, using the p prompt,")
 
 
-def test_prompt_change_and_added_and_removed_models_are_listed(results):
-    text_run(results, "text_b", [[True] * 4] * 4, extra_models=("o3", "gpt-4o"), drop_models=("gpt-5-nano",), prompt="q")
-    assert describe_all(results, {"text_run": "txt0", "text_b": "txt1"})["text_b"] == (
-        "Same as txt0, except it uses the q prompt instead of p, and it adds o3 and gpt-4o and drops GPT-5 Nano."
-    )
-
-
-def test_identical_settings_are_a_rerun(results):
-    text_run(results, "text_again", [[False] * 4] * 4)
-    assert (
-        describe_all(results, {"text_run": "txt0", "text_again": "txt1"})["text_again"]
-        == "A rerun of txt0 with the same settings."
-    )
+def test_description_never_refers_to_other_runs_or_order(results):
+    text_run(results, "text_b", [[True] * 4] * 4, extra_models=("o3",), thinking="default", prompt="q")
+    for text in describe_all(results).values():
+        for word in ("first", "same as", "rerun", "instead of", "except"):
+            assert word not in text.lower(), (word, text)
+        assert not re.search(r"\b(txt|vid|img)\d", text), text
+    assert describe_all(results)["text_b"].endswith("on 3 models.")
 
 
 def test_descriptions_are_deterministic(results):
-    text_run(results, "text_b", [[True] * 4] * 4, extra_models=("o3", "gpt-4o"), thinking="default", prompt="q")
-    ids = {"text_run": "txt0", "text_b": "txt1", "video_run": "vid0"}
-    runs = load_results(results)
-    once = {r.name: describe(r, runs, ids) for r in runs}
-    assert once == {r.name: describe(r, list(reversed(runs)), ids) for r in load_results(results)}
-    assert once["text_b"] == (
-        "Same as txt0, except it uses the q prompt instead of p, thinking is set to default "
-        "(each provider decides how much to reason) instead of min (the lowest reasoning each provider allows), "
-        "and it adds o3 and gpt-4o."
-    )
+    assert describe_all(results) == describe_all(results)
 
 
 def test_run_ids_yaml_rejects_old_style_entries():
