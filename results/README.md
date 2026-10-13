@@ -19,6 +19,9 @@ Run: `txt0` [`repro_fig4`](repro_fig4/README.md) · [paper check](repro_fig4/pap
 | Gemini 2.5 Flash (3) | 0.928 [0.894, 0.951] | 0.930 | 0.715 [0.663, 0.761] | 0.940 | 0.690 [0.637, 0.738] | 0.710 | 0.671 [0.618, 0.720] | 0.660 |
 | Gemini 2.5 Pro (3.1) | 0.925 [0.890, 0.949] | 0.940 | 0.674 [0.621, 0.723] | 0.960 | 0.687 [0.634, 0.735] | 0.700 | 0.605 [0.550, 0.657] | 0.640 |
 
+- `latent_severity_accuracy`: the share of multiple-choice severity questions answered with the exact right level (none / minor / moderate / severe); the Fig 4 severity score (the paper's Fig 3 defines it this way).
+- `activated_risk_accuracy`: the share of multiple-choice severity questions answered with the exact right level (none / minor / moderate / severe); the Fig 4 severity score (the paper's Fig 3 defines it this way).
+
 ![fig4a](../figures/fig4a_comparison.png) ![fig4b](../figures/fig4b_comparison.png)
 
 ## Fig 5 (video)

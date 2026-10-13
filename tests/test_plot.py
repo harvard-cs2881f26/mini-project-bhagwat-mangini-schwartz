@@ -273,3 +273,12 @@ def test_reading_notes_match_the_figure():
 def test_tick_names_wrap_without_running_into_each_other():
     assert plot.tick_name("Gemini 2.5 Flash-Lite (3.1)") == "Gemini 2.5\nFlash-Lite\n(3.1)"
     assert plot.tick_name("GPT-5") == "GPT-5"
+
+
+def test_fig4_severity_axis_says_multiple_choice_exact_level():
+    for question in ("latent_severity", "activated_risk"):
+        title = plot.READABLE[f"{question}_accuracy"]
+        assert "exact" in title and "multiple-choice" in title
+        assert title.count("\n") == 1  # the two-line style of the other axis titles
+    assert plot.FIG4["fig4a"][2] == "Severity Accuracy"  # paper-style figures keep the paper's wording
+    assert plot.FIG4["fig4b"][2] == "Activated Risk Accuracy"

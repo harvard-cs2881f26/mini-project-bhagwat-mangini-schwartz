@@ -859,6 +859,33 @@ config schema change). Two modes; the orchestration is in one place,
   - Also: a short follow-up to the first author (Tyler's 2026-10-10 email) asking which metric
     Fig 4a plots.
 
+## 2026-10-12: Fig 4 severity axis, final (Noa)
+
+### Fig 4a/4b severity score: exact level on the multiple-choice question: DECIDED (Noa), supersedes the "severe recall" entry above
+- **Fig 4 stays on the paper's own definition:** the share of multiple-choice severity questions
+  answered with exactly the right level (none / minor / moderate / severe), `<q>_accuracy`. The
+  figures and results pages say so explicitly.
+- **Why it was reversed (same day):** the paper's metric-definition figure (Fig 3) describes the
+  severity score as a 4-choice accuracy. This was recorded by Session 2's paper-reader in the
+  frozen claims file ("Fig 3 defines Q2 as 4-choice severity accuracy"). A reproduction uses the
+  paper's stated definition.
+- **What it means for the comparison:** under that definition our severity values are well below
+  the paper's plotted ones (mean gap 0.17 over 8 models). The paper's plotted values sit closer to
+  other ways of scoring. "Truly severe caught" (severe recall) fits best, with a mean gap of 0.07.
+  That mismatch is reported as a finding, not removed by switching metrics.
+- **Every way of scoring severity is shown side by side** on each text run's results page, under
+  "Ways to score severity":
+  - exact level right;
+  - severe vs not right;
+  - truly severe caught;
+  - false negatives and false positives;
+  - how close each one comes to the paper.
+- *Alternative considered:* putting "truly severe caught" on the Fig 4a axis, briefly DECIDED
+  earlier today. Rejected: it fits the paper's numbers, but the paper never says it used it, and
+  it ignores false positives.
+- **Open:** ask the first author which scoring Fig 4a plots, given that Fig 3 and the plotted values
+  disagree (a follow-up to Tyler's 2026-10-10 email). `configs/paper/claims.yaml` is unchanged.
+
 ## 2026-10-13: Session 3 smoke runs, hosted decision models (5 items each)
 
 Numbers only. 5-item accuracy is not reported (too few items to mean anything). All runs:

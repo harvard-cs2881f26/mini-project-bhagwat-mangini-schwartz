@@ -15,9 +15,10 @@ from asimov.bench.text_score import QUESTIONS
 from asimov.claims import Claims
 from asimov.collect.build import build
 from asimov.collect.checks import ACTION_QUESTIONS, LATENT_QUESTIONS
-from asimov.collect.load import ModelResult, load_model, load_results
-from asimov.collect.pages import FIGURES, GENERATED, FailureCounts, failure_counts
+from asimov.collect.load import ModelResult, RunData, load_model, load_results
+from asimov.collect.pages import FIGURES, GENERATED, FailureCounts, failure_counts, severity_section
 from asimov.collect.run_ids import PREFIXES, assign_ids, describe, next_number, parse_ids
+from asimov.collect.severity import mean_abs_gap
 from asimov.collect.tables import CSV_DIGITS, to_csv
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -420,3 +421,77 @@ def test_cli_writes_run_ids_and_check_fails_when_one_is_missing(results, tmp_pat
     assert {p: p.read_text() for p in results.rglob("*") if p.is_file()} == before  # --check writes nothing
     assert collect.main(args) == 0
     assert collect.main([*args, "--check"]) == 0
+
+
+# ---- ways to score severity (text run pages) ------------------------------------------------
+
+
+def severity_claims(value: float) -> Claims:
+    claim = {
+        "id": "fig4a_gpt5_latent_severity",
+        "figure": "4a",
+        "section": "4",
+        "benchmark": "text",
+        "model": "GPT 5",
+        "metric": "latent_severity_accuracy",
+        "value": value,
+        "scale": "fraction",
+        "kind": "value",
+        "source": "figure",
+        "quote": "read off figure",
+        "approx": True,
+    }
+    return Claims.model_validate(
+        {"paper": {"arxiv": "x", "version": "v2", "title": "T", "read_on": "2026-10-12"}, "claims": [claim], "headline": []}
+    )
+
+
+def severity_run() -> RunData:
+    """One text model with every Q2 severity field (10 items, 4 truly severe) and none of Q4's."""
+    summary = {
+        "name": "GPT-5",
+        "model": "gpt-5",
+        "n": 10,
+        "latent_severity_accuracy": 0.6,
+        "latent_severity_severe_binary_accuracy": 0.8,
+        "latent_severity_severe_recall": 0.75,
+        "latent_severity_severe_false_negatives": 1,
+        "latent_severity_severe_false_negative_rate": 0.25,
+        "latent_severity_severe_false_positives": 1,
+        "latent_severity_severe_false_positive_rate": 1 / 6,
+        "latent_severity_n_severe": 4,
+        "activated_risk_accuracy": 0.5,
+    }
+    return RunData("sev_run", "text", None, (ModelResult(summary, {}, (), (), {}),))
+
+
+def test_mean_abs_gap_on_a_hand_example():
+    assert mean_abs_gap([(0.6, 0.5), (0.7, 0.9), (None, 0.4), (0.3, None)]) == pytest.approx(0.15)
+    assert mean_abs_gap([(None, 0.5)]) is None
+
+
+def test_severity_section_numbers():
+    section = severity_section(severity_run(), severity_claims(0.5))
+    assert section.startswith("## Ways to score severity")
+    assert "Exact level right (used for Fig 4)" in section and "Fig 3" in section
+    assert "False negatives (severe, not called severe)" in section
+    assert "False positives (not severe, called severe)" in section
+    q2, q4 = section.split("### ")[1:3]
+    row = next(line for line in q2.splitlines() if line.startswith("| GPT-5 "))
+    assert row == "| GPT-5 | 0.600 | 0.800 | 0.750 (3 / 4) | 1 / 4 (0.250) | 1 / 6 (0.167) |"
+    gap = next(line for line in q2.splitlines() if line.startswith("How close each scoring comes"))
+    assert "exact level right 0.100" in gap and "severe vs not right 0.300" in gap and "truly severe caught 0.250" in gap
+    row4 = next(line for line in q4.splitlines() if line.startswith("| GPT-5 "))
+    assert row4 == "| GPT-5 | 0.500 | – | – | – | – |"  # an older summary without the Q4 severity fields
+
+
+def test_severity_section_on_text_run_pages_only(results, claims):
+    files = build(load_results(results), claims, {}, {}, [])
+    assert "## Ways to score severity" in files["text_run/README.md"]
+    assert "Ways to score severity" not in files["video_run/README.md"]
+
+
+def test_severity_score_is_named_in_plain_words_on_the_pages(results, claims):
+    files = build(load_results(results), claims, {}, {}, [])
+    for page in (files["text_run/README.md"], files["README.md"]):
+        assert "multiple-choice severity questions answered with the exact right level" in page
