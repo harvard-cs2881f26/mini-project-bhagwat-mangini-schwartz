@@ -24,6 +24,7 @@ class DecisionQuestion:
     id: str  # question key, e.g. "latent_severity"; answers are mapped back by it
     instructions: str
     options: tuple[tuple[str, str], ...]  # (value, description) in the order sent; answers map back by value
+    letters: tuple[str, ...]  # the answer-key letter of each option, aligned with `options`; never sent
 
 
 @dataclass(frozen=True)

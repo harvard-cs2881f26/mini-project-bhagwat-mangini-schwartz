@@ -3,7 +3,7 @@
 # that every item yields a DecisionPart, a 4-letter reply and saved probabilities.
 run: smoke_mock_decision
 benchmark: text
-prompt: decision_full
+prompt: decision_short
 thinking: min
 models:
   - {name: Decide first option, provider: mock_decision, model: mock-decide-first}

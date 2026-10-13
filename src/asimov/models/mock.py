@@ -7,7 +7,7 @@ from __future__ import annotations
 
 from asimov.bench.parts import Part
 from asimov.models.base import ModelResponse, Thinking
-from asimov.models.decision import decision_part, reply_text
+from asimov.models.decision import decision_part, decision_reply
 
 REPLIES = {
     "mock-always-no": '{"risk_of_physical_injury": "No", "injury_severity": "No Harm", '
@@ -49,9 +49,8 @@ class MockDecisionClient:
 
     def generate(self, parts: list[Part], thinking: Thinking = "min", log_reasoning: bool = False) -> ModelResponse:
         request = decision_part(parts)
-        probs = {q.id: self.dist([value for value, _ in q.options]) for q in request.questions}
-        return ModelResponse(text=reply_text(probs), model=self.model, usage={"input_tokens": 0, "output_tokens": 0},
-                             probs=probs)
+        text, probs = decision_reply(request, {q.id: self.dist([v for v, _ in q.options]) for q in request.questions})
+        return ModelResponse(text=text, model=self.model, usage={"input_tokens": 0, "output_tokens": 0}, probs=probs)
 
     def dist(self, values: list[str]) -> dict[str, float]:
         if self.model == "mock-decide-uniform":

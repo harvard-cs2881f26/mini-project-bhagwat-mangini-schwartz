@@ -11,11 +11,11 @@ import pytest
 import yaml
 
 from asimov.bench.parts import DecisionPart
-from asimov.bench.text import DECISION_PROMPTS, build_request, prompt_version
+from asimov.bench.text import DECISION_PROMPTS, build_request, option_name, prompt_version
 from asimov.bench.text_score import OPTIONS, QUESTIONS, response_key, score, score_item
 from asimov.data.text import load_text_answers, load_text_items, parse_prompt
 from asimov.models import get_client
-from asimov.models.decision import reply_text
+from asimov.models.decision import decision_reply, reply_text
 from asimov.runner import ROOT, run
 
 
@@ -55,16 +55,42 @@ def test_unparseable_prompt_fails_loudly():
 
 
 @pytest.mark.parametrize("prompt", DECISION_PROMPTS)
-def test_decision_request_has_state_and_four_lettered_questions(prompt):
+def test_decision_request_has_state_and_four_questions_with_the_papers_options(prompt):
+    for item in load_text_items():
+        p = parse_prompt(item.prompt)
+        [part] = build_request(item, prompt)
+        assert isinstance(part, DecisionPart)
+        assert part.state == f"SCENARIO: {p.scenario}\nINSTRUCTION: {p.instruction}"  # no task preamble
+        assert tuple(q.id for q in part.questions) == QUESTIONS
+        for dq, q in zip(part.questions, p.questions, strict=True):
+            assert dq.letters == tuple(q.options)
+            assert [d for _, d in dq.options] == list(q.options.values())  # the paper's option text
+            assert len({v for v, _ in dq.options}) == len(dq.options)  # values unique within the question
+            assert dq.instructions.strip()
+
+
+def test_option_values_are_short_names_or_letters():
+    assert option_name("Burns, Chemical") == "burns_chemical"
     item = load_text_items()[0]
+    [named] = build_request(item, "decision_short")
+    [lettered] = build_request(item, "decision_short_letters")
+    values = {q.id: [v for v, _ in q.options] for q in named.questions}
+    q1_text = parse_prompt(item.prompt).questions[0].options.values()
+    assert values["latent_risk"] == [option_name(text) for text in q1_text]
+    assert values["latent_risk"][-1] == "no_realistic_injury_possible"
+    assert values["latent_severity"] == values["activated_risk"] == ["no_injury", "minor", "moderate", "severe"]
+    assert values["effect"] == ["eliminates", "reduces", "no_change", "increases"]
+    assert all([v for v, _ in q.options] == list(q.letters) for q in lettered.questions)
+
+
+def test_full_and_short_wording_differ_only_in_instructions():
+    item = load_text_items()[0]
+    [full], [short] = build_request(item, "decision_full"), build_request(item, "decision_short")
+    assert full.state == short.state
+    assert [q.options for q in full.questions] == [q.options for q in short.questions]
     p = parse_prompt(item.prompt)
-    [part] = build_request(item, prompt)
-    assert isinstance(part, DecisionPart)
-    assert p.scenario in part.state and p.instruction in part.state
-    assert tuple(q.id for q in part.questions) == QUESTIONS
-    for dq, q in zip(part.questions, p.questions, strict=True):
-        assert dq.options == tuple(q.options.items())  # letters as values, the paper's option text
-        assert dq.instructions.strip()
+    assert [q.instructions for q in full.questions] == [q.text for q in p.questions]
+    assert all(len(s.instructions) < len(f.instructions) for s, f in zip(short.questions, full.questions, strict=True))
 
 
 def test_decision_prompt_versions_differ_and_cover_the_wording_file():
@@ -100,6 +126,27 @@ def test_reply_text_is_the_argmax_letter_json_and_scores_like_an_llm_reply():
 def test_unanswered_question_is_left_out_of_the_reply():
     text = reply_text({"latent_risk": {"A": 1.0}, "latent_severity": None})
     assert json.loads(text) == {response_key("latent_risk"): "A"}
+
+
+def test_probabilities_map_back_from_option_values_to_letters():
+    [part] = build_request(load_text_items()[0], "decision_short")
+    by_value = {
+        q.id: {v: (0.9 if i == 2 else 0.1 / (len(q.options) - 1)) for i, (v, _) in enumerate(q.options)} for q in part.questions
+    }
+    text, probs = decision_reply(part, by_value)
+    assert json.loads(text) == {response_key(q): "C" for q in QUESTIONS}
+    assert probs["latent_severity"] == {
+        "A": pytest.approx(0.1 / 3),
+        "B": pytest.approx(0.1 / 3),
+        "C": 0.9,
+        "D": pytest.approx(0.1 / 3),
+    }
+
+
+def test_answer_with_unknown_options_fails_loudly():
+    [part] = build_request(load_text_items()[0], "decision_short")
+    with pytest.raises(ValueError, match="don't match the options sent"):
+        decision_reply(part, {"effect": {"A": 0.5, "B": 0.5}})
 
 
 def test_mock_decision_client_returns_probs_and_rejects_text_requests():

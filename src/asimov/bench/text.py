@@ -13,6 +13,7 @@ prompts/decision_questions.yaml (the one home for that wording).
 from __future__ import annotations
 
 import hashlib
+import re
 from functools import cache
 from pathlib import Path
 
@@ -21,11 +22,13 @@ import yaml
 from asimov.bench import Benchmark
 from asimov.bench.parts import DecisionPart, DecisionQuestion, Part, TextPart
 from asimov.bench.text_score import score
-from asimov.data.text import ParsedPrompt, TextItem, load_text_answers, load_text_items, parse_prompt
+from asimov.data.text import ParsedPrompt, Question, TextItem, load_text_answers, load_text_items, parse_prompt
 
 DATASET_VERSION = "asimov_v2_injuries/0.1.0"
 PROMPT_NAME = "text_verbatim"  # the dataset's prompt, unchanged
-DECISION_PROMPTS = ("decision_full", "decision_short")
+# decision_<wording>[_letters]: wording = the paper's full text per question or the short text in the
+# wording file; option values are short names (e.g. "severe") unless `_letters` (A-E). WORKLOG 2026-10-12.
+DECISION_PROMPTS = ("decision_short", "decision_full", "decision_short_letters")
 PROMPTS = (PROMPT_NAME, *DECISION_PROMPTS)
 WORDING = Path(__file__).resolve().parents[1] / "prompts" / "decision_questions.yaml"
 
@@ -45,16 +48,34 @@ def wording() -> dict:
     return yaml.safe_load(WORDING.read_text())
 
 
+def option_name(text: str) -> str:
+    """Q1 option text -> a short value name: 'Burns, Chemical' -> 'burns_chemical'."""
+    return re.sub(r"[^a-z0-9]+", "_", text.lower()).strip("_")
+
+
+def option_values(question: Question, prompt_name: str) -> list[str]:
+    """Values sent for each option, in prompt order: letters, Q1 names made from the option text, or
+    the fixed names for Q2-Q4 from the wording file."""
+    if prompt_name.endswith("_letters"):
+        return list(question.options)
+    if question.key in wording()["names"]:
+        return [wording()["names"][question.key][letter] for letter in question.options]
+    return [option_name(text) for text in question.options.values()]
+
+
 def decision_request(parsed: ParsedPrompt, prompt_name: str) -> DecisionPart:
     """One DecisionPart: the state, and each question's instructions and the paper's options."""
     w = wording()
     state = w["state"].format(scenario=parsed.scenario, instruction=parsed.instruction)
-    questions = tuple(
-        DecisionQuestion(id=q.key, instructions=q.text if prompt_name == "decision_full" else w["short"][q.key],
-                         options=tuple(q.options.items()))
-        for q in parsed.questions
-    )
-    return DecisionPart(state=state, questions=questions)
+    questions = []
+    for q in parsed.questions:
+        values = option_values(q, prompt_name)
+        if len(set(values)) != len(values):
+            raise ValueError(f"{q.key}: option values aren't unique: {values}")
+        questions.append(DecisionQuestion(
+            id=q.key, instructions=q.text if prompt_name.startswith("decision_full") else w["short"][q.key],
+            options=tuple(zip(values, q.options.values(), strict=True)), letters=tuple(q.options)))
+    return DecisionPart(state=state, questions=tuple(questions))
 
 
 def build_request(item: TextItem, prompt_name: str = PROMPT_NAME) -> list[Part]:
