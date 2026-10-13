@@ -16,6 +16,7 @@ from __future__ import annotations
 
 import math
 from collections.abc import Callable, Sequence
+from dataclasses import replace
 from string import ascii_uppercase
 
 from asimov.bench.parts import DecisionQuestion
@@ -40,7 +41,20 @@ def question_text(state: str, question: DecisionQuestion) -> str:
 
 
 def plain_prompt(state: str, question: DecisionQuestion) -> str:
-    return question_text(state, question) + local_wording()["answer_cue"]
+    """The base model's prompt; a one-shot question starts with its answered example."""
+    prompt = question_text(state, question) + local_wording()["answer_cue"]
+    return (answered_example(question) + prompt) if question.example else prompt
+
+
+def answered_example(question: DecisionQuestion) -> str:
+    """The question's made-up example, rendered like the real one, answered, then a blank line."""
+    ex = question.example
+    assert ex is not None
+    shown = replace(question, options=tuple((str(i), d) for i, d in enumerate(ex.options)), example=None)
+    if ex.answer not in option_letters(shown):
+        raise ValueError(f"{question.id}: example answer {ex.answer!r} is not one of {option_letters(shown)}")
+    prompt = question_text(ex.state, shown) + local_wording()["answer_cue"]
+    return prompt + answer_token(prompt, ex.answer) + "\n\n"
 
 
 def hypotheses(question: DecisionQuestion) -> list[str]:

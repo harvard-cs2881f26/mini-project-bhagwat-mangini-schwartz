@@ -18,7 +18,7 @@ import json
 from dataclasses import asdict
 from typing import Any
 
-from asimov.bench.parts import DecisionPart, DecisionQuestion
+from asimov.bench.parts import DecisionExample, DecisionPart, DecisionQuestion
 from asimov.models.base import ModelResponse, Timer
 from asimov.models.decision import Decided
 
@@ -44,10 +44,15 @@ def part_from_dict(d: dict) -> DecisionPart:
             options=tuple((v, desc) for v, desc in q["options"]),
             letters=tuple(q["letters"]),
             context=q["context"],
+            example=example_from_dict(q.get("example")),
         )
         for q in d["questions"]
     )
     return DecisionPart(state=d["state"], questions=questions, mode=d["mode"])
+
+
+def example_from_dict(d: dict | None) -> DecisionExample | None:
+    return DecisionExample(state=d["state"], options=tuple(d["options"]), answer=d["answer"]) if d else None
 
 
 # --- server side (inside the Modal container) ---

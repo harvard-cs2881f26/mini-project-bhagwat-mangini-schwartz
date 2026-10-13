@@ -35,6 +35,18 @@ class DecisionQuestion:
     # cumulative: the state line naming the model's own pick for this question, for later
     # questions; "{answer}" = the picked option's description. Never sent with this question itself.
     context: str = ""
+    # one-shot prompts only (local base model): a made-up worked example shown before this question
+    example: DecisionExample | None = None
+
+
+@dataclass(frozen=True)
+class DecisionExample:
+    """A made-up, answered example of a question (never from the dataset): its own state, option
+    descriptions in order, and the letter answering it (prompts/decision_questions.yaml `oneshot`)."""
+
+    state: str
+    options: tuple[str, ...]
+    answer: str
 
 
 @dataclass(frozen=True)
