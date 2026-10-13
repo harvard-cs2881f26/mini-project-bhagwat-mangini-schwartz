@@ -1037,3 +1037,24 @@ were fixed in this session's plan and in Noa's message, not chosen from the 319-
   - `repro_fig5` (video) now shows $68.01. Not checked against Tyler's records.
 - `tests/test_leakage.py` read every `configs/*.yaml` as a run config. It now reads only those with a
   `run` key (Noa's call, 2026-10-13), so the price table isn't mistaken for one.
+
+### Exploratory: cheaper LLM targets (post-hoc, Noa 2026-10-13)
+- **Added:** `configs/analysis/part2_designs_exploratory.yaml` -> `results/part2_designs_exploratory/` and
+  `figures/part2_designs_exploratory/`. Same decision models, confidence rule, fixed shares and B headline
+  split as `part2_designs.yaml`; only the escalation targets differ: luna generate (`part2_luna_gen`,
+  verbatim prompt), Gemini Flash-Lite (`repro_fig4`, thinking `min`) and GPT-5 (`repro_fig4_default`,
+  thinking `default`). Question it answers: how cheap can the LLM side be.
+- **Status: EXPLORATORY, post-hoc.** The targets were chosen after the Part 2 results were seen, so these
+  outputs are not evidence for H1 or H2. `tables.md` and every figure title carry an EXPLORATORY line,
+  from a new optional `label` field in `DesignConfig` (printed only when set; the pre-registered outputs
+  are unchanged, `scripts/cascade.py --check` passes).
+- *Alternatives:* no exploratory targets; or adding them to `part2_designs.yaml`, rejected so the
+  pre-registered and post-hoc results never mix.
+- Endpoints (each target alone, n = 319, mean of 4 [95% CI], $ per 1,000 items), matching each run's
+  `summary.json` accuracies and `results/index.csv` cost x 1000/319:
+  - luna generate: 0.686 [0.655, 0.716], $0.23 (cost from `configs/prices.yaml`).
+  - Gemini Flash-Lite (min): 0.704 [0.672, 0.737], $0.78 (2 prompt-blocked items, counted wrong).
+  - GPT-5 (default): 0.733 [0.702, 0.763], $11.54.
+- Fixed in passing: figure files were named with `Path.with_suffix`, which cut a model id at its dot
+  (`gemini-3.1-flash-lite` -> `gemini-3`). Now the full id is kept; the pre-registered figure names have
+  no dots and are unchanged.
