@@ -1005,7 +1005,7 @@ were fixed in this session's plan and in Noa's message, not chosen from the 319-
   headline. B cannot lower cost in this simulation: the LLM's one call answers all 4 questions, so any
   split using it costs both calls. D is the accuracy-vs-cost result.
 
-### Rules for the simulation: PROPOSED (Claude; Noa to confirm)
+### Rules for the simulation: DECIDED (Noa, 2026-10-14: confirmed as proposed by Claude)
 - A question with no probabilities (e.g. luna's 3 Q1 refusals) gives its item confidence 0, so the item
   is among the first sent on. *Alternative:* drop the item (breaks "unanswered = wrong, never dropped").
 - At a fixed share, exactly round(share x n) items are sent on, lowest confidence first, with ties broken
@@ -1478,10 +1478,10 @@ Numbers only; interpretation is Noa's. Write-up: `results/part2_designs/writeup.
 
 | Part | Status | Where | Choices |
 |---|---|---|---|
-| **Confirmatory:** D and B, pre-registered (4 decision models x GPT-5 / Mini) | Rebuilt on main 9a038cc, after #22 and #23: tables byte-identical (`cascade.py --check`) | `results/part2_designs/`, `figures/part2_designs/` | DECIDED (Noa), entry "2026-10-13: Part 2 design analysis, B and D"; simulation rules PROPOSED |
+| **Confirmatory:** D and B, pre-registered (4 decision models x GPT-5 / Mini) | Rebuilt on main 9a038cc, after #22 and #23: tables byte-identical (`cascade.py --check`) | `results/part2_designs/`, `figures/part2_designs/` | DECIDED (Noa), entry "2026-10-13: Part 2 design analysis, B and D"; simulation rules DECIDED (Noa, 2026-10-14: confirmed as proposed by Claude) |
 | Exploratory: cheaper LLM targets | merged (#19) | `results/part2_designs_exploratory/` | post-hoc (Noa, 2026-10-13) |
-| Exploratory: router search, 60,078 candidates, CV-selected | PR #26 | `results/router_search/` | protocol PROPOSED (Claude); entry "Router search: rerun + extensions" |
-| Exploratory: prompt experiments, paid $3.01 under Noa's $5 cap | PR #25 | `results/prompt_experiments/` | wording PROPOSED (Claude); entry "Part 2 prompt experiments" |
+| Exploratory: router search, 60,078 candidates, CV-selected | PR #26 | `results/router_search/` | protocol DECIDED (Noa, 2026-10-14: confirmed as proposed by Claude); entry "Router search: rerun + extensions" |
+| Exploratory: prompt experiments, paid $3.01 under Noa's $5 cap | PR #25 | `results/prompt_experiments/` | wording DECIDED (Noa, 2026-10-14: confirmed as proposed by Claude); entry "Part 2 prompt experiments" |
 
 - **Decided by Noa on 2026-10-14:**
   - Build the exploratory search on the router-search branch. *Alternative:* extend `cascade.py` instead.
@@ -1490,7 +1490,4 @@ Numbers only; interpretation is Noa's. Write-up: `results/part2_designs/writeup.
     cap ($5 total, from the option text). *Alternatives:* GPT-5 only; Noa approving the wording before
     the full runs.
 - **Still for Noa to confirm:**
-  - the simulation rules (entry "Rules for the simulation: PROPOSED");
-  - the router-search protocol choices;
-  - the prompt wording;
   - txt33's 8.2% parse failures (held for her review).

@@ -60,7 +60,7 @@ at $0.78-$0.87. The perfect-router bounds are 0.750, 0.722, 0.701 and 0.716.
 - Kev-4B's $ leaves out its Modal GPU time. OpenJev's $0 reflects Codiv's free tier, not a market price.
 - Latency assumes the two calls run in sequence; running them in parallel is in the exploratory analysis.
 - The perfect router is a bound, not a system: it needs the answer key to choose.
-- The simulation rules are PROPOSED (WORKLOG "Rules for the simulation"):
+- The simulation rules were confirmed by Noa (DECIDED 2026-10-14; WORKLOG "Rules for the simulation"):
   - a missing probability gives confidence 0;
   - ties at a fixed share are broken by item id;
   - the bound is computed at equal items sent;
@@ -102,5 +102,5 @@ Jev's saved answers were fed to the LLM. Mean of 4 minus the LLM alone [paired b
 | Jev's Q1 + GPT-5 Mini answers Q2-Q4 | 0.637 | -0.032 [-0.060, -0.004] | $0.87 |
 
 **Caveats:**
-- The prompt wording is PROPOSED, not yet approved.
+- The prompt wording was confirmed by Noa (DECIDED 2026-10-14).
 - The variant runs ran in parallel, so their latency can't be compared with `repro_fig4`'s.
