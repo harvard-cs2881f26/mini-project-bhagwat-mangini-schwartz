@@ -27,3 +27,8 @@ part2_laya_full: txt21
 part2_laya_cumulative: txt22
 part2_openjev_think512_full: txt23
 part2_openjev_think512_cumulative: txt24
+part2_nli: txt25
+part2_qwen_base_logprob: txt26
+part2_qwen_gen: txt27
+part2_qwen_logprob: txt28
+part2_qwen_base_logprob_oneshot: txt29
