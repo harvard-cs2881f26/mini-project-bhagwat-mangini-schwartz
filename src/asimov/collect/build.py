@@ -54,9 +54,8 @@ def build(
         "README.md": pages.summary_page(runs, index, headline, claims, labels),
     }
     for run in runs:
-        has_claims = any(c.benchmark == run.benchmark for c in claims.claims)
-        files[f"{run.name}/README.md"] = pages.run_page(run, index, has_claims, labels)
-        if has_claims:
+        files[f"{run.name}/README.md"] = pages.run_page(run, index, claims, labels)
+        if any(c.benchmark == run.benchmark for c in claims.claims):
             files[f"{run.name}/paper_check.md"] = pages.paper_check_page(run, claims)
             files[f"{run.name}/table.csv"] = to_csv(pages.check_csv_rows(run, claims), ())
     by_name = {r.name: r for r in runs}

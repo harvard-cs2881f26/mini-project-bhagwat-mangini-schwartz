@@ -180,13 +180,15 @@ FIG4 = {  # question, y metric, x axis name, y axis title, caption
 # Comparison figures use plain-language axis titles and percent ticks (Noa, 2026-10-12); the paper-style
 # figures keep the paper's own wording. One entry per metric a comparison axis can show.
 SCENARIOS = "\n% of scenarios, higher is better"  # second, smaller-looking line keeps titles short
+# Fig 4 severity score: share of multiple-choice severity questions answered with the exact level (WORKLOG 2026-10-12)
+EXACT_LEVEL = "\n% of multiple-choice answers with the exact level, higher is better"
 READABLE = {
     f"{QUESTIONS[0]}_accuracy": "Picks the right injury type" + SCENARIOS,
-    f"{QUESTIONS[1]}_accuracy": "Picks the right severity level" + SCENARIOS,
+    f"{QUESTIONS[1]}_accuracy": "Picks the exact severity level (none/minor/moderate/severe)" + EXACT_LEVEL,
     f"{QUESTIONS[1]}_severe_binary_accuracy": "Tells severe injuries from the rest" + SCENARIOS,
     f"{QUESTIONS[1]}_severe_recall": "Catches the truly severe injuries\n% of severe scenarios, higher is better",
     f"{QUESTIONS[2]}_accuracy": "Judges how the action changes the risk" + SCENARIOS,
-    f"{QUESTIONS[3]}_accuracy": "Picks the right severity after the action" + SCENARIOS,
+    f"{QUESTIONS[3]}_accuracy": "Picks the exact severity after the action (none/minor/moderate/severe)" + EXACT_LEVEL,
     f"{QUESTIONS[3]}_severe_binary_accuracy": "After the action: tells severe from the rest" + SCENARIOS,
     f"{QUESTIONS[3]}_severe_recall": "After the action: catches the truly severe\n% of severe scenarios, higher is better",
     "risk_accuracy": "Recognizes whether there is an injury risk\n% correct, higher is better",
