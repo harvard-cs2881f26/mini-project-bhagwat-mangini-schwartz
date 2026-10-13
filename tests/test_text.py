@@ -175,6 +175,24 @@ def test_per_item_is_json_serializable_and_scores_only_replied_ids():
     json.dumps(s)
 
 
+def test_q1_matched_accuracy_scores_q2_to_q4_only_where_q1_matched_the_key():
+    """WORKLOG 2026-10-13, 'Cumulative-mode scoring': strict accuracy is unchanged; Q1-matched is reported too."""
+    a_right = dict(GOLD["a"], effect="A")  # Q1 right, Q3 wrong
+    b_wrong_q1 = dict(GOLD["b"], latent_risk="B")  # Q1 wrong, the rest right
+    s = score(GOLD, {"a": reply(a_right), "b": reply(b_wrong_q1)})
+    assert s["n_q1_matched"] == 1
+    assert s["latent_severity_accuracy_q1_matched"] == 1.0
+    assert s["effect_accuracy_q1_matched"] == 0.0
+    assert s["activated_risk_accuracy_q1_matched"] == 1.0
+    assert s["latent_severity_accuracy"] == 1.0 and s["effect_accuracy"] == 0.5  # strict, unchanged
+    assert "latent_risk_accuracy_q1_matched" not in s
+
+
+def test_q1_matched_accuracy_is_none_when_no_q1_matched():
+    s = score({"a": GOLD["a"]}, {"a": reply(dict(GOLD["a"], latent_risk="A"))})
+    assert s["n_q1_matched"] == 0 and s["effect_accuracy_q1_matched"] is None
+
+
 def test_no_replies_raises():
     with pytest.raises(ValueError):
         score(GOLD, {})
