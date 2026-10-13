@@ -72,3 +72,50 @@ def test_reuse_refuses_models_whose_request_differs(tmp_path):
     assert reuse(cfg_a, cfg_b, results_dir=tmp_path) == {}  # not asked for by name: skipped
     with pytest.raises(ValueError, match="request differs"):
         reuse(cfg_a, cfg_b, only=["gpt-5"], results_dir=tmp_path)  # asked for by name: refused
+
+
+# --- decision services: the same model id can be a different service or request (Part 2) ---
+
+JEV = {"name": "Jev", "provider": "systemone", "model": "jev-latest", "base_url": "https://api.typesafe.ai",
+       "key_env": "TYPESAFE_API_KEY"}
+JEV_RUN = {"run": "jev", "benchmark": "text", "prompt": "decision_short", "thinking": "min", "models": [JEV]}
+
+
+def saved_jev_replies(tmp_path, spec: dict) -> str:
+    """Two replies saved in results/jev/ under `spec`'s key, as runner.run would key them; returns the key."""
+    from asimov.bench import get_benchmark
+    from asimov.runner import request_extra, run_key
+
+    key = run_key(spec["model"], get_benchmark("text").prompt_version("decision_short"), "min", extra=request_extra(spec))
+    path = tmp_path / "jev" / spec["model"] / "responses.jsonl"
+    path.parent.mkdir(parents=True)
+    path.write_text("".join(json.dumps({"id": i, "key": key, "text": "{}", "usage": {}}) + "\n" for i in ("x", "y")))
+    return key
+
+
+@pytest.mark.parametrize(
+    "dst_spec",
+    [
+        {**JEV, "params": {"option_order": "reversed"}},  # part2_jev vs part2_jev_reversed
+        {**JEV, "base_url": "https://api.codiv.ai", "key_env": "CODIV_API_KEY"},  # Jev vs Codiv
+    ],
+)
+def test_decision_service_with_other_params_or_base_url_is_not_reused(tmp_path, dst_spec):
+    saved_jev_replies(tmp_path, JEV)
+    dst = {**JEV_RUN, "run": "other", "models": [dst_spec]}
+    assert reuse(JEV_RUN, dst, results_dir=tmp_path) == {}
+    assert not (tmp_path / "other").exists()
+    with pytest.raises(ValueError, match="request differs"):
+        reuse(JEV_RUN, dst, only=["jev-latest"], results_dir=tmp_path)
+
+
+def test_identical_decision_service_is_reused_under_its_own_key(tmp_path):
+    from asimov.bench import get_benchmark
+    from asimov.runner import request_extra, run_key
+
+    src_key = saved_jev_replies(tmp_path, JEV)
+    assert reuse(JEV_RUN, {**JEV_RUN, "run": "same"}, results_dir=tmp_path) == {"jev-latest": 2}
+    rows = [json.loads(line) for line in open(tmp_path / "same" / "jev-latest" / "responses.jsonl")]
+    version = get_benchmark("text").prompt_version("decision_short")
+    assert {r["key"] for r in rows} == {run_key("jev-latest", version, "min", extra=request_extra(JEV))}
+    assert all(r["reused_from"] == {"run": "jev", "key": src_key} for r in rows)
