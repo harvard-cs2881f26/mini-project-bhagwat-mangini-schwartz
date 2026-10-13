@@ -858,3 +858,30 @@ config schema change). Two modes; the orchestration is in one place,
   - `plot.py`'s `--severity` currently applies to 4a and 4b alike; it should apply to 4a only.
   - Also: a short follow-up to the first author (Tyler's 2026-10-10 email) asking which metric
     Fig 4a plots.
+
+## 2026-10-13: Session 3 smoke runs, hosted decision models (5 items each)
+
+Numbers only. 5-item accuracy is not reported (too few items to mean anything). All runs:
+`decision_short` (or `text_verbatim` for luna_gen), 0 errors, 0 parse failures.
+
+| Run | Served model | Input / output tokens per item | p50 latency | Cost, 5 items | Projected, 319 |
+|---|---|---|---|---|---|
+| `part2_codiv` OpenJev think 0 | `openjev-0.1` | 724 / 0 | 0.50 s | $0 (Codiv free tier) | $0 |
+| `part2_codiv` Laya | `laya-1.0` | 866 / 0 | 0.48 s | $0 | $0 |
+| `part2_openjev_think512` | `openjev-0.1` | 1,936 / 478 | 2.39 s | $0 | $0 |
+| `part2_jev` | `jev-1.13.0` | 1,060 / 222 | 0.17 s | $0.0002 | ~$0.014 |
+| `part2_jev_reversed` | `jev-1.13.0` | 1,060 / 222 | 0.26 s | $0.0002 | ~$0.014 |
+| `part2_luna_decide` | `gpt-6-luna` | 942 / 0 | 0.99 s | $0.0005 | ~$0.030 |
+| `part2_luna_gen` | `gpt-6-luna` | 1,370 / 200 | 2.78 s | $0.0012 | ~$0.076 |
+
+- Cost = tokens x list price (Jev $0.042/M input, output free; Decisions $0.10/M input; luna on
+  Responses $0.10/M in, $0.50/M out). Paid smoke total about $0.002.
+- OpenJev think 512 reached its 512-token cap on 3/5 items; input tokens more than double (the
+  OpenJev README says thinking bills the input twice).
+- Laya reports 783-967 input tokens per item, above its documented 512-token limit; the count may
+  be summed over the 4 questions. Codiv's response has no truncation signal, so whether any Laya
+  input was cut is **UNVERIFIED**.
+- gpt-6-luna reported 0 reasoning tokens on both Decisions and Responses (effort "none").
+- Jev, normal vs reversed option order: same answer on 18/20 question-answers (2 severity
+  answers moved by one level). 5 items only; the full runs measure this properly.
+- The Decisions API reports the served model as `gpt-6-luna`, with no dated version.
