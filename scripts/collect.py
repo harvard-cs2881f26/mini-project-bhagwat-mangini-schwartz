@@ -6,7 +6,9 @@
 
 Reads results/<run>/*/summary.json and responses.jsonl, configs/paper/claims.yaml, and
 configs/prices.yaml if it exists. Hand-edited inputs: results/headline.yaml (created once if
-missing) and results/comparisons.yaml. results/run_ids.yaml (run name -> short run ID) is maintained here:
+missing), results/comparisons.yaml, and each run's results/<run>/writeup.md, which is included verbatim
+in its run page and never written here: after editing a write-up, rerun this (--check fails until you do).
+results/run_ids.yaml (run name -> short run ID) is maintained here:
 new runs are added, existing IDs never change. Every other file it writes is generated: never edit it.
 """
 

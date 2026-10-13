@@ -1,5 +1,9 @@
-"""Markdown pages under results/: pure functions from loaded runs to text. Numbers only, no
-interpretation (CLAUDE.md). No prompt or scenario text: that's dataset content we don't commit.
+"""Markdown pages under results/: pure functions from loaded runs to text.
+
+Pages hold generated numbers, mechanical checks against the paper and links to the figures drawn by
+scripts/plot.py, plus each run's hand-written write-up (results/<run>/writeup.md), included verbatim.
+The generated parts never interpret the results: that is the write-up's job, written by the owner
+(CLAUDE.md). No prompt or scenario text: that's dataset content we don't commit.
 """
 
 from __future__ import annotations
@@ -35,6 +39,36 @@ FIGURES = {
     "fig5": ("video", ("risk_accuracy", "timing_mae_s", "within_0_5_rate"), ("fig5a", "fig5b")),
     "fig6": ("image", ("violation_rate",), ("fig6a",)),
 }
+# What scripts/plot.py draws for each run into figures/<run_id>/ (fig6 waits for the image scorer). Fig 5a
+# (text vs video) needs a run of each: a run is paired with the headline run of the other benchmark.
+OWN_FIGURES = {"text": ("fig4a", "fig4b"), "video": ("fig5b",)}
+PAIRED_FIGURE = "fig5a"
+PARTNER_FIGURE = {"text": "fig5", "video": "fig4"}  # benchmark -> the headline.yaml figure holding its Fig 5a partner
+FIGURE_VERSIONS = ("comparison", "paper")  # order on the pages: comparison first
+FIGURES_DIR = "figures"  # at the repo root, next to results/
+
+
+def fig5a_partner(run: RunData, runs: list[RunData], headline: dict) -> RunData | None:
+    """The headline run of the other benchmark (results/headline.yaml), to draw Fig 5a with; None if there isn't one."""
+    fig = PARTNER_FIGURE.get(run.benchmark)
+    if fig is None:
+        return None
+    name = ((headline.get("figures") or {}).get(fig) or {}).get("run")
+    other = FIGURES[fig][0]
+    return next((r for r in runs if r.name == name and r.benchmark == other), None)
+
+
+def run_figures(run: RunData, runs: list[RunData], headline: dict) -> list[str]:
+    """The figures scripts/plot.py draws for this run, e.g. ["fig4a", "fig4b", "fig5a"]."""
+    names = list(OWN_FIGURES.get(run.benchmark, ()))
+    if fig5a_partner(run, runs, headline) is not None:
+        names.append(PAIRED_FIGURE)
+    return sorted(names)
+
+
+def figure_file(run_id: str, fig: str, version: str, suffix: str = "", ext: str = "png") -> str:
+    """Path from the repo root: figures/<run_id>/<fig>_<version><suffix>.<ext> (suffix e.g. "_severity-binary")."""
+    return f"{FIGURES_DIR}/{run_id}/{fig}_{version}{suffix}.{ext}"
 
 
 def num(v: float | None, digits: int = 3) -> str:
@@ -187,6 +221,53 @@ def metrics_section(run: RunData) -> str:
     )
 
 
+WRITEUP_NOTE = (
+    "_Hand-written in [writeup.md](writeup.md) and included here verbatim. After editing it, rerun "
+    "`python scripts/collect.py`: this page includes it, so `collect.py --check` fails until you do._"
+)
+
+
+def writeup_section(run: RunData) -> str:
+    if run.writeup is None or not run.writeup.strip():
+        body = (
+            f"No write-up yet: add results/{run.name}/writeup.md, then rerun `python scripts/collect.py` "
+            "(this page includes it, so `collect.py --check` fails until you do)."
+        )
+    else:
+        body = WRITEUP_NOTE + "\n\n" + run.writeup.strip("\n")
+    return "## Write-up\n\n" + body
+
+
+def figures_section(run: RunData, runs: list[RunData], headline: dict, labels: dict[str, RunLabel]) -> str:
+    names = run_figures(run, runs, headline)
+    if not names:
+        return "## Figures\n\nNo figures for this benchmark yet (`scripts/plot.py` draws Figs 4 and 5)."
+    run_id = labels[run.name].id
+    intro = (
+        f"Drawn by `scripts/plot.py` into `{FIGURES_DIR}/{run_id}/` (PNG and PDF). Comparison: ours with 95% CIs, "
+        "the paper's values and majority baselines; paper-style: the paper's look, our values only."
+    )
+    partner = fig5a_partner(run, runs, headline)
+    if partner is not None:
+        intro += (
+            f" Fig 5a pairs this run with the headline {partner.benchmark} run `{labels[partner.name].id}` "
+            f"[`{partner.name}`](../{partner.name}/README.md) ([`headline.yaml`](../headline.yaml))."
+        )
+    parts = ["## Figures", intro]
+    for version, title in zip(FIGURE_VERSIONS, ("Comparison versions", "Paper-style versions"), strict=True):
+        images = [f"![{f}, {version}](../../{figure_file(run_id, f, version)})" for f in names]
+        parts.append(f"### {title}\n\n" + "\n\n".join(images))
+    return "\n\n".join(parts)
+
+
+def paper_section(run: RunData, claims: Claims) -> str:
+    if not any(c.benchmark == run.benchmark for c in claims.claims):
+        return "## Comparison with the paper\n\nNo paper numbers for this benchmark in `configs/paper/claims.yaml`."
+    parts = paper_check_parts(run, claims, level=3)
+    parts[0] += " The same, as its own page: [paper_check.md](paper_check.md)."
+    return "\n\n".join(["## Comparison with the paper", *parts])
+
+
 def files_section(run: RunData) -> str:
     rows = [
         [m.name, f"[responses.jsonl]({m.summary['model']}/responses.jsonl)", f"[summary.json]({m.summary['model']}/summary.json)"]
@@ -199,20 +280,27 @@ def files_section(run: RunData) -> str:
     )
 
 
-def run_page(run: RunData, index: dict[tuple[str, str], dict], has_claims: bool, labels: dict[str, RunLabel]) -> str:
+def run_page(
+    run: RunData,
+    index: dict[tuple[str, str], dict],
+    claims: Claims,
+    labels: dict[str, RunLabel],
+    runs: list[RunData],
+    headline: dict,
+) -> str:
+    """The run's report: write-up, figures, ours vs the paper, then settings, models, metrics and files."""
     parts = [
         GENERATED,
         f"# Run `{labels[run.name].id}`: `{run.name}`",
         labels[run.name].description,
+        writeup_section(run),
+        figures_section(run, runs, headline, labels),
+        paper_section(run, claims),
         settings_section(run),
         models_section(run, index),
         metrics_section(run),
         files_section(run),
     ]
-    if has_claims:
-        parts.append(
-            "## Paper check\n\nOurs vs every number the paper reports for this benchmark: [paper_check.md](paper_check.md)."
-        )
     return "\n\n".join(parts) + "\n"
 
 
@@ -296,18 +384,20 @@ HEADLINE_SECTIONS = {
 }
 
 
-def headline_section(run: RunData, claims: Claims, rows: list[CheckRow]) -> str:
-    """One subsection per headline claim: its quote, the computed check, and the note. Text runs only."""
-    parts = ["## Headline claims (computed checks)"]
+def headline_section(run: RunData, claims: Claims, rows: list[CheckRow], level: int = 2) -> str:
+    """One subsection per headline claim: its quote, the computed check, and the note. Text runs only.
+    `level`: heading level of the section (2 on paper_check.md, 3 inside a run page)."""
+    parts = [f"{'#' * level} Headline claims (computed checks)"]
     for h in claims.headline:
-        parts.append(f"### `{h.id}` ({h.check}, §{h.section})\n\n> {h.quote}")
+        parts.append(f"{'#' * (level + 1)} `{h.id}` ({h.check}, §{h.section})\n\n> {h.quote}")
         parts.append(HEADLINE_SECTIONS[h.check](run, h, rows))
         if h.note:
             parts.append(f"Note: {h.note}")
     return "\n\n".join(parts)
 
 
-def paper_check_page(run: RunData, claims: Claims) -> str:
+def paper_check_parts(run: RunData, claims: Claims, level: int = 2) -> list[str]:
+    """Intro, the claim table and (text runs) the headline checks; shared by paper_check.md and the run page."""
     rows = paper_check(run, claims)
     p = claims.paper
     intro = (
@@ -315,10 +405,14 @@ def paper_check_page(run: RunData, claims: Claims) -> str:
         "Values are on our scale (fractions, seconds); `~` marks a value read off a figure. "
         '"Paper in CI" is only computed for single-model values. Stand-in rows compare our model to a different paper model.'
     )
-    parts = [GENERATED, f"# Paper check: `{run.name}`", intro, check_rows_table(rows)]
+    parts = [intro, check_rows_table(rows)]
     if run.benchmark == "text" and claims.headline:
-        parts.append(headline_section(run, claims, rows))
-    return "\n\n".join(parts) + "\n"
+        parts.append(headline_section(run, claims, rows, level))
+    return parts
+
+
+def paper_check_page(run: RunData, claims: Claims) -> str:
+    return "\n\n".join([GENERATED, f"# Paper check: `{run.name}`", *paper_check_parts(run, claims)]) + "\n"
 
 
 def check_csv_rows(run: RunData, claims: Claims) -> list[dict]:
@@ -347,7 +441,15 @@ def check_csv_rows(run: RunData, claims: Claims) -> list[dict]:
 # ---- summary page ---------------------------------------------------------------------------
 
 
-def figure_section(fig: str, run: RunData | None, note: str, claims: Claims, labels: dict[str, RunLabel]) -> str:
+def figure_section(
+    fig: str,
+    run: RunData | None,
+    note: str,
+    claims: Claims,
+    labels: dict[str, RunLabel],
+    runs: list[RunData],
+    headline: dict,
+) -> str:
     benchmark, metrics, files = FIGURES[fig]
     title = f"## Fig {fig[3:]} ({benchmark})"
     if run is None:
@@ -358,12 +460,13 @@ def figure_section(fig: str, run: RunData | None, note: str, claims: Claims, lab
         + [x for k in metrics for x in (with_ci(estimate(m, benchmark, k)), num(paper_value(claims, benchmark, m.name, k)))]
         for m in run.models
     ]
-    images = " ".join(f"![{f}](../figures/{f}_comparison.png)" for f in files)
+    drawn = run_figures(run, runs, headline)
+    images = " ".join(f"![{f}](../{figure_file(labels[run.name].id, f, 'comparison')})" for f in files if f in drawn)
     run_line = f"Run: `{labels[run.name].id}` [`{run.name}`]({run.name}/README.md) · [paper check]({run.name}/paper_check.md)"
     lines = [title, run_line]
     if note:
         lines.append(f"Note ({run.name} owner): {note}")
-    return "\n\n".join([*lines, table(header, rows), images])
+    return "\n\n".join([*lines, table(header, rows), *([images] if images else [])])
 
 
 def all_runs_section(runs: list[RunData], index: dict[tuple[str, str], dict], notes: dict, labels: dict[str, RunLabel]) -> str:
@@ -410,6 +513,8 @@ def summary_page(
             (figures.get(fig) or {}).get("note") or "",
             claims,
             labels,
+            runs,
+            headline,
         )
         for fig in FIGURES
     ]

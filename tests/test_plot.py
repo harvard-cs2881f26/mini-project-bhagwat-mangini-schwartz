@@ -33,7 +33,7 @@ from asimov.plot_data import (
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT / "scripts"))
 import plot  # noqa: E402  # pyright: ignore[reportMissingImports]
-from results_tree import make_results  # noqa: E402  # pyright: ignore[reportMissingImports]
+from results_tree import make_results, text_run  # noqa: E402  # pyright: ignore[reportMissingImports]
 
 PAPER = {"arxiv": "2509.21651", "version": "v2", "title": "T", "read_on": "2026-10-12"}
 
@@ -136,27 +136,34 @@ def test_points_in_paper_legend_order():
     assert [p.name for p in ordered] == ["Gemini 2.5 Flash-Lite (3.1)", "Claude Opus 4.1 (4.5)", "GPT-5", "Unknown"]
 
 
-def test_plot_writes_paper_and_comparison_figures(results, tmp_path, capsys):
+def test_plot_writes_each_runs_figures_under_its_run_id(results, tmp_path, capsys):
+    text_run(results, "text_run_b", [[False, True, True, True]] * 4, scored_at="2026-10-13T10:00:00-0400")
+    (results / "run_ids.yaml").write_text(yaml.safe_dump({"text_run": "txt0", "video_run": "vid0"}))  # text_run_b: new
     claims_path = tmp_path / "claims.yaml"
     claims_path.write_text(yaml.safe_dump(CLAIMS))
     headline = {"figures": {"fig4": {"run": "text_run"}, "fig5": {"run": "video_run"}, "fig6": {"run": None}}}
     (results / "headline.yaml").write_text(yaml.safe_dump(headline))
     out = tmp_path / "figures"
-    args = [
-        "--results",
-        str(results),
-        "--claims",
-        str(claims_path),
-        "--out",
-        str(out),
-    ]
+    args = ["--results", str(results), "--claims", str(claims_path), "--out", str(out)]
     assert plot.main(args) == 0
-    for fig in ("fig4a", "fig4b", "fig5a", "fig5b"):
-        for version in ("paper", "comparison"):
-            assert (out / f"{fig}_{version}.png").exists() and (out / f"{fig}_{version}.pdf").exists()
+    expected = {"txt0": ("fig4a", "fig4b", "fig5a"), "txt1": ("fig4a", "fig4b", "fig5a"), "vid0": ("fig5a", "fig5b")}
+    for run_id, figs in expected.items():
+        drawn = {p.name for p in (out / run_id).iterdir()}
+        assert drawn == {f"{f}_{v}.{ext}" for f in figs for v in ("paper", "comparison") for ext in ("png", "pdf")}
+    assert not list(out.glob("*.png")) and not list(out.glob("*.pdf"))  # nothing at the top level
     assert "fig6" in capsys.readouterr().out  # stub says it waits for the image scorer
     assert plot.main([*args, "--severity", "binary"]) == 0
-    assert (out / "fig4a_comparison_severity-binary.png").exists()
+    assert (out / "txt1" / "fig4a_comparison_severity-binary.png").exists()
+
+
+def test_plot_skips_fig5a_without_a_headline_run_of_the_other_benchmark(results, tmp_path):
+    claims_path = tmp_path / "claims.yaml"
+    claims_path.write_text(yaml.safe_dump(CLAIMS))
+    (results / "headline.yaml").write_text(yaml.safe_dump({"figures": {"fig4": {"run": "text_run"}, "fig5": {"run": None}}}))
+    out = tmp_path / "figures"
+    assert plot.main(["--results", str(results), "--claims", str(claims_path), "--out", str(out)]) == 0
+    assert (out / "txt0" / "fig4a_paper.png").exists() and not (out / "txt0" / "fig5a_paper.png").exists()
+    assert (out / "vid0" / "fig5a_paper.png").exists()  # the text headline run is its partner
 
 
 def test_same_spot_ranks_ring_models_that_share_a_score():

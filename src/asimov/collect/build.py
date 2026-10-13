@@ -1,4 +1,7 @@
-"""Everything collect.py writes, as {path under results/: text}. Pure: same runs in, same bytes out."""
+"""Everything collect.py writes, as {path under results/: text}. Pure: same runs in, same bytes out.
+
+Never results/<run>/writeup.md: that is hand-written, and only read (into the run page).
+"""
 
 from __future__ import annotations
 
@@ -55,7 +58,7 @@ def build(
     }
     for run in runs:
         has_claims = any(c.benchmark == run.benchmark for c in claims.claims)
-        files[f"{run.name}/README.md"] = pages.run_page(run, index, has_claims, labels)
+        files[f"{run.name}/README.md"] = pages.run_page(run, index, claims, labels, runs, headline)
         if has_claims:
             files[f"{run.name}/paper_check.md"] = pages.paper_check_page(run, claims)
             files[f"{run.name}/table.csv"] = to_csv(pages.check_csv_rows(run, claims), ())

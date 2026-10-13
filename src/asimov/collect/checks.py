@@ -1,7 +1,8 @@
 """Ours vs the paper (configs/paper/claims.yaml): one row per claim, plus the three headline checks.
 
-Numbers and mechanical checks only (is the paper value inside our CI, gaps with paired CIs);
-whether the reproduction holds is the owner's call (CLAUDE.md).
+Generated numbers and mechanical checks (is the paper value inside our CI, gaps with paired CIs), shown on
+paper_check.md and in each run page's "Comparison with the paper" section. Whether the reproduction holds is the
+owner's call, made in the run's hand-written write-up (results/<run>/writeup.md, CLAUDE.md).
 """
 
 from __future__ import annotations

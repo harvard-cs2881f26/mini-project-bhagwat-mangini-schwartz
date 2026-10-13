@@ -1,13 +1,16 @@
 #!/usr/bin/env python
 """Draw the paper's figures from our results (docs/PLAN.md §10). Free: reads results/ and configs/ only.
 
-    python scripts/plot.py                       # Fig 4a, 4b, 5a, 5b -> figures/<fig>_{paper,comparison}.{png,pdf}
+    python scripts/plot.py                       # every run -> figures/<run_id>/<fig>_{paper,comparison}.{png,pdf}
     python scripts/plot.py --severity binary     # Fig 4 severity axis: 4way (default) | binary | recall
+                                                 #   -> figures/<run_id>/fig4*_<version>_severity-binary.*
 
 Two versions per figure:
 - paper:      the paper's look (chart type, axes, colors, labels, legend; no title), our values only;
 - comparison: ours filled with 95% CI bars, the paper's values hollow, majority baselines dashed.
-Runs come from results/headline.yaml (the official run per figure). Fig 6 waits for the image scorer.
+Every run gets its own figures, under its run ID (results/run_ids.yaml): text runs Fig 4a and 4b, video runs Fig 5b.
+Fig 5a (text vs video) pairs each run with the headline run of the other benchmark (results/headline.yaml) and is
+skipped when there is none. Run pages (scripts/collect.py) link these files; Fig 6 waits for the image scorer.
 """
 
 from __future__ import annotations
@@ -35,7 +38,8 @@ from asimov.bench.text_score import QUESTIONS  # noqa: E402
 from asimov.claims import CLAIMS_PATH, Claims, load_claims, model_key  # noqa: E402
 from asimov.collect.build import default_headline  # noqa: E402
 from asimov.collect.load import RunData, load_results, load_yaml  # noqa: E402
-from asimov.collect.pages import FIGURES  # noqa: E402
+from asimov.collect.pages import PAIRED_FIGURE, fig5a_partner, run_figures  # noqa: E402
+from asimov.collect.run_ids import RUN_IDS_FILE, assign_ids, parse_ids  # noqa: E402
 from asimov.plot_data import (  # noqa: E402
     SEVERITY,
     SEVERITY_LABEL,
@@ -598,10 +602,20 @@ def fig5b(run: RunData, claims: Claims, out: Path) -> list[Path]:
     return written
 
 
-def headline_runs(results: Path, runs: list[RunData]) -> dict[str, RunData | None]:
-    figures = (load_yaml(results / "headline.yaml", {}) or default_headline(runs)).get("figures") or {}
-    by_name = {r.name: r for r in runs}
-    return {fig: by_name.get((figures.get(fig) or {}).get("run") or "") for fig in FIGURES}
+def draw_run(run: RunData, runs: list[RunData], headline: dict, claims: Claims, severity: str, out: Path) -> list[Path]:
+    """This run's figures (pages.run_figures) into `out`, which is figures/<run_id>/."""
+    names = run_figures(run, runs, headline)
+    written: list[Path] = []
+    for name in (n for n in names if n in FIG4):
+        written += fig4(name, run, claims, severity, out)
+    partner = fig5a_partner(run, runs, headline)
+    if PAIRED_FIGURE in names and partner is not None:
+        text, video = (run, partner) if run.benchmark == "text" else (partner, run)
+        written += fig5a(text_vs_video(text, video, claims, only_paper_models=True), "fig5a_paper", out, False)
+        written += fig5a(text_vs_video(text, video, claims, only_paper_models=False), "fig5a_comparison", out, True)
+    if "fig5b" in names:
+        written += fig5b(run, claims, out)
+    return written
 
 
 def main(argv: list[str] | None = None) -> int:
@@ -614,25 +628,16 @@ def main(argv: list[str] | None = None) -> int:
 
     runs = load_results(args.results)
     claims = load_claims(args.claims)
-    chosen = headline_runs(args.results, runs)
+    headline = load_yaml(args.results / "headline.yaml", {}) or default_headline(runs)  # as collect.py reads it
+    ids = assign_ids(parse_ids(load_yaml(args.results / RUN_IDS_FILE, {})), runs)  # new runs: the IDs collect.py gives
     written: list[Path] = []
-    if chosen["fig4"]:
-        for name in FIG4:
-            written += fig4(name, chosen["fig4"], claims, args.severity, args.out)
-    if chosen["fig4"] and chosen["fig5"]:
-        written += fig5a(
-            text_vs_video(chosen["fig4"], chosen["fig5"], claims, only_paper_models=True), "fig5a_paper", args.out, False
-        )
-        written += fig5a(
-            text_vs_video(chosen["fig4"], chosen["fig5"], claims, only_paper_models=False), "fig5a_comparison", args.out, True
-        )
-    if chosen["fig5"]:
-        written += fig5b(chosen["fig5"], claims, args.out)
+    for run in runs:
+        written += draw_run(run, runs, headline, claims, args.severity, args.out / ids[run.name])
     print("fig6: not drawn yet, waiting for the image scorer (Riddhi)")
-    missing = [f for f in ("fig4", "fig5") if not chosen[f]]
-    if missing:
-        print(f"no headline run for {', '.join(missing)} (results/headline.yaml)")
-    print(f"plot: {len(written)} files under {args.out}")
+    unpaired = [ids[r.name] for r in runs if r.benchmark in ("text", "video") and fig5a_partner(r, runs, headline) is None]
+    if unpaired:
+        print(f"fig5a: skipped for {', '.join(unpaired)}: no headline run of the other benchmark (results/headline.yaml)")
+    print(f"plot: {len(written)} files for {len(runs)} runs under {args.out}/<run_id>/")
     return 0
 
 

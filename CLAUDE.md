@@ -31,10 +31,6 @@ scope and owners. Point out the conflict instead of silently picking one.
 
 ## Hard rules
 
-- **Do not write the experiments or the analysis.** The course penalizes AI-generated work
-  the students can't explain. Build tools (loaders, scorers, clients, runners, plots). Leave
-  hypotheses, methods, conclusions and slide text to the owners. When asked for analysis,
-  give the numbers and point out what they show, but don't write the interpretation.
 - **Ask before any run that costs money**, other than a `--limit N` dry run.
 - **Cache every API response.** Reruns must be free. Never cache errors.
 - **Results only come from `scripts/run.py`**, never from a notebook or a one-off script, so every

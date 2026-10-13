@@ -1,8 +1,8 @@
 """Read results/ into memory: the only I/O in asimov.collect (the script writes the pages).
 
 Reads `results/<run>/config.yaml`, `<run>/<model>/summary.json` and `responses.jsonl` (latency,
-served model id, reply text for comparison excerpts). Never reads data/: scorers save pred, gold
-and correct per item in summary.json (docs/PLAN.md §11).
+served model id, reply text for comparison excerpts), and the run's hand-written `writeup.md` if any.
+Never reads data/: scorers save pred, gold and correct per item in summary.json (docs/PLAN.md §11).
 """
 
 from __future__ import annotations
@@ -14,6 +14,7 @@ from pathlib import Path
 import yaml
 
 SKIP_PROVIDERS = frozenset({"mock"})  # free smoke runs are gitignored, so they never appear on pages
+WRITEUP_FILE = "writeup.md"  # results/<run>/writeup.md: the owner's write-up, shown on the run page
 
 
 @dataclass(frozen=True)
@@ -35,6 +36,7 @@ class RunData:
     benchmark: str
     config: dict | None  # results/<run>/config.yaml, written by the runner at run start
     models: tuple[ModelResult, ...]  # in the config's order
+    writeup: str | None = None  # results/<run>/writeup.md, hand-written; read, never written
 
 
 def load_model(mdir: Path) -> ModelResult:
@@ -71,7 +73,9 @@ def load_run(run_dir: Path) -> RunData | None:
     benchmarks = {r.summary.get("benchmark") for r in results}
     if len(benchmarks) != 1 or None in benchmarks:
         raise ValueError(f"{run_dir}: model summaries lack or disagree on `benchmark` ({sorted(map(str, benchmarks))})")
-    return RunData(run_dir.name, str(benchmarks.pop()), config, tuple(model_order(config, results)))
+    writeup_path = run_dir / WRITEUP_FILE
+    writeup = writeup_path.read_text() if writeup_path.exists() else None
+    return RunData(run_dir.name, str(benchmarks.pop()), config, tuple(model_order(config, results)), writeup)
 
 
 def load_results(results_dir: Path) -> list[RunData]:

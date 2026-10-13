@@ -420,3 +420,89 @@ def test_cli_writes_run_ids_and_check_fails_when_one_is_missing(results, tmp_pat
     assert {p: p.read_text() for p in results.rglob("*") if p.is_file()} == before  # --check writes nothing
     assert collect.main(args) == 0
     assert collect.main([*args, "--check"]) == 0
+
+
+# ---- run page as a report --------------------------------------------------------------------
+
+RUN_PAGE_SECTIONS = [
+    "# Run `txt0`: `text_run`",
+    "## Write-up",
+    "## Figures",
+    "## Comparison with the paper",
+    "## Models",
+    "## Metrics (95% CI)",
+    "## Files",
+]
+IDS = {"text_run": "txt0", "video_run": "vid0"}
+HEADLINE = {"figures": {"fig4": {"run": "text_run"}, "fig5": {"run": "video_run"}, "fig6": {"run": None}}}
+
+
+def run_page(results: Path, claims: Claims, run: str = "text_run", headline: dict | None = None) -> str:
+    return build(load_results(results), claims, {}, HEADLINE if headline is None else headline, [], IDS)[f"{run}/README.md"]
+
+
+def test_run_page_has_its_sections_in_order(results, claims):
+    page = run_page(results, claims)
+    positions = [page.index(s + "\n") for s in RUN_PAGE_SECTIONS]
+    assert positions == sorted(positions)
+    assert page.index("Text benchmark,") < page.index("## Write-up")  # description right under the title
+
+
+def test_run_page_folds_in_the_paper_check(results, claims):
+    page = run_page(results, claims)
+    comparison = page[page.index("## Comparison with the paper") : page.index("## Models")]
+    assert "fig4a_gpt5_latent_risk" in comparison and "[paper_check.md](paper_check.md)" in comparison
+    assert "Headline claims" in comparison and "Holm" in comparison and "effect + activated_risk" in comparison
+    assert "fig5b_gpt5_within" in run_page(results, claims, "video_run")
+
+
+def test_run_page_lists_the_runs_figures_comparison_first(results, claims):
+    page = run_page(results, claims)
+    figures = page[page.index("## Figures") : page.index("## Comparison with the paper")]
+    links = re.findall(r"\]\((\.\./\.\./figures/[^)]+)\)", figures)
+    assert links == [f"../../figures/txt0/{f}_{v}.png" for v in ("comparison", "paper") for f in ("fig4a", "fig4b", "fig5a")]
+    video = run_page(results, claims, "video_run")
+    assert re.findall(r"\]\(\.\./\.\./figures/vid0/([^)]+)\)", video) == [
+        "fig5a_comparison.png",
+        "fig5b_comparison.png",
+        "fig5a_paper.png",
+        "fig5b_paper.png",
+    ]
+
+
+def test_fig5a_is_left_out_without_a_headline_run_of_the_other_benchmark(results, claims):
+    page = run_page(results, claims, headline={"figures": {"fig4": {"run": "text_run"}, "fig5": {"run": None}}})
+    assert "fig4a_comparison.png" in page and "fig5a" not in page
+
+
+def test_writeup_is_included_verbatim_when_present(results, claims):
+    assert "No write-up yet: add results/text_run/writeup.md" in run_page(results, claims)
+    writeup = "### What we see\n\nGPT-5 | table pipes and *markdown* stay as written.\n"
+    (results / "text_run" / "writeup.md").write_text(writeup)
+    page = run_page(results, claims)
+    assert writeup.strip() in page and "No write-up yet" not in page
+    assert page.index("## Write-up") < page.index(writeup.strip()) < page.index("## Figures")
+
+
+def test_collect_never_writes_writeup(results, tmp_path):
+    args = ["--results", str(results), "--claims", str(write_claims(tmp_path))]
+    assert collect.main(args) == 0
+    assert not (results / "text_run" / "writeup.md").exists()  # no placeholder file
+    path = results / "video_run" / "writeup.md"
+    path.write_text("Hand-written.\n")
+    files = build(load_results(results), empty_claims(), {}, {}, [])
+    assert not any(p.endswith("writeup.md") for p in files)
+    assert collect.orphaned_files(results, files) == []
+    assert collect.main([*args, "--check"]) == 1  # the run page includes the write-up: rerun collect
+    assert collect.main(args) == 0 and path.read_text() == "Hand-written.\n"
+    assert collect.main([*args, "--check"]) == 0
+    assert "Hand-written." in (results / "video_run" / "README.md").read_text()
+
+
+def test_summary_links_the_headline_runs_figures(results, claims):
+    summary = build(load_results(results), claims, {}, HEADLINE, [], IDS)["README.md"]
+    assert "![fig4a](../figures/txt0/fig4a_comparison.png)" in summary
+    assert "![fig4b](../figures/txt0/fig4b_comparison.png)" in summary
+    assert "![fig5a](../figures/vid0/fig5a_comparison.png)" in summary
+    assert "![fig5b](../figures/vid0/fig5b_comparison.png)" in summary
+    assert "](../figures/fig" not in summary  # no old top-level figure paths

@@ -6,7 +6,7 @@ and the latest `WORKLOG.md` entries first.
 
 Changes from the 2026-10-11 draft: this plan builds on the existing harness and doesn't add a
 second one. It uses `WORKLOG.md` / `CONTRIBUTIONS.md` instead of a new PROGRESS.md, and keeps the
-team CLAUDE.md. Hypotheses, verdicts and write-up stay with Noa (CLAUDE.md hard rules).
+team CLAUDE.md.
 
 **Four Claude sessions.** A new session starts only where Noa has to step in between (decisions
 or review), or where one session would run out of context. Cost approvals happen *inside* a
@@ -53,8 +53,8 @@ session: Claude stops, shows the numbers, waits for a yes, and carries on.
 - **Ask Noa before any paid run** beyond `--limit N`. Show the projected cost from the limit run.
 - Don't edit the runner or existing clients for one benchmark; if the runner must change
   (Session 3), it's a PR for Tyler.
-- Claude produces code, tables and figures with numbers. Noa writes hypotheses, verdicts,
-  limitations and slides.
+- Claude produces code, tables, figures and run write-ups (what the results show, comparison
+  with the paper, key takeaways).
 - End of every session: update the Status row, add a `CONTRIBUTIONS.md` row (AI-assistance
   cell honest), log any scoring decision in `WORKLOG.md` (date, DECIDED/PROPOSED/OPEN,
   alternative considered).
@@ -334,7 +334,7 @@ Starts with the same `PART 2 APPROVED` check.
   (reads `HYPOTHESIS.md` and results, lists the 5 strongest threats). Noa decides what goes
   in limitations.
 - **Done when:** verifier matches; figures and tables exist; Claude lists the numbers per
-  contrast without interpreting them, and stops.
+  contrast, and stops.
 
 ### After Session 4: write-up + slides (Noa)
 
@@ -589,7 +589,7 @@ paper (Session 2) and re-read only if the paper changes (e.g. a new arXiv versio
 - Stand-in models are flagged on every row, since they aren't the paper's model.
 - The paper's three headline claims (big models spot risks well, small models lag, actions are
   harder) appear as their computed checks (§3 claims a-c) with the numbers behind each.
-- Numbers and mechanical checks only; whether the reproduction "holds" is the owner's call.
+- The mechanical checks, plus the run's write-up (`results/<run>/writeup.md`) on what they show.
 - **Why not have an LLM re-read the paper on every run:** the paper doesn't change between runs,
   an LLM read costs money and can misread a number differently each time. Reading once into a
   reviewed file and comparing by code is free, repeatable and auditable.
@@ -608,4 +608,4 @@ paper (Session 2) and re-read only if the paper changes (e.g. a new arXiv versio
 3. Only `headline.yaml` and `comparisons.yaml` are hand-edited (plus `configs/paper/claims.yaml`
    once, at review): owners pick the official run per figure, choose comparisons, and write notes
    in their own words.
-4. Pages show numbers only; interpretation stays with the owners (CLAUDE.md).
+4. Each run page includes its write-up (`results/<run>/writeup.md`): what the results show, the comparison with the paper, and key takeaways.
