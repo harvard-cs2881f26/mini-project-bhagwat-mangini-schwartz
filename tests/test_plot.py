@@ -31,6 +31,7 @@ from asimov.plot_data import (
 )
 
 ROOT = Path(__file__).resolve().parents[1]
+QUESTIONS_FOR_TEST = ("latent_risk", "latent_severity", "effect", "activated_risk")
 sys.path.insert(0, str(ROOT / "scripts"))
 import plot  # noqa: E402  # pyright: ignore[reportMissingImports]
 from results_tree import make_results, text_run  # noqa: E402  # pyright: ignore[reportMissingImports]
@@ -149,7 +150,11 @@ def test_plot_writes_each_runs_figures_under_its_run_id(results, tmp_path, capsy
     expected = {"txt0": ("fig4a", "fig4b", "fig5a"), "txt1": ("fig4a", "fig4b", "fig5a"), "vid0": ("fig5a", "fig5b")}
     for run_id, figs in expected.items():
         drawn = {p.name for p in (out / run_id).iterdir()}
-        extra = {f"severity_scoring.{ext}" for ext in ("png", "pdf")} if run_id.startswith("txt") else set()
+        extra = (
+            {f"{f}.{ext}" for f in ("accuracy_heatmap", "severity_scoring") for ext in ("png", "pdf")}
+            if run_id.startswith("txt")
+            else set()
+        )
         assert drawn == {f"{f}_{v}.{ext}" for f in figs for v in ("paper", "comparison") for ext in ("png", "pdf")} | extra
     assert not list(out.glob("*.png")) and not list(out.glob("*.pdf"))  # nothing at the top level
     assert "fig6" in capsys.readouterr().out  # stub says it waits for the image scorer
@@ -290,3 +295,12 @@ def test_severity_scoring_chart_for_text_runs(results, tmp_path):
     paths = plot.severity_scoring(run, Claims.model_validate(CLAIMS), tmp_path)
     assert {p.name for p in paths} == {"severity_scoring.png", "severity_scoring.pdf"}
     assert [label for _, label, _ in plot.SCORING] == ["Multiple choice (exact level)", "Severe vs not", "Severe recall"]
+
+
+def test_accuracy_heatmap_for_text_runs(results, tmp_path):
+    from asimov.claims import Claims
+
+    run = next(r for r in load_results(results) if r.benchmark == "text")
+    paths = plot.accuracy_heatmap(run, Claims.model_validate(CLAIMS), tmp_path)
+    assert {p.name for p in paths} == {"accuracy_heatmap.png", "accuracy_heatmap.pdf"}
+    assert list(plot.HEATMAP_COLUMNS) == list(QUESTIONS_FOR_TEST)

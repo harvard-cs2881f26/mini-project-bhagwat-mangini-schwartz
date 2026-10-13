@@ -32,7 +32,11 @@ These redraw the paper's own figures with our results: same chart type, axes, wo
 
 ![fig5a, paper](../../figures/txt1/fig5a_paper.png)
 
-### Scoring choices
+### Across models
+
+Every model on all four questions in one grid: darker means more accurate. Each cell shows our accuracy, and the paper's value underneath where the paper reports one.
+
+![accuracy_heatmap](../../figures/txt1/accuracy_heatmap.png)
 
 The same severity answers (Q2) scored three ways, per model: the exact level (multiple choice, the score Fig 4a uses), severe vs not, and severe recall. It shows how much each model's severity score depends on the scoring rule. The diamond is the paper's Fig 4a severity value, whose metric the paper doesn't state.
 

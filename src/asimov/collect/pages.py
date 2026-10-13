@@ -45,14 +45,21 @@ OWN_FIGURES = {"text": ("fig4a", "fig4b"), "video": ("fig5b",)}
 PAIRED_FIGURE = "fig5a"
 PARTNER_FIGURE = {"text": "fig5", "video": "fig4"}  # benchmark -> the headline.yaml figure holding its Fig 5a partner
 FIGURE_VERSIONS = ("comparison", "paper")  # order on the pages: comparison first
-# Our own extra charts (one version each, no paper-style twin), drawn for every run of the benchmark.
-EXTRA_FIGURES = {"text": ("severity_scoring",)}
-EXTRA_SUBHEADING = "Scoring choices"
-EXTRA_NOTE = (
-    "The same severity answers (Q2) scored three ways, per model: the exact level (multiple choice, the score Fig 4a "
-    "uses), severe vs not, and severe recall. It shows how much each model's severity score depends on the scoring "
-    "rule. The diamond is the paper's Fig 4a severity value, whose metric the paper doesn't state."
-)
+# Our own extra charts (one version each, no paper-style twin), drawn for every run of the benchmark,
+# shown under one subheading in this order, each with its note.
+EXTRA_FIGURES = {"text": ("accuracy_heatmap", "severity_scoring")}
+EXTRA_SUBHEADING = "Across models"
+EXTRA_NOTES = {
+    "accuracy_heatmap": (
+        "Every model on all four questions in one grid: darker means more accurate. Each cell shows our accuracy, "
+        "and the paper's value underneath where the paper reports one."
+    ),
+    "severity_scoring": (
+        "The same severity answers (Q2) scored three ways, per model: the exact level (multiple choice, the score "
+        "Fig 4a uses), severe vs not, and severe recall. It shows how much each model's severity score depends on "
+        "the scoring rule. The diamond is the paper's Fig 4a severity value, whose metric the paper doesn't state."
+    ),
+}
 FIGURES_DIR = "figures"  # at the repo root, next to results/
 FIGURE_SUBHEADINGS = {"comparison": "Comparison versions", "paper": "Paper-style versions"}
 FIGURE_VERSION_NOTES = {  # the plain-language paragraph under each subheading of a run page's Figures section
@@ -286,8 +293,8 @@ def figures_section(run: RunData, runs: list[RunData], headline: dict, labels: d
         parts.append("\n\n".join([f"### {FIGURE_SUBHEADINGS[version]}", FIGURE_VERSION_NOTES[version], *images]))
     extras = EXTRA_FIGURES.get(run.benchmark, ())
     if extras:
-        images = [f"![{f}](../../{extra_figure_file(run_id, f)})" for f in extras]
-        parts.append("\n\n".join([f"### {EXTRA_SUBHEADING}", EXTRA_NOTE, *images]))
+        blocks = [f"{EXTRA_NOTES[f]}\n\n![{f}](../../{extra_figure_file(run_id, f)})" for f in extras]
+        parts.append("\n\n".join([f"### {EXTRA_SUBHEADING}", *blocks]))
     return "\n\n".join(parts)
 
 

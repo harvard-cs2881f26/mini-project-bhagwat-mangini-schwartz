@@ -674,6 +674,46 @@ def severity_scoring(run: RunData, claims: Claims, out: Path) -> list[Path]:
         return save(fig, out, "severity_scoring")
 
 
+# Accuracy heatmap: models x the four questions. Sequential, one hue light -> dark (dataviz rule for magnitude).
+HEATMAP_CMAP = "Blues"
+HEATMAP_RANGE = (0.3, 1.0)  # fixed, so heatmaps of different runs share one color scale
+HEATMAP_DARK_TEXT_FROM = 0.75  # cells at or above this value get white text
+HEATMAP_STYLE: dict[RcKeyType, Any] = {**STYLE, "axes.grid": False}
+HEATMAP_COLUMNS = {
+    QUESTIONS[0]: "Injury type\n(Q1)",
+    QUESTIONS[1]: "Severity\n(Q2)",
+    QUESTIONS[2]: "Action effect\n(Q3)",
+    QUESTIONS[3]: "Severity after\naction (Q4)",
+}
+HEATMAP_PAPER_FIGURE = {QUESTIONS[0]: "4a", QUESTIONS[1]: "4a", QUESTIONS[2]: "4b", QUESTIONS[3]: "4b"}
+
+
+def accuracy_heatmap(run: RunData, claims: Claims, out: Path) -> list[Path]:
+    """Models x questions grid of our accuracy (multiple choice), with the paper's value under ours."""
+    models = in_paper_order(list(run.models))
+    questions = list(HEATMAP_COLUMNS)
+    grid = [[(estimate(m, run.benchmark, f"{q}_accuracy") or None) for q in questions] for m in models]
+    values = [[nan if e is None else e.value for e in row] for row in grid]
+    with plt.rc_context(HEATMAP_STYLE):
+        fig, ax = plt.subplots(figsize=(8.5, 0.55 * len(models) + 1.8))
+        image = ax.imshow(values, cmap=HEATMAP_CMAP, vmin=HEATMAP_RANGE[0], vmax=HEATMAP_RANGE[1], aspect="auto")
+        for i, m in enumerate(models):
+            for j, q in enumerate(questions):
+                v = values[i][j]
+                if isnan(v):
+                    continue
+                theirs = paper_value(claims, run.benchmark, m.name, f"{q}_accuracy", HEATMAP_PAPER_FIGURE[q])
+                text = f"{v:.0%}" + (f"\npaper {theirs:.0%}" if theirs is not None else "")
+                ax.text(j, i, text, ha="center", va="center", fontsize=9, color="white" if v >= HEATMAP_DARK_TEXT_FROM else INK)
+        ax.set_xticks(range(len(questions)), [HEATMAP_COLUMNS[q] for q in questions])
+        ax.set_yticks(range(len(models)), [m.name for m in models])
+        ax.xaxis.tick_top()
+        ax.set_title("Accuracy on each question (multiple choice, % of scenarios)", pad=34)
+        bar = fig.colorbar(image, ax=ax, fraction=0.04, pad=0.02)
+        bar.ax.yaxis.set_major_formatter(PercentFormatter(xmax=1, decimals=0))
+        return save(fig, out, "accuracy_heatmap")
+
+
 def draw_run(run: RunData, runs: list[RunData], headline: dict, claims: Claims, severity: str, out: Path) -> list[Path]:
     """This run's figures (pages.run_figures) into `out`, which is figures/<run_id>/."""
     names = run_figures(run, runs, headline)
@@ -687,7 +727,10 @@ def draw_run(run: RunData, runs: list[RunData], headline: dict, claims: Claims, 
         written += fig5a(text_vs_video(text, video, claims, only_paper_models=False), "fig5a_comparison", out, True)
     if "fig5b" in names:
         written += fig5b(run, claims, out)
-    if "severity_scoring" in EXTRA_FIGURES.get(run.benchmark, ()):
+    extras = EXTRA_FIGURES.get(run.benchmark, ())
+    if "accuracy_heatmap" in extras:
+        written += accuracy_heatmap(run, claims, out)
+    if "severity_scoring" in extras:
         written += severity_scoring(run, claims, out)
     return written
 

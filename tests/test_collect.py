@@ -462,7 +462,8 @@ def test_run_page_lists_the_runs_figures_comparison_first(results, claims):
     figures = page[page.index("## Figures") : page.index("## Comparison with the paper")]
     links = re.findall(r"\]\((\.\./\.\./figures/[^)]+)\)", figures)
     assert links == [f"../../figures/txt0/{f}_{v}.png" for v in ("comparison", "paper") for f in ("fig4a", "fig4b", "fig5a")] + [
-        "../../figures/txt0/severity_scoring.png"  # text runs' extra chart, after both versions
+        "../../figures/txt0/accuracy_heatmap.png",  # text runs' extra charts, after both versions
+        "../../figures/txt0/severity_scoring.png",
     ]
     video = run_page(results, claims, "video_run")
     assert re.findall(r"\]\(\.\./\.\./figures/vid0/([^)]+)\)", video) == [
@@ -594,5 +595,6 @@ def test_text_run_page_shows_the_scoring_chart(results):
     files = build(load_results(results), empty_claims(), {}, {}, [], {"text_run": "txt0", "video_run": "vid0"})
     text_page = next(v for k, v in files.items() if k.endswith("README.md") and "text_run" in k)
     assert f"### {EXTRA_SUBHEADING}" in text_page and "figures/txt0/severity_scoring.png" in text_page
+    assert "figures/txt0/accuracy_heatmap.png" in text_page
     video_page = next(v for k, v in files.items() if k.endswith("README.md") and "video_run" in k)
     assert EXTRA_SUBHEADING not in video_page
