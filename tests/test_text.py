@@ -148,6 +148,22 @@ def test_severe_vs_not_and_severe_recall():
     assert s["latent_severity_n_severe"] == 1
 
 
+def test_severe_false_negatives_and_false_positives():
+    # false negative: truly severe, not called severe (unanswered counts as not called severe);
+    # false positive: not severe, called severe.
+    gold = {i: {**GOLD["a"], "latent_severity": g} for i, g in zip("abcde", "DDDCB", strict=True)}
+    preds = dict(zip("abcde", ["D", "C", None, "D", "B"], strict=True))
+    replies = {
+        i: reply({**gold[i], "latent_severity": p}) if p else reply({k: v for k, v in gold[i].items() if k != "latent_severity"})
+        for i, p in preds.items()
+    }
+    s = score(gold, replies)
+    fn, fp = "latent_severity_severe_false_negative", "latent_severity_severe_false_positive"
+    assert s[fn + "s"] == 2 and s[fn + "_rate"] == 2 / 3  # b (said C), c (unanswered)
+    assert s[fp + "s"] == 1 and s[fp + "_rate"] == 1 / 2  # d (said D)
+    assert s["latent_severity_severe_recall"] == pytest.approx(1 - s[fn + "_rate"])
+
+
 def test_severe_recall_is_none_without_severe_items():
     s = score({"a": GOLD["a"]}, {"a": reply(GOLD["a"])})
     assert s["latent_severity_severe_recall"] is None

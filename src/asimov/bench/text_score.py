@@ -158,12 +158,22 @@ def rate(hits: int, total: int) -> float | None:
 
 
 def severity_metrics(question: str, per_item: dict[str, dict]) -> dict:
+    """Severe (D) vs not: a false negative is a truly severe injury the model didn't call severe
+    (unanswered counts as not called severe); a false positive is a not-severe injury it called
+    severe. Rates are out of the truly severe / not-severe items. severe_recall = 1 - FN rate."""
     outcomes = [o[question] for o in per_item.values()]
     severe = [o for o in outcomes if o["gold"] == SEVERE]
+    not_severe = [o for o in outcomes if o["gold"] != SEVERE]
+    false_negatives = sum(o["pred"] != SEVERE for o in severe)
+    false_positives = sum(o["pred"] == SEVERE for o in not_severe)
     binary_ok = sum((o["pred"] == SEVERE) == (o["gold"] == SEVERE) and o["pred"] is not None for o in outcomes)
     return {
         f"{question}_severe_binary_accuracy": rate(binary_ok, len(outcomes)),
-        f"{question}_severe_recall": rate(sum(o["pred"] == SEVERE for o in severe), len(severe)),
+        f"{question}_severe_recall": rate(len(severe) - false_negatives, len(severe)),
+        f"{question}_severe_false_negatives": false_negatives,
+        f"{question}_severe_false_negative_rate": rate(false_negatives, len(severe)),
+        f"{question}_severe_false_positives": false_positives,
+        f"{question}_severe_false_positive_rate": rate(false_positives, len(not_severe)),
         f"{question}_n_severe": len(severe),
     }
 
