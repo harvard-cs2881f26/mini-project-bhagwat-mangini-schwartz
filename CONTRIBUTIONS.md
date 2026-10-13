@@ -46,3 +46,5 @@ before the writeup is submitted.
 | 2026-10-10 | Tyler | Error review page for the video benchmark (breakdowns by answer-key group, timing by true time, severity confusion, example videos with frames and replies) | `scripts/error_report.py` | Script written by Claude at Tyler's request; numbers only, interpretation left to Tyler (review pending) |
 
 2026-10-12: Riddhi used Codex assistance to clean and phase the Figure 6 integration: separate scorer consistent with video, reuse annotation loaders and shared registry, move image fingerprints out of runner logic, and preserve exact requests/cache compatibility. Codex ran offline tests and prepared staged review changes; no paid calls or commits.
+
+2026-10-13: Riddhi used Codex assistance for Phase 2 Figure 6 plotting, category validation, model-availability checks and offline scoring/source audit tools. Codex reused existing repo components, verified plots and tests, and committed this phase at the user's request.

@@ -8,6 +8,7 @@ Reads keys from .env. Providers without a key are reported as "no key" and skipp
 from __future__ import annotations
 
 import os
+import argparse
 import sys
 from pathlib import Path
 
@@ -32,6 +33,15 @@ def listing(provider: str) -> list[str]:
 
 
 def main() -> None:
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument("--config", help="Check exact model IDs from this YAML instead of the Fig. 5 stand-ins")
+    args = parser.parse_args()
+    if args.config:
+        import yaml
+        specs = yaml.safe_load(Path(args.config).read_text())["models"]
+        models = {s["name"]: (s["provider"], s["model"]) for s in specs}
+    else:
+        models = PAPER_MODELS
     load_dotenv(ROOT / ".env")
     available: dict[str, list[str] | str] = {}
     for provider, var in KEY_VARS.items():
@@ -42,8 +52,9 @@ def main() -> None:
             available[provider] = listing(provider)
         except Exception as e:  # report and keep going
             available[provider] = f"error: {type(e).__name__}: {e}"
-    print(f"{'Paper model':24s} {'API model ID':22s} status")
-    for name, (provider, model) in PAPER_MODELS.items():
+    print("Listing only: a listed model may still reject inference for this account.")
+    print(f"{'Configured model':24s} {'API model ID':22s} status")
+    for name, (provider, model) in models.items():
         ids = available[provider]
         if isinstance(ids, str):
             status = ids

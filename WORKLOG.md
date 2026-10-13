@@ -343,3 +343,7 @@ Status tags: **DECIDED**, **PROPOSED** (needs team sign-off), **OPEN** (needs a 
 - DECIDED: build on the shared benchmark registry, request parts, row reader, clients and runner. Separate image scoring into image_score.py like video_score.py; reuse the existing annotation loader, with annotation-free request inputs and scorer-only answer dictionaries. Move image fingerprint construction into the image benchmark and avoid reading its JPEG twice for a system/user request. Alternative: a separate runner or new plugin/hook framework; rejected as unnecessary.
 - Preserve original prompts, JPEG bytes, literal box-interior scoring, malformed-response policy, historical fingerprints and cached results. Exact author settings remain unverified; no new paid calls.
 - Prepare three reviewable commit phases: benchmark integration, plotting/audit tools, then cached results and reproduction evidence. No commits created without approval.
+
+### 2026-10-13 — Figure 6 plotting and offline audit tools (Riddhi, Codex-assisted)
+- Added paper-format horizontal plotting through the existing matplotlib stack, category mapping validation with provisional-label opt-in, native model-availability checks, and offline input/geometry/denominator audit. Reused shared data rows and dataset definitions.
+- Five category tests pass; PNG inspected and plots generated in a temporary directory. No API calls required by plotting/audit. This is Phase 2 of the user-authorized phased commits.
