@@ -1,0 +1,9 @@
+# Variant of part2_codiv.yaml (Laya row only, not OpenJev) with one change: prompt decision_short ->
+# decision_full. Codiv: run with --workers 1 (60 requests/min). Laya reads at most 512 tokens and cuts longer
+# input silently; the full wording is longer (input sizes in WORKLOG).
+run: part2_laya_full
+benchmark: text
+prompt: decision_full
+thinking: min
+models:
+  - {name: Laya, provider: systemone, model: laya-1.0, base_url: "https://api.codiv.ai", key_env: CODIV_API_KEY}

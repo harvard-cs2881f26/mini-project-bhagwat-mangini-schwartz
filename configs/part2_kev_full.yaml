@@ -1,0 +1,9 @@
+# Variant of part2_kev.yaml with one change: prompt decision_short -> decision_full.
+# Kev applies its own fitted temperature (2.41); see part2_kev.yaml.
+run: part2_kev_full
+benchmark: text
+prompt: decision_full
+thinking: min
+models:
+  - {name: Kev-4B, provider: systemone, model: kev-latest, base_url: "https://nschwartz--kev-api.modal.run",
+     key_env: KEV_API_KEY}

@@ -1032,3 +1032,120 @@ Q3 60/97/121/41, Q4 78/43/90/108.
 | `part2_jev_full` | 71/85/67/74/22 | 23/76/66/154 | 19/147/83/70 | 161/31/29/98 |
 | `part2_openjev_full` | 56/84/74/66/39 | 3/66/150/100 | 26/131/99/63 | 152/74/31/62 |
 | `part2_jev_letters` | 76/89/63/74/17 | 76/51/66/126 | 0/188/41/90 | 202/11/17/89 |
+
+## 2026-10-14: Part 2 wording x mode grid (hosted)
+
+Numbers only; interpretation is Noa's. Ten new runs fill the wording {short, full} x mode
+{independent, cumulative} grid for the hosted decision systems (overnight, run by Claude at Noa's
+request to keep running experiments; API budget $0.50). Each new config copies a base config with
+exactly one change, named in the comment at its top. Every new run: `--limit 5` first (0 errors,
+0 parse failures except luna refusals), then 319 items, then a second pass that called nothing
+(0 errors on the first pass, so nothing to retry). Codiv runs used `--workers 1`; no rate-limit errors.
+
+The table has **every hosted decision run so far** (existing and new; `part2_luna_gen` is an LLM
+run, not a decision run, and is left out). Severity columns are exact-level accuracy, as in Fig 4.
+Think = OpenJev's `think` budget. Cumulative latency is the sum of the 4 calls per item.
+
+| Run | System | Wording | Mode | Option values | Think | Q1 risk type | Q2 severity | Q3 effect | Q4 activated | Parse fail | p50 latency | API cost |
+|---|---|---|---|---|---|---|---|---|---|---|---|---|
+| txt2 `part2_codiv` | Laya | short | independent | names | - | 23.5% | 37.9% | 30.1% | 27.9% | 0.0% | 0.41 s | $0.000 |
+| txt2 `part2_codiv` | OpenJev | short | independent | names | 0 | 50.5% | 24.8% | 42.6% | 30.7% | 0.0% | 0.52 s | $0.000 |
+| txt3 `part2_openjev_think512` | OpenJev | short | independent | names | 512 | 61.4% | 39.2% | 65.8% | 48.3% | 0.0% | 1.55 s | $0.000 |
+| txt4 `part2_jev` | Jev | short | independent | names | - | 82.1% | 52.7% | 49.5% | 48.0% | 0.0% | 0.15 s | $0.014 |
+| txt5 `part2_jev_reversed` | Jev (options reversed) | short | independent | names | - | 81.2% | 54.2% | 51.7% | 46.4% | 0.0% | 0.15 s | $0.014 |
+| txt6 `part2_luna_decide` | luna Decisions | short | independent | names | - | 82.1% | 37.9% | 39.8% | 46.1% | 0.9% | 0.13 s | $0.030 |
+| txt8 `part2_kev` | Kev-4B | short | independent | names | - | 42.9% | 38.2% | 58.6% | 42.9% | 0.0% | 0.39 s | GPU time |
+| txt9 `part2_jev_cumulative` | Jev | short | cumulative | names | - | 82.8% | 60.5% | 57.4% | 55.8% | 0.0% | 0.55 s | $0.030 |
+| txt10 `part2_jev_full` | Jev | full | independent | names | - | 87.5% | 57.4% | 67.1% | 51.7% | 0.0% | 0.15 s | $0.022 |
+| txt11 `part2_jev_letters` | Jev | short | independent | letters | - | 86.2% | 52.7% | 51.7% | 47.3% | 0.0% | 0.14 s | $0.014 |
+| txt12 `part2_kev_cumulative` | Kev-4B | short | cumulative | names | - | 42.0% | 32.6% | 57.1% | 42.9% | 0.0% | 0.69 s | GPU time |
+| txt13 `part2_openjev_cumulative` | OpenJev | short | cumulative | names | 0 | 44.5% | 25.1% | 59.6% | 36.7% | 0.0% | 1.66 s | $0.000 |
+| txt14 `part2_openjev_full` | OpenJev | full | independent | names | 0 | 78.4% | 67.1% | 68.3% | 45.1% | 0.0% | 0.45 s | $0.000 |
+| txt15 `part2_jev_full_cumulative` | Jev | full | cumulative | names | - | 86.5% | 68.0% | 74.9% | 63.3% | 0.0% | 0.70 s | $0.038 |
+| txt16 `part2_luna_decide_full` | luna Decisions | full | independent | names | - | 83.1% | 45.1% | 58.0% | 40.1% | 2.5% | 0.12 s | $0.049 |
+| txt17 `part2_luna_decide_cumulative` | luna Decisions | short | cumulative | names | - | 81.8% | 51.1% | 50.2% | 53.9% | 1.3% | 0.50 s | $0.043 |
+| txt18 `part2_luna_decide_full_cumulative` | luna Decisions | full | cumulative | names | - | 82.4% | 65.2% | 62.7% | 60.8% | 0.3% | 0.52 s | $0.062 |
+| txt19 `part2_luna_decide_letters` | luna Decisions | short | independent | letters | - | 81.5% | 31.0% | 40.8% | 46.1% | 1.3% | 0.12 s | $0.029 |
+| txt20 `part2_openjev_full_cumulative` | OpenJev | full | cumulative | names | 0 | 61.4% | 45.1% | 69.9% | 41.4% | 0.0% | 1.72 s | $0.000 |
+| txt21 `part2_laya_full` | Laya | full | independent | names | - | 27.0% | 36.4% | 22.9% | 25.1% | 0.0% | 0.35 s | $0.000 |
+| txt22 `part2_laya_cumulative` | Laya | short | cumulative | names | - | 23.5% | 28.8% | 22.6% | 22.6% | 0.0% | 1.49 s | $0.000 |
+| txt23 `part2_openjev_think512_full` | OpenJev | full | independent | names | 512 | 86.2% | 66.5% | 75.2% | 63.0% | 0.0% | 4.92 s | $0.000 |
+| txt24 `part2_openjev_think512_cumulative` | OpenJev | short | cumulative | names | 512 | 59.6% | 45.8% | 62.7% | 49.5% | 0.0% | 4.54 s | $0.000 |
+
+- **Grid coverage.** Jev, luna Decisions, OpenJev think 0 and OpenJev think 512: all four
+  wording x mode cells (think 512 has no full-cumulative run; not asked for). Laya: short-independent,
+  full-independent, short-cumulative. Kev-4B: short-independent and short-cumulative only.
+  Letters: Jev and luna (short-independent).
+- **Kev cells not run.** Configs `part2_kev_full`, `part2_kev_letters` and `part2_kev_full_cumulative`
+  were added later the same night (Noa raised the budget to $5 incl. Modal), but redeploying Kev's Modal
+  app was blocked by the session's permission check, so no Kev call was made and there are no Kev
+  results for them. Kev stays stopped. To run them: redeploy `kev_serve.py` (see "Kev-4B on Modal"),
+  then `scripts/run.py` on each config.
+- **Cost (new runs):** tokens x list price (Jev $0.042/M input, output free; Decisions $0.10/M input;
+  Codiv free tier). API total **$0.221** (the smoke calls are included: they are reused by the full
+  runs). Input tokens: Jev full-cumulative 914,638; luna full 485,248, cumulative 427,248,
+  full-cumulative 620,412, letters 293,808; OpenJev think 0 full-cumulative 616,507; Laya full
+  394,267, cumulative 333,752; OpenJev think 512 full 1,008,477 (147,416 output), cumulative
+  1,225,081 (380,283 output).
+- **p95 latency (new runs):** Jev full-cumulative 0.86 s; luna full 0.23 s, cumulative 0.74 s,
+  full-cumulative 0.88 s, letters 0.23 s; OpenJev think 0 full-cumulative 6.87 s; Laya full 5.49 s,
+  cumulative 6.68 s; OpenJev think 512 full 6.31 s, cumulative 5.84 s.
+- **OpenJev think 512, full wording:** 170 of 319 calls reported 512 output tokens (the thinking
+  budget). `truncation_rate` is 0: the service still returned probabilities for every question.
+- **luna Decisions refusals** (per question, `type: refusal`; counted as unanswered = wrong, and the
+  item counts as a parse failure and a refusal):
+  - `part2_luna_decide_full`: 14 question refusals on 8 items (Q2 5, Q3 5, Q4 4; no Q1);
+  - `part2_luna_decide_cumulative`: 5 on 4 items (Q1 3, Q3 1, Q4 1);
+  - `part2_luna_decide_full_cumulative`: 2 on 1 item (`text_0224` Q3 and Q4);
+  - `part2_luna_decide_letters`: 4 on 4 items (Q1 2, Q3 2).
+  In cumulative runs a refused question adds no context line to later calls (checked).
+
+### Laya input size, full wording (512-token limit): truncation likely on Q3
+Laya reads at most 512 tokens and cuts longer input without saying so; Codiv returns no truncation
+signal. Per-question input = state + instructions + option values and texts:
+- **Characters** (all 319 items): short wording, max per question 1,509; full wording, Q3 (effect)
+  median 2,658, max 2,925; Q1 max 1,325, Q2 max 1,542, Q4 max 1,883.
+- **Tokens reported by Codiv per call:** `part2_laya_cumulative` (one question per call, short
+  wording) Q1 median 152 (max 213), Q2 282 (344), Q3 238 (305), Q4 373 (439); none above 512.
+  `part2_laya_full` (one call, all 4 questions) median 1,235, max 1,467: all 319 above 512, but this
+  count covers the 4 questions together, as in `part2_codiv` (median 847), so it doesn't show
+  per-question size.
+- **Estimate for full wording per question** (characters / 3.53, the median characters per reported
+  token in `part2_laya_cumulative`; tokenizer-free proxy, context lines not counted, so the ratio
+  leans low and the estimate high): Q3 median ~753, max ~828 tokens, above 512 on **all 319** items;
+  Q4 median ~458, above 512 on 3 items; Q1 and Q2 below 512 on all items.
+- **Flag:** `part2_laya_full` Q3 (and possibly Q4 on a few items) likely exceeded Laya's 512-token
+  limit and was cut. Its Q3 numbers should be read with that in mind. **UNVERIFIED** (no tokenizer,
+  no truncation signal from Codiv).
+
+### Bug checks (all ten new runs)
+Same replay script as the 2026-10-13 variant runs (each saved row re-run through
+`bench.text.build_request` + `models.decision.generate_decision` with the saved provider responses in
+place of HTTP; extended for the OpenAI Decisions client):
+- 319 rows, no duplicate ids, one cache key per run, the config's prompt on every row.
+- Served model on every call: `jev-1.13.0` (Jev), `gpt-6-luna` (luna), `openjev-0.1` (OpenJev),
+  `laya-1.0` (Laya).
+- Every answered question's probabilities sum to 1 within 0.03; every reply letter is a
+  top-probability option; replay gives the saved reply text on all 319 rows of every run.
+- Cumulative runs (5): 4 calls per item; the rebuilt state of all 1,276 calls per run is the
+  scenario/instruction state plus one context line per earlier answered question naming the model's
+  own pick. No state contains a line naming the answer key's option where the model picked another
+  option (or refused).
+- Refusals: luna only (above). Truncations 0. Parse failures = luna refusals only; 0 elsewhere.
+- No code bugs found; no code changed.
+
+Predicted vs key answer counts (A/B/C/D[/E]; "-" = refused); key: Q1 78/83/74/79/5,
+Q2 6/32/142/139, Q3 60/97/121/41, Q4 78/43/90/108.
+
+| Run | Q1 | Q2 | Q3 | Q4 |
+|---|---|---|---|---|
+| `part2_jev_full_cumulative` | 70/86/66/73/24 | 24/55/86/154 | 25/134/107/53 | 146/34/44/95 |
+| `part2_luna_decide_full` | 65/77/63/68/46 | 80/52/51/131, -5 | 7/150/69/88, -5 | 185/36/29/65, -4 |
+| `part2_luna_decide_cumulative` | 67/77/64/69/39, -3 | 68/69/73/109 | 5/165/40/108, -1 | 132/57/48/81, -1 |
+| `part2_luna_decide_full_cumulative` | 64/76/64/68/47 | 47/56/79/137 | 10/141/89/78, -1 | 122/54/47/95, -1 |
+| `part2_luna_decide_letters` | 63/77/71/68/38, -2 | 158/58/28/75 | 0/179/18/120, -2 | 167/35/35/82 |
+| `part2_openjev_full_cumulative` | 43/58/50/50/118 | 108/57/62/92 | 73/81/125/40 | 230/14/24/51 |
+| `part2_laya_full` | 39/26/27/30/197 | 0/73/224/22 | 257/56/0/6 | 0/24/281/14 |
+| `part2_laya_cumulative` | 32/23/27/28/209 | 1/148/146/24 | 1/177/3/138 | 1/139/152/27 |
+| `part2_openjev_think512_full` | 66/82/74/67/30 | 22/68/92/137 | 49/108/105/57 | 126/50/47/96 |
+| `part2_openjev_think512_cumulative` | 54/52/49/44/120 | 110/61/62/86 | 14/159/80/66 | 189/40/30/60 |
