@@ -10,12 +10,11 @@ unanswered = wrong.
 
 Question modes live here, in one place (`generate_decision`): each client only makes one call
 (`decide`) for the questions it is given. The request's `mode` sets the calls:
-    independent  one call with all 4 questions (raw = that call's response, as before)
-    chained      Q1 alone, then Q2-Q4 with one state line naming the model's own Q1 pick
+    independent  (non-cumulative) one call with all 4 questions (raw = that call's response, as before)
     cumulative   one call per question; each state adds a line per earlier question's own pick
 A pick is the argmax option's description (the paper's option text), put into that question's
 `context` line from prompts/decision_questions.yaml. It comes from the model's reply, never the
-answer key; an unanswered question adds no line. Chained/cumulative raw = {"mode", "calls": [...]}.
+answer key; an unanswered question adds no line. Cumulative raw = {"mode", "calls": [...]}.
 """
 
 from __future__ import annotations
@@ -87,8 +86,6 @@ def decision_reply(part: DecisionPart, by_value: Probs) -> tuple[str, Probs]:
 def steps(part: DecisionPart) -> list[tuple[DecisionQuestion, ...]]:
     """The questions asked in each call, in order, for the request's mode."""
     qs = part.questions
-    if part.mode == "chained":
-        return [qs[:1], qs[1:]]
     if part.mode == "cumulative":
         return [(q,) for q in qs]
     return [qs]

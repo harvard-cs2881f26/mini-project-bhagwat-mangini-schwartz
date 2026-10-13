@@ -9,11 +9,10 @@ from __future__ import annotations
 from dataclasses import dataclass
 from typing import Literal
 
-# independent: one call, every question answered in isolation (main runs)
-# chained:     Q1 alone, then Q2-Q4 with the model's own Q1 pick added to the state
-# cumulative:  one call per question, each with the model's own picks for every earlier question
-Mode = Literal["independent", "chained", "cumulative"]
-MODES: tuple[Mode, ...] = ("independent", "chained", "cumulative")
+# independent (non-cumulative): one call, every question answered in isolation (main runs)
+# cumulative: one call per question, each with the model's own picks for every earlier question
+Mode = Literal["independent", "cumulative"]
+MODES: tuple[Mode, ...] = ("independent", "cumulative")
 
 
 @dataclass(frozen=True)
@@ -33,7 +32,7 @@ class DecisionQuestion:
     instructions: str
     options: tuple[tuple[str, str], ...]  # (value, description) in the order sent; answers map back by value
     letters: tuple[str, ...]  # the answer-key letter of each option, aligned with `options`; never sent
-    # chained/cumulative: the state line naming the model's own pick for this question, for later
+    # cumulative: the state line naming the model's own pick for this question, for later
     # questions; "{answer}" = the picked option's description. Never sent with this question itself.
     context: str = ""
 

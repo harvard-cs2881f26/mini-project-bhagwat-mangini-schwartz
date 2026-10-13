@@ -5,7 +5,7 @@ own base_url, key_env and params (docs/apis/systemone.md).
 One call per item: `state` + the 4 questions as `choice` questions keyed by question id, each with
 `criteria` = option value -> the paper's option text. Answers are mapped back by value
 (models.decision), so the reply scores like an LLM's. Questions are answered in isolation by the
-service; chained/cumulative prompts make more calls per item, run by models.decision.generate_decision
+service; cumulative prompts make one call per question per item, run by models.decision.generate_decision
 (`decide` is one call). Retries 408/429/5xx/529 with exponential backoff, honouring `retry-after`; other errors
 raise with the service's message (a 422 names the bad field).
 

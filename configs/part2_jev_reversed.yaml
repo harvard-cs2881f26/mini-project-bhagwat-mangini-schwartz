@@ -1,7 +1,7 @@
 # Part 2: Jev with every question's options sent in reverse order, to measure its documented
 # lean toward the first option (docs.typesafe.ai/model-jaggedness/jev-1.13). Compare per item
 # with part2_jev. Own run name: results folders are keyed by model id.
-# Question mode: change prompt to decision_short_chained or decision_short_cumulative (new run name).
+# Question mode: change prompt to decision_short_cumulative (new run name).
 run: part2_jev_reversed
 benchmark: text
 prompt: decision_short

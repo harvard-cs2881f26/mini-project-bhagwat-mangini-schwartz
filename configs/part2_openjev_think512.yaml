@@ -1,6 +1,6 @@
 # Part 2: OpenJev with a 512-token thinking budget ("Give multi-step problems 512 or more",
 # OpenJev README). Same model id as the think-0 row in part2_codiv, so its own run name.
-# Question mode: change prompt to decision_short_chained or decision_short_cumulative (new run name).
+# Question mode: change prompt to decision_short_cumulative (new run name).
 run: part2_openjev_think512
 benchmark: text
 prompt: decision_short

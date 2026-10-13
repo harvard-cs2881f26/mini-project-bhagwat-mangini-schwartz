@@ -1,6 +1,6 @@
 """OpenAI Decisions API (Part 2: `luna_decide`, gpt-6-luna; docs/apis/openai_decisions.md).
 
-One call per item (chained/cumulative prompts: more, run by models.decision.generate_decision;
+One call per item (cumulative prompts: one per question, run by models.decision.generate_decision;
 `decide` is one call): `input` = the state, and the 4 questions as `choice` questions named by question
 id, with `choices` = [{value, description}] (option value -> the paper's option text). Answers
 are matched by `name`, not position, and mapped back to letters (models.decision). A per-question

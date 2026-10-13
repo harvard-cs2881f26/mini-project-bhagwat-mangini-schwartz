@@ -10,7 +10,7 @@ finish(provider, raw):
     "refused"    a refusal or safety block (OpenAI refusal content or content_filter, Claude
                  stop_reason "refusal", Gemini prompt_feedback.block_reason or a safety finish_reason;
                  decision models: any question answered with something other than a choice, in
-                 any call of a chained/cumulative reply)
+                 any call of a cumulative reply)
     "complete"   anything else
 """
 
@@ -50,7 +50,7 @@ def _gemini(raw: dict) -> Finish:
 
 def _decision(raw: dict) -> Finish:
     """Decision services: answers keyed by question (systemone) or a list with names (OpenAI).
-    Chained/cumulative replies ({"mode", "calls"}): refused if any call was."""
+    Cumulative replies ({"mode", "calls"}): refused if any call was."""
     if "calls" in raw:
         return "refused" if any(_decision(c) == "refused" for c in raw["calls"]) else "complete"
     answers = raw.get("answers") or {}
@@ -66,7 +66,7 @@ def finish(provider: str, raw: dict) -> Finish:
 
 def cached_input_tokens(provider: str, raw: dict) -> int | None:
     """Input tokens served from the provider's prompt cache; None if the provider doesn't say."""
-    if provider == "openai_decisions" and "calls" in raw:  # chained/cumulative: summed over calls
+    if provider == "openai_decisions" and "calls" in raw:  # cumulative: summed over calls
         return sum(cached_input_tokens(provider, c) or 0 for c in raw["calls"])
     if provider in ("openai", "openai_decisions"):
         return ((raw.get("usage") or {}).get("input_tokens_details") or {}).get("cached_tokens") or 0

@@ -1,6 +1,6 @@
 # Part 2: gpt-6-luna through the OpenAI Decisions API (OPENAI_API_KEY). Pairs with part2_luna_gen:
 # same model, deciding vs generating.
-# Question mode: change prompt to decision_short_chained or decision_short_cumulative (new run name).
+# Question mode: change prompt to decision_short_cumulative (new run name).
 run: part2_luna_decide
 benchmark: text
 prompt: decision_short

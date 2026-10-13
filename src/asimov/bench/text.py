@@ -9,7 +9,7 @@ Decision prompts (Part 2) send one DecisionPart instead: the item's scenario and
 the state, and its four questions with the paper's options, worded from
 prompts/decision_questions.yaml (the one home for that wording). Their names are
 `decision_<wording>[_letters][_<mode>]` (parse_decision_prompt): wording `short` or `full`,
-`_letters` for A-E option values, and mode `chained` or `cumulative` (none = independent) for
+`_letters` for A-E option values, and `_cumulative` (none = independent, non-cumulative) for
 whether a question sees the model's own earlier picks (models.decision.generate_decision).
 """
 
@@ -33,10 +33,10 @@ DATASET_VERSION = "asimov_v2_injuries/0.1.0"
 PROMPT_NAME = "text_verbatim"  # the dataset's prompt, unchanged
 # decision_<wording>[_letters][_<mode>]: wording = the paper's full text per question or the short text
 # in the wording file; option values are short names (e.g. "severe") unless `_letters` (A-E); mode
-# chained/cumulative passes the model's own earlier picks to later questions (none = independent).
+# `_cumulative` passes the model's own earlier picks to later questions (none = independent, non-cumulative).
 # WORKLOG 2026-10-12 ("Decision-model wording", "Decision question modes").
 WORDINGS = ("short", "full")
-DECISION_NAME = re.compile(r"decision_(short|full)(_letters)?(?:_(chained|cumulative))?")
+DECISION_NAME = re.compile(r"decision_(short|full)(_letters)?(?:_(cumulative))?")
 
 
 class DecisionPrompt(NamedTuple):
@@ -50,7 +50,7 @@ def decision_prompt_name(words: str, letters: bool, mode: Mode) -> str:
 
 
 def parse_decision_prompt(name: str) -> DecisionPrompt:
-    """'decision_short_letters_chained' -> ('short', True, 'chained'); ValueError if not a decision prompt."""
+    """'decision_short_letters_cumulative' -> ('short', True, 'cumulative'); ValueError if not a decision prompt."""
     m = DECISION_NAME.fullmatch(name)
     if not m:
         raise ValueError(f"not a decision prompt: {name!r}")
@@ -61,7 +61,7 @@ DECISION_PROMPTS = tuple(decision_prompt_name(w, letters, mode) for mode in MODE
 PROMPTS = (PROMPT_NAME, *DECISION_PROMPTS)
 WORDING = Path(__file__).resolve().parents[1] / "prompts" / "decision_questions.yaml"
 # Sections of the wording file a decision request uses; their content (not the file's bytes, so
-# comments don't count) is hashed into prompt_version. `context` only matters to chained/cumulative.
+# comments don't count) is hashed into prompt_version. `context` only matters to cumulative.
 REQUEST_SECTIONS = ("state", "short", "names")
 
 
@@ -101,7 +101,7 @@ def option_values(question: Question, prompt_name: str) -> list[str]:
 
 def decision_request(parsed: ParsedPrompt, prompt_name: str) -> DecisionPart:
     """One DecisionPart: the state, each question's instructions and the paper's options, and the
-    question mode with each question's context line (used only by chained/cumulative)."""
+    question mode with each question's context line (used only by cumulative)."""
     w, prompt = wording(), parse_decision_prompt(prompt_name)
     state = w["state"].format(scenario=parsed.scenario, instruction=parsed.instruction)
     questions = []
