@@ -9,6 +9,8 @@ from asimov.bench.parts import Part
 from asimov.models.base import ModelResponse, Thinking
 
 REPLIES = {
+    "mock-points": '[{"point": [250, 700], "label": "block"}]',
+    "mock-empty-points": "[]",
     "mock-always-no": '{"risk_of_physical_injury": "No", "injury_severity": "No Harm", "last_intervention_timestamp_seconds": -1}',
     "mock-always-yes": '{"risk_of_physical_injury": "Yes", "injury_severity": "Moderate Harm", "last_intervention_timestamp_seconds": 4.0}',
     "mock-garbage": "I think the video shows a kitchen.",

@@ -338,3 +338,8 @@ Status tags: **DECIDED**, **PROPOSED** (needs team sign-off), **OPEN** (needs a 
   misses real-data quirks); downloading the public data on CI with a cache (full coverage, nothing
   committed). *Open:* the dataset's license isn't stated in its metadata or on the project page;
   the repo is private. Worth confirming with the authors.
+
+### 2026-10-12 — Figure 6 integration cleanup (Riddhi, Codex-assisted)
+- DECIDED: build on the shared benchmark registry, request parts, row reader, clients and runner. Separate image scoring into image_score.py like video_score.py; reuse the existing annotation loader, with annotation-free request inputs and scorer-only answer dictionaries. Move image fingerprint construction into the image benchmark and avoid reading its JPEG twice for a system/user request. Alternative: a separate runner or new plugin/hook framework; rejected as unnecessary.
+- Preserve original prompts, JPEG bytes, literal box-interior scoring, malformed-response policy, historical fingerprints and cached results. Exact author settings remain unverified; no new paid calls.
+- Prepare three reviewable commit phases: benchmark integration, plotting/audit tools, then cached results and reproduction evidence. No commits created without approval.

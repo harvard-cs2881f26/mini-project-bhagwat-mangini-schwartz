@@ -10,6 +10,9 @@ data/*
 # derived from the dataset stay out.
 results/box_check/
 
+# API failure audits are local diagnostics, not reusable responses
+results/**/attempt_errors.jsonl
+
 # python
 .venv/
 __pycache__/
@@ -19,6 +22,10 @@ __pycache__/
 
 # free mock runs are regenerated on demand
 results/smoke_mock/
+results/constraints_mock/
+results/image_mock/
 
 # error review pages embed dataset frames
 results/error_review/
+
+results/image_rationale_mock/

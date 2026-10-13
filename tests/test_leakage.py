@@ -29,15 +29,17 @@ def test_every_registered_benchmark_has_a_config():
 @pytest.mark.parametrize("name,prompt", PROMPTS)
 def test_no_answer_or_id_in_any_request(name, prompt):
     bench = get_benchmark(name)
-    raw_answers = {r["id"]: r["answer_raw"] for r in read_rows(name)}
+    raw_answers = {r["id"]: [v for k, v in r.items() if k.endswith("_raw")]
+                   for r in read_rows(name)}
     items = bench.load_items()
     assert {i.id for i in items} == set(raw_answers)
     for item in items:
-        raw = raw_answers[item.id]
+        raw_values = raw_answers[item.id]
         parts = bench.build_request(item, prompt)
         text = "\n".join(p.text for p in parts if isinstance(p, TextPart))
         images = b"".join(p.data for p in parts if isinstance(p, ImagePart))
-        assert raw not in text and raw.encode() not in images, f"answer leaks into {item.id}"
+        assert raw_values
+        assert all(raw not in text and raw.encode() not in images for raw in raw_values), f"answer leaks into {item.id}"
         assert item.id not in text, f"ID leaks into {item.id}"
         fields = {f.name: getattr(item, f.name) for f in dataclasses.fields(item) if f.name != "id"}
-        assert not any(raw in str(v) for v in fields.values()), f"answer stored on item {item.id}"
+        assert not any(raw in str(v) for raw in raw_values for v in fields.values()), f"answer stored on item {item.id}"

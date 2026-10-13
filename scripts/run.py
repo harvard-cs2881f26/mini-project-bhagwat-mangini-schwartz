@@ -37,11 +37,14 @@ def main() -> None:
     ap.add_argument("--limit", type=int)
     ap.add_argument("--models", nargs="+")
     ap.add_argument("--workers", type=int, default=4)
+    ap.add_argument("--score-only", action="store_true", help="Rescore caches without API calls")
     args = ap.parse_args()
     load_dotenv(ROOT / ".env")
     cfg = yaml.safe_load(open(args.config))
-    rows = run(cfg, args.limit, args.models, args.workers)
-    cols = get_benchmark(cfg["benchmark"]).columns
+    rows = run(cfg, args.limit, args.models, args.workers, score_only=args.score_only)
+    name = cfg.get("benchmark", "video")
+    name = "image" if name == "constraints" else name
+    cols = get_benchmark(cfg.get("variant", name) if name == "image" else name).columns
 
     print(f"\n{'model':28s} {'n':>4s} " + " ".join(f"{label:>{len(label) + 1}s}" for label, _, _ in cols) + f" {'errors':>6s}")
     for r in rows:
