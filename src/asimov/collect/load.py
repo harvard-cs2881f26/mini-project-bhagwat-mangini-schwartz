@@ -9,7 +9,7 @@ Never reads data/: scorers save pred, gold and correct per item in summary.json 
 from __future__ import annotations
 
 import json
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from pathlib import Path
 
 import yaml
@@ -27,6 +27,9 @@ class ModelResult:
     latencies: tuple[float, ...]  # replies under the summary's key, for the items it scored (rows with latency_s)
     served_models: tuple[str, ...]
     replies: dict[str, str]  # item id -> reply text
+    usage: dict[str, dict] = field(default_factory=dict)  # item id -> the reply's token usage (incl. Gemini thinking_tokens)
+    probs: dict[str, dict] = field(default_factory=dict)  # item id -> question -> letter -> probability (decision models)
+    item_latency: dict[str, float] = field(default_factory=dict)  # item id -> latency_s, for replies that have one
 
     @property
     def name(self) -> str:
@@ -47,7 +50,7 @@ def load_model(mdir: Path) -> ModelResult:
     full = json.loads((mdir / "summary.json").read_text())
     per_item = full.pop("per_item", {}) or {}
     key = full.get("key")
-    latencies, served, replies = [], set(), {}
+    latencies, served, replies, usage, probs, item_latency = [], set(), {}, {}, {}, {}
     path = mdir / "responses.jsonl"
     for line in path.read_text().splitlines() if path.exists() else []:
         row = json.loads(line)
@@ -55,9 +58,13 @@ def load_model(mdir: Path) -> ModelResult:
             continue
         if row.get("latency_s") is not None:  # a row without timing is left out of the latency stats, not counted as 0
             latencies.append(float(row["latency_s"]))
+            item_latency[row["id"]] = float(row["latency_s"])
         served.add(row.get("served_model") or "")
         replies[row["id"]] = row.get("text", "")
-    return ModelResult(full, per_item, tuple(latencies), tuple(sorted(served - {""})), replies)
+        usage[row["id"]] = row.get("usage") or {}
+        if row.get("probs"):
+            probs[row["id"]] = row["probs"]
+    return ModelResult(full, per_item, tuple(latencies), tuple(sorted(served - {""})), replies, usage, probs, item_latency)
 
 
 def model_order(config: dict | None, results: list[ModelResult]) -> list[ModelResult]:

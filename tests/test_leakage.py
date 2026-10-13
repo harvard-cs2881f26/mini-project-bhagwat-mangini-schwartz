@@ -8,6 +8,7 @@ uses), check that:
   3. no field of the item contains the raw answer (a loader must not put the answer on the item).
 Stricter benchmark-specific checks live next to each benchmark (e.g. tests/test_video_request.py).
 """
+
 import dataclasses
 from pathlib import Path
 
@@ -19,7 +20,8 @@ from asimov.bench.parts import DecisionPart, ImagePart, TextPart
 from asimov.data.rows import read_rows
 
 CONFIGS = sorted((Path(__file__).resolve().parents[1] / "configs").glob("*.yaml"))
-PROMPTS = sorted({(c["benchmark"], c["prompt"]) for c in (yaml.safe_load(open(p)) for p in CONFIGS)})
+RUN_CONFIGS = [c for c in (yaml.safe_load(open(p)) for p in CONFIGS) if "run" in c]  # not e.g. configs/prices.yaml
+PROMPTS = sorted({(c["benchmark"], c["prompt"]) for c in RUN_CONFIGS})
 
 
 def test_every_registered_benchmark_has_a_config():
@@ -35,8 +37,9 @@ def test_no_answer_or_id_in_any_request(name, prompt):
     for item in items:
         raw = raw_answers[item.id]
         parts = bench.build_request(item, prompt)
-        text = "\n".join([p.text for p in parts if isinstance(p, TextPart)]
-                         + [decision_text(p) for p in parts if isinstance(p, DecisionPart)])
+        text = "\n".join(
+            [p.text for p in parts if isinstance(p, TextPart)] + [decision_text(p) for p in parts if isinstance(p, DecisionPart)]
+        )
         images = b"".join(p.data for p in parts if isinstance(p, ImagePart))
         assert raw not in text and raw.encode() not in images, f"answer leaks into {item.id}"
         assert item.id not in text, f"ID leaks into {item.id}"
@@ -46,5 +49,6 @@ def test_no_answer_or_id_in_any_request(name, prompt):
 
 def decision_text(part: DecisionPart) -> str:
     """Everything a decision request sends: state, instructions, option values and descriptions."""
-    return "\n".join([part.state] + [f"{q.id}\n{q.instructions}\n" + "\n".join(f"{v} {d}" for v, d in q.options)
-                                      for q in part.questions])
+    return "\n".join(
+        [part.state] + [f"{q.id}\n{q.instructions}\n" + "\n".join(f"{v} {d}" for v, d in q.options) for q in part.questions]
+    )

@@ -212,18 +212,18 @@ Note: Compares Fig 4b (effect, activated risk) with Fig 4a (latent risk, severit
 
 | Model | Input tokens / item | Output tokens / item | Latency p50 / p95 s | Refused | Parse failures | $ / item | $ run |
 |---|---|---|---|---|---|---|---|
-| GPT-5 Nano | 1361 | 2271 | 13.3 / 19.8 | 0 | 0 | – | – |
-| GPT-5 Mini | 1361 | 961 | 7.5 / 10.8 | 0 | 0 | – | – |
-| GPT-5 | 1361 | 984 | 10.3 / 18.4 | 0 | 0 | – | – |
-| Claude Sonnet 4 (4.5) | 1572 | 534 | 12.7 / 15.9 | 0 | 0 | – | – |
-| Claude Opus 4.1 (4.5) | 1572 | 372 | 8.0 / 10.0 | 0 | 0 | – | – |
-| Gemini 2.5 Flash-Lite (3.1) | 1437 | 286 | 1.4 / 1.7 | 2 | 2 | – | – |
-| Gemini 2.5 Flash (3) | 1437 | 298 | 10.7 / 41.9 | 2 | 3 | – | – |
-| Gemini 2.5 Pro (3.1) | 1437 | 270 | 16.2 / 26.9 | 2 | 2 | – | – |
+| GPT-5 Nano | 1361 | 2271 | 13.3 / 19.8 | 0 | 0 | 0.0010 | 0.31 |
+| GPT-5 Mini | 1361 | 961 | 7.5 / 10.8 | 0 | 0 | 0.0023 | 0.72 |
+| GPT-5 | 1361 | 984 | 10.3 / 18.4 | 0 | 0 | 0.0115 | 3.68 |
+| Claude Sonnet 4 (4.5) | 1572 | 534 | 12.7 / 15.9 | 0 | 0 | 0.0127 | 4.06 |
+| Claude Opus 4.1 (4.5) | 1572 | 372 | 8.0 / 10.0 | 0 | 0 | 0.0171 | 5.47 |
+| Gemini 2.5 Flash-Lite (3.1) | 1437 | 286 | 1.4 / 1.7 | 2 | 2 | 0.0008 | 0.25 |
+| Gemini 2.5 Flash (3) | 1437 | 298 | 10.7 / 41.9 | 2 | 3 | 0.0072 | 2.28 |
+| Gemini 2.5 Pro (3.1) | 1437 | 270 | 16.2 / 26.9 | 2 | 2 | 0.0223 | 7.12 |
 
 Per item: the model's totals over this run divided by its replies. Refused and Parse failures as in Models below. $ comes from logged tokens × `configs/prices.yaml`; "–" until that file has the model.
 
-**Key insight:** Gemini 2.5 Flash-Lite (3.1) is the fastest per reply (median 1.4 s) and Gemini 2.5 Pro (3.1) the slowest (16.2 s); GPT-5 Nano writes the most output tokens per item (2,271) and Gemini 2.5 Pro (3.1) the fewest (270).
+**Key insight:** Gemini 2.5 Flash-Lite (3.1) is the fastest per reply (median 1.4 s) and Gemini 2.5 Pro (3.1) the slowest (16.2 s); GPT-5 Nano writes the most output tokens per item (2,271) and Gemini 2.5 Pro (3.1) the fewest (270); the whole run cost $23.90.
 
 ## Settings
 
@@ -241,14 +241,14 @@ Per item: the model's totals over this run divided by its replies. Refused and P
 
 | Model | Requested | Served | Stand-in | Replies | Errors | Parse failures | Refused | Truncated | Malformed | Near-key reads | With reasoning | Input tokens | Output tokens | Cost $ | Latency p50 / p95 s |
 |---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|
-| GPT-5 Nano | `gpt-5-nano` | `gpt-5-nano-2025-08-07` |  | 319 | 0 | 0 | 0 | 0 | 0 | 0 | 318 | 434014 | 724297 | – | 13.3 / 19.8 |
-| GPT-5 Mini | `gpt-5-mini` | `gpt-5-mini-2025-08-07` |  | 319 | 0 | 0 | 0 | 0 | 0 | 0 | 309 | 434014 | 306617 | – | 7.5 / 10.8 |
-| GPT-5 | `gpt-5` | `gpt-5-2025-08-07` |  | 319 | 0 | 0 | 0 | 0 | 0 | 0 | 312 | 434014 | 313764 | – | 10.3 / 18.4 |
-| Claude Sonnet 4 (4.5) | `claude-sonnet-4-5-20250929` | `claude-sonnet-4-5-20250929` | yes | 319 | 0 | 0 | 0 | 0 | 0 | 2 | 0 | 501506 | 170392 | – | 12.7 / 15.9 |
-| Claude Opus 4.1 (4.5) | `claude-opus-4-5-20251101` | `claude-opus-4-5-20251101` | yes | 319 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 501506 | 118521 | – | 8.0 / 10.0 |
-| Gemini 2.5 Flash-Lite (3.1) | `gemini-3.1-flash-lite` | `gemini-3.1-flash-lite` | yes | 319 | 0 | 2 | 2 | 0 | 0 | 0 | 0 | 458555 | 91222 | – | 1.4 / 1.7 |
-| Gemini 2.5 Flash (3) | `gemini-3-flash-preview` | `gemini-3-flash-preview` | yes | 319 | 0 | 3 | 2 | 1 | 0 | 0 | 317 | 458555 | 95171 | – | 10.7 / 41.9 |
-| Gemini 2.5 Pro (3.1) | `gemini-3.1-pro-preview` | `gemini-3.1-pro-preview` | yes | 319 | 0 | 2 | 2 | 0 | 0 | 0 | 317 | 458555 | 86134 | – | 16.2 / 26.9 |
+| GPT-5 Nano | `gpt-5-nano` | `gpt-5-nano-2025-08-07` |  | 319 | 0 | 0 | 0 | 0 | 0 | 0 | 318 | 434014 | 724297 | 0.31 | 13.3 / 19.8 |
+| GPT-5 Mini | `gpt-5-mini` | `gpt-5-mini-2025-08-07` |  | 319 | 0 | 0 | 0 | 0 | 0 | 0 | 309 | 434014 | 306617 | 0.72 | 7.5 / 10.8 |
+| GPT-5 | `gpt-5` | `gpt-5-2025-08-07` |  | 319 | 0 | 0 | 0 | 0 | 0 | 0 | 312 | 434014 | 313764 | 3.68 | 10.3 / 18.4 |
+| Claude Sonnet 4 (4.5) | `claude-sonnet-4-5-20250929` | `claude-sonnet-4-5-20250929` | yes | 319 | 0 | 0 | 0 | 0 | 0 | 2 | 0 | 501506 | 170392 | 4.06 | 12.7 / 15.9 |
+| Claude Opus 4.1 (4.5) | `claude-opus-4-5-20251101` | `claude-opus-4-5-20251101` | yes | 319 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 501506 | 118521 | 5.47 | 8.0 / 10.0 |
+| Gemini 2.5 Flash-Lite (3.1) | `gemini-3.1-flash-lite` | `gemini-3.1-flash-lite` | yes | 319 | 0 | 2 | 2 | 0 | 0 | 0 | 0 | 458555 | 91222 | 0.25 | 1.4 / 1.7 |
+| Gemini 2.5 Flash (3) | `gemini-3-flash-preview` | `gemini-3-flash-preview` | yes | 319 | 0 | 3 | 2 | 1 | 0 | 0 | 317 | 458555 | 95171 | 2.28 | 10.7 / 41.9 |
+| Gemini 2.5 Pro (3.1) | `gemini-3.1-pro-preview` | `gemini-3.1-pro-preview` | yes | 319 | 0 | 2 | 2 | 0 | 0 | 0 | 317 | 458555 | 86134 | 7.12 | 16.2 / 26.9 |
 
 Parse failures: replies with no readable answer; all count as wrong (CLAUDE.md, scoring conventions). With per-item `parse_ok` in `summary.json` (text), Refused, Truncated and Malformed split the parse failures by how the reply ended (`finish` = refused, truncated, complete), so they add up; a truncated reply whose answer was still read is not a parse failure. Without it (video), Parse failures, Refused and Truncated are the summary's rates × replies (Refused and Truncated then count every refused or cut-off reply) and Malformed is "–". Cost is "–" until `configs/prices.yaml` has the model.
 

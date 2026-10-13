@@ -977,6 +977,90 @@ Severity columns are exact-level accuracy, as in Fig 4.
   0-19 times by every decision model. Laya predicts "moderate" for Q4 on 306/319.
 - Codiv runs used `--workers 1` (60 requests/min limit): no rate-limit errors.
 
+## 2026-10-13: Part 2 design analysis, B and D (Noa)
+
+Analysis of designs D (route by confidence) and B (split by question) on the text benchmark, simulated
+for $0 from saved replies: `scripts/cascade.py` (logic in `src/asimov/cascade.py`) with
+`configs/analysis/part2_designs.yaml` -> `results/part2_designs/` and `figures/part2_designs/`. No model
+calls. The hosted full runs (PR #17) were already on main when the analysis first ran. The choices below
+were fixed in this session's plan and in Noa's message, not chosen from the 319-item scores.
+
+### Choices for D and B: DECIDED (Noa)
+- **Decision models that answer first:** Jev (`part2_jev`), luna Decisions (`part2_luna_decide`), OpenJev
+  think 0 (`part2_codiv`), Kev-4B (`part2_kev`). *Alternative:* also Laya and the variants (Jev reversed,
+  OpenJev think 512).
+- **Escalation target:** GPT-5 from `repro_fig4` (thinking `min`). GPT-5 Mini (same run) is a second
+  target, since it is one config line. *Alternative:* GPT-5 Mini only.
+- **Item confidence:** the lowest top-option probability across the item's 4 questions, from each reply's
+  `probs`. Below the threshold, the whole item goes to the LLM, whose one call answers all 4 questions.
+  *Alternatives:* the mean top probability across the questions; the services' own `confidence` field
+  (Jev, Kev and OpenJev return one, and it is not the top probability).
+- **Report:** the whole accuracy-vs-cost curve per decision model, with the perfect-router bound and the
+  LLM alone as reference points, plus a table at fixed shares of items sent to the LLM: 25%, 50%, 75%.
+  No threshold is chosen from the 319 items. *Alternative:* one threshold chosen on held-out folds.
+- **Accuracy axes:** one panel per question (Wilson CI), plus the mean over the 4 questions per item
+  (percentile bootstrap over items). *Alternatives:* per question only; the mean only.
+- **B:** all 16 splits as an accuracy table, with the pre-registered headline split = decision model for
+  Q1 only, the LLM for Q2-Q4 (Q2 depends on Q1's injury). *Alternatives:* Q1-Q2 as headline; no
+  headline. B cannot lower cost in this simulation: the LLM's one call answers all 4 questions, so any
+  split using it costs both calls. D is the accuracy-vs-cost result.
+
+### Rules for the simulation: PROPOSED (Claude; Noa to confirm)
+- A question with no probabilities (e.g. luna's 3 Q1 refusals) gives its item confidence 0, so the item
+  is among the first sent on. *Alternative:* drop the item (breaks "unanswered = wrong, never dropped").
+- At a fixed share, exactly round(share x n) items are sent on, lowest confidence first, with ties broken
+  by item id. A threshold alone can't split tied items. *Alternative:* the nearest point on the curve.
+- The curve has one point per distinct confidence value: items with confidence below it are sent on.
+  It runs from 0% to 100% sent on.
+- Perfect router, per metric: send an item on only when the LLM gets strictly more of that metric right,
+  largest gain first (then the cheaper LLM call, then item id). It is a bound, not a system.
+- Cost per item = the decision call + the LLM call if sent on. Latency = their sum (sequential calls).
+  The LLM alone (one call) is its own reference point.
+- The script stops if a run has failed calls (`errors > 0`) or a decision-run item has no LLM reply.
+  Outputs with fewer items than the LLM run are stamped "smoke run, not a result".
+- B's one paired contrast: the headline split minus the LLM alone, mean of 4, paired bootstrap.
+
+### Price table `configs/prices.yaml`: DECIDED (Noa, by approving the plan)
+- Dated (`checked: 2026-10-12`), keyed by model id, loaded by `asimov.prices` (pydantic, unknown keys
+  fail). Prices are those in "Cost method" above, plus Jev ($0.042/M input, output free) and gpt-6-luna
+  ($0.10 / $0.50).
+- Gemini entries have `thinking_as_output: true`: saved `thinking_tokens` are billed at the output
+  price. OpenAI's output already includes reasoning tokens.
+- Codiv (OpenJev, Laya) is `free_tier` ($0). Kev-4B is `self_hosted` (no $; parameters and latency are
+  reported). *Alternative:* pricing Kev's GPU time per item from the Modal bill (not itemised per call).
+- **Side effect on the results pages:** `collect.py` already read this file if it existed, but priced
+  summaries, which leave out thinking tokens. `collect` now adds the thinking tokens summed from the saved
+  replies. Every run page and `results/index.csv` gain a $ column.
+  - Check: `repro_fig4` totals $15.11, matching the run's logged cost.
+  - `repro_fig4_default` shows $23.90. That is the cost of its replies, including 314 Claude replies
+    reused from `repro_fig4` (paid then); the new spend logged for that run was $14.52.
+  - Only text runs are priced (`collect/tables.PRICED_BENCHMARKS`). Video (Tyler) and image (Riddhi)
+    costs are their owners' to add (Noa, 2026-10-13: Part 2 doesn't touch video). The video page is
+    unchanged from main.
+- `tests/test_leakage.py` read every `configs/*.yaml` as a run config. It now reads only those with a
+  `run` key (Noa's call, 2026-10-13), so the price table isn't mistaken for one.
+
+### Exploratory: cheaper LLM targets (post-hoc, Noa 2026-10-13)
+- **Added:** `configs/analysis/part2_designs_exploratory.yaml` -> `results/part2_designs_exploratory/` and
+  `figures/part2_designs_exploratory/`. Same decision models, confidence rule, fixed shares and B headline
+  split as `part2_designs.yaml`; only the escalation targets differ: luna generate (`part2_luna_gen`,
+  verbatim prompt), Gemini Flash-Lite (`repro_fig4`, thinking `min`) and GPT-5 (`repro_fig4_default`,
+  thinking `default`). Question it answers: how cheap can the LLM side be.
+- **Status: EXPLORATORY, post-hoc.** The targets were chosen after the Part 2 results were seen, so these
+  outputs are not evidence for H1 or H2. `tables.md` and every figure title carry an EXPLORATORY line,
+  from a new optional `label` field in `DesignConfig` (printed only when set; the pre-registered outputs
+  are unchanged, `scripts/cascade.py --check` passes).
+- *Alternatives:* no exploratory targets; or adding them to `part2_designs.yaml`, rejected so the
+  pre-registered and post-hoc results never mix.
+- Endpoints (each target alone, n = 319, mean of 4 [95% CI], $ per 1,000 items), matching each run's
+  `summary.json` accuracies and `results/index.csv` cost x 1000/319:
+  - luna generate: 0.686 [0.655, 0.716], $0.23 (cost from `configs/prices.yaml`).
+  - Gemini Flash-Lite (min): 0.704 [0.672, 0.737], $0.78 (2 prompt-blocked items, counted wrong).
+  - GPT-5 (default): 0.733 [0.702, 0.763], $11.54.
+- Fixed in passing: figure files were named with `Path.with_suffix`, which cut a model id at its dot
+  (`gemini-3.1-flash-lite` -> `gemini-3`). Now the full id is kept; the pre-registered figure names have
+  no dots and are unchanged.
+
 ## 2026-10-13: Session 3 Step C, local decision models
 
 Built rows 7-10 of the Part 2 matrix: `part2_qwen_base_logprob`, `part2_qwen_logprob`,
