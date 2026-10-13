@@ -785,3 +785,13 @@ still wait for the Fig 4 review and docs/HYPOTHESIS.md.
   - `plot.py`'s `--severity` currently applies to 4a and 4b alike; it should apply to 4a only.
   - Also: a short follow-up to the first author (Tyler's 2026-10-10 email) asking which metric
     Fig 4a plots.
+
+### Fig 4a severity axis: back to multiple-choice correctness: DECIDED (Noa, 2026-10-12)
+- **Supersedes** "Fig 4a severity axis: severe recall" above. Fig 4a's severity axis stays the
+  normal multiple-choice score (exact letter, 4 options: `latent_severity_accuracy`), as in the first
+  decision. Nothing needed changing: claims, figures and the txt0 write-up already use it.
+- Severe recall, severe-vs-not and the severe false negatives/positives stay in every summary and on
+  the run pages, and `scripts/plot.py --severity recall|binary` still draws those versions.
+- *Alternative considered:* severe recall, the closest match to the paper's plotted values (mean gap
+  0.068 vs 0.172 for 4-way, evidence in the entry above). The open question to the first author
+  about which metric Fig 4a plots still stands.
