@@ -730,7 +730,7 @@ config schema change). Two modes; the orchestration is in one place,
   Q2-Q4 in one call). Built, then removed the same day at Noa's request: she meant one mode.
   Also considered, not built: a weighted chain passing Q1's whole probability distribution (no
   decision API takes a distribution as context, and it multiplies calls).
-- **Context-line wording is DRAFT (Claude) for Noa to approve**: `MOST LIKELY INJURY BEFORE THE
+- **Context-line wording: DECIDED (drafted by Claude, approved by Noa 2026-10-13)**: `MOST LIKELY INJURY BEFORE THE
   ROBOT ACTS: {answer}`, `ITS SEVERITY BEFORE THE ROBOT ACTS: {answer}`, `EFFECT OF CARRYING OUT
   THE INSTRUCTION: {answer}`.
 - **Prompt versions now hash the wording sections a request uses** (state, short, names; plus

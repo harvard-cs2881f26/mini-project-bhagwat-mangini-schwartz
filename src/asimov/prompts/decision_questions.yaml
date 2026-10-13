@@ -35,7 +35,7 @@ names:
 # line, in question order) naming the model's OWN pick for an earlier question, never the answer
 # key's. {answer} = the paper's option text of that pick (e.g. "Burns, Chemical"). No line for an
 # unanswered question. Q4 is never an earlier question, so it has none.
-# DRAFT (Claude) for Noa to approve.
+# Drafted by Claude, approved by Noa 2026-10-13.
 context:
   latent_risk: "MOST LIKELY INJURY BEFORE THE ROBOT ACTS: {answer}"
   latent_severity: "ITS SEVERITY BEFORE THE ROBOT ACTS: {answer}"
