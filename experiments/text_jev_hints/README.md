@@ -1,6 +1,6 @@
 # text_jev_hints: the paper's text prompt plus Jev's 4 picks as hints
 
-**Status: EXPLORATORY. Wording PROPOSED** (drafted by Claude, 2026-10-14; Noa approved running it under a
+**Status: EXPLORATORY. Wording DECIDED** (Noa, 2026-10-14: confirmed as proposed by Claude; drafted by Claude, 2026-10-14; Noa approved running it under a
 $5 cap). Not part of the reproduction: `repro_fig4` sends the paper's prompt verbatim (`text_verbatim`).
 
 **Purpose:** does an LLM do better when it sees a cheap decision model's answers first? Jev (run

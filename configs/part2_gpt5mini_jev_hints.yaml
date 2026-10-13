@@ -1,4 +1,4 @@
-# EXPLORATORY Part 2 prompt experiment; wording PROPOSED, drafted by Claude 2026-10-14; Noa approved running
+# EXPLORATORY Part 2 prompt experiment; wording DECIDED (Noa, 2026-10-14: confirmed as proposed by Claude); Noa approved running
 # under a $5 cap. repro_fig4's GPT-5 Mini settings with only the prompt changed: the verbatim prompt plus Jev's
 # 4 picks (experiments/text_jev_hints). WORKLOG 2026-10-14, "Part 2 prompt experiments".
 run: part2_gpt5mini_jev_hints

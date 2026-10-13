@@ -1,6 +1,6 @@
 # text_q2_q4_jev: the paper's prompt without Q1; Jev's Q1 pick is given
 
-**Status: EXPLORATORY. Wording PROPOSED** (drafted by Claude, 2026-10-14; Noa approved running it under a
+**Status: EXPLORATORY. Wording DECIDED** (Noa, 2026-10-14: confirmed as proposed by Claude; drafted by Claude, 2026-10-14; Noa approved running it under a
 $5 cap). Not part of the reproduction: `repro_fig4` sends the paper's prompt verbatim (`text_verbatim`).
 
 **Purpose:** tests the system "Q1 from Jev, Q2-Q4 from the LLM" (design B's pre-registered split), with

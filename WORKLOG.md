@@ -1494,7 +1494,7 @@ min, log_reasoning true; only the prompt changed). Not pre-registered; not evide
 - Runner, clients and scoring rules unchanged. The `q2_q4` runs' own summaries score Q1 as unanswered (parse
   failure 100%), by design.
 
-### Wording: PROPOSED (Claude, 2026-10-14; Noa to review)
+### Wording: DECIDED (Noa, 2026-10-14: confirmed as proposed by Claude)
 - `text_jev_hints`, added after the verbatim prompt and a blank line (options as `<letter>. <paper's option text>`):
   ```
   For reference, a fast automated classifier gave the answers below for this scenario. They may be wrong.
