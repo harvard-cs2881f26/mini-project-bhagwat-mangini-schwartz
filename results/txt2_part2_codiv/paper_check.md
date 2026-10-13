@@ -84,7 +84,7 @@ Per item: mean correct on effect + activated_risk minus mean correct on latent_r
 
 | Model | Action accuracy | Latent accuracy | Action − latent [95% CI] |
 |---|---|---|---|
-| OpenJev (think 0) | 0.200 | 0.500 | -0.300 [-0.700, 0.100] |
-| Laya | 0.200 | 0.400 | -0.200 [-0.500, 0.200] |
+| OpenJev (think 0) | 0.367 | 0.376 | -0.009 [-0.060, 0.041] |
+| Laya | 0.290 | 0.307 | -0.017 [-0.061, 0.028] |
 
 Note: Compares Fig 4b (effect, activated risk) with Fig 4a (latent risk, severity). Text adds: 'Except for Gemini 2.5 Flash', smaller models are substantially weaker, naming GPT-5-Mini, GPT-5-Nano and Gemini 2.5 Flash-lite.

@@ -44,13 +44,13 @@ Every model on all four questions in one grid: darker means more accurate. Each 
 
 ![accuracy_heatmap](../../figures/txt2/accuracy_heatmap.png)
 
-**Key insight:** Q3 (action effect) is the lowest-scoring question for 2 of 2 models; the paper reports no values for these models.
+**Key insight:** Q1 (injury type) and Q2 (severity) are each the lowest-scoring question for 1 of 2 models; the paper reports no values for these models.
 
 The same severity answers (Q2) scored three ways, per model: the exact level (multiple choice, the score Fig 4a uses), severe vs not, and severe recall. It shows how much each model's severity score depends on the scoring rule. The diamond is the paper's Fig 4a severity value, whose metric the paper doesn't state.
 
 ![severity_scoring](../../figures/txt2/severity_scoring.png)
 
-**Key insight:** Severe recall is higher than multiple-choice accuracy for 1 of 2 models, by 40 points; it is lower for 1 (by 60 points).
+**Key insight:** Severe recall is lower than multiple-choice accuracy for every model, by 4 to 29 points.
 
 Accuracy against cost, one panel per question: each dot is a model, placed by its accuracy and by the output tokens it writes per item on average (log scale). Models that report no output tokens are left out and named in the chart's note.
 
@@ -142,8 +142,8 @@ Per item: mean correct on effect + activated_risk minus mean correct on latent_r
 
 | Model | Action accuracy | Latent accuracy | Action − latent [95% CI] |
 |---|---|---|---|
-| OpenJev (think 0) | 0.200 | 0.500 | -0.300 [-0.700, 0.100] |
-| Laya | 0.200 | 0.400 | -0.200 [-0.500, 0.200] |
+| OpenJev (think 0) | 0.367 | 0.376 | -0.009 [-0.060, 0.041] |
+| Laya | 0.290 | 0.307 | -0.017 [-0.061, 0.028] |
 
 Note: Compares Fig 4b (effect, activated risk) with Fig 4a (latent risk, severity). Text adds: 'Except for Gemini 2.5 Flash', smaller models are substantially weaker, naming GPT-5-Mini, GPT-5-Nano and Gemini 2.5 Flash-lite.
 
@@ -151,12 +151,12 @@ Note: Compares Fig 4b (effect, activated risk) with Fig 4a (latent risk, severit
 
 | Model | Input tokens / item | Output tokens / item | Latency p50 / p95 s | Refused | Parse failures | $ / item | $ run |
 |---|---|---|---|---|---|---|---|
-| OpenJev (think 0) | 724 | 0 | 0.5 / 0.7 | 0 | 0 | – | – |
-| Laya | 866 | 0 | 0.5 / 0.5 | 0 | 0 | – | – |
+| OpenJev (think 0) | 721 | 0 | 0.5 / 0.8 | 0 | 0 | – | – |
+| Laya | 848 | 0 | 0.4 / 0.8 | 0 | 0 | – | – |
 
 Per item: the model's totals over this run divided by its replies. Refused and Parse failures as in Models below. $ comes from logged tokens × `configs/prices.yaml`; "–" until that file has the model.
 
-**Key insight:** OpenJev (think 0) and Laya are the fastest per reply (median 0.5 s) and OpenJev (think 0) and Laya the slowest (0.5 s); OpenJev (think 0) and Laya write the most output tokens per item (0) and OpenJev (think 0) and Laya the fewest (0).
+**Key insight:** Laya is the fastest per reply (median 0.4 s) and OpenJev (think 0) the slowest (0.5 s); OpenJev (think 0) and Laya write the most output tokens per item (0) and OpenJev (think 0) and Laya the fewest (0).
 
 ## Settings
 
@@ -166,7 +166,7 @@ Per item: the model's totals over this run divided by its replies. Refused and P
 | Prompt | decision_short |
 | Thinking | min |
 | Reasoning logged | False |
-| Git commit | 20ae587aa2 |
+| Git commit | 60dafbf4e0 (dirty) |
 | Scored | 2026-10-13 |
 | Config | [config.yaml](config.yaml) (sha256 5bd997b70a5b) |
 
@@ -174,8 +174,8 @@ Per item: the model's totals over this run divided by its replies. Refused and P
 
 | Model | Requested | Served | Stand-in | Replies | Errors | Parse failures | Refused | Truncated | Malformed | Near-key reads | With reasoning | Input tokens | Output tokens | Cost $ | Latency p50 / p95 s |
 |---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|
-| OpenJev (think 0) | `openjev-latest` | `openjev-0.1` | yes | 5 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 3622 | 0 | – | 0.5 / 0.7 |
-| Laya | `laya-1.0` | `laya-1.0` |  | 5 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 4330 | 0 | – | 0.5 / 0.5 |
+| OpenJev (think 0) | `openjev-latest` | `openjev-0.1` | yes | 319 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 230039 | 0 | – | 0.5 / 0.8 |
+| Laya | `laya-1.0` | `laya-1.0` |  | 319 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 270495 | 0 | – | 0.4 / 0.8 |
 
 Parse failures: replies with no readable answer; all count as wrong (CLAUDE.md, scoring conventions). With per-item `parse_ok` in `summary.json` (text), Refused, Truncated and Malformed split the parse failures by how the reply ended (`finish` = refused, truncated, complete), so they add up; a truncated reply whose answer was still read is not a parse failure. Without it (video), Parse failures, Refused and Truncated are the summary's rates × replies (Refused and Truncated then count every refused or cut-off reply) and Malformed is "–". Cost is "–" until `configs/prices.yaml` has the model.
 
@@ -183,8 +183,8 @@ Parse failures: replies with no readable answer; all count as wrong (CLAUDE.md, 
 
 | Model | latent_risk_accuracy | latent_severity_accuracy | effect_accuracy | activated_risk_accuracy | latent_severity_severe_binary_accuracy | activated_risk_severe_binary_accuracy | latent_severity_severe_recall | activated_risk_severe_recall |
 |---|---|---|---|---|---|---|---|---|
-| OpenJev (think 0) | 0.400 [0.118, 0.769] | 0.600 [0.231, 0.882] | 0.200 [0.036, 0.624] | 0.200 [0.036, 0.624] | 1.000 [0.566, 1.000] | 0.800 [0.376, 0.964] | 1.000 [0.207, 1.000] | 0.000 [0.000, 0.793] |
-| Laya | 0.200 [0.036, 0.624] | 0.600 [0.231, 0.882] | 0.000 [0.000, 0.434] | 0.400 [0.118, 0.769] | 0.600 [0.231, 0.882] | 0.800 [0.376, 0.964] | 0.000 [0.000, 0.793] | 0.000 [0.000, 0.793] |
+| OpenJev (think 0) | 0.505 [0.450, 0.559] | 0.248 [0.203, 0.298] | 0.426 [0.373, 0.481] | 0.307 [0.259, 0.360] | 0.655 [0.601, 0.705] | 0.715 [0.663, 0.761] | 0.209 [0.149, 0.284] | 0.176 [0.116, 0.258] |
+| Laya | 0.235 [0.192, 0.285] | 0.379 [0.328, 0.434] | 0.301 [0.253, 0.353] | 0.279 [0.233, 0.331] | 0.549 [0.494, 0.602] | 0.633 [0.579, 0.684] | 0.086 [0.050, 0.145] | 0.019 [0.005, 0.065] |
 
 CIs: Wilson for rates, bootstrap over items for means (`src/asimov/stats.py`).
 
@@ -207,8 +207,8 @@ Fig 4 uses the first column because the paper's Fig 3 defines severity that way 
 
 | Model | Exact level right (used for Fig 4) | Severe vs not right | Truly severe caught | False negatives (severe, not called severe) | False positives (not severe, called severe) |
 |---|---|---|---|---|---|
-| OpenJev (think 0) | 0.600 | 1.000 | 1.000 (1 / 1) | 0 / 1 (0.000) | 0 / 4 (0.000) |
-| Laya | 0.600 | 0.600 | 0.000 (0 / 1) | 1 / 1 (1.000) | 1 / 4 (0.250) |
+| OpenJev (think 0) | 0.248 | 0.655 | 0.209 (29 / 139) | 110 / 139 (0.791) | 0 / 180 (0.000) |
+| Laya | 0.379 | 0.549 | 0.086 (12 / 139) | 127 / 139 (0.914) | 17 / 180 (0.094) |
 
 How close each scoring comes to the paper's Fig 4a severity values (mean absolute gap over models with a paper value): exact level right – · severe vs not right – · truly severe caught – (0 models).
 
@@ -216,8 +216,8 @@ How close each scoring comes to the paper's Fig 4a severity values (mean absolut
 
 | Model | Exact level right (used for Fig 4) | Severe vs not right | Truly severe caught | False negatives (severe, not called severe) | False positives (not severe, called severe) |
 |---|---|---|---|---|---|
-| OpenJev (think 0) | 0.200 | 0.800 | 0.000 (0 / 1) | 1 / 1 (1.000) | 0 / 4 (0.000) |
-| Laya | 0.400 | 0.800 | 0.000 (0 / 1) | 1 / 1 (1.000) | 0 / 4 (0.000) |
+| OpenJev (think 0) | 0.307 | 0.715 | 0.176 (19 / 108) | 89 / 108 (0.824) | 2 / 211 (0.009) |
+| Laya | 0.279 | 0.633 | 0.019 (2 / 108) | 106 / 108 (0.981) | 11 / 211 (0.052) |
 
 ## Files
 

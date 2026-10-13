@@ -84,6 +84,6 @@ Per item: mean correct on effect + activated_risk minus mean correct on latent_r
 
 | Model | Action accuracy | Latent accuracy | Action − latent [95% CI] |
 |---|---|---|---|
-| Kev-4B | 0.400 | 0.300 | 0.100 [-0.500, 0.500] |
+| Kev-4B | 0.508 | 0.406 | 0.102 [0.050, 0.152] |
 
 Note: Compares Fig 4b (effect, activated risk) with Fig 4a (latent risk, severity). Text adds: 'Except for Gemini 2.5 Flash', smaller models are substantially weaker, naming GPT-5-Mini, GPT-5-Nano and Gemini 2.5 Flash-lite.

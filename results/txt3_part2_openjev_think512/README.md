@@ -50,13 +50,13 @@ The same severity answers (Q2) scored three ways, per model: the exact level (mu
 
 ![severity_scoring](../../figures/txt3/severity_scoring.png)
 
-**Key insight:** Severe recall is lower than multiple-choice accuracy for OpenJev (think 512), by 40 points.
+**Key insight:** Severe recall is higher than multiple-choice accuracy for OpenJev (think 512), by 8 points.
 
 Accuracy against cost, one panel per question: each dot is a model, placed by its accuracy and by the output tokens it writes per item on average (log scale). Models that report no output tokens are left out and named in the chart's note.
 
 ![accuracy_vs_cost](../../figures/txt3/accuracy_vs_cost.png)
 
-**Key insight:** OpenJev (think 512) is the only model with token counts (478 output tokens per item).
+**Key insight:** OpenJev (think 512) is the only model with token counts (459 output tokens per item).
 
 ## Comparison with the paper
 
@@ -142,7 +142,7 @@ Per item: mean correct on effect + activated_risk minus mean correct on latent_r
 
 | Model | Action accuracy | Latent accuracy | Action − latent [95% CI] |
 |---|---|---|---|
-| OpenJev (think 512) | 0.600 | 0.600 | 0.000 [0.000, 0.000] |
+| OpenJev (think 512) | 0.571 | 0.503 | 0.067 [0.019, 0.118] |
 
 Note: Compares Fig 4b (effect, activated risk) with Fig 4a (latent risk, severity). Text adds: 'Except for Gemini 2.5 Flash', smaller models are substantially weaker, naming GPT-5-Mini, GPT-5-Nano and Gemini 2.5 Flash-lite.
 
@@ -150,11 +150,11 @@ Note: Compares Fig 4b (effect, activated risk) with Fig 4a (latent risk, severit
 
 | Model | Input tokens / item | Output tokens / item | Latency p50 / p95 s | Refused | Parse failures | $ / item | $ run |
 |---|---|---|---|---|---|---|---|
-| OpenJev (think 512) | 1936 | 478 | 2.4 / 2.5 | 0 | 0 | – | – |
+| OpenJev (think 512) | 1910 | 459 | 1.6 / 2.1 | 0 | 0 | – | – |
 
 Per item: the model's totals over this run divided by its replies. Refused and Parse failures as in Models below. $ comes from logged tokens × `configs/prices.yaml`; "–" until that file has the model.
 
-**Key insight:** OpenJev (think 512) takes a median 2.4 s per reply and writes 478 output tokens per item.
+**Key insight:** OpenJev (think 512) takes a median 1.6 s per reply and writes 459 output tokens per item.
 
 ## Settings
 
@@ -164,7 +164,7 @@ Per item: the model's totals over this run divided by its replies. Refused and P
 | Prompt | decision_short |
 | Thinking | min |
 | Reasoning logged | False |
-| Git commit | 20ae587aa2 |
+| Git commit | 60dafbf4e0 (dirty) |
 | Scored | 2026-10-13 |
 | Config | [config.yaml](config.yaml) (sha256 12f46f54c982) |
 
@@ -172,7 +172,7 @@ Per item: the model's totals over this run divided by its replies. Refused and P
 
 | Model | Requested | Served | Stand-in | Replies | Errors | Parse failures | Refused | Truncated | Malformed | Near-key reads | With reasoning | Input tokens | Output tokens | Cost $ | Latency p50 / p95 s |
 |---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|
-| OpenJev (think 512) | `openjev-latest` | `openjev-0.1` | yes | 5 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 9681 | 2392 | – | 2.4 / 2.5 |
+| OpenJev (think 512) | `openjev-latest` | `openjev-0.1` | yes | 319 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 609258 | 146309 | – | 1.6 / 2.1 |
 
 Parse failures: replies with no readable answer; all count as wrong (CLAUDE.md, scoring conventions). With per-item `parse_ok` in `summary.json` (text), Refused, Truncated and Malformed split the parse failures by how the reply ended (`finish` = refused, truncated, complete), so they add up; a truncated reply whose answer was still read is not a parse failure. Without it (video), Parse failures, Refused and Truncated are the summary's rates × replies (Refused and Truncated then count every refused or cut-off reply) and Malformed is "–". Cost is "–" until `configs/prices.yaml` has the model.
 
@@ -180,7 +180,7 @@ Parse failures: replies with no readable answer; all count as wrong (CLAUDE.md, 
 
 | Model | latent_risk_accuracy | latent_severity_accuracy | effect_accuracy | activated_risk_accuracy | latent_severity_severe_binary_accuracy | activated_risk_severe_binary_accuracy | latent_severity_severe_recall | activated_risk_severe_recall |
 |---|---|---|---|---|---|---|---|---|
-| OpenJev (think 512) | 0.800 [0.376, 0.964] | 0.400 [0.118, 0.769] | 0.600 [0.231, 0.882] | 0.600 [0.231, 0.882] | 0.600 [0.231, 0.882] | 1.000 [0.566, 1.000] | 0.000 [0.000, 0.793] | 1.000 [0.207, 1.000] |
+| OpenJev (think 512) | 0.614 [0.560, 0.666] | 0.392 [0.340, 0.446] | 0.658 [0.605, 0.708] | 0.483 [0.428, 0.537] | 0.746 [0.696, 0.791] | 0.799 [0.752, 0.840] | 0.475 [0.394, 0.557] | 0.435 [0.346, 0.529] |
 
 CIs: Wilson for rates, bootstrap over items for means (`src/asimov/stats.py`).
 
@@ -203,7 +203,7 @@ Fig 4 uses the first column because the paper's Fig 3 defines severity that way 
 
 | Model | Exact level right (used for Fig 4) | Severe vs not right | Truly severe caught | False negatives (severe, not called severe) | False positives (not severe, called severe) |
 |---|---|---|---|---|---|
-| OpenJev (think 512) | 0.400 | 0.600 | 0.000 (0 / 1) | 1 / 1 (1.000) | 1 / 4 (0.250) |
+| OpenJev (think 512) | 0.392 | 0.746 | 0.475 (66 / 139) | 73 / 139 (0.525) | 8 / 180 (0.044) |
 
 How close each scoring comes to the paper's Fig 4a severity values (mean absolute gap over models with a paper value): exact level right – · severe vs not right – · truly severe caught – (0 models).
 
@@ -211,7 +211,7 @@ How close each scoring comes to the paper's Fig 4a severity values (mean absolut
 
 | Model | Exact level right (used for Fig 4) | Severe vs not right | Truly severe caught | False negatives (severe, not called severe) | False positives (not severe, called severe) |
 |---|---|---|---|---|---|
-| OpenJev (think 512) | 0.600 | 1.000 | 1.000 (1 / 1) | 0 / 1 (0.000) | 0 / 4 (0.000) |
+| OpenJev (think 512) | 0.483 | 0.799 | 0.435 (47 / 108) | 61 / 108 (0.565) | 3 / 211 (0.014) |
 
 ## Files
 

@@ -44,13 +44,13 @@ Every model on all four questions in one grid: darker means more accurate. Each 
 
 ![accuracy_heatmap](../../figures/txt8/accuracy_heatmap.png)
 
-**Key insight:** Q1 (injury type) is the lowest-scoring question for 1 of 1 model; the paper reports no values for these models.
+**Key insight:** Q2 (severity) is the lowest-scoring question for 1 of 1 model; the paper reports no values for these models.
 
 The same severity answers (Q2) scored three ways, per model: the exact level (multiple choice, the score Fig 4a uses), severe vs not, and severe recall. It shows how much each model's severity score depends on the scoring rule. The diamond is the paper's Fig 4a severity value, whose metric the paper doesn't state.
 
 ![severity_scoring](../../figures/txt8/severity_scoring.png)
 
-**Key insight:** Severe recall is higher than multiple-choice accuracy for Kev-4B, by 60 points.
+**Key insight:** Severe recall is higher than multiple-choice accuracy for Kev-4B, by 20 points.
 
 Accuracy against cost, one panel per question: each dot is a model, placed by its accuracy and by the output tokens it writes per item on average (log scale). Models that report no output tokens are left out and named in the chart's note.
 
@@ -142,7 +142,7 @@ Per item: mean correct on effect + activated_risk minus mean correct on latent_r
 
 | Model | Action accuracy | Latent accuracy | Action − latent [95% CI] |
 |---|---|---|---|
-| Kev-4B | 0.400 | 0.300 | 0.100 [-0.500, 0.500] |
+| Kev-4B | 0.508 | 0.406 | 0.102 [0.050, 0.152] |
 
 Note: Compares Fig 4b (effect, activated risk) with Fig 4a (latent risk, severity). Text adds: 'Except for Gemini 2.5 Flash', smaller models are substantially weaker, naming GPT-5-Mini, GPT-5-Nano and Gemini 2.5 Flash-lite.
 
@@ -150,11 +150,11 @@ Note: Compares Fig 4b (effect, activated risk) with Fig 4a (latent risk, severit
 
 | Model | Input tokens / item | Output tokens / item | Latency p50 / p95 s | Refused | Parse failures | $ / item | $ run |
 |---|---|---|---|---|---|---|---|
-| Kev-4B | 602 | 347 | 1.2 / 1.2 | 0 | 0 | – | – |
+| Kev-4B | 598 | 347 | 0.4 / 0.8 | 0 | 0 | – | – |
 
 Per item: the model's totals over this run divided by its replies. Refused and Parse failures as in Models below. $ comes from logged tokens × `configs/prices.yaml`; "–" until that file has the model.
 
-**Key insight:** Kev-4B takes a median 1.2 s per reply and writes 347 output tokens per item.
+**Key insight:** Kev-4B takes a median 0.4 s per reply and writes 347 output tokens per item.
 
 ## Settings
 
@@ -164,7 +164,7 @@ Per item: the model's totals over this run divided by its replies. Refused and P
 | Prompt | decision_short |
 | Thinking | min |
 | Reasoning logged | False |
-| Git commit | 183bc74a73 |
+| Git commit | 60dafbf4e0 (dirty) |
 | Scored | 2026-10-13 |
 | Config | [config.yaml](config.yaml) (sha256 1f40c17b27ba) |
 
@@ -172,7 +172,7 @@ Per item: the model's totals over this run divided by its replies. Refused and P
 
 | Model | Requested | Served | Stand-in | Replies | Errors | Parse failures | Refused | Truncated | Malformed | Near-key reads | With reasoning | Input tokens | Output tokens | Cost $ | Latency p50 / p95 s |
 |---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|
-| Kev-4B | `kev-latest` | `kev-latest` |  | 5 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 3010 | 1734 | – | 1.2 / 1.2 |
+| Kev-4B | `kev-latest` | `kev-latest` |  | 319 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 190848 | 110836 | – | 0.4 / 0.8 |
 
 Parse failures: replies with no readable answer; all count as wrong (CLAUDE.md, scoring conventions). With per-item `parse_ok` in `summary.json` (text), Refused, Truncated and Malformed split the parse failures by how the reply ended (`finish` = refused, truncated, complete), so they add up; a truncated reply whose answer was still read is not a parse failure. Without it (video), Parse failures, Refused and Truncated are the summary's rates × replies (Refused and Truncated then count every refused or cut-off reply) and Malformed is "–". Cost is "–" until `configs/prices.yaml` has the model.
 
@@ -180,7 +180,7 @@ Parse failures: replies with no readable answer; all count as wrong (CLAUDE.md, 
 
 | Model | latent_risk_accuracy | latent_severity_accuracy | effect_accuracy | activated_risk_accuracy | latent_severity_severe_binary_accuracy | activated_risk_severe_binary_accuracy | latent_severity_severe_recall | activated_risk_severe_recall |
 |---|---|---|---|---|---|---|---|---|
-| Kev-4B | 0.200 [0.036, 0.624] | 0.400 [0.118, 0.769] | 0.400 [0.118, 0.769] | 0.400 [0.118, 0.769] | 1.000 [0.566, 1.000] | 0.800 [0.376, 0.964] | 1.000 [0.207, 1.000] | 0.000 [0.000, 0.793] |
+| Kev-4B | 0.429 [0.376, 0.484] | 0.382 [0.331, 0.437] | 0.586 [0.531, 0.639] | 0.429 [0.376, 0.484] | 0.777 [0.729, 0.820] | 0.777 [0.729, 0.820] | 0.583 [0.500, 0.661] | 0.481 [0.390, 0.575] |
 
 CIs: Wilson for rates, bootstrap over items for means (`src/asimov/stats.py`).
 
@@ -203,7 +203,7 @@ Fig 4 uses the first column because the paper's Fig 3 defines severity that way 
 
 | Model | Exact level right (used for Fig 4) | Severe vs not right | Truly severe caught | False negatives (severe, not called severe) | False positives (not severe, called severe) |
 |---|---|---|---|---|---|
-| Kev-4B | 0.400 | 1.000 | 1.000 (1 / 1) | 0 / 1 (0.000) | 0 / 4 (0.000) |
+| Kev-4B | 0.382 | 0.777 | 0.583 (81 / 139) | 58 / 139 (0.417) | 13 / 180 (0.072) |
 
 How close each scoring comes to the paper's Fig 4a severity values (mean absolute gap over models with a paper value): exact level right – · severe vs not right – · truly severe caught – (0 models).
 
@@ -211,7 +211,7 @@ How close each scoring comes to the paper's Fig 4a severity values (mean absolut
 
 | Model | Exact level right (used for Fig 4) | Severe vs not right | Truly severe caught | False negatives (severe, not called severe) | False positives (not severe, called severe) |
 |---|---|---|---|---|---|
-| Kev-4B | 0.400 | 0.800 | 0.000 (0 / 1) | 1 / 1 (1.000) | 0 / 4 (0.000) |
+| Kev-4B | 0.429 | 0.777 | 0.481 (52 / 108) | 56 / 108 (0.519) | 15 / 211 (0.071) |
 
 ## Files
 
