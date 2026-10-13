@@ -49,7 +49,11 @@ No run yet.
 
 | Run ID | Run | Description | Benchmark | Date | Models | Thinking | Prompt | Commit | Cost $ | Note |
 |---|---|---|---|---|---|---|---|---|---|---|
+| `txt12` | [`part2_qwen_logprob`](part2_qwen_logprob/README.md) | Text benchmark, using the decision_short_local prompt, with thinking set to min (the lowest reasoning each provider allows), on 1 model. | text | 2026-10-13 | 1 | min | decision_short_local | a5f392b | – |  |
+| `txt11` | [`part2_qwen_gen`](part2_qwen_gen/README.md) | Text benchmark, using the paper's prompt sent unchanged (text_verbatim), with thinking set to min (the lowest reasoning each provider allows), on 1 model. | text | 2026-10-13 | 1 | min | text_verbatim | a5f392b | – |  |
+| `txt10` | [`part2_qwen_base_logprob`](part2_qwen_base_logprob/README.md) | Text benchmark, using the decision_short_local prompt, with thinking set to min (the lowest reasoning each provider allows), on 1 model. | text | 2026-10-13 | 1 | min | decision_short_local | a5f392b | – |  |
 | `txt3` | [`part2_openjev_think512`](part2_openjev_think512/README.md) | Text benchmark, using the decision_short prompt, with thinking set to min (the lowest reasoning each provider allows), on 1 model. | text | 2026-10-13 | 1 | min | decision_short | 20ae587 | – |  |
+| `txt9` | [`part2_nli`](part2_nli/README.md) | Text benchmark, using the decision_short_local prompt, with thinking set to min (the lowest reasoning each provider allows), on 1 model. | text | 2026-10-13 | 1 | min | decision_short_local | a5f392b | – |  |
 | `txt7` | [`part2_luna_gen`](part2_luna_gen/README.md) | Text benchmark, using the paper's prompt sent unchanged (text_verbatim), with thinking set to min (the lowest reasoning each provider allows), on 1 model. | text | 2026-10-13 | 1 | min | text_verbatim | 44c5280 | – |  |
 | `txt8` | [`part2_kev`](part2_kev/README.md) | Text benchmark, using the decision_short prompt, with thinking set to min (the lowest reasoning each provider allows), on 1 model. | text | 2026-10-13 | 1 | min | decision_short | 183bc74 | – |  |
 | `txt5` | [`part2_jev_reversed`](part2_jev_reversed/README.md) | Text benchmark, using the decision_short prompt, with thinking set to min (the lowest reasoning each provider allows), on 1 model. | text | 2026-10-13 | 1 | min | decision_short | 44c5280 | – |  |

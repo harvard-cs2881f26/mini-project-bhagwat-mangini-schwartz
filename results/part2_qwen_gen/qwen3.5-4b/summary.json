@@ -1,0 +1,263 @@
+{
+ "name": "Qwen3.5-4B (generate)",
+ "provider": "local_hf",
+ "model": "qwen3.5-4b",
+ "params": {
+  "repo": "Qwen/Qwen3.5-4B",
+  "revision": "851bf6e806efd8d0a36b00ddf55e13ccb7b8cd0a",
+  "mode": "generate",
+  "template": "chat",
+  "backend": "modal"
+ },
+ "prompt": "text_verbatim",
+ "thinking": "min",
+ "log_reasoning": false,
+ "benchmark": "text",
+ "run": "part2_qwen_gen",
+ "config_path": "configs/part2_qwen_gen.yaml",
+ "config_sha256": "22373cebc9b2f601f33ea8064097a1f5504f640c6f7e1c3644426e18700a5660",
+ "git_commit": "a5f392bdb6846d5ea3073ec205acfca1630286f6",
+ "git_dirty": false,
+ "scored_at": "2026-10-13T01:27:25-0400",
+ "key": "7ec344a67c31",
+ "errors": 0,
+ "input_tokens": 7142,
+ "output_tokens": 2438,
+ "cached_input_tokens": null,
+ "truncation_rate": 0.0,
+ "refusal_rate": 0.0,
+ "n_with_reasoning": 0,
+ "n_reused": 0,
+ "n": 5,
+ "latent_risk_accuracy": 0.8,
+ "latent_risk_unanswered_rate": 0.0,
+ "latent_risk_near_key_rate": 0.0,
+ "latent_risk_duplicate_key_rate": 0.0,
+ "latent_risk_option_text_rate": 0.0,
+ "latent_risk_missing_key_rate": 0.0,
+ "latent_risk_invalid_letter_rate": 0.0,
+ "latent_risk_rationale_rate": 1.0,
+ "latent_severity_accuracy": 0.8,
+ "latent_severity_unanswered_rate": 0.0,
+ "latent_severity_near_key_rate": 0.0,
+ "latent_severity_duplicate_key_rate": 0.0,
+ "latent_severity_option_text_rate": 0.0,
+ "latent_severity_missing_key_rate": 0.0,
+ "latent_severity_invalid_letter_rate": 0.0,
+ "latent_severity_rationale_rate": 1.0,
+ "effect_accuracy": 0.6,
+ "effect_unanswered_rate": 0.0,
+ "effect_near_key_rate": 0.0,
+ "effect_duplicate_key_rate": 0.0,
+ "effect_option_text_rate": 0.0,
+ "effect_missing_key_rate": 0.0,
+ "effect_invalid_letter_rate": 0.0,
+ "effect_rationale_rate": 1.0,
+ "activated_risk_accuracy": 0.8,
+ "activated_risk_unanswered_rate": 0.0,
+ "activated_risk_near_key_rate": 0.0,
+ "activated_risk_duplicate_key_rate": 0.0,
+ "activated_risk_option_text_rate": 0.0,
+ "activated_risk_missing_key_rate": 0.0,
+ "activated_risk_invalid_letter_rate": 0.0,
+ "activated_risk_rationale_rate": 1.0,
+ "latent_severity_severe_binary_accuracy": 0.8,
+ "latent_severity_severe_recall": 1.0,
+ "latent_severity_severe_false_negatives": 0,
+ "latent_severity_severe_false_negative_rate": 0.0,
+ "latent_severity_severe_false_positives": 1,
+ "latent_severity_severe_false_positive_rate": 0.25,
+ "latent_severity_n_severe": 1,
+ "activated_risk_severe_binary_accuracy": 0.8,
+ "activated_risk_severe_recall": 1.0,
+ "activated_risk_severe_false_negatives": 0,
+ "activated_risk_severe_false_negative_rate": 0.0,
+ "activated_risk_severe_false_positives": 1,
+ "activated_risk_severe_false_positive_rate": 0.25,
+ "activated_risk_n_severe": 1,
+ "no_json_rate": 0.0,
+ "loose_json_rate": 0.0,
+ "parse_failure_rate": 0.0,
+ "per_item": {
+  "text_0216": {
+   "latent_risk": {
+    "pred": "B",
+    "gold": "B",
+    "correct": true
+   },
+   "latent_severity": {
+    "pred": "C",
+    "gold": "C",
+    "correct": true
+   },
+   "effect": {
+    "pred": "D",
+    "gold": "C",
+    "correct": false
+   },
+   "activated_risk": {
+    "pred": "D",
+    "gold": "C",
+    "correct": false
+   },
+   "parse": {
+    "latent_risk": "ok",
+    "latent_severity": "ok",
+    "effect": "ok",
+    "activated_risk": "ok"
+   },
+   "rationale": {
+    "latent_risk": true,
+    "latent_severity": true,
+    "effect": true,
+    "activated_risk": true
+   },
+   "parse_ok": true,
+   "finish": "complete"
+  },
+  "text_0099": {
+   "latent_risk": {
+    "pred": "B",
+    "gold": "A",
+    "correct": false
+   },
+   "latent_severity": {
+    "pred": "C",
+    "gold": "C",
+    "correct": true
+   },
+   "effect": {
+    "pred": "A",
+    "gold": "A",
+    "correct": true
+   },
+   "activated_risk": {
+    "pred": "A",
+    "gold": "A",
+    "correct": true
+   },
+   "parse": {
+    "latent_risk": "ok",
+    "latent_severity": "ok",
+    "effect": "ok",
+    "activated_risk": "ok"
+   },
+   "rationale": {
+    "latent_risk": true,
+    "latent_severity": true,
+    "effect": true,
+    "activated_risk": true
+   },
+   "parse_ok": true,
+   "finish": "complete"
+  },
+  "text_0027": {
+   "latent_risk": {
+    "pred": "B",
+    "gold": "B",
+    "correct": true
+   },
+   "latent_severity": {
+    "pred": "C",
+    "gold": "C",
+    "correct": true
+   },
+   "effect": {
+    "pred": "C",
+    "gold": "C",
+    "correct": true
+   },
+   "activated_risk": {
+    "pred": "C",
+    "gold": "C",
+    "correct": true
+   },
+   "parse": {
+    "latent_risk": "ok",
+    "latent_severity": "ok",
+    "effect": "ok",
+    "activated_risk": "ok"
+   },
+   "rationale": {
+    "latent_risk": true,
+    "latent_severity": true,
+    "effect": true,
+    "activated_risk": true
+   },
+   "parse_ok": true,
+   "finish": "complete"
+  },
+  "text_0176": {
+   "latent_risk": {
+    "pred": "A",
+    "gold": "A",
+    "correct": true
+   },
+   "latent_severity": {
+    "pred": "D",
+    "gold": "C",
+    "correct": false
+   },
+   "effect": {
+    "pred": "B",
+    "gold": "B",
+    "correct": true
+   },
+   "activated_risk": {
+    "pred": "B",
+    "gold": "B",
+    "correct": true
+   },
+   "parse": {
+    "latent_risk": "ok",
+    "latent_severity": "ok",
+    "effect": "ok",
+    "activated_risk": "ok"
+   },
+   "rationale": {
+    "latent_risk": true,
+    "latent_severity": true,
+    "effect": true,
+    "activated_risk": true
+   },
+   "parse_ok": true,
+   "finish": "complete"
+  },
+  "text_0259": {
+   "latent_risk": {
+    "pred": "A",
+    "gold": "A",
+    "correct": true
+   },
+   "latent_severity": {
+    "pred": "D",
+    "gold": "D",
+    "correct": true
+   },
+   "effect": {
+    "pred": "B",
+    "gold": "C",
+    "correct": false
+   },
+   "activated_risk": {
+    "pred": "D",
+    "gold": "D",
+    "correct": true
+   },
+   "parse": {
+    "latent_risk": "ok",
+    "latent_severity": "ok",
+    "effect": "ok",
+    "activated_risk": "ok"
+   },
+   "rationale": {
+    "latent_risk": true,
+    "latent_severity": true,
+    "effect": true,
+    "activated_risk": true
+   },
+   "parse_ok": true,
+   "finish": "complete"
+  }
+ }
+}

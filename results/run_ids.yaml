@@ -10,3 +10,7 @@ part2_jev_reversed: txt5
 part2_luna_decide: txt6
 part2_luna_gen: txt7
 part2_kev: txt8
+part2_nli: txt9
+part2_qwen_base_logprob: txt10
+part2_qwen_gen: txt11
+part2_qwen_logprob: txt12

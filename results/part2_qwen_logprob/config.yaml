@@ -1,0 +1,13 @@
+# Part 2: Qwen3.5-4B (post-trained), local (free), option probabilities: per question, the question
+# rendered as text (`local` in prompts/decision_questions.yaml) as the user turn of the chat template
+# with thinking off; the next-token logits of the option letters, softmaxed over the letters.
+# Pairs with part2_qwen_gen (same model generating the paper's prompt) and part2_qwen_base_logprob.
+# Question mode: change prompt to decision_short_cumulative_local (new run name).
+# Runs on a Modal L40S (backend: modal; models/modal_app.py, deploy it first), same code as locally.
+run: part2_qwen_logprob
+benchmark: text
+prompt: decision_short_local
+thinking: min  # required by the schema; thinking is always off for local models
+models:
+  - {name: Qwen3.5-4B (logprob), provider: local_hf, model: qwen3.5-4b,
+     params: {repo: Qwen/Qwen3.5-4B, revision: 851bf6e806efd8d0a36b00ddf55e13ccb7b8cd0a, mode: logprob, template: chat, backend: modal}}

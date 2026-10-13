@@ -940,3 +940,88 @@ Numbers only. 5-item accuracy is not reported (too few items to mean anything). 
 - Kev's URL lives in `configs/part2_kev.yaml`; there is no `KEV_BASE_URL` env var (docs corrected).
 - Not changed, flagged for Tyler: the gpt-6-luna lowest-effort mapping is a model id in
   `models/openai_client.py` (`MIN_EFFORT`).
+
+## 2026-10-13: Session 3 Step C, local decision models
+
+Built rows 7-10 of the Part 2 matrix: `part2_qwen_base_logprob`, `part2_qwen_logprob`,
+`part2_qwen_gen`, `part2_nli`. Code: `models/local_text.py` (rendering + pure maths),
+`models/local_hf.py` (provider `local_hf`), `models/nli.py` (provider `nli`), `models/remote.py` +
+`models/modal_app.py` (Modal backend). Numbers below are facts only, no interpretation.
+
+### Decisions
+- **Local wording (`local` in prompts/decision_questions.yaml): DECIDED (Noa, 2026-10-13), drafted
+  by Claude.** Option-probability prompt = state, `QUESTION: <instructions>`, options as
+  `A. <description>` lines in sent order, `Answer with the letter of one option.`; the base model
+  gets `\nANSWER:` appended (the next token is the letter, read as ` A` with a space); the chat
+  model gets the same text as its user turn, then the template's thinking-off assistant start
+  (letter read as bare `A`). NLI: premise = state, one hypothesis per option from a per-question
+  template ("Before the robot acts, the most likely physical injury in this scenario is:
+  {description}", etc.). *Alternatives considered:* the paper's verbatim prompt with an assistant
+  prefill up to the JSON answer key (docs/apis/qwen3_4b_local.md §4); NLI premise = the full
+  verbatim prompt (needs an 8k-token NLI model, docs/apis/nli_zeroshot.md (b)); one generic
+  hypothesis "{instructions} {description}".
+- **`_local` prompt names: DECIDED (Claude, design; Noa to confirm).** `decision_short_local` etc.
+  build the same DecisionPart as `decision_short`, and only their version hashes the `local`
+  section, so the hosted prompt versions are unchanged (pin test untouched) and editing the local
+  wording never reuses old local replies. `config.py` requires a `_local` prompt for local
+  option-probability and NLI models. *Alternative:* hashing `local` into every decision prompt
+  (would move the pinned hosted versions and invalidate saved hosted replies).
+- **Letters are checked to be one token at load and on every call** (`letter_token_ids`): the
+  letter written right after the prompt must add exactly one token, without merging into the
+  prompt's end, else the run fails. Passed for both Qwen tokenizers.
+- **Generation (`qwen_gen`): greedy decoding, thinking off, `MAX_NEW_TOKENS` = 1024: DECIDED (Noa,
+  2026-10-13).** Deterministic, so the cached reply is the reply. *Alternative considered:*
+  the model card's thinking-off sampling (temperature 0.7, top_p 0.8, top_k 20), which needs
+  several samples per item to be reproducible; a larger cap (one laptop item hit 1024).
+- **Option probabilities = softmax over the option letters only** (logprob) / over the options'
+  entailment logits (NLI, the zero-shot pipeline with `multi_label=False`). The pick is the
+  argmax; the client's `chosen` is that argmax (no separate service choice). Each reply's raw
+  also keeps the top-1 next token over the whole vocabulary and the probability mass on the
+  letters, so a model that wouldn't answer with a letter is visible.
+- **NLI inputs over the model's limit raise instead of being cut** (the pipeline truncates
+  silently). NLI runs in fp32 (DeBERTa-v3 is known to be unstable in half precision); Qwen in bf16.
+- **Where the models run: Modal L40S, DECIDED (Noa, 2026-10-13)**, after the laptop smoke heated
+  the Mac. `params: {backend: modal}` sends each request to the deployed app
+  `asimov-local-models` (`PYTHONPATH=src modal deploy -m asimov.models.modal_app`), whose container
+  builds the same client (`backend: local`) from this repo's `src/asimov` on CUDA; weights cached
+  on the Volume `asimov-hf-cache`; one container per model (`max_containers=1`), scales to zero
+  after 300 s. Same GPU as Kev-4B (part2_kev). Rows record `raw.remote` = {backend, device, gpu,
+  kernels, compute_s, load_s}; `latency_s` is the round trip. A container whose `local` wording
+  differs from the checkout's raises (redeploy). *Alternative:* the laptop (MPS), measured below.
+- **PROPOSED (Claude, for Noa): `flash-linear-attention==0.5.2` in the Modal image.** Qwen3.5 has
+  linear-attention layers; without these Triton kernels transformers falls back to a PyTorch
+  reference implementation (the laptop's path, 2.2 s per 250-token forward pass on MPS). Replies
+  record `kernels: fla`. Numerics differ slightly from the reference path (e.g. `text_0216`
+  base-model severity, a near tie on the laptop, flipped A vs C). `causal-conv1d` (needs a CUDA
+  build) is not installed, so its reference path is used.
+- **Base model letter mass, for Noa (no change made):** after `\nANSWER:` the base model's top
+  next token is `\n\n` on 18 of 20 smoke questions; the letters hold 14-40% of the probability
+  (median 0.25), and the reported probabilities are renormalised over the letters. The chat model's
+  top token is a letter on 20/20 (letter mass median 0.99). A different answer cue would change the
+  base-model numbers; it's a wording choice.
+
+### Smoke on Modal (5 items each, `--limit 5 --workers 1`, 2026-10-13)
+All on NVIDIA L40S, `kernels: fla`. 0 errors, 0 parse failures, 0 truncated, for all four.
+
+| Run | Served | Cold start (first item, round trip) | Warm s/item, round trip / compute | Tokens per item |
+|---|---|---|---|---|
+| `part2_nli` | `MoritzLaurer/deberta-v3-large-zeroshot-v2.0@cf44676c...` | 31.8 s (load 23.9 s) | 0.20 / 0.15 | 2,057 in (17 pairs) |
+| `part2_qwen_base_logprob` | `Qwen/Qwen3.5-4B-Base@1001bb4d...` | 106 s (load 57.7 s incl. 9 GB download; first pass 34.7 s, kernel compile) | 0.34 / 0.21 | 858 in (4 passes) |
+| `part2_qwen_logprob` | `Qwen/Qwen3.5-4B@851bf6e8...` | 124 s (load 73.6 s incl. download; first pass 41 s) | 0.32 / 0.28 | 890 in (4 passes) |
+| `part2_qwen_gen` | `Qwen/Qwen3.5-4B@851bf6e8...` | 76.6 s (load 22.5 s, weights cached) | 12.8 median (10.4-15.3) / same | 1,428 in, 374-578 out; ~36.6 tokens/s warm |
+
+- Qwen loads as `Qwen3_5ForCausalLM` (text-only, via AutoModelForCausalLM; the vision tower in
+  the checkpoint is not loaded).
+- Agreement, `qwen_logprob` argmax vs `qwen_gen` answer, on the 5 smoke items (the 20-item check
+  is still to run): latent risk 1/5, latent severity 2/5, effect 2/5, activated risk 1/5.
+- Projected full runs (319 items, `max_containers=1`): NLI ~1 min, each logprob ~2 min, generate
+  ~68 min, plus a cold start and 5 idle minutes each: about 1.6 GPU-hours, ~$3.70 at ~$2.27/h.
+
+### Laptop smoke (Apple M1 Pro, MPS, bf16), superseded, results not committed
+Run before the move to Modal, same code with `backend: local` (no `backend` param, so a different
+cache key). Replies are not committed (kept out of results/). Facts: NLI 1.6 s/item, load 2.7 s,
+peak memory 1.7 GB; Qwen base logprob 10.0 s/item (median), Qwen logprob 12.2 s/item, peak 9.9 GB;
+Qwen generate ~7.7 tokens/s, 42-111 s/item, peak 11.2 GB, load 11-14 s; 1 of 17 generations hit the
+1024-token cap. Transformers used its PyTorch reference path for the linear-attention layers (no
+`flash-linear-attention` on Mac): 2.2 s per 250-token forward pass. The laptop generation run
+(`--limit 20`) was stopped at 17 items by the main session.
