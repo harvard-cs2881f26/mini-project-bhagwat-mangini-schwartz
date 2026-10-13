@@ -3,3 +3,4 @@
 # Each run's folder is results/<id>_<run>/.
 repro_fig4: txt0
 repro_fig5: vid0
+repro_fig4_default: txt1

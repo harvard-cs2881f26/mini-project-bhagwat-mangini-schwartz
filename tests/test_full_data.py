@@ -40,3 +40,12 @@ def test_text_majority_baselines():
     assert round(s["latent_severity_severe_binary_accuracy"] * 319) == 180
     assert round(s["effect_accuracy"] * 319) == 121
     assert round(s["activated_risk_accuracy"] * 319) == 108
+
+
+def test_every_text_prompt_has_four_option_lists():
+    from asimov.bench.text_score import QUESTIONS
+    from asimov.data.text import load_text_options
+
+    options = load_text_options()
+    assert len(options) == 319
+    assert all([len(o[q]) for q in QUESTIONS] == [5, 4, 4, 4] for o in options.values())

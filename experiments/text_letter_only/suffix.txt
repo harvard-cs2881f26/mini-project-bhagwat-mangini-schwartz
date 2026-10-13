@@ -1,0 +1,1 @@
+Format note: for every field that ends in _response, write only the option letter (A, B, C, D or E), for example "C". Do not write the option's text in that field.

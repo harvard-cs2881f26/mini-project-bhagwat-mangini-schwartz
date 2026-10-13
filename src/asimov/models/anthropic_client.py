@@ -36,6 +36,7 @@ def to_content(parts: list[Part]) -> list[dict]:
 
 class AnthropicClient:
     provider = "anthropic"
+    request_settings: frozenset[str] = frozenset()  # thinking and log_reasoning change nothing sent
 
     def __init__(self, model: str):
         self.model = model
