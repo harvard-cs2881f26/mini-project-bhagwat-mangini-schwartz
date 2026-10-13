@@ -7,8 +7,8 @@ Working notes for Noa, kept for later. Not decided; nothing here is a hypothesis
 Drafted by Claude on 2026-10-12. The "fit" column applies vendor guidance: decision models are
 pitched for quick, one-step judgments between a few clearly described options, and their docs
 list multi-step reasoning, "what happens after X" questions and ordered scales as weak spots.
-The research behind it is in `reports/System One models accuracy cost.md` (untracked, in the
-Session 3 worktree). The accuracy column is the range over the 8 LLMs in `repro_fig4` (thinking
+The research behind it is in `reports/System One models accuracy cost.md`.
+The accuracy column is the range over the 8 LLMs in `repro_fig4` (thinking
 `min`), from each `results/repro_fig4/<model>/summary.json`.
 
 | Question | What it asks | Fit for a decision model | Part 1 LLM accuracy (8 models) |

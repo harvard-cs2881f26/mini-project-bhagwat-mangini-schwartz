@@ -675,7 +675,7 @@ Decision models (Part 2) get one `DecisionPart` per item, built from
 `src/asimov/prompts/decision_questions.yaml` (the one home for the wording; its hash is in each
 decision prompt's version). Sources: TypeSafe Choice docs (https://docs.typesafe.ai/primitives/choice),
 Jev 1.13 weaknesses (https://docs.typesafe.ai/model-jaggedness/jev-1.13), and
-`reports/System One models accuracy cost.md` (Session 3 research, not committed).
+`reports/System One models accuracy cost.md` (Session 3 research).
 - **Main runs use short instructions (`decision_short`)**: one self-contained sentence per question,
   approved as drafted, with Q3 ending "compared with not doing it?". *Alternative considered:* the
   paper's full text per question (`decision_full`). It is kept as a robustness check, because
