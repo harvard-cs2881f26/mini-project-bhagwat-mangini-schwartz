@@ -57,13 +57,16 @@ class RunConfig(BaseModel):
         """Local option-probability and NLI models render the request with the wording file's `local`
         section, which only `_local` prompts hash into their version (asimov.bench.text); local
         generation takes a text prompt."""
-        from asimov.bench.text import is_local_prompt
+        from asimov.bench.text import is_local_prompt, is_oneshot_prompt
 
         for m in self.models:
             mode = m.params.get("mode") if m.provider == "local_hf" else "logprob" if m.provider == "nli" else None
             if mode == "logprob" and not is_local_prompt(self.prompt):
                 raise ValueError(f"{m.name}: {m.provider} option probabilities need a `_local` decision prompt "
                                  f"(e.g. decision_short_local), not {self.prompt!r}")
+            plain = m.provider == "local_hf" and m.params.get("template") == "plain"
+            if is_oneshot_prompt(self.prompt) and not (mode == "logprob" and plain):
+                raise ValueError(f"{m.name}: one-shot prompts are for local_hf logprob with template: plain only")
             if mode == "generate" and is_local_prompt(self.prompt):
                 raise ValueError(f"{m.name}: local_hf generate takes a text prompt (e.g. text_verbatim), not {self.prompt!r}")
         return self
