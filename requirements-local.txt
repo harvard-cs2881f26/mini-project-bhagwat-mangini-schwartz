@@ -6,3 +6,5 @@ torch==2.14.1
 transformers==5.19.0
 accelerate==1.15.0
 sentencepiece==0.2.2
+# Kev-4B deploy on Modal (docs/apis/systemone.md §3)
+modal==1.6.1
