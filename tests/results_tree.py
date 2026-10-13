@@ -29,6 +29,7 @@ def write_model(
     per_item: dict,
     metrics: dict,
     scored_at: str = SCORED_AT,
+    settings: dict | None = None,
 ) -> None:
     mdir = run_dir / model
     mdir.mkdir(parents=True)
@@ -52,6 +53,7 @@ def write_model(
         "scored_at": scored_at,
         "git_commit": "abc1234def",
         "n": len(per_item),
+        **(settings or {}),
         **metrics,
     }
     (mdir / "summary.json").write_text(json.dumps({**summary, "per_item": per_item}))
@@ -63,17 +65,35 @@ def write_model(
     (mdir / "responses.jsonl").write_text("".join(json.dumps(r) + "\n" for r in rows))
 
 
-def text_run(results: Path, run: str, large_correct: list[list[bool]], scored_at: str = SCORED_AT) -> None:
+def text_run(
+    results: Path,
+    run: str,
+    large_correct: list[list[bool]],
+    scored_at: str = SCORED_AT,
+    extra_models: tuple[str, ...] = (),
+    drop_models: tuple[str, ...] = (),
+    **settings,
+) -> None:
+    """A text run of GPT-5 and GPT-5 Nano (plus `extra_models`, minus `drop_models`); `settings` override the config's
+    prompt (p), thinking (min) and log_reasoning, in config.yaml and in every summary."""
     run_dir = results / run
-    models = [("GPT-5", "gpt-5", large_correct), ("GPT-5 Nano", "gpt-5-nano", [[False, True, False, True]] * 4)]
-    cfg = {"run": run, "benchmark": "text", "models": [{"name": n, "provider": "openai", "model": m} for n, m, _ in models]}
+    small = [[False, True, False, True]] * 4
+    models = [("GPT-5", "gpt-5", large_correct), ("GPT-5 Nano", "gpt-5-nano", small)] + [(m, m, small) for m in extra_models]
+    models = [x for x in models if x[1] not in drop_models]
+    settings = {"prompt": "p", "thinking": "min", **settings}
+    cfg = {
+        "run": run,
+        "benchmark": "text",
+        **settings,
+        "models": [{"name": n, "provider": "openai", "model": m} for n, m, _ in models],
+    }
     run_dir.mkdir(parents=True)
     (run_dir / "config.yaml").write_text(yaml.safe_dump(cfg, sort_keys=False))
     for name, model, by_item in models:
         per_item = {i: text_outcome(c) for i, c in zip(ITEMS, by_item, strict=True)}
         metrics = {f"{q}_accuracy": sum(per_item[i][q]["correct"] for i in ITEMS) / 4 for q in QUESTIONS}
         metrics |= {"parse_failure_rate": 0.0, "latent_severity_n_severe": 2, "latent_severity_severe_recall": 0.5}
-        write_model(run_dir, name, model, "openai", "text", per_item, metrics, scored_at)
+        write_model(run_dir, name, model, "openai", "text", per_item, metrics, scored_at, settings)
 
 
 def make_results(tmp_path: Path) -> Path:

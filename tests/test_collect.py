@@ -16,7 +16,7 @@ from asimov.collect.build import build
 from asimov.collect.checks import ACTION_QUESTIONS, LATENT_QUESTIONS
 from asimov.collect.load import ModelResult, load_model, load_results
 from asimov.collect.pages import FIGURES, GENERATED, FailureCounts, failure_counts
-from asimov.collect.run_ids import PREFIXES, RunLabel, assign_ids, next_number, update_labels
+from asimov.collect.run_ids import PREFIXES, assign_ids, describe, next_number, parse_ids
 from asimov.collect.tables import CSV_DIGITS, to_csv
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -319,32 +319,113 @@ def test_img_and_imgr_numbers_are_separate():
 
 
 def test_run_id_column_follows_run_in_both_tables(results):
-    labels = {"text_run": RunLabel("txt0", "what text_run tests"), "video_run": RunLabel("vid0")}
-    files = build(load_results(results), empty_claims(), {}, {}, [], labels)
+    files = build(load_results(results), empty_claims(), {}, {}, [], {"text_run": "txt0", "video_run": "vid0"})
     index = read_csv(files["index.csv"])
     assert list(index[0])[:3] == ["run", "run_id", "description"]
     assert [r["run_id"] for r in index] == ["txt0", "txt0", "vid0"]
-    assert index[0]["description"] == "what text_run tests"
-    assert index[2]["description"] == "video · prompt p · thinking min · 1 model (auto)"
+    assert index[0]["description"] == "The first text run: the p prompt, with thinking set to min, on 2 models."
+    assert (
+        index[2]["description"] == "The first video run: the p prompt, with thinking set to min, on 1 model."
+    )  # no config.yaml: from summaries
     per_item = read_csv(files["per_item.csv"])
     assert list(per_item[0])[:3] == ["run", "run_id", "benchmark"] and "description" not in per_item[0]
     assert {r["run_id"] for r in per_item if r["run"] == "video_run"} == {"vid0"}
 
 
-def test_run_id_appears_on_the_pages(results):
-    text_run(results, "text_run_b", [[False] * 4] * 4)
-    ids = {"text_run": RunLabel("txt0", "baseline"), "text_run_b": RunLabel("txt1"), "video_run": RunLabel("vid0", "video")}
+def test_run_id_and_description_appear_on_the_pages(results):
+    text_run(results, "text_run_b", [[False] * 4] * 4, thinking="default")
+    ids = {"text_run": "txt0", "text_run_b": "txt1", "video_run": "vid0"}
     headline = {"figures": {"fig4": {"run": "text_run", "note": ""}}}
     comparisons = [{"name": "a_vs_b", "a": "text_run", "b": "text_run_b"}]
     files = build(load_results(results), empty_claims(), {}, headline, comparisons, ids)
-    assert "# Run `txt0`: `text_run`\n\nbaseline\n" in files["text_run/README.md"]
-    assert "text · prompt p · thinking min · 2 models (auto)" in files["text_run_b/README.md"]
+    first = "The first text run: the p prompt, with thinking set to min, on 2 models."
+    assert f"# Run `txt0`: `text_run`\n\n{first}\n" in files["text_run/README.md"]
+    later = (
+        "Same as txt0, except thinking is set to default (each provider decides how much to reason) "
+        "instead of min (the lowest reasoning each provider allows)."
+    )
+    assert later in files["text_run_b/README.md"]
     summary = files["README.md"]
-    assert "| Run ID | Run | Description |" in summary and "| `vid0` | [`video_run`](video_run/README.md) | video |" in summary
+    assert "| Run ID | Run | Description |" in summary
+    assert f"| `txt1` | [`text_run_b`](text_run_b/README.md) | {later} |" in summary
     assert "Run: `txt0` [`text_run`](text_run/README.md)" in summary
     compare = files["compare/a_vs_b.md"]
     assert "`txt0`" in compare.splitlines()[2] and "`txt1`" in compare.splitlines()[2]
-    assert "A: baseline" in compare and "B: text · prompt p" in compare
+    assert f"A: {first}" in compare and f"B: {later}" in compare
+    assert "(auto)" not in summary
+
+
+def describe_all(results: Path, ids: dict[str, str]) -> dict[str, str]:
+    runs = load_results(results)
+    return {r.name: describe(r, runs, ids) for r in runs}
+
+
+def test_paper_prompt_and_min_thinking_read_as_words(results):
+    text_run(results, "verbatim", [[True] * 4] * 4, prompt="text_verbatim", thinking="default")
+    text_run(results, "verbatim_min", [[True] * 4] * 4, prompt="text_verbatim", extra_models=("GPT-6 Luna",))
+    described = describe_all(results, {"verbatim": "txt0", "verbatim_min": "txt1", "text_run": "txt2"})
+    assert described["verbatim"] == (
+        "The first text run: the paper's prompt sent unchanged (text_verbatim), with thinking set to default, on 2 models."
+    )
+    assert described["verbatim_min"] == (
+        "Same as txt0, except thinking is set to min (the lowest reasoning each provider allows) instead of default "
+        "(each provider decides how much to reason), and it adds GPT-6 Luna."
+    )
+    assert described["text_run"].startswith("Same as txt0, except it uses the p prompt instead of text_verbatim, ")
+
+
+def test_first_run_describes_its_settings(results):
+    text_run(results, "logged", [[True] * 4] * 4, log_reasoning=True)
+    described = describe_all(results, {"logged": "txt0", "text_run": "txt1", "video_run": "vid0"})
+    assert (
+        described["logged"]
+        == "The first text run: the p prompt, with thinking set to min, on 2 models. Reasoning summaries are saved."
+    )
+    assert described["text_run"] == "Same as txt0, except it doesn't save reasoning summaries."
+
+
+def test_thinking_only_change(results):
+    text_run(results, "text_default", [[True] * 4] * 4, thinking="default")
+    assert describe_all(results, {"text_run": "txt0", "text_default": "txt1"})["text_default"] == (
+        "Same as txt0, except thinking is set to default (each provider decides how much to reason) "
+        "instead of min (the lowest reasoning each provider allows)."
+    )
+
+
+def test_prompt_change_and_added_and_removed_models_are_listed(results):
+    text_run(results, "text_b", [[True] * 4] * 4, extra_models=("o3", "gpt-4o"), drop_models=("gpt-5-nano",), prompt="q")
+    assert describe_all(results, {"text_run": "txt0", "text_b": "txt1"})["text_b"] == (
+        "Same as txt0, except it uses the q prompt instead of p, and it adds o3 and gpt-4o and drops GPT-5 Nano."
+    )
+
+
+def test_identical_settings_are_a_rerun(results):
+    text_run(results, "text_again", [[False] * 4] * 4)
+    assert (
+        describe_all(results, {"text_run": "txt0", "text_again": "txt1"})["text_again"]
+        == "A rerun of txt0 with the same settings."
+    )
+
+
+def test_descriptions_are_deterministic(results):
+    text_run(results, "text_b", [[True] * 4] * 4, extra_models=("o3", "gpt-4o"), thinking="default", prompt="q")
+    ids = {"text_run": "txt0", "text_b": "txt1", "video_run": "vid0"}
+    runs = load_results(results)
+    once = {r.name: describe(r, runs, ids) for r in runs}
+    assert once == {r.name: describe(r, list(reversed(runs)), ids) for r in load_results(results)}
+    assert once["text_b"] == (
+        "Same as txt0, except it uses the q prompt instead of p, thinking is set to default "
+        "(each provider decides how much to reason) instead of min (the lowest reasoning each provider allows), "
+        "and it adds o3 and gpt-4o."
+    )
+
+
+def test_run_ids_yaml_rejects_old_style_entries():
+    assert parse_ids({"a": "txt0", "b": "imgr2"}) == {"a": "txt0", "b": "imgr2"}
+    with pytest.raises(ValueError, match="run name -> id"):
+        parse_ids({"a": {"id": "txt0", "description": ""}})
+    with pytest.raises(ValueError):
+        parse_ids({"a": "not an id"})
 
 
 def test_cli_writes_run_ids_and_check_fails_when_one_is_missing(results, tmp_path):
@@ -352,40 +433,16 @@ def test_cli_writes_run_ids_and_check_fails_when_one_is_missing(results, tmp_pat
     assert collect.main(args) == 0
     path = results / "run_ids.yaml"
     text = path.read_text()
-    assert text.startswith("#") and "never changed or reused" in text and "hand-written" in text
-    assert yaml.safe_load(text) == {"text_run": {"id": "txt0", "description": ""}, "video_run": {"id": "vid0", "description": ""}}
+    assert text.startswith("#") and "never changed or reused" in text and "description" not in text
+    assert yaml.safe_load(text) == {"text_run": "txt0", "video_run": "vid0"}
     assert collect.main([*args, "--check"]) == 0
 
     text_run(results, "text_run_b", [[False] * 4] * 4, scored_at="2026-10-01T09:00:00-0400")
     assert collect.main(args) == 0  # rebuild pages so only run_ids.yaml can be stale below
-    assert yaml.safe_load(path.read_text())["text_run_b"] == {
-        "id": "txt1",
-        "description": "",
-    }  # new run: next number, even though scored earlier
+    assert yaml.safe_load(path.read_text())["text_run_b"] == "txt1"  # new run: next number, even though scored earlier
     path.write_text(text)  # drop text_run_b's ID
     before = {p: p.read_text() for p in results.rglob("*") if p.is_file()}
     assert collect.main([*args, "--check"]) == 1
     assert {p: p.read_text() for p in results.rglob("*") if p.is_file()} == before  # --check writes nothing
     assert collect.main(args) == 0
-    assert collect.main([*args, "--check"]) == 0
-
-
-def test_update_labels_keeps_existing_entries(results):
-    existing = {"text_run": RunLabel("txt5", "mine"), "gone": RunLabel("vid0", "deleted run")}
-    labels = update_labels(existing, load_results(results))
-    assert labels == {
-        "text_run": RunLabel("txt5", "mine"),
-        "gone": RunLabel("vid0", "deleted run"),
-        "video_run": RunLabel("vid1"),
-    }
-
-
-def test_hand_edited_description_survives_a_rebuild(results, tmp_path):
-    args = ["--results", str(results), "--claims", str(write_claims(tmp_path))]
-    assert collect.main(args) == 0
-    path = results / "run_ids.yaml"
-    path.write_text(path.read_text().replace("description: ''", "description: my own words", 1))
-    assert collect.main(args) == 0
-    assert yaml.safe_load(path.read_text())["text_run"] == {"id": "txt0", "description": "my own words"}
-    assert "my own words" in (results / "text_run" / "README.md").read_text()
     assert collect.main([*args, "--check"]) == 0

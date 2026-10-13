@@ -2,7 +2,7 @@
 
 # Run `vid0`: `repro_fig5`
 
-Fig 5 reproduction (Tyler): video prompt v2 on 16 frames, thinking min.
+The first video run: the video_v2 prompt, with thinking set to min, on 8 models.
 
 ## Settings
 

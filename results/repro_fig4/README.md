@@ -2,7 +2,7 @@
 
 # Run `txt0`: `repro_fig4`
 
-Fig 4 reproduction: the paper's text prompt verbatim, thinking set to the lowest level each provider allows (min).
+The first text run: the paper's prompt sent unchanged (text_verbatim), with thinking set to min, on 8 models. Reasoning summaries are saved.
 
 ## Settings
 

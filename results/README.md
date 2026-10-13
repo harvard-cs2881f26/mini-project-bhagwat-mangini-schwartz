@@ -46,5 +46,5 @@ No run yet.
 
 | Run ID | Run | Description | Benchmark | Date | Models | Thinking | Prompt | Commit | Cost $ | Note |
 |---|---|---|---|---|---|---|---|---|---|---|
-| `vid0` | [`repro_fig5`](repro_fig5/README.md) | Fig 5 reproduction (Tyler): video prompt v2 on 16 frames, thinking min. | video | 2026-10-12 | 8 | min | video_v2 | ae0477e | – |  |
-| `txt0` | [`repro_fig4`](repro_fig4/README.md) | Fig 4 reproduction: the paper's text prompt verbatim, thinking set to the lowest level each provider allows (min). | text | 2026-10-12 | 8 | min | text_verbatim | 7b3ddf9 | – |  |
+| `vid0` | [`repro_fig5`](repro_fig5/README.md) | The first video run: the video_v2 prompt, with thinking set to min, on 8 models. | video | 2026-10-12 | 8 | min | video_v2 | ae0477e | – |  |
+| `txt0` | [`repro_fig4`](repro_fig4/README.md) | The first text run: the paper's prompt sent unchanged (text_verbatim), with thinking set to min, on 8 models. Reasoning summaries are saved. | text | 2026-10-12 | 8 | min | text_verbatim | 7b3ddf9 | – |  |

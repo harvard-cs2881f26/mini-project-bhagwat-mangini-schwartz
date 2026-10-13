@@ -10,7 +10,7 @@ import numpy as np
 from asimov.claims import is_stand_in
 from asimov.collect.load import ModelResult, RunData
 from asimov.collect.metrics import item_rows
-from asimov.collect.run_ids import RunLabel, description
+from asimov.collect.run_ids import RunLabel
 
 LEADING = (
     "run",
@@ -81,7 +81,7 @@ def index_row(run: RunData, model: ModelResult, prices: dict, labels: dict[str, 
     made = {
         "run": run.name,
         "run_id": labels[run.name].id,
-        "description": description(run, labels),
+        "description": labels[run.name].description,
         "benchmark": run.benchmark,
         "served_model": ";".join(model.served_models),
         "stand_in": is_stand_in(s["name"]),

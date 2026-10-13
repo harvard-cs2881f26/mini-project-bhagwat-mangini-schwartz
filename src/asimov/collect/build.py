@@ -7,7 +7,7 @@ import yaml
 from asimov.claims import Claims
 from asimov.collect import pages
 from asimov.collect.load import RunData
-from asimov.collect.run_ids import RunLabel, update_labels
+from asimov.collect.run_ids import assign_ids, run_labels
 from asimov.collect.tables import LEADING, PER_ITEM_COLUMNS, index_rows, per_item_rows, to_csv
 
 HEADLINE_HEADER = """\
@@ -41,11 +41,11 @@ def build(
     prices: dict,
     headline: dict,
     comparisons: list[dict],
-    labels: dict[str, RunLabel] | None = None,
+    run_ids: dict[str, str] | None = None,
 ) -> dict[str, str]:
-    """`labels` (results/run_ids.yaml) gives each run its ID and description; runs missing from it get fresh IDs."""
+    """`run_ids` is results/run_ids.yaml (run name -> id); runs missing from it get fresh IDs. Descriptions are generated."""
     headline = headline or default_headline(runs)
-    labels = update_labels(labels or {}, runs)
+    labels = run_labels(runs, assign_ids(run_ids or {}, runs))
     rows = index_rows(runs, prices, labels)
     index = {(r["run"], r["model"]): r for r in rows}
     files = {
