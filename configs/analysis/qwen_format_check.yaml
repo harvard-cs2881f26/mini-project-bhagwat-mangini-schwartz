@@ -1,0 +1,7 @@
+# EXPLORATORY. Qwen3.5-4B generate: few-shot format prompt (part2_qwen_gen_fewshot) vs the verbatim prompt
+# (part2_qwen_gen_2048, txt33), same model and 2048-token cap, on the items both runs have. Read by
+# scripts/qwen_format_check.py (unknown keys fail); output results/qwen_format_check/tables.md.
+# WORKLOG 2026-10-14, "Qwen generate, few-shot format prompt (exploratory)". $0: saved replies only.
+label: "EXPLORATORY: prompt variant, not the paper's prompt word for word"
+baseline: {run: part2_qwen_gen_2048, model: qwen3.5-4b}   # verbatim prompt (txt33)
+variant: {run: part2_qwen_gen_fewshot, model: qwen3.5-4b}  # few-shot format prompt
