@@ -1,0 +1,11 @@
+# Part 2: open decision models hosted on Codiv (free tier; key in CODIV_API_KEY, our name, see
+# docs/apis/systemone.md §2). OpenJev without thinking (think 0) and Laya. Laya reads 512 tokens and
+# cuts longer input silently: check input_tokens on the smoke run.
+run: part2_codiv
+benchmark: text
+prompt: decision_short
+thinking: min
+models:
+  - {name: OpenJev (think 0), provider: systemone, model: openjev-latest, base_url: "https://api.codiv.ai",
+     key_env: CODIV_API_KEY, params: {think: 0}}
+  - {name: Laya, provider: systemone, model: laya-1.0, base_url: "https://api.codiv.ai", key_env: CODIV_API_KEY}

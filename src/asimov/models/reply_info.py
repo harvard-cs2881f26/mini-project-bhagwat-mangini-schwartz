@@ -8,7 +8,8 @@ finish(provider, raw):
     "truncated"  cut off by the output-token limit (OpenAI status "incomplete" for
                  max_output_tokens, Claude stop_reason "max_tokens", Gemini finish_reason MAX_TOKENS)
     "refused"    a refusal or safety block (OpenAI refusal content or content_filter, Claude
-                 stop_reason "refusal", Gemini prompt_feedback.block_reason or a safety finish_reason)
+                 stop_reason "refusal", Gemini prompt_feedback.block_reason or a safety finish_reason;
+                 decision models: any question answered with something other than a choice)
     "complete"   anything else
 """
 
@@ -46,14 +47,22 @@ def _gemini(raw: dict) -> Finish:
     return "truncated" if "MAX_TOKENS" in reasons else "complete"
 
 
+def _decision(raw: dict) -> Finish:
+    """Decision services: answers keyed by question (systemone) or a list with names (OpenAI)."""
+    answers = raw.get("answers") or {}
+    answers = list(answers.values()) if isinstance(answers, dict) else answers
+    return "refused" if any(a.get("type") != "choice" for a in answers) else "complete"
+
+
 def finish(provider: str, raw: dict) -> Finish:
-    reader = {"openai": _openai, "anthropic": _anthropic, "gemini": _gemini}.get(provider)
+    reader = {"openai": _openai, "anthropic": _anthropic, "gemini": _gemini,
+              "systemone": _decision, "openai_decisions": _decision}.get(provider)
     return reader(raw) if reader else "complete"
 
 
 def cached_input_tokens(provider: str, raw: dict) -> int | None:
     """Input tokens served from the provider's prompt cache; None if the provider doesn't say."""
-    if provider == "openai":
+    if provider in ("openai", "openai_decisions"):
         return ((raw.get("usage") or {}).get("input_tokens_details") or {}).get("cached_tokens") or 0
     if provider == "anthropic":
         return (raw.get("usage") or {}).get("cache_read_input_tokens") or 0

@@ -20,7 +20,9 @@ PAPER_MODELS = {
 }
 
 
-def get_client(provider: str, model: str):
+def get_client(provider: str, model: str, base_url: str | None = None, key_env: str | None = None,
+               params: dict | None = None):
+    """base_url, key_env, params: decision services only (Part 2; asimov.config.ModelSpec)."""
     if provider == "anthropic":
         from asimov.models.anthropic_client import AnthropicClient
         return AnthropicClient(model)
@@ -33,6 +35,12 @@ def get_client(provider: str, model: str):
     if provider == "mock":
         from asimov.models.mock import MockClient
         return MockClient(model)
+    if provider == "systemone":
+        from asimov.models.systemone import SystemOneClient
+        return SystemOneClient(model, base_url=base_url, key_env=key_env, params=params or {})
+    if provider == "openai_decisions":
+        from asimov.models.openai_decisions import OpenAIDecisionsClient
+        return OpenAIDecisionsClient(model, params=params or {})
     if provider == "mock_decision":
         from asimov.models.mock import MockDecisionClient
         return MockDecisionClient(model)

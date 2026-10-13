@@ -1,0 +1,8 @@
+# Part 2: Jev (TypeSafe, hosted, paid key in TYPESAFE_API_KEY). Decision prompt, main wording.
+# `thinking` is required by the config schema but not used by decision services.
+run: part2_jev
+benchmark: text
+prompt: decision_short
+thinking: min
+models:
+  - {name: Jev, provider: systemone, model: jev-latest, base_url: "https://api.typesafe.ai", key_env: TYPESAFE_API_KEY}
