@@ -217,5 +217,18 @@ def run(cfg: dict, limit: int | None = None, only: list[str] | None = None,
             print(f"\n== {spec['name']}: skipped, {var} not set")
             continue
         rows.append(run_model(bench, spec, cfg, items, out_dir, workers, show, made, call_models))
-    (out_dir / "summary.json").write_text(json.dumps(rows, indent=1))
+    write_combined(cfg, out_dir)
     return rows
+
+
+def write_combined(cfg: dict, out_dir: Path) -> None:
+    """results/<run>/summary.json: one row per config model, from each model's own summary.json,
+    so running a subset (--models) never drops the other models' rows."""
+    combined = []
+    for spec in cfg["models"]:
+        path = out_dir / spec["model"] / "summary.json"
+        if path.exists():
+            s = json.loads(path.read_text())
+            s.pop("per_item", None)
+            combined.append(s)
+    (out_dir / "summary.json").write_text(json.dumps(combined, indent=1))

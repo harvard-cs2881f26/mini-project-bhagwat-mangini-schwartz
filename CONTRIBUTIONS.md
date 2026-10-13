@@ -46,3 +46,4 @@ before the writeup is submitted.
 | Riddhi Bhagwat | Fig. 6 (constraints) |
 | 2026-10-10 | Tyler | Gemini stand-ins (2.5 retired for new keys) and Gemini 3 thinking levels; runner warns on unknown `--models` | `configs/repro_fig5.yaml`, `src/asimov/models/gemini_client.py`, `src/asimov/runner.py` | Code written by Claude from Tyler's stand-in decision (review pending) |
 | 2026-10-10 | Tyler | Error review page for the video benchmark (breakdowns by answer-key group, timing by true time, severity confusion, example videos with frames and replies) | `scripts/error_report.py` | Script written by Claude at Tyler's request; numbers only, interpretation left to Tyler (review pending) |
+| 2026-10-12 | Tyler | Runner: combined summary keeps every model after a `--models` subset run | `src/asimov/runner.py`, `tests/test_runner.py` | Code written by Claude at Tyler's request (review pending) |

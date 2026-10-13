@@ -597,3 +597,10 @@ still wait for the Fig 4 review and docs/HYPOTHESIS.md.
   considered:* Qwen3-4B, as in the plan.
 - **All optional systems kept** (`semif`, `nli_zeroshot`, `laya`, `openjev` think 0/512).
   *Alternative considered:* cutting them in the PLAN §4 cut order.
+
+### Combined summary keeps every model (2026-10-12): DECIDED (Tyler)
+- `results/<run>/summary.json` is now rebuilt after every run from each config model's own
+  `summary.json` (`runner.write_combined`), so `--models` subset runs no longer drop the other rows.
+  Return value and printed table still show only the models just run.
+- *Alternative considered:* merge new rows into the old combined file. Rejected: two sources of
+  truth; the per-model summaries already hold everything.
