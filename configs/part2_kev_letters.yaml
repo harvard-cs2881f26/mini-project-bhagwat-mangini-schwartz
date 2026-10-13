@@ -1,0 +1,9 @@
+# Variant of part2_kev.yaml with one change: prompt decision_short -> decision_short_letters.
+# Kev applies its own fitted temperature (2.41); see part2_kev.yaml.
+run: part2_kev_letters
+benchmark: text
+prompt: decision_short_letters
+thinking: min
+models:
+  - {name: Kev-4B, provider: systemone, model: kev-latest, base_url: "https://nschwartz--kev-api.modal.run",
+     key_env: KEV_API_KEY}
