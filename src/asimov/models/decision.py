@@ -30,7 +30,7 @@ from asimov.bench.text_score import response_key
 from asimov.models.base import ModelResponse, Timer
 
 Probs = dict[str, dict[str, float] | None]  # question id -> {option: probability}, None if unanswered
-PROB_SUM_TOLERANCE = 1e-3  # a service's probabilities must sum to 1 within this (Kev's are rounded to ~1e-4)
+PROB_SUM_TOLERANCE = 0.03  # sum within 1 +- this: Jev and luna round to 2 decimals (5 options: up to 0.025 off; Jev seen at 0.99)
 
 
 @dataclass
