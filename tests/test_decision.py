@@ -10,12 +10,13 @@ import json
 import pytest
 import yaml
 
-from asimov.bench.parts import DecisionPart
-from asimov.bench.text import DECISION_PROMPTS, build_request, option_name, prompt_version
+from asimov.bench.parts import DecisionPart, DecisionQuestion
+from asimov.bench.text import DECISION_PROMPTS, build_request, option_name, parse_decision_prompt, prompt_version, wording
 from asimov.bench.text_score import OPTIONS, QUESTIONS, response_key, score, score_item
 from asimov.data.text import load_text_answers, load_text_items, parse_prompt
 from asimov.models import get_client
-from asimov.models.decision import decision_reply, reply_text
+from asimov.models.decision import Decided, decision_reply, generate_decision, reply_text
+from asimov.models.reply_info import finish
 from asimov.runner import ROOT, run
 
 
@@ -168,3 +169,170 @@ def test_mock_decision_run_end_to_end_saves_probs(tmp_path):
     assert row["n"] == n and row["parse_failure_rate"] == 0
     saved = [json.loads(line) for line in open(tmp_path / cfg["run"] / "mock-decide-first" / "responses.jsonl")]
     assert len(saved) == n and all(set(r["probs"]) == set(QUESTIONS) for r in saved)
+
+
+# --- question modes: do a decision model's questions see its own earlier answers? ---
+
+
+def test_decision_prompt_names_parse_into_wording_letters_and_mode():
+    assert parse_decision_prompt("decision_short") == ("short", False, "independent")
+    assert parse_decision_prompt("decision_full") == ("full", False, "independent")
+    assert parse_decision_prompt("decision_short_letters") == ("short", True, "independent")
+    assert parse_decision_prompt("decision_short_chained") == ("short", False, "chained")
+    assert parse_decision_prompt("decision_full_letters_cumulative") == ("full", True, "cumulative")
+    for bad in ("decision_medium", "decision_short_chained_letters", "decision_short_independent", "text_verbatim"):
+        with pytest.raises(ValueError):
+            parse_decision_prompt(bad)
+    assert {"decision_short", "decision_full", "decision_short_letters"} <= set(DECISION_PROMPTS)
+    assert all(parse_decision_prompt(p) for p in DECISION_PROMPTS)
+    assert len(DECISION_PROMPTS) == 12  # {short, full} x {names, letters} x {independent, chained, cumulative}
+
+
+def test_existing_decision_prompt_versions_are_pinned():
+    """Main-run versions: editing a mode's context lines (or a YAML comment) must not move them.
+    (They moved once, from ...|126e444fcb3b, when the hash went from the file's bytes to the sections
+    a request uses; no decision replies had been saved then.)"""
+    assert prompt_version("decision_short") == "asimov_v2_injuries/0.1.0|decision_short|f89d5ee7e6bc"
+    assert prompt_version("decision_full") == "asimov_v2_injuries/0.1.0|decision_full|f89d5ee7e6bc"
+    assert prompt_version("decision_short_letters") == "asimov_v2_injuries/0.1.0|decision_short_letters|f89d5ee7e6bc"
+
+
+def test_context_wording_is_in_the_chained_versions_only(monkeypatch):
+    before = {p: prompt_version(p) for p in DECISION_PROMPTS}
+    edited = {**wording(), "context": {**wording()["context"], "latent_risk": "EDITED: {answer}"}}
+    monkeypatch.setattr("asimov.bench.text.wording", lambda: edited)
+    for p in DECISION_PROMPTS:
+        moved = prompt_version(p) != before[p]
+        assert moved == (parse_decision_prompt(p).mode != "independent"), p
+
+
+def test_every_decision_prompt_builds_a_request_with_its_mode():
+    item = load_text_items()[0]
+    for p in DECISION_PROMPTS:
+        [part] = build_request(item, p)
+        assert part.mode == parse_decision_prompt(p).mode
+        assert tuple(q.id for q in part.questions) == QUESTIONS
+        assert part.state == build_request(item, "decision_short")[0].state  # context is added per call, not here
+
+
+class Scripted:
+    """A decision client whose pick per question is fixed (option index), or None to refuse."""
+
+    model = "scripted"
+
+    def __init__(self, picks: dict[str, int | None], usage=None, served=("served-1", "served-2", "served-3", "served-4")):
+        self.picks, self.parts = picks, []
+        self.usage = usage or {"input_tokens": 10, "output_tokens": 1}
+        self.served = served
+
+    def decide(self, part: DecisionPart) -> Decided:
+        self.parts.append(part)
+        by_value = {}
+        for q in part.questions:
+            top = self.picks.get(q.id, 0)
+            values = [v for v, _ in q.options]
+            by_value[q.id] = (
+                None if top is None else {v: (0.7 if i == top else 0.3 / (len(values) - 1)) for i, v in enumerate(values)}
+            )
+        n = len(self.parts)
+        return Decided(by_value=by_value, raw={"call": n}, usage=dict(self.usage), model=self.served[n - 1])
+
+
+def option_text(q: DecisionQuestion, index: int) -> str:
+    return q.options[index][1]
+
+
+def context_line(qid: str, answer: str) -> str:
+    return wording()["context"][qid].format(answer=answer)
+
+
+def test_independent_mode_is_one_call_with_the_raw_unchanged():
+    [part] = build_request(load_text_items()[0], "decision_short")
+    client = Scripted({})
+    r = generate_decision(client, [part])
+    assert client.parts == [part]
+    assert r.raw == {"call": 1} and r.usage == {"input_tokens": 10, "output_tokens": 1} and r.model == "served-1"
+
+
+def test_chained_mode_passes_the_models_own_q1_pick_to_q2_q4():
+    [part] = build_request(load_text_items()[0], "decision_short_chained")
+    client = Scripted({"latent_risk": 3, "latent_severity": 1, "effect": 2, "activated_risk": 0})
+    r = generate_decision(client, [part])
+    first, second = client.parts
+    assert [q.id for q in first.questions] == ["latent_risk"] and first.state == part.state
+    assert [q.id for q in second.questions] == ["latent_severity", "effect", "activated_risk"]
+    assert second.state == part.state + "\n" + context_line("latent_risk", option_text(part.questions[0], 3))
+    assert json.loads(r.text) == {
+        response_key("latent_risk"): "D",
+        response_key("latent_severity"): "B",
+        response_key("effect"): "C",
+        response_key("activated_risk"): "A",
+    }
+    assert list(r.probs) == list(QUESTIONS) and r.probs["latent_risk"]["D"] == 0.7
+    assert r.usage == {"input_tokens": 20, "output_tokens": 2}
+    assert r.model == "served-1" and r.latency_s >= 0
+    assert r.raw == {"mode": "chained", "calls": [{"call": 1}, {"call": 2}]}
+
+
+def test_cumulative_mode_adds_every_earlier_pick_in_order():
+    [part] = build_request(load_text_items()[0], "decision_short_cumulative")
+    client = Scripted({"latent_risk": 1, "latent_severity": 2, "effect": 3, "activated_risk": 0})
+    r = generate_decision(client, [part])
+    assert [[q.id for q in p.questions] for p in client.parts] == [[q] for q in QUESTIONS]
+    q1, q2, q3, _ = part.questions
+    lines = [
+        context_line("latent_risk", option_text(q1, 1)),
+        context_line("latent_severity", option_text(q2, 2)),
+        context_line("effect", option_text(q3, 3)),
+    ]
+    for i, sent in enumerate(client.parts):
+        assert sent.state == "\n".join([part.state, *lines[:i]])
+    assert r.usage == {"input_tokens": 40, "output_tokens": 4} and len(r.raw["calls"]) == 4
+    assert r.raw["mode"] == "cumulative"
+
+
+def test_unknown_token_counts_stay_unknown_when_summed():
+    [part] = build_request(load_text_items()[0], "decision_short_chained")
+    r = generate_decision(Scripted({}, usage={"input_tokens": None, "output_tokens": 0}), [part])
+    assert r.usage == {"input_tokens": None, "output_tokens": 0}
+
+
+def test_chained_mode_with_an_unanswered_q1_adds_no_injury_line():
+    [part] = build_request(load_text_items()[0], "decision_short_chained")
+    client = Scripted({"latent_risk": None})
+    r = generate_decision(client, [part])
+    assert client.parts[1].state == part.state
+    assert response_key("latent_risk") not in json.loads(r.text) and r.probs["latent_risk"] is None
+    calls = [
+        {"answers": {"latent_risk": {"type": "refusal"}}},
+        {"answers": {q: {"type": "choice", "probabilities": {}} for q in QUESTIONS[1:]}},
+    ]
+    assert finish("systemone", {"mode": "chained", "calls": calls}) == "refused"
+    assert finish("systemone", {"mode": "chained", "calls": calls[1:]}) == "complete"
+
+
+def test_context_comes_from_the_models_pick_never_the_answer_key(monkeypatch):
+    item = load_text_items()[0]
+    key = load_text_answers()[item.id]["latent_risk"]
+    pick = next(i for i, letter in enumerate("ABCDE") if letter != key)
+    [part] = build_request(item, "decision_short_chained")
+
+    def no_answers(*a, **k):
+        raise AssertionError("decision requests must not read the answer key")
+
+    monkeypatch.setattr("asimov.bench.text.load_text_answers", no_answers)
+    monkeypatch.setattr("asimov.data.text.load_text_answers", no_answers)
+    client = Scripted({"latent_risk": pick})
+    generate_decision(client, [part])
+    assert client.parts[1].state.endswith(context_line("latent_risk", option_text(part.questions[0], pick)))
+
+
+def test_mock_decision_chained_run_end_to_end_saves_probs(tmp_path):
+    for config in ("smoke_mock_decision_chained.yaml", "smoke_mock_decision_cumulative.yaml"):
+        cfg = yaml.safe_load((ROOT / "configs" / config).read_text())
+        assert parse_decision_prompt(cfg["prompt"]).mode != "independent"
+        [row] = [r for r in run(cfg, results_dir=tmp_path) if r["model"] == "mock-decide-first"]
+        assert row["n"] == len(load_text_answers()) and row["parse_failure_rate"] == 0
+        saved = [json.loads(line) for line in open(tmp_path / cfg["run"] / "mock-decide-first" / "responses.jsonl")]
+        assert all(set(r["probs"]) == set(QUESTIONS) for r in saved)
+        assert all(r["raw"]["mode"] == parse_decision_prompt(cfg["prompt"]).mode for r in saved)

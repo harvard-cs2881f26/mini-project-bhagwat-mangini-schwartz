@@ -1,5 +1,6 @@
 # Part 2: Jev (TypeSafe, hosted, paid key in TYPESAFE_API_KEY). Decision prompt, main wording.
 # `thinking` is required by the config schema but not used by decision services.
+# Question mode: change prompt to decision_short_chained or decision_short_cumulative (new run name).
 run: part2_jev
 benchmark: text
 prompt: decision_short

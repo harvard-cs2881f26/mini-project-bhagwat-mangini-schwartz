@@ -14,7 +14,7 @@ from asimov.bench.text_score import OPTIONS, QUESTIONS, response_key
 from asimov.config import ModelSpec
 from asimov.data.text import load_text_items
 from asimov.models.openai_decisions import OpenAIDecisionsClient
-from asimov.models.reply_info import finish
+from asimov.models.reply_info import cached_input_tokens, finish
 from asimov.models.systemone import SystemOneClient
 from asimov.runner import ROOT, run, run_key
 
@@ -285,3 +285,44 @@ def test_hosted_part2_configs_load():
         cfg = yaml.safe_load(path.read_text())
         for spec in cfg["models"]:
             ModelSpec.model_validate(spec)
+
+
+# --- question modes (chained / cumulative) through the hosted clients ---
+
+
+def test_systemone_chained_sends_q1_then_q2_q4_with_its_own_pick(monkeypatch):
+    sent = []
+
+    def handler(request):
+        body = json.loads(request.content)
+        sent.append(body)
+        return httpx.Response(200, json=systemone_answer(body, top=1))
+
+    [part] = build_request(load_text_items()[0], "decision_short_chained")
+    r = systemone_client(handler, monkeypatch).generate([part])
+    assert [list(b["questions"]) for b in sent] == [["latent_risk"], ["latent_severity", "effect", "activated_risk"]]
+    q1 = part.questions[0]
+    assert sent[0]["state"] == part.state
+    assert sent[1]["state"] == part.state + "\n" + q1.context.format(answer=q1.options[1][1])
+    assert json.loads(r.text) == {response_key(q): "B" for q in QUESTIONS}
+    assert r.usage == {"input_tokens": 2400, "output_tokens": 0} and r.model == "jev-1.13.0"
+    assert r.raw["mode"] == "chained" and len(r.raw["calls"]) == 2
+    assert finish("systemone", r.raw) == "complete" and cached_input_tokens("systemone", r.raw) is None
+
+
+def test_decisions_chained_sums_cached_tokens_and_flags_refusals():
+    [part] = build_request(load_text_items()[0], "decision_short_chained")
+    fake = FakeDecisions(refuse="effect")
+    r = decisions_client(fake).generate([part])
+    assert [[q["name"] for q in c["questions"]] for c in fake.calls] == [
+        ["latent_risk"],
+        ["latent_severity", "effect", "activated_risk"],
+    ]
+    q1 = part.questions[0]
+    assert fake.calls[1]["input"] == part.state + "\n" + q1.context.format(answer=q1.options[2][1])
+    assert response_key("effect") not in json.loads(r.text) and json.loads(r.text)[response_key("latent_risk")] == "C"
+    assert r.usage == {"input_tokens": 1800, "output_tokens": 0}
+    assert finish("openai_decisions", r.raw) == "refused"
+    for c in r.raw["calls"]:
+        c["usage"]["input_tokens_details"]["cached_tokens"] = 100
+    assert cached_input_tokens("openai_decisions", r.raw) == 200

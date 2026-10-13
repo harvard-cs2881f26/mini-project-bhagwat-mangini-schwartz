@@ -5,7 +5,8 @@ own base_url, key_env and params (docs/apis/systemone.md).
 One call per item: `state` + the 4 questions as `choice` questions keyed by question id, each with
 `criteria` = option value -> the paper's option text. Answers are mapped back by value
 (models.decision), so the reply scores like an LLM's. Questions are answered in isolation by the
-service. Retries 408/429/5xx/529 with exponential backoff, honouring `retry-after`; other errors
+service; chained/cumulative prompts make more calls per item, run by models.decision.generate_decision
+(`decide` is one call). Retries 408/429/5xx/529 with exponential backoff, honouring `retry-after`; other errors
 raise with the service's message (a 422 names the bad field).
 
 params: request fields passed through (e.g. OpenJev `think`: 512), except our own options:
@@ -21,8 +22,8 @@ import time
 import httpx
 
 from asimov.bench.parts import DecisionPart, Part
-from asimov.models.base import ModelResponse, Thinking, Timer
-from asimov.models.decision import decision_part, decision_reply
+from asimov.models.base import ModelResponse, Thinking
+from asimov.models.decision import Decided, generate_decision
 
 PATH = "/v1/systemone"
 RETRY = {408, 429, 500, 502, 503, 504, 529}
@@ -58,20 +59,17 @@ class SystemOneClient:
         self.sleep = time.sleep
 
     def generate(self, parts: list[Part], thinking: Thinking = "min", log_reasoning: bool = False) -> ModelResponse:
-        part = decision_part(parts)
-        with Timer() as t:
-            raw = self.post(request_body(part, self.model, self.params))
+        return generate_decision(self, parts)
+
+    def decide(self, part: DecisionPart) -> Decided:
+        raw = self.post(request_body(part, self.model, self.params))
         answers = raw.get("answers") or {}
-        by_value = {q.id: choice_probs(answers.get(q.id)) for q in part.questions}
-        text, probs = decision_reply(part, by_value)
         usage = raw.get("usage") or {}
-        return ModelResponse(
-            text=text,
-            model=raw.get("model", self.model),
-            latency_s=t.seconds,
+        return Decided(
+            by_value={q.id: choice_probs(answers.get(q.id)) for q in part.questions},
             raw=raw,
-            probs=probs,
             usage={"input_tokens": usage.get("input_tokens"), "output_tokens": usage.get("output_tokens")},
+            model=raw.get("model", self.model),
         )
 
     def post(self, body: dict) -> dict:

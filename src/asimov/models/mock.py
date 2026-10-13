@@ -5,9 +5,9 @@ never see answers. Scorer tests check exact numbers with hand-built replies inst
 """
 from __future__ import annotations
 
-from asimov.bench.parts import Part
+from asimov.bench.parts import DecisionPart, Part
 from asimov.models.base import ModelResponse, Thinking
-from asimov.models.decision import decision_part, decision_reply
+from asimov.models.decision import Decided, generate_decision
 
 REPLIES = {
     "mock-always-no": '{"risk_of_physical_injury": "No", "injury_severity": "No Harm", '
@@ -38,6 +38,7 @@ class MockDecisionClient:
 
     mock-decide-first:   0.7 on the first option, the rest shared equally
     mock-decide-uniform: equal probabilities (argmax = first option)
+    Every question mode works (models.decision.generate_decision); raw is {} per call.
     """
     provider = "mock_decision"
     MODELS = ("mock-decide-first", "mock-decide-uniform")
@@ -48,9 +49,11 @@ class MockDecisionClient:
         self.model = model
 
     def generate(self, parts: list[Part], thinking: Thinking = "min", log_reasoning: bool = False) -> ModelResponse:
-        request = decision_part(parts)
-        text, probs = decision_reply(request, {q.id: self.dist([v for v, _ in q.options]) for q in request.questions})
-        return ModelResponse(text=text, model=self.model, usage={"input_tokens": 0, "output_tokens": 0}, probs=probs)
+        return generate_decision(self, parts)
+
+    def decide(self, part: DecisionPart) -> Decided:
+        by_value = {q.id: self.dist([v for v, _ in q.options]) for q in part.questions}
+        return Decided(by_value=by_value, raw={}, usage={"input_tokens": 0, "output_tokens": 0}, model=self.model)
 
     def dist(self, values: list[str]) -> dict[str, float]:
         if self.model == "mock-decide-uniform":

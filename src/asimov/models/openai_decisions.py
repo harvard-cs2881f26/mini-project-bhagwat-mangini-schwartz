@@ -1,6 +1,7 @@
 """OpenAI Decisions API (Part 2: `luna_decide`, gpt-6-luna; docs/apis/openai_decisions.md).
 
-One call per item: `input` = the state, and the 4 questions as `choice` questions named by question
+One call per item (chained/cumulative prompts: more, run by models.decision.generate_decision;
+`decide` is one call): `input` = the state, and the 4 questions as `choice` questions named by question
 id, with `choices` = [{value, description}] (option value -> the paper's option text). Answers
 are matched by `name`, not position, and mapped back to letters (models.decision). A per-question
 `refusal` leaves that question unanswered (scored wrong; `finish` = refused). The SDK retries
@@ -11,9 +12,9 @@ from __future__ import annotations
 
 import openai
 
-from asimov.bench.parts import Part
-from asimov.models.base import ModelResponse, Thinking, Timer
-from asimov.models.decision import decision_part, decision_reply
+from asimov.bench.parts import DecisionPart, Part
+from asimov.models.base import ModelResponse, Thinking
+from asimov.models.decision import Decided, generate_decision
 
 
 class OpenAIDecisionsClient:
@@ -26,7 +27,9 @@ class OpenAIDecisionsClient:
         self.client = openai.OpenAI()
 
     def generate(self, parts: list[Part], thinking: Thinking = "min", log_reasoning: bool = False) -> ModelResponse:
-        part = decision_part(parts)
+        return generate_decision(self, parts)
+
+    def decide(self, part: DecisionPart) -> Decided:
         questions = [
             {
                 "type": "choice",
@@ -36,19 +39,14 @@ class OpenAIDecisionsClient:
             }
             for q in part.questions
         ]
-        with Timer() as t:
-            raw = self.client.decisions.create(model=self.model, input=part.state, questions=questions).to_dict()
+        raw = self.client.decisions.create(model=self.model, input=part.state, questions=questions).to_dict()
         answers = {a.get("name"): a for a in raw.get("answers") or []}
-        by_value = {q.id: choice_probs(answers.get(q.id)) for q in part.questions}
-        text, probs = decision_reply(part, by_value)
         usage = raw.get("usage") or {}
-        return ModelResponse(
-            text=text,
-            model=raw.get("model", self.model),
-            latency_s=t.seconds,
+        return Decided(
+            by_value={q.id: choice_probs(answers.get(q.id)) for q in part.questions},
             raw=raw,
-            probs=probs,
             usage={"input_tokens": usage.get("input_tokens"), "output_tokens": usage.get("output_tokens")},
+            model=raw.get("model", self.model),
         )
 
 
