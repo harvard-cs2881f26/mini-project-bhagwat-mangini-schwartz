@@ -1,0 +1,10 @@
+# run name -> {id, description}. scripts/collect.py adds every new run here.
+# id: automatic (benchmark prefix + number, in scoring order); never changed or reused, even after a run is deleted.
+# description: hand-written by the run's owner (what the run tests, not its results). collect.py adds new runs
+# with description "" (pages then show an automatic one from the settings) and never overwrites a description.
+repro_fig4:
+  id: txt0
+  description: "Fig 4 reproduction: the paper's text prompt verbatim, thinking set to the lowest level each provider allows (min)."
+repro_fig5:
+  id: vid0
+  description: "Fig 5 reproduction (Tyler): video prompt v2 on 16 frames, thinking min."
