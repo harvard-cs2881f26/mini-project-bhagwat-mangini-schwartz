@@ -597,3 +597,45 @@ still wait for the Fig 4 review and docs/HYPOTHESIS.md.
   considered:* Qwen3-4B, as in the plan.
 - **All optional systems kept** (`semif`, `nli_zeroshot`, `laya`, `openjev` think 0/512).
   *Alternative considered:* cutting them in the PLAN §4 cut order.
+
+## 2026-10-12: Session 3, decision-model interface (Noa)
+
+### Decision-model wording: DECIDED (Noa, 2026-10-12)
+Decision models (Part 2) get one `DecisionPart` per item, built from
+`src/asimov/prompts/decision_questions.yaml` (the one home for the wording; its hash is in each
+decision prompt's version). Sources: TypeSafe Choice docs (https://docs.typesafe.ai/primitives/choice),
+Jev 1.13 weaknesses (https://docs.typesafe.ai/model-jaggedness/jev-1.13), and
+`reports/System One models accuracy cost.md` (Session 3 research, not committed).
+- **Main runs use short instructions (`decision_short`)**: one self-contained sentence per question,
+  approved as drafted, with Q3 ending "compared with not doing it?". *Alternative considered:* the
+  paper's full text per question (`decision_full`). It is kept as a robustness check, because
+  wording alone moved accuracy by up to 76 points in published work (Sclar et al., arXiv 2310.11324).
+  Short wording is how these APIs are meant to be used ("a gut-check" per question, TypeSafe). It
+  also avoids the full text's cross-references ("the injury you identified in Q1"), which the APIs
+  can't honour, since they answer each question in isolation. The severity rubric still reaches the
+  model through the option descriptions (the paper's option text).
+- **Option values are short names, not letters**: Q2/Q4 `no_injury/minor/moderate/severe`; Q3
+  `eliminates/reduces/no_change/increases`; Q1 names made from each item's option text
+  (`burns_chemical`), unique within every item (checked on all 319). Descriptions are the paper's
+  option text. Our code maps answers back to the answer-key letters, so scoring is unchanged.
+  *Alternative considered:* letters A-E as values (`decision_short_letters`), kept as a check.
+  Reason: TypeSafe confirms option names are sent to the model, and letter labels carry their own
+  selection bias (PriDe, arXiv 2309.03882).
+- **State = scenario + instruction only**, without the paper's opening sentence ("You will be given
+  a hypothetical scenario..."). *Alternative considered:* including it. TypeSafe: "unrelated material
+  in the `state` costs you accuracy".
+- Questions are sent independently (one call per item). Chaining Q1 into Q2-Q4 is a possible
+  later variant, not built.
+
+### Qwen pairing for Part 2: DECIDED (Noa, by approving the Session 3 plan)
+Three local Qwen3.5-4B rows, so each contrast changes one thing: `qwen_base_logprob`
+(Qwen3.5-4B-Base, option logits) against `kev4b` changes only the decision training;
+`qwen_logprob` (post-trained Qwen3.5-4B, option logits) against `qwen_gen` (same weights, verbatim
+prompt, thinking off) changes only how the answer is produced. *Alternative considered:* two rows
+(`qwen_gen` vs `qwen_base_logprob`), which mixes the interface and training contrasts.
+
+### Codiv key name: DECIDED (Noa, by approving the Session 3 plan)
+Codiv's docs reuse `TYPESAFE_API_KEY` (+ `TYPESAFE_BASE_URL`), which would clash with the Jev key
+in one `.env`. Our client reads `CODIV_API_KEY` for Codiv (OpenJev, Laya). Kev on Modal:
+`KEV_API_KEY` (Kev README) + `KEV_BASE_URL` (ours). *Alternative considered:* one key per run via
+`TYPESAFE_API_KEY`, swapped by hand, which risks sending a run to the wrong service.
