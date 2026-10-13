@@ -20,6 +20,8 @@ __pycache__/
 # free mock runs are regenerated on demand (mock-only runs keep plain results/<run>/ folders, no run ID)
 results/smoke_mock/
 results/smoke_mock_text/
+results/smoke_mock_decision/
+results/smoke_mock_decision_cumulative/
 
 # error review pages embed dataset frames
 results/error_review/

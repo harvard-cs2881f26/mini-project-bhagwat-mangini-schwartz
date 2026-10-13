@@ -60,7 +60,7 @@ def folder_name(run_id: str, run_name: str) -> str:
     return f"{run_id}_{run_name}"
 
 
-UNREGISTERED_PROVIDERS = frozenset({"mock"})  # free smoke runs: no ID, plain results/<run>/ (gitignored)
+UNREGISTERED_PROVIDERS = frozenset({"mock", "mock_decision"})  # free smoke runs: no ID, plain results/<run>/ (gitignored)
 
 
 def run_dir(results_dir: Path, run_name: str, benchmark: str, providers: Iterable[str] = ()) -> Path:

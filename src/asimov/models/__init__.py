@@ -33,11 +33,23 @@ def client_class(provider: str):
     if provider == "mock":
         from asimov.models.mock import MockClient
         return MockClient
+    if provider == "systemone":
+        from asimov.models.systemone import SystemOneClient
+        return SystemOneClient
+    if provider == "openai_decisions":
+        from asimov.models.openai_decisions import OpenAIDecisionsClient
+        return OpenAIDecisionsClient
+    if provider == "mock_decision":
+        from asimov.models.mock import MockDecisionClient
+        return MockDecisionClient
     raise ValueError(f"unknown provider {provider}")
 
 
-def get_client(provider: str, model: str):
-    return client_class(provider)(model)
+def get_client(provider: str, model: str, **service):
+    """service: base_url, key_env, params, for decision services only (Part 2; asimov.config.ModelSpec).
+    Passed through only when given, so LLM clients are built as `client_class(provider)(model)`."""
+    options = {k: v for k, v in service.items() if v is not None}
+    return client_class(provider)(model, **options)
 
 
 def request_settings(provider: str) -> frozenset[str]:

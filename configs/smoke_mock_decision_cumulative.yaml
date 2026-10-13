@@ -1,0 +1,10 @@
+# Free end-to-end check of the cumulative question mode (Part 2): one call per question, each state naming the mock's own earlier picks (4 calls per item).
+# No API keys, no network; the mocks answer from the options alone, so accuracy is meaningless.
+# Checks that every item yields a 4-letter reply, saved probabilities and a {mode, calls} raw.
+run: smoke_mock_decision_cumulative
+benchmark: text
+prompt: decision_short_cumulative
+thinking: min
+models:
+  - {name: Decide first option, provider: mock_decision, model: mock-decide-first}
+  - {name: Decide uniform,      provider: mock_decision, model: mock-decide-uniform}

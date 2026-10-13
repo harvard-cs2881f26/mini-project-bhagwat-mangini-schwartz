@@ -6,8 +6,10 @@ replies from one run are then the replies the other run would get, so they're co
 paid for again. Each copied row keeps its text and usage, gets the target run's cache key, and
 records `reused_from` (source run and key). Summaries count them (`n_reused`).
 
-A model is reusable only if the two configs share benchmark and prompt, and every setting that
-differs between them is one its client ignores (`models.request_settings`).
+A model is reusable only if the two configs share benchmark and prompt, its two specs have the same
+service and request params (`runner.request_extra`: base_url, params; decision services share model
+ids across services and variants), and every setting that differs between them is one its client
+ignores (`models.request_settings`).
 """
 
 from __future__ import annotations
@@ -18,7 +20,7 @@ from pathlib import Path
 from asimov.bench import get_benchmark
 from asimov.config import RunConfig
 from asimov.models import request_settings
-from asimov.runner import ROOT, load_saved, run_key
+from asimov.runner import ROOT, load_saved, request_extra, run_key
 
 SETTINGS = ("thinking", "log_reasoning")  # config settings a client may or may not send
 
@@ -54,16 +56,17 @@ def reuse(src: dict, dst: dict, only: list[str] | None = None, results_dir: Path
         model, provider = spec["model"], spec["provider"]
         if (only and model not in only and spec["name"] not in only) or model not in src_models:
             continue
-        if not reusable(provider, src, dst):
+        src_extra, dst_extra = request_extra(src_models[model]), request_extra(spec)
+        if not reusable(provider, src, dst) or src_extra != dst_extra:
             if only:
-                raise ValueError(
-                    f"{model}: request differs between {src['run']} and {dst['run']} "
-                    f"({sorted(differing_settings(src, dst) & request_settings(provider))}); call it instead"
-                )
+                why = sorted(differing_settings(src, dst) & request_settings(provider))
+                if src_extra != dst_extra:
+                    why.append(f"service/params {src_extra!r} vs {dst_extra!r}")
+                raise ValueError(f"{model}: request differs between {src['run']} and {dst['run']} ({why}); call it instead")
             continue
         version = bench.prompt_version(dst["prompt"])
-        src_key = run_key(model, version, src["thinking"], src.get("log_reasoning", False))
-        dst_key = run_key(model, version, dst["thinking"], dst.get("log_reasoning", False))
+        src_key = run_key(model, version, src["thinking"], src.get("log_reasoning", False), extra=src_extra)
+        dst_key = run_key(model, version, dst["thinking"], dst.get("log_reasoning", False), extra=dst_extra)
         src_path = results / src["run"] / model / "responses.jsonl"
         dst_path = results / dst["run"] / model / "responses.jsonl"
         rows = [json.loads(line) for line in src_path.read_text().splitlines()] if src_path.exists() else []
