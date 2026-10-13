@@ -260,3 +260,16 @@ def test_fig5a_leaves_a_missing_value_out_instead_of_drawing_zero(tmp_path):
     bars = [Bar("GPT-5", 0.9, None, (0.85, 0.95), None, None, None)]
     paths = plot.fig5a(bars, "fig5a_test", tmp_path, comparison=True)
     assert all(p.exists() for p in paths)
+
+
+def test_reading_notes_match_the_figure():
+    fig4 = plot.scatter_notes("latent_severity_accuracy", "latent_risk_accuracy")
+    assert "Higher = picks the right injury type." in fig4 and any("thin line" in n for n in fig4)
+    fig5b = plot.scatter_notes("timing_mae_s", "within_0_5_rate", reversed_x=True, connected=False)
+    assert "Further right = smaller timing error (axis reversed)." in fig5b
+    assert not any("thin line" in n for n in fig5b)
+
+
+def test_tick_names_wrap_without_running_into_each_other():
+    assert plot.tick_name("Gemini 2.5 Flash-Lite (3.1)") == "Gemini 2.5\nFlash-Lite\n(3.1)"
+    assert plot.tick_name("GPT-5") == "GPT-5"

@@ -14,6 +14,7 @@ from __future__ import annotations
 
 import argparse
 import sys
+import textwrap
 from dataclasses import dataclass
 from math import isnan, nan
 from pathlib import Path
@@ -24,6 +25,7 @@ import matplotlib
 matplotlib.use("Agg")
 import matplotlib.pyplot as plt  # noqa: E402
 from matplotlib.lines import Line2D  # noqa: E402
+from matplotlib.ticker import MultipleLocator, PercentFormatter  # noqa: E402
 from matplotlib.typing import RcKeyType  # noqa: E402
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -64,10 +66,12 @@ STYLE: dict[RcKeyType, Any] = {
     "axes.spines.right": False,
     "xtick.major.size": 0,
     "ytick.major.size": 0,
-    "font.size": 10,
-    "axes.titlesize": 12,
-    "axes.labelsize": 10,
-    "legend.fontsize": 8,
+    "font.size": 11,
+    "axes.titlesize": 13,
+    "axes.labelsize": 12,
+    "xtick.labelsize": 11,
+    "ytick.labelsize": 11,
+    "legend.fontsize": 9,
     "figure.dpi": 150,
 }
 # Paper-style figures copy the paper's larger type
@@ -151,7 +155,7 @@ BAR_HEADROOM = 0.06  # above the tallest bar or CI, for its printed value
 PAPER_BAR_YMAX = 1.0  # the paper's Fig 5a y axis
 FIG5A_INCHES_PER_MODEL, FIG5A_EXTRA_WIDTH, FIG5A_MIN_WIDTH, FIG5A_HEIGHT = 1.3, 2.5, 5.0, 4.5
 PAPER_FIG5A_SIZE = (10.5, 7)
-TICK_FONTSIZE = 8
+TICK_FONTSIZE = 10
 COMPARISON_VALUE_FONTSIZE, PAPER_VALUE_FONTSIZE = 7, 13
 # Fig 5a's two series: seaborn "deep" blue and orange at barplot saturation 0.75, as in the paper
 TEXT_COLOR, VIDEO_COLOR = "#5975a4", "#cc8963"
@@ -171,6 +175,83 @@ FIG4 = {  # question, y metric, x axis name, y axis title, caption
         "Understanding Action Effects",
     ),
 }
+
+
+# Comparison figures use plain-language axis titles and percent ticks (Noa, 2026-10-12); the paper-style
+# figures keep the paper's own wording. One entry per metric a comparison axis can show.
+SCENARIOS = "\n% of scenarios, higher is better"  # second, smaller-looking line keeps titles short
+READABLE = {
+    f"{QUESTIONS[0]}_accuracy": "Picks the right injury type" + SCENARIOS,
+    f"{QUESTIONS[1]}_accuracy": "Picks the right severity level" + SCENARIOS,
+    f"{QUESTIONS[1]}_severe_binary_accuracy": "Tells severe injuries from the rest" + SCENARIOS,
+    f"{QUESTIONS[1]}_severe_recall": "Catches the truly severe injuries\n% of severe scenarios, higher is better",
+    f"{QUESTIONS[2]}_accuracy": "Judges how the action changes the risk" + SCENARIOS,
+    f"{QUESTIONS[3]}_accuracy": "Picks the right severity after the action" + SCENARIOS,
+    f"{QUESTIONS[3]}_severe_binary_accuracy": "After the action: tells severe from the rest" + SCENARIOS,
+    f"{QUESTIONS[3]}_severe_recall": "After the action: catches the truly severe\n% of severe scenarios, higher is better",
+    "risk_accuracy": "Recognizes whether there is an injury risk\n% correct, higher is better",
+    "timing_mae_s": "Average timing error in seconds\nlower is better (axis reversed: better is to the right)",
+    "within_0_5_rate": "Steps in within 0.5 s of the right moment\n% of videos, higher is better",
+}
+PERCENT_STEP = 0.1  # one tick every 10 points on fraction axes
+
+
+def percent_axis(axis, scale: float = 1.0) -> None:
+    """Ticks as whole percents every 10 points; `scale` is the axis value of 100% (1 for fractions, 100 for percents)."""
+    axis.set_major_locator(MultipleLocator(PERCENT_STEP * scale))
+    axis.set_major_formatter(PercentFormatter(xmax=scale, decimals=0))
+
+
+# "How to read this" box under the legend of each comparison figure: what the marks mean, never what the
+# results say (interpretation stays with the owners, CLAUDE.md).
+NOTE_WIDTH = 40  # characters per line
+NOTE_GAP = 0.03  # axes fraction between the legend and the box
+NOTE_BOX = {"boxstyle": "round,pad=0.5", "facecolor": "white", "edgecolor": "#cccccc"}
+NOTE_FONTSIZE = 8.5
+CI_NOTE = "Filled dot = our run. Its bars show the 95% range the true score likely falls in."
+PAPER_NOTE_LINE = "Hollow dot = the paper's value for the same model (same color)."
+CONNECTOR_NOTE = " A thin line joins each model's two dots."
+BASELINE_NOTE = "Dashed line = the score from always giving the most common answer."
+FIG5A_NOTES = [
+    "Each pair of bars is one model: the same risk question asked about text scenarios (blue) and videos (orange).",
+    "Taller is better. The gap between a model's two bars is its text-vs-video difference.",
+    "Bars = our runs, with the 95% range the true score likely falls in.",
+    "Diamonds = the paper's values (only 3 models).",
+]
+
+
+def axis_meaning(metric: str) -> str:
+    """First line of the plain-language axis title, lowercased: 'picks the right injury type'."""
+    first = READABLE[metric].split("\n")[0]
+    return first[0].lower() + first[1:]
+
+
+def scatter_notes(x_metric: str, y_metric: str, reversed_x: bool = False, connected: bool = True) -> list[str]:
+    right = (
+        "Further right = smaller timing error (axis reversed)." if reversed_x else f"Further right = {axis_meaning(x_metric)}."
+    )
+    return [
+        "Each dot is one model; up and to the right is better.",
+        f"Higher = {axis_meaning(y_metric)}.",
+        right,
+        CI_NOTE,
+        PAPER_NOTE_LINE + (CONNECTOR_NOTE if connected else ""),
+    ]
+
+
+def reading_notes(ax, lines: list[str]) -> None:
+    """Draw a "How to read this" box just under the legend (outside the plot on the right)."""
+    legend = ax.get_legend()
+    fig = ax.figure
+    fig.canvas.draw()
+    if legend is not None:
+        box = legend.get_window_extent(fig.canvas.get_renderer()).transformed(ax.transAxes.inverted())
+        x, y = box.x0, box.y0 - NOTE_GAP
+    else:
+        x, y = OUTSIDE_LEGEND["bbox_to_anchor"][0], 1.0
+    wrapped = ["\n".join(textwrap.wrap(line, NOTE_WIDTH, subsequent_indent="  ")) for line in lines]
+    text = "How to read this\n" + "\n".join("• " + w for w in wrapped)
+    ax.text(x, y, text, transform=ax.transAxes, va="top", ha="left", fontsize=NOTE_FONTSIZE, bbox=NOTE_BOX, color=INK)
 
 
 def marker_sizes(points: list[Point], diameter: float) -> list[float]:
@@ -355,9 +436,13 @@ def fig4(name: str, run: RunData, claims: Claims, severity: str, out: Path) -> l
         scatter(ax, theirs, COMPARISON, hollow=True)
         draw_baselines(ax, claims, x_metric, y_metric)
         note = f"{OURS_NOTE}, {PAPER_NOTE}" if theirs else f"{OURS_NOTE}; no paper values for this axis"
-        ax.set(xlabel=x_label, ylabel=y_label, title=f"{title}\n{note}")
+        ax.set(xlabel=READABLE[x_metric], ylabel=READABLE[y_metric], title=f"{title}\n{note}")
+        percent_axis(ax.xaxis)
+        percent_axis(ax.yaxis)
         model_legend(ax, mine, COMPARISON)
         label_points(ax, mine, COMPARISON, avoid=theirs)
+        has_baseline = baseline(claims, x_metric) is not None or baseline(claims, y_metric) is not None
+        reading_notes(ax, scatter_notes(x_metric, y_metric) + ([BASELINE_NOTE] if has_baseline else []))
         written += save(fig, out, f"{name}_comparison{suffix}")
     return written
 
@@ -404,9 +489,15 @@ def bar_values(ax, xs, values: list[float | None], tops: list[float], fontsize: 
             )
 
 
+TICK_WRAP = 11  # characters per line of a Fig 5a model name
+
+
 def tick_name(name: str) -> str:
-    """Model name on two lines, e.g. "Claude Opus 4.1\n(4.5)", so Fig 5a's ticks stay horizontal."""
-    return name.replace(" (", "\n(")
+    """Model name wrapped to short lines, e.g. "Gemini 2.5\nFlash-Lite\n(3.1)", so Fig 5a's ticks stay horizontal
+    and don't run into each other."""
+    base, _, stand_in = name.partition(" (")
+    lines = textwrap.wrap(base, TICK_WRAP, break_on_hyphens=False)
+    return "\n".join(lines + ([f"({stand_in}"] if stand_in else []))
 
 
 def fig5a(bars: list[Bar], stem: str, out: Path, comparison: bool) -> list[Path]:
@@ -449,14 +540,18 @@ def fig5a(bars: list[Bar], stem: str, out: Path, comparison: bool) -> list[Path]
                 paper_bars(ax, pos, [getattr(b, f"paper_{kind}") for b in bars], first=series == 0)
         names = [tick_name(b.name) for b in bars]
         ax.set_xticks(xs, names, fontsize=TICK_FONTSIZE) if comparison else ax.set_xticks(xs, names)
-        ax.set(xlabel="Model", ylabel="Risk Recognition Accuracy", ylim=(0, max(PAPER_BAR_YMAX, tallest + BAR_HEADROOM)))
+        ylabel = READABLE["risk_accuracy"] if comparison else "Risk Recognition Accuracy"
+        ax.set(xlabel="Model", ylabel=ylabel, ylim=(0, max(PAPER_BAR_YMAX, tallest + BAR_HEADROOM)))
         if comparison:
-            ax.set_title(f"{OURS_NOTE}, diamonds = paper")
+            ax.set_title(f"Text vs video\n{OURS_NOTE}, diamonds = paper")
+            percent_axis(ax.yaxis)
         if bars:
             legend = ax.legend(title="Accuracy Type", **(OUTSIDE_LEGEND if comparison else {"loc": "best", "frameon": True}))
             drawn = [box_of(a.get_window_extent()) for a in [*ax.patches, *ax.texts]]
             if not comparison and legend_covers(ax, legend, drawn):  # the paper's corner is taken: move it out
                 ax.legend(title="Accuracy Type", **OUTSIDE_LEGEND)
+        if comparison and bars:
+            reading_notes(ax, FIG5A_NOTES)
         return save(fig, out, stem)
 
 
@@ -494,9 +589,11 @@ def fig5b(run: RunData, claims: Claims, out: Path) -> list[Path]:
         scatter(ax, mine, COMPARISON, with_ci=True)
         scatter(ax, theirs, COMPARISON, hollow=True)
         ax.invert_xaxis()
-        ax.set(xlabel=x_label, ylabel=y_label, title=f"{title}\n{OURS_NOTE}, {PAPER_NOTE}")
+        ax.set(xlabel=READABLE["timing_mae_s"], ylabel=READABLE["within_0_5_rate"], title=f"{title}\n{OURS_NOTE}, {PAPER_NOTE}")
+        percent_axis(ax.yaxis, scale=100)
         model_legend(ax, mine, COMPARISON)
         label_points(ax, mine, COMPARISON, avoid=theirs)
+        reading_notes(ax, scatter_notes("timing_mae_s", "within_0_5_rate", reversed_x=True, connected=False))
         written += save(fig, out, "fig5b_comparison")
     return written
 

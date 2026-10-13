@@ -10,9 +10,12 @@ import numpy as np
 from asimov.claims import is_stand_in
 from asimov.collect.load import ModelResult, RunData
 from asimov.collect.metrics import item_rows
+from asimov.collect.run_ids import RunLabel
 
 LEADING = (
     "run",
+    "run_id",
+    "description",
     "benchmark",
     "name",
     "provider",
@@ -37,7 +40,20 @@ LEADING = (
     "latency_p95_s",
     "cost_usd",
 )
-PER_ITEM_COLUMNS = ("run", "benchmark", "model", "item", "question", "pred", "gold", "correct", "status", "parse_ok", "finish")
+PER_ITEM_COLUMNS = (
+    "run",
+    "run_id",
+    "benchmark",
+    "model",
+    "item",
+    "question",
+    "pred",
+    "gold",
+    "correct",
+    "status",
+    "parse_ok",
+    "finish",
+)
 PER_MTOK = 1e6
 LATENCY_DIGITS = 3  # rounded so index.csv is the same on every machine
 COST_DIGITS = 6
@@ -58,12 +74,14 @@ def cost_usd(summary: dict, prices: dict) -> float | None:
     return round(total / PER_MTOK, COST_DIGITS)
 
 
-def index_row(run: RunData, model: ModelResult, prices: dict) -> dict:
+def index_row(run: RunData, model: ModelResult, prices: dict, labels: dict[str, RunLabel]) -> dict:
     s = model.summary
     lat = np.asarray(model.latencies, dtype=float)
     p50, p95 = (round(float(np.percentile(lat, q)), LATENCY_DIGITS) for q in (50, 95)) if len(lat) else (None, None)
     made = {
         "run": run.name,
+        "run_id": labels[run.name].id,
+        "description": labels[run.name].description,
         "benchmark": run.benchmark,
         "served_model": ";".join(model.served_models),
         "stand_in": is_stand_in(s["name"]),
@@ -74,11 +92,11 @@ def index_row(run: RunData, model: ModelResult, prices: dict) -> dict:
     return {**s, **made}
 
 
-def index_rows(runs: list[RunData], prices: dict) -> list[dict]:
-    return [index_row(run, m, prices) for run in runs for m in run.models]
+def index_rows(runs: list[RunData], prices: dict, labels: dict[str, RunLabel]) -> list[dict]:
+    return [index_row(run, m, prices, labels) for run in runs for m in run.models]
 
 
-def per_item_rows(runs: list[RunData]) -> list[dict]:
+def per_item_rows(runs: list[RunData], labels: dict[str, RunLabel]) -> list[dict]:
     rows = []
     for run in runs:
         for m in run.models:
@@ -88,6 +106,7 @@ def per_item_rows(runs: list[RunData]) -> list[dict]:
                     rows.append(
                         {
                             "run": run.name,
+                            "run_id": labels[run.name].id,
                             "benchmark": run.benchmark,
                             "model": m.summary["model"],
                             "item": item_id,
