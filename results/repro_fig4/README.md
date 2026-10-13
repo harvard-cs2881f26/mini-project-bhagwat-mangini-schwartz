@@ -8,8 +8,6 @@ Text benchmark, using the paper's prompt sent unchanged (text_verbatim), with th
 
 _Hand-written in [writeup.md](writeup.md) and included here verbatim. After editing it, rerun `python scripts/collect.py`: this page includes it, so `collect.py --check` fails until you do._
 
-_Draft written by Claude from this run's numbers (below on this page). Edit freely, then rerun `python scripts/collect.py`._
-
 ### Summary
 
 The large models reproduce the paper on risk-type recognition, but our severity scores are lower than the paper's, and the small-model gap looks different. GPT-5, Claude Opus 4.1 (4.5) and Gemini 2.5 Pro (3.1) all name the right injury type on more than 91% of the 319 scenarios, matching the paper's headline. Every model also does worse on the action questions than on the scenario-only questions, as the paper reports. Two things don't match: our severity accuracy is 5-29 points below the paper for 7 of 8 models, and GPT-5 Mini and Nano swap places (the paper has Mini well below Nano, we have the opposite).
