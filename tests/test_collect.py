@@ -16,6 +16,7 @@ from asimov.collect.build import build
 from asimov.collect.checks import ACTION_QUESTIONS, LATENT_QUESTIONS
 from asimov.collect.load import ModelResult, load_model, load_results
 from asimov.collect.pages import FIGURES, GENERATED, FailureCounts, failure_counts
+from asimov.collect.run_ids import PREFIXES, RunLabel, assign_ids, next_number, update_labels
 from asimov.collect.tables import CSV_DIGITS, to_csv
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -274,3 +275,117 @@ def test_check_flags_orphaned_generated_files(results, tmp_path):
         "old_run/table.csv",
     ]
     assert collect.main([*args, "--check"]) == 1
+
+
+# ---- run IDs ----------------------------------------------------------------------------------
+
+
+def write_claims(tmp_path: Path) -> Path:
+    path = tmp_path / "claims.yaml"
+    path.write_text(yaml.safe_dump(empty_claims().model_dump()))
+    return path
+
+
+def test_prefixes_cover_every_benchmark():
+    assert PREFIXES == {"text": "txt", "video": "vid", "image": "img", "image_rationale": "imgr"}
+
+
+def test_new_runs_get_the_next_number_per_prefix_by_scored_at(results):
+    text_run(results, "text_early", [[True] * 4] * 4, scored_at="2026-10-11T09:00:00-0400")
+    text_run(results, "text_late", [[True] * 4] * 4, scored_at="2026-10-13T09:00:00-0400")
+    ids = assign_ids({}, load_results(results))
+    # text_run is scored 2026-10-12, between the other two; ties would go by name
+    assert ids == {"text_early": "txt0", "text_run": "txt1", "text_late": "txt2", "video_run": "vid0"}
+
+
+def test_existing_ids_are_never_changed(results):
+    text_run(results, "text_early", [[True] * 4] * 4, scored_at="2026-10-11T09:00:00-0400")
+    existing = {"text_run": "txt0", "video_run": "vid0"}
+    ids = assign_ids(existing, load_results(results))
+    assert ids == {"text_run": "txt0", "video_run": "vid0", "text_early": "txt1"}  # earlier, but text_run keeps txt0
+    assert existing == {"text_run": "txt0", "video_run": "vid0"}  # input not mutated
+
+
+def test_a_removed_runs_number_is_never_reused(results):
+    existing = {"deleted_run": "txt0", "old_image": "imgr3"}
+    ids = assign_ids(existing, load_results(results))
+    assert ids == {"deleted_run": "txt0", "old_image": "imgr3", "text_run": "txt1", "video_run": "vid0"}
+
+
+def test_img_and_imgr_numbers_are_separate():
+    assert assign_ids({"a": "imgr0", "b": "imgr1"}, []) == {"a": "imgr0", "b": "imgr1"}
+    assert next_number({"a": "imgr0", "b": "imgr1"}, "img") == 0
+    assert next_number({"a": "img4", "b": "imgr7"}, "img") == 5
+
+
+def test_run_id_column_follows_run_in_both_tables(results):
+    labels = {"text_run": RunLabel("txt0", "what text_run tests"), "video_run": RunLabel("vid0")}
+    files = build(load_results(results), empty_claims(), {}, {}, [], labels)
+    index = read_csv(files["index.csv"])
+    assert list(index[0])[:3] == ["run", "run_id", "description"]
+    assert [r["run_id"] for r in index] == ["txt0", "txt0", "vid0"]
+    assert index[0]["description"] == "what text_run tests"
+    assert index[2]["description"] == "video · prompt p · thinking min · 1 model (auto)"
+    per_item = read_csv(files["per_item.csv"])
+    assert list(per_item[0])[:3] == ["run", "run_id", "benchmark"] and "description" not in per_item[0]
+    assert {r["run_id"] for r in per_item if r["run"] == "video_run"} == {"vid0"}
+
+
+def test_run_id_appears_on_the_pages(results):
+    text_run(results, "text_run_b", [[False] * 4] * 4)
+    ids = {"text_run": RunLabel("txt0", "baseline"), "text_run_b": RunLabel("txt1"), "video_run": RunLabel("vid0", "video")}
+    headline = {"figures": {"fig4": {"run": "text_run", "note": ""}}}
+    comparisons = [{"name": "a_vs_b", "a": "text_run", "b": "text_run_b"}]
+    files = build(load_results(results), empty_claims(), {}, headline, comparisons, ids)
+    assert "# Run `txt0`: `text_run`\n\nbaseline\n" in files["text_run/README.md"]
+    assert "text · prompt p · thinking min · 2 models (auto)" in files["text_run_b/README.md"]
+    summary = files["README.md"]
+    assert "| Run ID | Run | Description |" in summary and "| `vid0` | [`video_run`](video_run/README.md) | video |" in summary
+    assert "Run: `txt0` [`text_run`](text_run/README.md)" in summary
+    compare = files["compare/a_vs_b.md"]
+    assert "`txt0`" in compare.splitlines()[2] and "`txt1`" in compare.splitlines()[2]
+    assert "A: baseline" in compare and "B: text · prompt p" in compare
+
+
+def test_cli_writes_run_ids_and_check_fails_when_one_is_missing(results, tmp_path):
+    args = ["--results", str(results), "--claims", str(write_claims(tmp_path))]
+    assert collect.main(args) == 0
+    path = results / "run_ids.yaml"
+    text = path.read_text()
+    assert text.startswith("#") and "never changed or reused" in text and "hand-written" in text
+    assert yaml.safe_load(text) == {"text_run": {"id": "txt0", "description": ""}, "video_run": {"id": "vid0", "description": ""}}
+    assert collect.main([*args, "--check"]) == 0
+
+    text_run(results, "text_run_b", [[False] * 4] * 4, scored_at="2026-10-01T09:00:00-0400")
+    assert collect.main(args) == 0  # rebuild pages so only run_ids.yaml can be stale below
+    assert yaml.safe_load(path.read_text())["text_run_b"] == {
+        "id": "txt1",
+        "description": "",
+    }  # new run: next number, even though scored earlier
+    path.write_text(text)  # drop text_run_b's ID
+    before = {p: p.read_text() for p in results.rglob("*") if p.is_file()}
+    assert collect.main([*args, "--check"]) == 1
+    assert {p: p.read_text() for p in results.rglob("*") if p.is_file()} == before  # --check writes nothing
+    assert collect.main(args) == 0
+    assert collect.main([*args, "--check"]) == 0
+
+
+def test_update_labels_keeps_existing_entries(results):
+    existing = {"text_run": RunLabel("txt5", "mine"), "gone": RunLabel("vid0", "deleted run")}
+    labels = update_labels(existing, load_results(results))
+    assert labels == {
+        "text_run": RunLabel("txt5", "mine"),
+        "gone": RunLabel("vid0", "deleted run"),
+        "video_run": RunLabel("vid1"),
+    }
+
+
+def test_hand_edited_description_survives_a_rebuild(results, tmp_path):
+    args = ["--results", str(results), "--claims", str(write_claims(tmp_path))]
+    assert collect.main(args) == 0
+    path = results / "run_ids.yaml"
+    path.write_text(path.read_text().replace("description: ''", "description: my own words", 1))
+    assert collect.main(args) == 0
+    assert yaml.safe_load(path.read_text())["text_run"] == {"id": "txt0", "description": "my own words"}
+    assert "my own words" in (results / "text_run" / "README.md").read_text()
+    assert collect.main([*args, "--check"]) == 0
