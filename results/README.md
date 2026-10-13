@@ -19,7 +19,7 @@ Run: `txt0` [`repro_fig4`](repro_fig4/README.md) · [paper check](repro_fig4/pap
 | Gemini 2.5 Flash (3) | 0.928 [0.894, 0.951] | 0.930 | 0.715 [0.663, 0.761] | 0.940 | 0.690 [0.637, 0.738] | 0.710 | 0.671 [0.618, 0.720] | 0.660 |
 | Gemini 2.5 Pro (3.1) | 0.925 [0.890, 0.949] | 0.940 | 0.674 [0.621, 0.723] | 0.960 | 0.687 [0.634, 0.735] | 0.700 | 0.605 [0.550, 0.657] | 0.640 |
 
-![fig4a](../figures/fig4a_comparison.png) ![fig4b](../figures/fig4b_comparison.png)
+![fig4a](../figures/txt0/fig4a_comparison.png) ![fig4b](../figures/txt0/fig4b_comparison.png)
 
 ## Fig 5 (video)
 
@@ -36,7 +36,7 @@ Run: `vid0` [`repro_fig5`](repro_fig5/README.md) · [paper check](repro_fig5/pap
 | Gemini 2.5 Flash (3) | 0.582 [0.524, 0.637] | – | 1.310 [1.108, 1.525] | 1.400 | 0.436 [0.379, 0.493] | 0.344 |
 | Gemini 2.5 Pro (3.1) | 0.631 [0.573, 0.684] | 0.840 | 1.141 [0.954, 1.333] | 0.720 | 0.519 [0.461, 0.576] | 0.560 |
 
-![fig5a](../figures/fig5a_comparison.png) ![fig5b](../figures/fig5b_comparison.png)
+![fig5a](../figures/vid0/fig5a_comparison.png) ![fig5b](../figures/vid0/fig5b_comparison.png)
 
 ## Fig 6 (image)
 

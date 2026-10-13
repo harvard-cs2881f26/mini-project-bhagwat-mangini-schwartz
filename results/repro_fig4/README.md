@@ -4,6 +4,174 @@
 
 Text benchmark, using the paper's prompt sent unchanged (text_verbatim), with thinking set to min (the lowest reasoning each provider allows), on 8 models. Reasoning summaries are saved.
 
+## Write-up
+
+_Hand-written in [writeup.md](writeup.md) and included here verbatim. After editing it, rerun `python scripts/collect.py`: this page includes it, so `collect.py --check` fails until you do._
+
+_Draft written by Claude from this run's numbers (below on this page). Edit freely, then rerun `python scripts/collect.py`._
+
+### Summary
+
+The large models reproduce the paper on risk-type recognition, but our severity scores are lower than the paper's, and the small-model gap looks different. GPT-5, Claude Opus 4.1 (4.5) and Gemini 2.5 Pro (3.1) all name the right injury type on more than 91% of the 319 scenarios, matching the paper's headline. Every model also does worse on the action questions than on the scenario-only questions, as the paper reports. Two things don't match: our severity accuracy is 5-29 points below the paper for 7 of 8 models, and GPT-5 Mini and Nano swap places (the paper has Mini well below Nano, we have the opposite).
+
+### Comparison with the paper
+
+**Risk recognition (Q1): reproduces.** The paper's claim is that the three large models all score above 90%, with an average of 92.3%. Ours are 93.4% (GPT-5), 91.8% (Opus) and 92.5% (Gemini Pro), an average of 92.6%. The paper's value sits inside our 95% CI for all three (e.g. Gemini Pro: paper 94%, ours 92.5% with CI 89.0-94.9%).
+
+**Severity (Q2): lower than the paper.** On the exact 4-level answer, the paper's large models score 82-96% and ours 67-77%. The biggest gaps are the stand-ins: Gemini Pro (67.4% vs 96%), Sonnet (66.1% vs 92%) and Opus (73.7% vs 93%). One possible reading is that the paper's Fig 4a axis isn't the 4-level score. The paper's text describes a "highly severe or not" average of 88.7%. On that question, our three large models average 80.3%, and on recall of truly severe cases they average 93.9%, so the paper's number falls between our two versions of that metric. We kept the 4-level score as the axis (WORKLOG, severity decision), so this gap is partly a definition question rather than a model question.
+
+**Small models lag (the paper's second claim): only partly.** GPT-5 beats Nano by 18-38 points on all four questions, all significant after Holm correction. But Mini is only 4.7 points behind GPT-5 on risk type, where the paper says 20. And the Gemini and Claude pairs show little or no gap: Opus beats Sonnet on 1 of 4 questions after correction, and Gemini Pro never beats Flash (it is 6.6 points lower on activated risk).
+
+**Actions are harder (the paper's third claim): reproduces.** All 8 models score lower on action effect and activated risk than on risk type and severity, by 11-25 points, and none of the 95% CIs include zero. The paper's top scores on the action questions are 74% and 66%. Ours top out at 69.0% and 67.1% (both Gemini Flash).
+
+### Key takeaways
+
+1. **The paper's three headline claims hold in direction:** large models recognize latent risks well, small models can lag, and reasoning about an action's effect is harder than spotting the risk in a static scenario.
+2. **Severity is where we diverge most,** and most of that is plausibly about what the paper measured (4-level vs severe-or-not), not model quality. Worth stating as a limitation and showing both versions (`scripts/plot.py --severity binary|recall`).
+3. **The size gap depends on the family and on thinking.** GPT-5 Nano at minimal thinking is the clear outlier (55.5% on risk type). A separate run with default thinking (`repro_fig4_default`, txt1, still partial) brings Nano to about 87% on risk type, which is the paper's number. That suggests the paper may have used more reasoning than our `thinking: min`, and that "small models lag" is partly "small models at minimal thinking lag".
+4. **The stand-ins limit the comparison.** Only the three GPT-5 models are the paper's exact models. The Claude 4.5 and Gemini 3.x stand-ins are newer models, so their gaps to the paper aren't evidence about the paper's models.
+5. **The run is clean.** Parse failures are at most 0.6% for any model (2 Gemini safety blocks per Gemini model, 1 malformed GPT-5 Nano reply), with no truncated replies and no failed calls.
+
+### Caveats
+
+- All numbers are from one run at `thinking: min`, and each model answered each scenario once.
+- The paper's Fig 4 values are read off its plots (five independent reads agree to 0.01), since the authors published no exact numbers.
+- CIs are 95% Wilson intervals for single models. Gaps between models are paired over the same 319 scenarios (bootstrap CI, exact McNemar, Holm correction over the 16 size-gap tests).
+
+## Figures
+
+Drawn by `scripts/plot.py` into `figures/txt0/` (PNG and PDF). Comparison: ours with 95% CIs, the paper's values and majority baselines; paper-style: the paper's look, our values only. Fig 5a pairs this run with the headline video run `vid0` [`repro_fig5`](../repro_fig5/README.md) ([`headline.yaml`](../headline.yaml)).
+
+### Comparison versions
+
+![fig4a, comparison](../../figures/txt0/fig4a_comparison.png)
+
+![fig4b, comparison](../../figures/txt0/fig4b_comparison.png)
+
+![fig5a, comparison](../../figures/txt0/fig5a_comparison.png)
+
+### Paper-style versions
+
+![fig4a, paper](../../figures/txt0/fig4a_paper.png)
+
+![fig4b, paper](../../figures/txt0/fig4b_paper.png)
+
+![fig5a, paper](../../figures/txt0/fig5a_paper.png)
+
+## Comparison with the paper
+
+Paper: arXiv 2509.21651v2, read on 2026-10-12 into `configs/paper/claims.yaml`. Values are on our scale (fractions, seconds); `~` marks a value read off a figure. "Paper in CI" is only computed for single-model values. Stand-in rows compare our model to a different paper model. The same, as its own page: [paper_check.md](paper_check.md).
+
+| Claim | Fig / § | Kind | Model (paper) | Ours | Metric | Paper | Ours [95% CI] | Diff | Paper in CI | Stand-in | Status |
+|---|---|---|---|---|---|---|---|---|---|---|---|
+| `fig4a_gemini_2_5_flash_lite_latent_risk_accuracy` | 4a / 3 | value | Gemini 2.5 Flash-Lite | Gemini 2.5 Flash-Lite (3.1) | latent_risk_accuracy | 0.820~ | 0.862 [0.820, 0.896] | 0.042 | yes | yes | checked |
+| `fig4a_gemini_2_5_flash_lite_latent_severity_accuracy` | 4a / 3 | value | Gemini 2.5 Flash-Lite | Gemini 2.5 Flash-Lite (3.1) | latent_severity_accuracy | 0.780~ | 0.680 [0.627, 0.729] | -0.100 | no | yes | checked |
+| `fig4a_gemini_2_5_flash_latent_risk_accuracy` | 4a / 3 | value | Gemini 2.5 Flash | Gemini 2.5 Flash (3) | latent_risk_accuracy | 0.930~ | 0.928 [0.894, 0.951] | -0.002 | yes | yes | checked |
+| `fig4a_gemini_2_5_flash_latent_severity_accuracy` | 4a / 3 | value | Gemini 2.5 Flash | Gemini 2.5 Flash (3) | latent_severity_accuracy | 0.940~ | 0.715 [0.663, 0.761] | -0.225 | no | yes | checked |
+| `fig4a_gemini_2_5_pro_latent_risk_accuracy` | 4a / 3 | value | Gemini 2.5 Pro | Gemini 2.5 Pro (3.1) | latent_risk_accuracy | 0.940~ | 0.925 [0.890, 0.949] | -0.015 | yes | yes | checked |
+| `fig4a_gemini_2_5_pro_latent_severity_accuracy` | 4a / 3 | value | Gemini 2.5 Pro | Gemini 2.5 Pro (3.1) | latent_severity_accuracy | 0.960~ | 0.674 [0.621, 0.723] | -0.286 | no | yes | checked |
+| `fig4a_claude_opus_4_1_latent_risk_accuracy` | 4a / 3 | value | Claude Opus 4.1 | Claude Opus 4.1 (4.5) | latent_risk_accuracy | 0.910~ | 0.918 [0.883, 0.944] | 0.008 | yes | yes | checked |
+| `fig4a_claude_opus_4_1_latent_severity_accuracy` | 4a / 3 | value | Claude Opus 4.1 | Claude Opus 4.1 (4.5) | latent_severity_accuracy | 0.930~ | 0.737 [0.686, 0.782] | -0.193 | no | yes | checked |
+| `fig4a_claude_sonnet_4_latent_risk_accuracy` | 4a / 3 | value | Claude Sonnet 4 | Claude Sonnet 4 (4.5) | latent_risk_accuracy | 0.870~ | 0.875 [0.834, 0.907] | 0.005 | yes | yes | checked |
+| `fig4a_claude_sonnet_4_latent_severity_accuracy` | 4a / 3 | value | Claude Sonnet 4 | Claude Sonnet 4 (4.5) | latent_severity_accuracy | 0.920~ | 0.661 [0.608, 0.711] | -0.259 | no | yes | checked |
+| `fig4a_gpt_5_nano_latent_risk_accuracy` | 4a / 3 | value | GPT 5 Nano | GPT-5 Nano | latent_risk_accuracy | 0.870~ | 0.555 [0.500, 0.608] | -0.315 | no |  | checked |
+| `fig4a_gpt_5_nano_latent_severity_accuracy` | 4a / 3 | value | GPT 5 Nano | GPT-5 Nano | latent_severity_accuracy | 0.740~ | 0.533 [0.478, 0.587] | -0.207 | no |  | checked |
+| `fig4a_gpt_5_mini_latent_risk_accuracy` | 4a / 3 | value | GPT 5 Mini | GPT-5 Mini | latent_risk_accuracy | 0.720~ | 0.887 [0.848, 0.917] | 0.167 | no |  | checked |
+| `fig4a_gpt_5_mini_latent_severity_accuracy` | 4a / 3 | value | GPT 5 Mini | GPT-5 Mini | latent_severity_accuracy | 0.640~ | 0.702 [0.650, 0.750] | 0.062 | no |  | checked |
+| `fig4a_gpt_5_latent_risk_accuracy` | 4a / 3 | value | GPT 5 | GPT-5 | latent_risk_accuracy | 0.920~ | 0.934 [0.901, 0.957] | 0.014 | yes |  | checked |
+| `fig4a_gpt_5_latent_severity_accuracy` | 4a / 3 | value | GPT 5 | GPT-5 | latent_severity_accuracy | 0.820~ | 0.774 [0.725, 0.817] | -0.046 | no |  | checked |
+| `fig4b_gemini_2_5_flash_lite_effect_accuracy` | 4b / 3 | value | Gemini 2.5 Flash-Lite | Gemini 2.5 Flash-Lite (3.1) | effect_accuracy | 0.630~ | 0.665 [0.611, 0.714] | 0.035 | yes | yes | checked |
+| `fig4b_gemini_2_5_flash_lite_activated_risk_accuracy` | 4b / 3 | value | Gemini 2.5 Flash-Lite | Gemini 2.5 Flash-Lite (3.1) | activated_risk_accuracy | 0.590~ | 0.608 [0.554, 0.660] | 0.018 | yes | yes | checked |
+| `fig4b_gemini_2_5_flash_effect_accuracy` | 4b / 3 | value | Gemini 2.5 Flash | Gemini 2.5 Flash (3) | effect_accuracy | 0.710~ | 0.690 [0.637, 0.738] | -0.020 | yes | yes | checked |
+| `fig4b_gemini_2_5_flash_activated_risk_accuracy` | 4b / 3 | value | Gemini 2.5 Flash | Gemini 2.5 Flash (3) | activated_risk_accuracy | 0.660~ | 0.671 [0.618, 0.720] | 0.011 | yes | yes | checked |
+| `fig4b_gemini_2_5_pro_effect_accuracy` | 4b / 3 | value | Gemini 2.5 Pro | Gemini 2.5 Pro (3.1) | effect_accuracy | 0.700~ | 0.687 [0.634, 0.735] | -0.013 | yes | yes | checked |
+| `fig4b_gemini_2_5_pro_activated_risk_accuracy` | 4b / 3 | value | Gemini 2.5 Pro | Gemini 2.5 Pro (3.1) | activated_risk_accuracy | 0.640~ | 0.605 [0.550, 0.657] | -0.035 | yes | yes | checked |
+| `fig4b_claude_opus_4_1_effect_accuracy` | 4b / 3 | value | Claude Opus 4.1 | Claude Opus 4.1 (4.5) | effect_accuracy | 0.740~ | 0.671 [0.618, 0.720] | -0.069 | no | yes | checked |
+| `fig4b_claude_opus_4_1_activated_risk_accuracy` | 4b / 3 | value | Claude Opus 4.1 | Claude Opus 4.1 (4.5) | activated_risk_accuracy | 0.630~ | 0.655 [0.601, 0.705] | 0.025 | yes | yes | checked |
+| `fig4b_claude_sonnet_4_effect_accuracy` | 4b / 3 | value | Claude Sonnet 4 | Claude Sonnet 4 (4.5) | effect_accuracy | 0.720~ | 0.646 [0.592, 0.696] | -0.074 | no | yes | checked |
+| `fig4b_claude_sonnet_4_activated_risk_accuracy` | 4b / 3 | value | Claude Sonnet 4 | Claude Sonnet 4 (4.5) | activated_risk_accuracy | 0.660~ | 0.602 [0.547, 0.654] | -0.058 | no | yes | checked |
+| `fig4b_gpt_5_nano_effect_accuracy` | 4b / 3 | value | GPT 5 Nano | GPT-5 Nano | effect_accuracy | 0.620~ | 0.467 [0.413, 0.522] | -0.153 | no |  | checked |
+| `fig4b_gpt_5_nano_activated_risk_accuracy` | 4b / 3 | value | GPT 5 Nano | GPT-5 Nano | activated_risk_accuracy | 0.590~ | 0.404 [0.352, 0.459] | -0.186 | no |  | checked |
+| `fig4b_gpt_5_mini_effect_accuracy` | 4b / 3 | value | GPT 5 Mini | GPT-5 Mini | effect_accuracy | 0.510~ | 0.561 [0.506, 0.615] | 0.051 | yes |  | checked |
+| `fig4b_gpt_5_mini_activated_risk_accuracy` | 4b / 3 | value | GPT 5 Mini | GPT-5 Mini | activated_risk_accuracy | 0.480~ | 0.527 [0.472, 0.581] | 0.047 | yes |  | checked |
+| `fig4b_gpt_5_effect_accuracy` | 4b / 3 | value | GPT 5 | GPT-5 | effect_accuracy | 0.670~ | 0.643 [0.589, 0.693] | -0.027 | yes |  | checked |
+| `fig4b_gpt_5_activated_risk_accuracy` | 4b / 3 | value | GPT 5 | GPT-5 | activated_risk_accuracy | 0.600~ | 0.655 [0.601, 0.705] | 0.055 | no |  | checked |
+| `fig5a_gemini_2_5_pro_latent_risk_accuracy` | 5a / 3 | value | Gemini 2.5 Pro | Gemini 2.5 Pro (3.1) | latent_risk_accuracy | 0.940 | 0.925 [0.890, 0.949] | -0.015 | yes | yes | checked |
+| `fig5a_claude_opus_4_1_latent_risk_accuracy` | 5a / 3 | value | Claude Opus 4.1 | Claude Opus 4.1 (4.5) | latent_risk_accuracy | 0.910 | 0.918 [0.883, 0.944] | 0.008 | yes | yes | checked |
+| `fig5a_gpt_5_latent_risk_accuracy` | 5a / 3 | value | GPT 5 | GPT-5 | latent_risk_accuracy | 0.920 | 0.934 [0.901, 0.957] | 0.014 | yes |  | checked |
+| `sec3_avg_latent_risk_accuracy` | – / 3 | mean | GPT5, Gemini 2.5 Pro, Claude Opus 4.1 | GPT-5, Gemini 2.5 Pro (3.1), Claude Opus 4.1 (4.5) | latent_risk_accuracy | 0.923 | 0.926 | 0.003 | – | yes | checked |
+| `sec3_avg_latent_risk_accuracy_floor` | – / 3 | bound | GPT5, Gemini 2.5 Pro, Claude Opus 4.1 | – | latent_risk_accuracy | 0.900 | – | – | – |  | a bound, not a point value |
+| `sec3_avg_latent_severity_severe_binary_accuracy` | – / 3 | mean | GPT5, Gemini 2.5 Pro, Claude Opus 4.1 | GPT-5, Gemini 2.5 Pro (3.1), Claude Opus 4.1 (4.5) | latent_severity_severe_binary_accuracy | 0.887 | 0.804 | -0.083 | – | yes | checked |
+| `sec3_gpt5_mini_latent_risk_accuracy_gap_vs_gpt5` | – / 3 | gap | GPT5-Mini | GPT-5, GPT-5 Mini | latent_risk_accuracy | 0.200 | 0.047 [0.016, 0.078] | -0.153 | – |  | checked |
+| `sec3_gpt5_nano_latent_risk_accuracy_gap_vs_gpt5` | – / 3 | gap | GPT5-Nano | GPT-5, GPT-5 Nano | latent_risk_accuracy | 0.050 | 0.379 [0.323, 0.436] | 0.329 | – |  | checked |
+| `sec3_gpt5_mini_latent_severity_severe_binary_accuracy_gap_vs_gpt5` | – / 3 | gap | GPT5-Mini | GPT-5, GPT-5 Mini | latent_severity_severe_binary_accuracy | 0.190 | 0.003 | -0.187 | – |  | checked (no paired CI for this metric) |
+| `sec3_gpt5_nano_latent_severity_severe_binary_accuracy_gap_vs_gpt5` | – / 3 | gap | GPT5-Nano | GPT-5, GPT-5 Nano | latent_severity_severe_binary_accuracy | 0.170 | 0.113 | -0.057 | – |  | checked (no paired CI for this metric) |
+| `sec3_avg_effect_accuracy_top` | – / 3 | max | Gemini 2.5 Flash-Lite, Gemini 2.5 Flash, Gemini 2.5 Pro, Claude Opus 4.1, Claude Sonnet 4, GPT 5 Nano, GPT 5 Mini, GPT 5 | Gemini 2.5 Flash-Lite (3.1), Gemini 2.5 Flash (3), Gemini 2.5 Pro (3.1), Claude Opus 4.1 (4.5), Claude Sonnet 4 (4.5), GPT-5 Nano, GPT-5 Mini, GPT-5 | effect_accuracy | 0.740 | 0.690 | -0.050 | – | yes | checked |
+| `sec3_avg_activated_risk_accuracy_top` | – / 3 | max | Gemini 2.5 Flash-Lite, Gemini 2.5 Flash, Gemini 2.5 Pro, Claude Opus 4.1, Claude Sonnet 4, GPT 5 Nano, GPT 5 Mini, GPT 5 | Gemini 2.5 Flash-Lite (3.1), Gemini 2.5 Flash (3), Gemini 2.5 Pro (3.1), Claude Opus 4.1 (4.5), Claude Sonnet 4 (4.5), GPT-5 Nano, GPT-5 Mini, GPT-5 | activated_risk_accuracy | 0.660 | 0.671 | 0.011 | – | yes | checked |
+| `appD_avg_majority_baseline_latent_severity` | – / Appendix D | baseline | – | – | majority_baseline_latent_severity | 0.445 | – | – | – |  | derived from the dataset's counts, no model |
+| `appD_avg_majority_baseline_latent_severity_severe_binary` | – / Appendix D | baseline | – | – | majority_baseline_latent_severity_severe_binary | 0.564 | – | – | – |  | derived from the dataset's counts, no model |
+| `appD_avg_majority_baseline_effect` | – / Appendix D | baseline | – | – | majority_baseline_effect | 0.379 | – | – | – |  | derived from the dataset's counts, no model |
+| `appD_avg_majority_baseline_activated_risk` | – / Appendix D | baseline | – | – | majority_baseline_activated_risk | 0.339 | – | – | – |  | derived from the dataset's counts, no model |
+| `appD_avg_majority_baseline_activated_risk_severe_binary` | – / Appendix D | baseline | – | – | majority_baseline_activated_risk_severe_binary | 0.661 | – | – | – |  | derived from the dataset's counts, no model |
+
+### Headline claims (computed checks)
+
+#### `headline_frontier_recognise_risks` (close_to_paper, §3)
+
+> on the task of recognizing latent risk types in (text) scenarios, GPT5, Gemini 2.5 Pro and Claude Opus 4.1 all score above 90%
+
+| Model | Paper values checked | Paper value inside our CI | Mean abs(ours − paper) |
+|---|---|---|---|
+| GPT-5 | 5 | 3 | 0.031 |
+| Gemini 2.5 Pro (3.1) | 5 | 4 | 0.073 |
+| Claude Opus 4.1 (4.5) | 5 | 3 | 0.061 |
+
+Note: Also: severity average 88.7% for the same three models (see sec3 claims).
+
+#### `headline_small_models_lag` (size_gap, §3)
+
+> the faster/nano versions of these models show considerable drop in performance
+
+| Pair | Question | Items | Large − small [95% CI] | McNemar p | Holm p |
+|---|---|---|---|---|---|
+| GPT-5 minus GPT-5 Mini | latent_risk | 319 | 0.047 [0.016, 0.078] | 0.0059 | 0.0533 |
+| GPT-5 minus GPT-5 Mini | latent_severity | 319 | 0.072 [0.013, 0.132] | 0.0220 | 0.1404 |
+| GPT-5 minus GPT-5 Mini | effect | 319 | 0.082 [0.031, 0.132] | 0.0029 | 0.0324 |
+| GPT-5 minus GPT-5 Mini | activated_risk | 319 | 0.129 [0.072, 0.188] | 0.0000 | 0.0003 |
+| GPT-5 minus GPT-5 Nano | latent_risk | 319 | 0.379 [0.323, 0.436] | 0.0000 | 0.0000 |
+| GPT-5 minus GPT-5 Nano | latent_severity | 319 | 0.241 [0.176, 0.307] | 0.0000 | 0.0000 |
+| GPT-5 minus GPT-5 Nano | effect | 319 | 0.176 [0.103, 0.251] | 0.0000 | 0.0001 |
+| GPT-5 minus GPT-5 Nano | activated_risk | 319 | 0.251 [0.188, 0.317] | 0.0000 | 0.0000 |
+| Claude Opus 4.1 (4.5) minus Claude Sonnet 4 (4.5) | latent_risk | 319 | 0.044 [0.009, 0.078] | 0.0201 | 0.1404 |
+| Claude Opus 4.1 (4.5) minus Claude Sonnet 4 (4.5) | latent_severity | 319 | 0.075 [0.028, 0.122] | 0.0032 | 0.0324 |
+| Claude Opus 4.1 (4.5) minus Claude Sonnet 4 (4.5) | effect | 319 | 0.025 [-0.016, 0.066] | 0.2912 | 0.8736 |
+| Claude Opus 4.1 (4.5) minus Claude Sonnet 4 (4.5) | activated_risk | 319 | 0.053 [0.003, 0.103] | 0.0533 | 0.2664 |
+| Gemini 2.5 Pro (3.1) minus Gemini 2.5 Flash (3) | latent_risk | 319 | -0.003 [-0.031, 0.022] | 1.0000 | 1.0000 |
+| Gemini 2.5 Pro (3.1) minus Gemini 2.5 Flash (3) | latent_severity | 319 | -0.041 [-0.082, 0.000] | 0.0596 | 0.2664 |
+| Gemini 2.5 Pro (3.1) minus Gemini 2.5 Flash (3) | effect | 319 | -0.003 [-0.041, 0.038] | 1.0000 | 1.0000 |
+| Gemini 2.5 Pro (3.1) minus Gemini 2.5 Flash (3) | activated_risk | 319 | -0.066 [-0.110, -0.022] | 0.0065 | 0.0533 |
+
+Note: Pairs per text: GPT5 vs GPT5-Mini/GPT5-Nano; Claude Sonnet 4 and Gemini 2.5 Flash 'also have a gap, albeit smaller' vs their larger counterparts. Gemini 2.5 Flash-Lite is plotted in Fig 4 but not named in this paragraph (named as weaker in the Action Safety paragraph). Intro calls this a 'latency gap'. Pairs set by Claude (main session) from the paper's pairing: each small model vs its own family's large model.
+
+#### `headline_actions_harder` (actions_harder, §3)
+
+> accuracy in evaluating whether an action is safe ... and post-action activated risk assessment ... is generally lower than scenario-only risk and severity accuracies
+
+Per item: mean correct on effect + activated_risk minus mean correct on latent_risk + latent_severity, then averaged; paired bootstrap CI.
+
+| Model | Action accuracy | Latent accuracy | Action − latent [95% CI] |
+|---|---|---|---|
+| GPT-5 Nano | 0.436 | 0.544 | -0.108 [-0.163, -0.052] |
+| GPT-5 Mini | 0.544 | 0.795 | -0.251 [-0.303, -0.197] |
+| GPT-5 | 0.649 | 0.854 | -0.205 [-0.248, -0.161] |
+| Claude Sonnet 4 (4.5) | 0.624 | 0.768 | -0.144 [-0.191, -0.097] |
+| Claude Opus 4.1 (4.5) | 0.663 | 0.828 | -0.165 [-0.207, -0.122] |
+| Gemini 2.5 Flash-Lite (3.1) | 0.636 | 0.771 | -0.135 [-0.179, -0.091] |
+| Gemini 2.5 Flash (3) | 0.680 | 0.821 | -0.141 [-0.182, -0.100] |
+| Gemini 2.5 Pro (3.1) | 0.646 | 0.799 | -0.154 [-0.194, -0.113] |
+
+Note: Compares Fig 4b (effect, activated risk) with Fig 4a (latent risk, severity). Text adds: 'Except for Gemini 2.5 Flash', smaller models are substantially weaker, naming GPT-5-Mini, GPT-5-Nano and Gemini 2.5 Flash-lite.
+
 ## Settings
 
 | Setting | Value |
@@ -60,7 +228,3 @@ CIs: Wilson for rates, bootstrap over items for means (`src/asimov/stats.py`).
 | Gemini 2.5 Pro (3.1) | [responses.jsonl](gemini-3.1-pro-preview/responses.jsonl) | [summary.json](gemini-3.1-pro-preview/summary.json) |
 
 Scoring decisions behind these numbers: [WORKLOG.md](../../WORKLOG.md).
-
-## Paper check
-
-Ours vs every number the paper reports for this benchmark: [paper_check.md](paper_check.md).
