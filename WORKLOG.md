@@ -1427,3 +1427,19 @@ Q2 6/32/142/139, Q3 60/97/121/41, Q4 78/43/90/108.
   the invalid "E" answers. *Alternative considered:* keep txt27 and report the 11%.
 - **Kev redeploy for the 3 missing grid cells: approved (Noa, 2026-10-14):** `part2_kev_full`,
   `part2_kev_letters`, `part2_kev_full_cumulative` (configs from PR #21).
+
+### Follow-up runs (2026-10-14): numbers only
+All 319/319, 0 errors; bug checks clean (one cache key, no duplicates, served version, probabilities
+sum to 1, reply = top option, 0 exact ties). Kev redeployed (approved) and stopped afterwards.
+
+| Run | System | Change from base | Q1 | Q2 | Q3 | Q4 | Parse fail |
+|---|---|---|---|---|---|---|---|
+| txt30 `part2_kev_full` | Kev-4B | full wording | 58.0% | 59.6% | 64.6% | 40.1% | 0.0% |
+| txt31 `part2_kev_letters` | Kev-4B | letters as option values | 43.9% | 41.4% | 55.8% | 41.1% | 0.0% |
+| txt32 `part2_kev_full_cumulative` | Kev-4B | full wording + cumulative | 58.0% | 53.9% | 59.9% | 51.1% | 0.0% |
+| txt33 `part2_qwen_gen_2048` | Qwen3.5-4B generate | cap 2048 (was 1024, txt27) | 77.1% | 61.8% | 59.6% | 58.0% | 8.2% |
+
+- txt33 vs txt27: replies at the cap 29 -> 11 (5 of them unparseable); parse failures 35 -> 26
+  items; 29 invalid "E" answers on 4-option severity questions remain (the cap doesn't change
+  them). Still above Noa's 2% stop line: held for her review. Output tokens p50 434; compute
+  p50 16.8 s per item (`raw.remote.compute_s`), run with `--workers 1`.
