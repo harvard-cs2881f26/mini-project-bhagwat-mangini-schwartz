@@ -1037,3 +1037,46 @@ were fixed in this session's plan and in Noa's message, not chosen from the 319-
   - `repro_fig5` (video) now shows $68.01. Not checked against Tyler's records.
 - `tests/test_leakage.py` read every `configs/*.yaml` as a run config. It now reads only those with a
   `run` key (Noa's call, 2026-10-13), so the price table isn't mistaken for one.
+
+## 2026-10-13: Router search (exploratory)
+
+**Objective (Noa):** find combinations of decision models and LLMs that maximise accuracy while minimising $
+and latency on the text benchmark (319 items). `scripts/router_search.py` with
+`configs/analysis/router_search.yaml` -> `results/router_search/` and `figures/router_search/`; logic in
+`src/asimov/router_search.py`. Free: saved replies in results/ only, no model calls. EXPLORATORY: a search over
+8,424 candidates on one benchmark.
+
+### Cross-validation protocol: PROPOSED (Claude; Noa to confirm)
+- Items are shuffled with numpy `default_rng(seed)` and dealt round-robin into 5 folds (no stratification),
+  for seeds 0-4 (5 repeats). For each fold, every candidate is fitted on the 4 training folds, the
+  highest-accuracy candidate within the cap on those folds is picked (ties: cheaper, faster, listed first),
+  and that pick is scored on the held-out fold. Held-out numbers pool the 5 folds and average over the 5
+  repeats. The mean-of-4 CI is a percentile bootstrap over items (`stats.bootstrap_mean_ci`) of each item's
+  held-out score averaged over repeats.
+- "Fitted" means: a confidence threshold is the chosen quantile of the training items' confidences
+  (min top-option probability, as in design D); the per-question mix keeps the decision model on a question
+  when it beat the LLM on the training items sent on (ties go to the LLM).
+- *Alternatives:* selecting on all 319 items (rejected: tuning on the eval set, CLAUDE.md); one fixed
+  train/test split (rejected: n = 319 is small, so one test split of ~64 items would be very noisy).
+- The in-sample frontier (fit and pick on all 319) is reported beside the held-out one, labelled
+  "in-sample, optimistic, not a result".
+
+### Families, pools and grids: PROPOSED (Claude)
+- Families: single (24), D-cascade (1,071), agreement (966), three-stage (5,292), per-question mix (1,071).
+  Every candidate's definition is in `results/router_search/candidates.csv`.
+- Decision pool: Jev, Jev reversed, luna Decisions, OpenJev think 0 and think 512, Laya, Kev-4B, plus any
+  `part2_*_cumulative` run with errors == 0 (none exist yet). LLM pool: the 8 models of `repro_fig4` and of
+  `repro_fig4_default` (labelled [min] / [default]) and luna generate. Cheap: Nano, Flash-Lite, Mini (both
+  settings) and luna generate. Strong: GPT-5, Gemini 3.1 Pro, Opus 4.5 (both settings).
+- Shares sent on: 10-90% in steps of 10. Agreement rules: any question, Q1 only. A missing answer never agrees.
+  Under the Q1 rule, items that agree on Q1 keep the second system's answers (the LLM in a decision + LLM pair;
+  decision + decision pairs are listed in both orders).
+- Cost and latency: $ from `configs/prices.yaml`; Kev-4B (self-hosted) counts as $0 and is flagged. Latency =
+  sequential calls added up; agreement's two first-stage calls run in parallel, so the slower one counts.
+  *Alternative:* add them (sequential).
+- Grids: budgets $0.1, 0.25, 0.5, 1, 2, 4, 8, 16, 32 per 1,000 items; p50 latency caps 0.5, 1, 2, 4, 8 s.
+
+### In-sample vs held-out
+In-sample picks are 0.000-0.017 higher in mean-of-4 accuracy than the held-out picks at the same cap
+(e.g. $1: 0.717 vs 0.700; $2: 0.751 vs 0.740; p50 ≤ 4 s: 0.752 vs 0.735). The held-out numbers are the
+result; in-sample numbers are not.

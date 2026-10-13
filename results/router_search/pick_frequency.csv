@@ -1,0 +1,52 @@
+cap_kind,cap,family,candidate,picks,share
+cost,0.1,per_question_mix,"Jev reversed -> luna generate (lowest 20% by confidence; per question, the better on training)",21,0.84
+cost,0.1,d_cascade,OpenJev think 512 -> luna generate (lowest 40% by confidence),3,0.12
+cost,0.1,per_question_mix,"OpenJev think 512 -> luna generate (lowest 40% by confidence; per question, the better on training)",1,0.04
+cost,0.25,single,luna generate,25,1.0
+cost,0.5,single,luna generate,25,1.0
+cost,1.0,agreement,Jev + luna generate agree (q1) else GPT-5 [min],10,0.4
+cost,1.0,single,Gemini 3.1 Flash-Lite [default],8,0.32
+cost,1.0,agreement,Jev reversed + luna generate agree (q1) else GPT-5 [min],5,0.2
+cost,1.0,agreement,luna Decisions + luna generate agree (q1) else GPT-5 [min],1,0.04
+cost,1.0,three_stage,Jev -> luna generate (lowest 80%) -> GPT-5 [min] if they disagree (q1),1,0.04
+cost,2.0,single,Gemini 3 Flash [min],17,0.68
+cost,2.0,agreement,Jev + Gemini 3.1 Flash-Lite [default] agree (q1) else GPT-5 [min],4,0.16
+cost,2.0,agreement,Jev reversed + Gemini 3.1 Flash-Lite [default] agree (q1) else GPT-5 [min],4,0.16
+cost,4.0,agreement,OpenJev think 512 + GPT-5 Nano [min] agree (any) else GPT-5 [min],20,0.8
+cost,4.0,single,Gemini 3 Flash [min],3,0.12
+cost,4.0,agreement,Jev + Gemini 3.1 Flash-Lite [default] agree (q1) else GPT-5 [min],1,0.04
+cost,4.0,agreement,Jev reversed + Gemini 3.1 Flash-Lite [default] agree (q1) else GPT-5 [min],1,0.04
+cost,8.0,single,Gemini 3 Flash [default],16,0.64
+cost,8.0,agreement,OpenJev think 512 + GPT-5 Nano [min] agree (any) else GPT-5 [min],5,0.2
+cost,8.0,agreement,Kev-4B + Gemini 3.1 Flash-Lite [default] agree (any) else GPT-5 [min],4,0.16
+cost,16.0,single,Gemini 3 Flash [default],16,0.64
+cost,16.0,agreement,OpenJev think 512 + GPT-5 Nano [min] agree (any) else GPT-5 [min],5,0.2
+cost,16.0,agreement,Kev-4B + Gemini 3.1 Flash-Lite [default] agree (any) else GPT-5 [min],4,0.16
+cost,32.0,single,Gemini 3 Flash [default],16,0.64
+cost,32.0,agreement,OpenJev think 512 + GPT-5 Nano [min] agree (any) else GPT-5 [min],5,0.2
+cost,32.0,agreement,Kev-4B + Gemini 3.1 Flash-Lite [default] agree (any) else GPT-5 [min],2,0.08
+cost,32.0,agreement,Kev-4B + GPT-5 Mini [min] agree (any) else Opus 4.5 [default],2,0.08
+latency,0.5,d_cascade,Jev -> GPT-5 [min] (lowest 50% by confidence),21,0.84
+latency,0.5,d_cascade,Jev reversed -> Gemini 3 Flash [default] (lowest 50% by confidence),1,0.04
+latency,0.5,three_stage,Jev -> GPT-5 Nano [default] (lowest 50%) -> GPT-5 [min] if they disagree (any),1,0.04
+latency,0.5,three_stage,Jev -> luna generate (lowest 50%) -> GPT-5 [min] if they disagree (any),1,0.04
+latency,0.5,three_stage,Jev reversed -> Gemini 3.1 Flash-Lite [min] (lowest 50%) -> GPT-5 [min] if they disagree (any),1,0.04
+latency,1.0,d_cascade,Jev -> GPT-5 [min] (lowest 50% by confidence),21,0.84
+latency,1.0,three_stage,Jev -> GPT-5 Nano [default] (lowest 50%) -> GPT-5 [min] if they disagree (any),1,0.04
+latency,1.0,three_stage,Jev -> Gemini 3.1 Flash-Lite [min] (lowest 50%) -> GPT-5 [min] if they disagree (any),1,0.04
+latency,1.0,three_stage,Jev -> Gemini 3.1 Flash-Lite [default] (lowest 50%) -> GPT-5 [min] if they disagree (any),1,0.04
+latency,1.0,three_stage,Jev -> luna generate (lowest 50%) -> GPT-5 [min] if they disagree (any),1,0.04
+latency,2.0,agreement,Jev + Gemini 3.1 Flash-Lite [default] agree (q1) else GPT-5 [min],13,0.52
+latency,2.0,agreement,Jev reversed + Gemini 3.1 Flash-Lite [default] agree (q1) else GPT-5 [min],12,0.48
+latency,4.0,single,Gemini 3 Flash [min],11,0.44
+latency,4.0,agreement,Jev + Laya agree (any) else GPT-5 [min],6,0.24
+latency,4.0,agreement,luna Decisions + Laya agree (any) else GPT-5 [min],3,0.12
+latency,4.0,agreement,Jev + Gemini 3.1 Flash-Lite [default] agree (q1) else GPT-5 [min],3,0.12
+latency,4.0,agreement,Jev reversed + Gemini 3.1 Flash-Lite [default] agree (q1) else GPT-5 [min],2,0.08
+latency,8.0,agreement,Kev-4B + Gemini 3.1 Flash-Lite [default] agree (any) else GPT-5 [min],12,0.48
+latency,8.0,agreement,OpenJev think 512 + GPT-5 Nano [min] agree (any) else GPT-5 [min],7,0.28
+latency,8.0,single,Gemini 3 Flash [min],2,0.08
+latency,8.0,agreement,OpenJev think 512 + GPT-5 Mini [min] agree (any) else GPT-5 [min],1,0.04
+latency,8.0,agreement,Kev-4B + GPT-5 Mini [min] agree (any) else GPT-5 [min],1,0.04
+latency,8.0,agreement,Jev + Gemini 3.1 Flash-Lite [default] agree (q1) else GPT-5 [min],1,0.04
+latency,8.0,agreement,Jev reversed + Gemini 3.1 Flash-Lite [default] agree (q1) else GPT-5 [min],1,0.04

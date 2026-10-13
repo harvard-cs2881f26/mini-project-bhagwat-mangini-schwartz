@@ -1,0 +1,63 @@
+set,axis,point,mean_of_4,x
+held_out,cost,"$0.1 per 1,000",0.599687,0.086729
+held_out,cost,"$0.25 per 1,000",0.685737,0.229518
+held_out,cost,"$1 per 1,000",0.70047,0.913464
+held_out,cost,"$2 per 1,000",0.740439,1.664034
+held_out,cost,"$4 per 1,000",0.747962,3.415321
+held_out,cost,"$8 per 1,000",0.74906,6.115591
+in_sample,cost,OpenJev think 512,0.536834,0.0
+in_sample,cost,"OpenJev think 512 -> GPT-5 Nano [min] (lowest 10% by confidence; per question, the better on training)",0.545455,0.022114
+in_sample,cost,OpenJev think 512 -> luna generate (lowest 10% by confidence),0.56348,0.023423
+in_sample,cost,Jev reversed,0.583856,0.044422
+in_sample,cost,"Jev reversed -> GPT-5 Nano [min] (lowest 10% by confidence; per question, the better on training)",0.584639,0.064693
+in_sample,cost,"Jev -> luna generate (lowest 10% by confidence; per question, the better on training)",0.587774,0.064756
+in_sample,cost,"Jev reversed -> luna generate (lowest 10% by confidence; per question, the better on training)",0.597179,0.065456
+in_sample,cost,"Jev reversed -> luna generate (lowest 20% by confidence; per question, the better on training)",0.612069,0.087272
+in_sample,cost,Jev reversed -> luna generate (lowest 30% by confidence),0.617555,0.113062
+in_sample,cost,"Jev -> luna generate (lowest 40% by confidence; per question, the better on training)",0.625392,0.130464
+in_sample,cost,Jev reversed -> luna generate (lowest 40% by confidence),0.634796,0.135447
+in_sample,cost,Jev reversed -> luna generate (lowest 50% by confidence),0.647335,0.154331
+in_sample,cost,Jev -> luna generate (lowest 60% by confidence),0.659091,0.178061
+in_sample,cost,Jev -> luna generate (lowest 70% by confidence),0.659875,0.200968
+in_sample,cost,Jev reversed -> luna generate (lowest 70% by confidence),0.662226,0.202345
+in_sample,cost,"OpenJev think 512 -> luna generate (lowest 90% by confidence; per question, the better on training)",0.666144,0.206749
+in_sample,cost,Kev-4B -> luna generate (lowest 90% by confidence),0.673981,0.206831
+in_sample,cost,Jev -> luna generate (lowest 80% by confidence),0.677116,0.227938
+in_sample,cost,luna generate,0.685737,0.229518
+in_sample,cost,Jev reversed -> Gemini 3.1 Flash-Lite [default] (lowest 80% by confidence),0.68652,0.673165
+in_sample,cost,Jev -> Gemini 3.1 Flash-Lite [default] (lowest 80% by confidence),0.687304,0.677676
+in_sample,cost,Kev-4B -> Gemini 3.1 Flash-Lite [default] (lowest 90% by confidence),0.691223,0.712397
+in_sample,cost,Jev reversed -> Gemini 3.1 Flash-Lite [default] (lowest 90% by confidence),0.697492,0.74543
+in_sample,cost,Gemini 3.1 Flash-Lite [min],0.703762,0.784955
+in_sample,cost,Gemini 3.1 Flash-Lite [default],0.712382,0.788313
+in_sample,cost,Jev + luna generate agree (q1) else GPT-5 [min],0.717085,0.950276
+in_sample,cost,Jev reversed + luna generate agree (q1) else GPT-5 [min],0.718652,1.001452
+in_sample,cost,Jev reversed -> Gemini 3.1 Flash-Lite [default] (lowest 80%) -> GPT-5 [min] if they disagree (q1),0.720219,1.415026
+in_sample,cost,OpenJev think 512 -> Gemini 3 Flash [min] (lowest 90% by confidence),0.725705,1.491331
+in_sample,cost,Kev-4B -> Gemini 3 Flash [min] (lowest 90% by confidence),0.734326,1.497067
+in_sample,cost,Jev reversed -> Gemini 3 Flash [min] (lowest 90% by confidence),0.73511,1.519171
+in_sample,cost,luna Decisions -> Gemini 3 Flash [min] (lowest 90% by confidence),0.741379,1.588971
+in_sample,cost,Gemini 3 Flash [min],0.750784,1.656516
+in_sample,cost,Jev reversed + luna generate agree (any) else GPT-5 [min],0.753135,3.630535
+in_sample,cost,OpenJev think 512 + GPT-5 Nano [min] agree (any) else GPT-5 [min],0.757837,3.877779
+in_sample,cost,Kev-4B + Gemini 3.1 Flash-Lite [default] agree (any) else GPT-5 [min],0.758621,4.414218
+in_sample,cost,Gemini 3 Flash [default],0.760972,7.161817
+held_out,latency,p50 ≤ 1 s,0.689498,0.254
+held_out,latency,p50 ≤ 2 s,0.746395,1.424
+in_sample,latency,luna Decisions -> Gemini 3.1 Pro [default] (lowest 10% by confidence),0.548589,0.13
+in_sample,latency,luna Decisions -> GPT-5 Mini [min] (lowest 20%) -> Gemini 3.1 Pro [default] if they disagree (any),0.588558,0.14
+in_sample,latency,luna Decisions -> GPT-5 Mini [min] (lowest 30%) -> Gemini 3.1 Pro [default] if they disagree (any),0.612853,0.15
+in_sample,latency,luna Decisions -> GPT-5 Mini [min] (lowest 40%) -> Gemini 3.1 Pro [default] if they disagree (any),0.634796,0.16
+in_sample,latency,luna Decisions + Jev reversed agree (q1) else GPT-5 [min],0.641066,0.17
+in_sample,latency,Jev -> luna generate (lowest 40%) -> GPT-5 [min] if they disagree (any),0.65674,0.19
+in_sample,latency,Jev reversed -> Gemini 3 Flash [default] (lowest 40% by confidence),0.660658,0.2
+in_sample,latency,Jev -> GPT-5 [min] (lowest 50% by confidence),0.689655,0.24
+in_sample,latency,Jev -> Gemini 3.1 Flash-Lite [default] (lowest 60%) -> GPT-5 [min] if they disagree (q1),0.692006,1.34
+in_sample,latency,Gemini 3.1 Flash-Lite [default],0.712382,1.37
+in_sample,latency,Jev reversed + Gemini 3.1 Flash-Lite [default] agree (q1) else GPT-5 [min],0.748433,1.42
+in_sample,latency,Gemini 3 Flash [min],0.750784,2.54
+in_sample,latency,GPT-5 [min],0.751567,3.29
+in_sample,latency,luna Decisions + Laya agree (any) else GPT-5 [min],0.752351,3.8
+in_sample,latency,Jev reversed + Gemini 3.1 Flash-Lite [default] agree (any) else GPT-5 [min],0.753918,4.53
+in_sample,latency,Kev-4B + Gemini 3.1 Flash-Lite [default] agree (any) else GPT-5 [min],0.758621,4.65
+in_sample,latency,Gemini 3 Flash [default],0.760972,10.71

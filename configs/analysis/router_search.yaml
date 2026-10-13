@@ -1,0 +1,53 @@
+# Router search (EXPLORATORY), text benchmark. Read by scripts/router_search.py, checked by
+# asimov.router_search.SearchConfig (unknown keys fail). Outputs: results/router_search/, figures/router_search/.
+# Protocol (5-fold CV over items, repeated with fixed seeds; nothing chosen on held-out items):
+# WORKLOG 2026-10-13, "Router search (exploratory)". Labels are the names in the tables; LLMs carry their thinking.
+decision:                                     # first-stage decision models (replies with `probs`)
+  - {run: part2_jev, model: jev-latest, label: Jev}
+  - {run: part2_jev_reversed, model: jev-latest, label: Jev reversed}
+  - {run: part2_luna_decide, model: gpt-6-luna, label: luna Decisions}
+  - {run: part2_codiv, model: openjev-latest, label: OpenJev think 0}
+  - {run: part2_openjev_think512, model: openjev-latest, label: OpenJev think 512}
+  - {run: part2_codiv, model: laya-1.0, label: Laya}
+  - {run: part2_kev, model: kev-latest, label: Kev-4B}
+cumulative_runs: "part2_*_cumulative"         # their decision models join the pool when the summary has errors == 0
+llms:
+  - {run: repro_fig4, model: gpt-5-nano, label: "GPT-5 Nano [min]"}
+  - {run: repro_fig4, model: gpt-5-mini, label: "GPT-5 Mini [min]"}
+  - {run: repro_fig4, model: gpt-5, label: "GPT-5 [min]"}
+  - {run: repro_fig4, model: claude-sonnet-4-5-20250929, label: "Sonnet 4.5 [min]"}
+  - {run: repro_fig4, model: claude-opus-4-5-20251101, label: "Opus 4.5 [min]"}
+  - {run: repro_fig4, model: gemini-3.1-flash-lite, label: "Gemini 3.1 Flash-Lite [min]"}
+  - {run: repro_fig4, model: gemini-3-flash-preview, label: "Gemini 3 Flash [min]"}
+  - {run: repro_fig4, model: gemini-3.1-pro-preview, label: "Gemini 3.1 Pro [min]"}
+  - {run: repro_fig4_default, model: gpt-5-nano, label: "GPT-5 Nano [default]"}
+  - {run: repro_fig4_default, model: gpt-5-mini, label: "GPT-5 Mini [default]"}
+  - {run: repro_fig4_default, model: gpt-5, label: "GPT-5 [default]"}
+  - {run: repro_fig4_default, model: claude-sonnet-4-5-20250929, label: "Sonnet 4.5 [default]"}
+  - {run: repro_fig4_default, model: claude-opus-4-5-20251101, label: "Opus 4.5 [default]"}
+  - {run: repro_fig4_default, model: gemini-3.1-flash-lite, label: "Gemini 3.1 Flash-Lite [default]"}
+  - {run: repro_fig4_default, model: gemini-3-flash-preview, label: "Gemini 3 Flash [default]"}
+  - {run: repro_fig4_default, model: gemini-3.1-pro-preview, label: "Gemini 3.1 Pro [default]"}
+  - {run: part2_luna_gen, model: gpt-6-luna, label: luna generate}
+cheap:                                        # agreement partners and the three-stage middle stage
+  - "GPT-5 Nano [min]"
+  - "GPT-5 Nano [default]"
+  - "Gemini 3.1 Flash-Lite [min]"
+  - "Gemini 3.1 Flash-Lite [default]"
+  - "GPT-5 Mini [min]"
+  - "GPT-5 Mini [default]"
+  - luna generate
+strong:                                       # escalation targets for agreement and three-stage
+  - "GPT-5 [min]"
+  - "GPT-5 [default]"
+  - "Gemini 3.1 Pro [min]"
+  - "Gemini 3.1 Pro [default]"
+  - "Opus 4.5 [min]"
+  - "Opus 4.5 [default]"
+confidence: min_top_probability               # lowest top-option probability over the item's 4 questions
+fractions: [0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9]   # share of training items sent on (threshold = that quantile)
+agreement_rules: [any, q1]                    # disagree on any question, or on Q1 (latent_risk) only
+budgets_per_1000: [0.1, 0.25, 0.5, 1, 2, 4, 8, 16, 32]    # $ per 1,000 items
+latency_caps_s: [0.5, 1, 2, 4, 8]             # p50 s per item
+folds: 5
+seeds: [0, 1, 2, 3, 4]                        # one repeat per seed
