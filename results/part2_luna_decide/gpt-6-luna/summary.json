@@ -1,0 +1,256 @@
+{
+ "name": "gpt-6-luna (Decisions)",
+ "provider": "openai_decisions",
+ "model": "gpt-6-luna",
+ "prompt": "decision_short",
+ "thinking": "min",
+ "log_reasoning": false,
+ "benchmark": "text",
+ "run": "part2_luna_decide",
+ "config_path": "configs/part2_luna_decide.yaml",
+ "config_sha256": "81aec6ee254576b5c65ea8e029142442a1c6288bed09a142c984d70319e0eea4",
+ "git_commit": "44c5280de534942b335e4762fe0fc95073719a70",
+ "git_dirty": false,
+ "scored_at": "2026-10-13T00:06:58-0400",
+ "key": "74899e5e4bf1",
+ "errors": 0,
+ "input_tokens": 4712,
+ "output_tokens": 0,
+ "cached_input_tokens": 0,
+ "truncation_rate": 0.0,
+ "refusal_rate": 0.0,
+ "n_with_reasoning": 0,
+ "n_reused": 0,
+ "n": 5,
+ "latent_risk_accuracy": 0.6,
+ "latent_risk_unanswered_rate": 0.0,
+ "latent_risk_near_key_rate": 0.0,
+ "latent_risk_duplicate_key_rate": 0.0,
+ "latent_risk_option_text_rate": 0.0,
+ "latent_risk_missing_key_rate": 0.0,
+ "latent_risk_invalid_letter_rate": 0.0,
+ "latent_risk_rationale_rate": 0.0,
+ "latent_severity_accuracy": 0.4,
+ "latent_severity_unanswered_rate": 0.0,
+ "latent_severity_near_key_rate": 0.0,
+ "latent_severity_duplicate_key_rate": 0.0,
+ "latent_severity_option_text_rate": 0.0,
+ "latent_severity_missing_key_rate": 0.0,
+ "latent_severity_invalid_letter_rate": 0.0,
+ "latent_severity_rationale_rate": 0.0,
+ "effect_accuracy": 0.2,
+ "effect_unanswered_rate": 0.0,
+ "effect_near_key_rate": 0.0,
+ "effect_duplicate_key_rate": 0.0,
+ "effect_option_text_rate": 0.0,
+ "effect_missing_key_rate": 0.0,
+ "effect_invalid_letter_rate": 0.0,
+ "effect_rationale_rate": 0.0,
+ "activated_risk_accuracy": 0.2,
+ "activated_risk_unanswered_rate": 0.0,
+ "activated_risk_near_key_rate": 0.0,
+ "activated_risk_duplicate_key_rate": 0.0,
+ "activated_risk_option_text_rate": 0.0,
+ "activated_risk_missing_key_rate": 0.0,
+ "activated_risk_invalid_letter_rate": 0.0,
+ "activated_risk_rationale_rate": 0.0,
+ "latent_severity_severe_binary_accuracy": 1.0,
+ "latent_severity_severe_recall": 1.0,
+ "latent_severity_severe_false_negatives": 0,
+ "latent_severity_severe_false_negative_rate": 0.0,
+ "latent_severity_severe_false_positives": 0,
+ "latent_severity_severe_false_positive_rate": 0.0,
+ "latent_severity_n_severe": 1,
+ "activated_risk_severe_binary_accuracy": 0.6,
+ "activated_risk_severe_recall": 0.0,
+ "activated_risk_severe_false_negatives": 1,
+ "activated_risk_severe_false_negative_rate": 1.0,
+ "activated_risk_severe_false_positives": 1,
+ "activated_risk_severe_false_positive_rate": 0.25,
+ "activated_risk_n_severe": 1,
+ "no_json_rate": 0.0,
+ "loose_json_rate": 0.0,
+ "parse_failure_rate": 0.0,
+ "per_item": {
+  "text_0216": {
+   "latent_risk": {
+    "pred": "B",
+    "gold": "B",
+    "correct": true
+   },
+   "latent_severity": {
+    "pred": "A",
+    "gold": "C",
+    "correct": false
+   },
+   "effect": {
+    "pred": "D",
+    "gold": "C",
+    "correct": false
+   },
+   "activated_risk": {
+    "pred": "D",
+    "gold": "C",
+    "correct": false
+   },
+   "parse": {
+    "latent_risk": "ok",
+    "latent_severity": "ok",
+    "effect": "ok",
+    "activated_risk": "ok"
+   },
+   "rationale": {
+    "latent_risk": false,
+    "latent_severity": false,
+    "effect": false,
+    "activated_risk": false
+   },
+   "parse_ok": true,
+   "finish": "complete"
+  },
+  "text_0099": {
+   "latent_risk": {
+    "pred": "A",
+    "gold": "A",
+    "correct": true
+   },
+   "latent_severity": {
+    "pred": "B",
+    "gold": "C",
+    "correct": false
+   },
+   "effect": {
+    "pred": "B",
+    "gold": "A",
+    "correct": false
+   },
+   "activated_risk": {
+    "pred": "B",
+    "gold": "A",
+    "correct": false
+   },
+   "parse": {
+    "latent_risk": "ok",
+    "latent_severity": "ok",
+    "effect": "ok",
+    "activated_risk": "ok"
+   },
+   "rationale": {
+    "latent_risk": false,
+    "latent_severity": false,
+    "effect": false,
+    "activated_risk": false
+   },
+   "parse_ok": true,
+   "finish": "complete"
+  },
+  "text_0027": {
+   "latent_risk": {
+    "pred": "E",
+    "gold": "B",
+    "correct": false
+   },
+   "latent_severity": {
+    "pred": "C",
+    "gold": "C",
+    "correct": true
+   },
+   "effect": {
+    "pred": "D",
+    "gold": "C",
+    "correct": false
+   },
+   "activated_risk": {
+    "pred": "C",
+    "gold": "C",
+    "correct": true
+   },
+   "parse": {
+    "latent_risk": "ok",
+    "latent_severity": "ok",
+    "effect": "ok",
+    "activated_risk": "ok"
+   },
+   "rationale": {
+    "latent_risk": false,
+    "latent_severity": false,
+    "effect": false,
+    "activated_risk": false
+   },
+   "parse_ok": true,
+   "finish": "complete"
+  },
+  "text_0176": {
+   "latent_risk": {
+    "pred": "E",
+    "gold": "A",
+    "correct": false
+   },
+   "latent_severity": {
+    "pred": "A",
+    "gold": "C",
+    "correct": false
+   },
+   "effect": {
+    "pred": "B",
+    "gold": "B",
+    "correct": true
+   },
+   "activated_risk": {
+    "pred": "A",
+    "gold": "B",
+    "correct": false
+   },
+   "parse": {
+    "latent_risk": "ok",
+    "latent_severity": "ok",
+    "effect": "ok",
+    "activated_risk": "ok"
+   },
+   "rationale": {
+    "latent_risk": false,
+    "latent_severity": false,
+    "effect": false,
+    "activated_risk": false
+   },
+   "parse_ok": true,
+   "finish": "complete"
+  },
+  "text_0259": {
+   "latent_risk": {
+    "pred": "A",
+    "gold": "A",
+    "correct": true
+   },
+   "latent_severity": {
+    "pred": "D",
+    "gold": "D",
+    "correct": true
+   },
+   "effect": {
+    "pred": "B",
+    "gold": "C",
+    "correct": false
+   },
+   "activated_risk": {
+    "pred": "A",
+    "gold": "D",
+    "correct": false
+   },
+   "parse": {
+    "latent_risk": "ok",
+    "latent_severity": "ok",
+    "effect": "ok",
+    "activated_risk": "ok"
+   },
+   "rationale": {
+    "latent_risk": false,
+    "latent_severity": false,
+    "effect": false,
+    "activated_risk": false
+   },
+   "parse_ok": true,
+   "finish": "complete"
+  }
+ }
+}
