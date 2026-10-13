@@ -1034,7 +1034,9 @@ were fixed in this session's plan and in Noa's message, not chosen from the 319-
   - Check: `repro_fig4` totals $15.11, matching the run's logged cost.
   - `repro_fig4_default` shows $23.90. That is the cost of its replies, including 314 Claude replies
     reused from `repro_fig4` (paid then); the new spend logged for that run was $14.52.
-  - `repro_fig5` (video) now shows $68.01. Not checked against Tyler's records.
+  - Only text runs are priced (`collect/tables.PRICED_BENCHMARKS`). Video (Tyler) and image (Riddhi)
+    costs are their owners' to add (Noa, 2026-10-13: Part 2 doesn't touch video). The video page is
+    unchanged from main.
 - `tests/test_leakage.py` read every `configs/*.yaml` as a run config. It now reads only those with a
   `run` key (Noa's call, 2026-10-13), so the price table isn't mistaken for one.
 

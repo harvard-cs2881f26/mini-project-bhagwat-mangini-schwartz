@@ -130,6 +130,14 @@ def test_cost_counts_thinking_tokens_billed_as_output(results, claims):
     assert float(index[0]["cost_usd"]) == pytest.approx((1000 + (100 + 4 * 50) * 10) / 1e6)  # the stale-key row is not counted
 
 
+def test_only_text_runs_are_priced(results, claims):
+    """Video (Tyler) and image (Riddhi) costs are their owners' to add; a price for the same model id doesn't apply."""
+    prices = {"gpt-5": {"input_per_mtok": 1.0, "output_per_mtok": 10.0}}
+    index = read_csv(build(load_results(results), claims, prices, {}, [])["index.csv"])
+    video = next(r for r in index if r["benchmark"] == "video")
+    assert video["cost_usd"] == ""
+
+
 def test_per_item_rows(results, claims):
     rows = read_csv(build(load_results(results), claims, {}, {}, [])["per_item.csv"])
     assert len(rows) == 2 * 4 * 4 + 3 * 2
