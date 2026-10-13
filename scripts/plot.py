@@ -24,6 +24,7 @@ import matplotlib
 matplotlib.use("Agg")
 import matplotlib.pyplot as plt  # noqa: E402
 from matplotlib.lines import Line2D  # noqa: E402
+from matplotlib.ticker import MultipleLocator, PercentFormatter  # noqa: E402
 from matplotlib.typing import RcKeyType  # noqa: E402
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -64,10 +65,12 @@ STYLE: dict[RcKeyType, Any] = {
     "axes.spines.right": False,
     "xtick.major.size": 0,
     "ytick.major.size": 0,
-    "font.size": 10,
-    "axes.titlesize": 12,
-    "axes.labelsize": 10,
-    "legend.fontsize": 8,
+    "font.size": 11,
+    "axes.titlesize": 13,
+    "axes.labelsize": 12,
+    "xtick.labelsize": 11,
+    "ytick.labelsize": 11,
+    "legend.fontsize": 9,
     "figure.dpi": 150,
 }
 # Paper-style figures copy the paper's larger type
@@ -151,7 +154,7 @@ BAR_HEADROOM = 0.06  # above the tallest bar or CI, for its printed value
 PAPER_BAR_YMAX = 1.0  # the paper's Fig 5a y axis
 FIG5A_INCHES_PER_MODEL, FIG5A_EXTRA_WIDTH, FIG5A_MIN_WIDTH, FIG5A_HEIGHT = 1.3, 2.5, 5.0, 4.5
 PAPER_FIG5A_SIZE = (10.5, 7)
-TICK_FONTSIZE = 8
+TICK_FONTSIZE = 10
 COMPARISON_VALUE_FONTSIZE, PAPER_VALUE_FONTSIZE = 7, 13
 # Fig 5a's two series: seaborn "deep" blue and orange at barplot saturation 0.75, as in the paper
 TEXT_COLOR, VIDEO_COLOR = "#5975a4", "#cc8963"
@@ -171,6 +174,31 @@ FIG4 = {  # question, y metric, x axis name, y axis title, caption
         "Understanding Action Effects",
     ),
 }
+
+
+# Comparison figures use plain-language axis titles and percent ticks (Noa, 2026-10-12); the paper-style
+# figures keep the paper's own wording. One entry per metric a comparison axis can show.
+SCENARIOS = "\n% of scenarios, higher is better"  # second, smaller-looking line keeps titles short
+READABLE = {
+    f"{QUESTIONS[0]}_accuracy": "Picks the right injury type" + SCENARIOS,
+    f"{QUESTIONS[1]}_accuracy": "Picks the right severity level" + SCENARIOS,
+    f"{QUESTIONS[1]}_severe_binary_accuracy": "Tells severe injuries from the rest" + SCENARIOS,
+    f"{QUESTIONS[1]}_severe_recall": "Catches the truly severe injuries\n% of severe scenarios, higher is better",
+    f"{QUESTIONS[2]}_accuracy": "Judges how the action changes the risk" + SCENARIOS,
+    f"{QUESTIONS[3]}_accuracy": "Picks the right severity after the action" + SCENARIOS,
+    f"{QUESTIONS[3]}_severe_binary_accuracy": "After the action: tells severe from the rest" + SCENARIOS,
+    f"{QUESTIONS[3]}_severe_recall": "After the action: catches the truly severe\n% of severe scenarios, higher is better",
+    "risk_accuracy": "Recognizes whether there is an injury risk\n% correct, higher is better",
+    "timing_mae_s": "Average timing error in seconds\nlower is better (axis reversed: better is to the right)",
+    "within_0_5_rate": "Steps in within 0.5 s of the right moment\n% of videos, higher is better",
+}
+PERCENT_STEP = 0.1  # one tick every 10 points on fraction axes
+
+
+def percent_axis(axis, scale: float = 1.0) -> None:
+    """Ticks as whole percents every 10 points; `scale` is the axis value of 100% (1 for fractions, 100 for percents)."""
+    axis.set_major_locator(MultipleLocator(PERCENT_STEP * scale))
+    axis.set_major_formatter(PercentFormatter(xmax=scale, decimals=0))
 
 
 def marker_sizes(points: list[Point], diameter: float) -> list[float]:
@@ -355,7 +383,9 @@ def fig4(name: str, run: RunData, claims: Claims, severity: str, out: Path) -> l
         scatter(ax, theirs, COMPARISON, hollow=True)
         draw_baselines(ax, claims, x_metric, y_metric)
         note = f"{OURS_NOTE}, {PAPER_NOTE}" if theirs else f"{OURS_NOTE}; no paper values for this axis"
-        ax.set(xlabel=x_label, ylabel=y_label, title=f"{title}\n{note}")
+        ax.set(xlabel=READABLE[x_metric], ylabel=READABLE[y_metric], title=f"{title}\n{note}")
+        percent_axis(ax.xaxis)
+        percent_axis(ax.yaxis)
         model_legend(ax, mine, COMPARISON)
         label_points(ax, mine, COMPARISON, avoid=theirs)
         written += save(fig, out, f"{name}_comparison{suffix}")
@@ -449,9 +479,11 @@ def fig5a(bars: list[Bar], stem: str, out: Path, comparison: bool) -> list[Path]
                 paper_bars(ax, pos, [getattr(b, f"paper_{kind}") for b in bars], first=series == 0)
         names = [tick_name(b.name) for b in bars]
         ax.set_xticks(xs, names, fontsize=TICK_FONTSIZE) if comparison else ax.set_xticks(xs, names)
-        ax.set(xlabel="Model", ylabel="Risk Recognition Accuracy", ylim=(0, max(PAPER_BAR_YMAX, tallest + BAR_HEADROOM)))
+        ylabel = READABLE["risk_accuracy"] if comparison else "Risk Recognition Accuracy"
+        ax.set(xlabel="Model", ylabel=ylabel, ylim=(0, max(PAPER_BAR_YMAX, tallest + BAR_HEADROOM)))
         if comparison:
-            ax.set_title(f"{OURS_NOTE}, diamonds = paper")
+            ax.set_title(f"Text vs video\n{OURS_NOTE}, diamonds = paper")
+            percent_axis(ax.yaxis)
         if bars:
             legend = ax.legend(title="Accuracy Type", **(OUTSIDE_LEGEND if comparison else {"loc": "best", "frameon": True}))
             drawn = [box_of(a.get_window_extent()) for a in [*ax.patches, *ax.texts]]
@@ -494,7 +526,8 @@ def fig5b(run: RunData, claims: Claims, out: Path) -> list[Path]:
         scatter(ax, mine, COMPARISON, with_ci=True)
         scatter(ax, theirs, COMPARISON, hollow=True)
         ax.invert_xaxis()
-        ax.set(xlabel=x_label, ylabel=y_label, title=f"{title}\n{OURS_NOTE}, {PAPER_NOTE}")
+        ax.set(xlabel=READABLE["timing_mae_s"], ylabel=READABLE["within_0_5_rate"], title=f"{title}\n{OURS_NOTE}, {PAPER_NOTE}")
+        percent_axis(ax.yaxis, scale=100)
         model_legend(ax, mine, COMPARISON)
         label_points(ax, mine, COMPARISON, avoid=theirs)
         written += save(fig, out, "fig5b_comparison")
