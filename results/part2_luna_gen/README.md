@@ -12,7 +12,7 @@ Text benchmark, using the paper's prompt sent unchanged (text_verbatim), with th
 | Prompt | text_verbatim |
 | Thinking | min |
 | Reasoning logged | False |
-| Git commit | 44c5280de5 |
+| Git commit | 60dafbf4e0 (dirty) |
 | Scored | 2026-10-13 |
 | Config | [config.yaml](config.yaml) (sha256 769da0736ab5) |
 
@@ -20,7 +20,7 @@ Text benchmark, using the paper's prompt sent unchanged (text_verbatim), with th
 
 | Model | Requested | Served | Stand-in | Replies | Errors | Parse failures | Refused | Truncated | Malformed | Near-key reads | With reasoning | Input tokens | Output tokens | Cost $ | Latency p50 / p95 s |
 |---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|
-| gpt-6-luna (generate) | `gpt-6-luna` | `gpt-6-luna` | yes | 5 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 6848 | 1001 | – | 2.8 / 4.7 |
+| gpt-6-luna (generate) | `gpt-6-luna` | `gpt-6-luna` | yes | 319 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 434014 | 59630 | – | 2.7 / 3.8 |
 
 Parse failures: replies with no readable answer; all count as wrong (CLAUDE.md, scoring conventions). With per-item `parse_ok` in `summary.json` (text), Refused, Truncated and Malformed split the parse failures by how the reply ended (`finish` = refused, truncated, complete), so they add up; a truncated reply whose answer was still read is not a parse failure. Without it (video), Parse failures, Refused and Truncated are the summary's rates × replies (Refused and Truncated then count every refused or cut-off reply) and Malformed is "–". Cost is "–" until `configs/prices.yaml` has the model.
 
@@ -28,7 +28,7 @@ Parse failures: replies with no readable answer; all count as wrong (CLAUDE.md, 
 
 | Model | latent_risk_accuracy | latent_severity_accuracy | effect_accuracy | activated_risk_accuracy | latent_severity_severe_binary_accuracy | activated_risk_severe_binary_accuracy | latent_severity_severe_recall | activated_risk_severe_recall |
 |---|---|---|---|---|---|---|---|---|
-| gpt-6-luna (generate) | 0.600 [0.231, 0.882] | 0.600 [0.231, 0.882] | 0.200 [0.036, 0.624] | 0.600 [0.231, 0.882] | 1.000 [0.566, 1.000] | 1.000 [0.566, 1.000] | 1.000 [0.207, 1.000] | 1.000 [0.207, 1.000] |
+| gpt-6-luna (generate) | 0.834 [0.789, 0.871] | 0.690 [0.637, 0.738] | 0.643 [0.589, 0.693] | 0.577 [0.522, 0.630] | 0.850 [0.806, 0.885] | 0.771 [0.722, 0.814] | 0.849 [0.780, 0.899] | 0.852 [0.773, 0.907] |
 
 CIs: Wilson for rates, bootstrap over items for means (`src/asimov/stats.py`).
 
@@ -51,7 +51,7 @@ Fig 4 uses the first column because the paper's Fig 3 defines severity that way 
 
 | Model | Exact level right (used for Fig 4) | Severe vs not right | Truly severe caught | False negatives (severe, not called severe) | False positives (not severe, called severe) |
 |---|---|---|---|---|---|
-| gpt-6-luna (generate) | 0.600 | 1.000 | 1.000 (1 / 1) | 0 / 1 (0.000) | 0 / 4 (0.000) |
+| gpt-6-luna (generate) | 0.690 | 0.850 | 0.849 (118 / 139) | 21 / 139 (0.151) | 27 / 180 (0.150) |
 
 How close each scoring comes to the paper's Fig 4a severity values (mean absolute gap over models with a paper value): exact level right – · severe vs not right – · truly severe caught – (0 models).
 
@@ -59,7 +59,7 @@ How close each scoring comes to the paper's Fig 4a severity values (mean absolut
 
 | Model | Exact level right (used for Fig 4) | Severe vs not right | Truly severe caught | False negatives (severe, not called severe) | False positives (not severe, called severe) |
 |---|---|---|---|---|---|
-| gpt-6-luna (generate) | 0.600 | 1.000 | 1.000 (1 / 1) | 0 / 1 (0.000) | 0 / 4 (0.000) |
+| gpt-6-luna (generate) | 0.577 | 0.771 | 0.852 (92 / 108) | 16 / 108 (0.148) | 57 / 211 (0.270) |
 
 ## Files
 

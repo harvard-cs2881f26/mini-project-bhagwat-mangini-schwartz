@@ -1,0 +1,7 @@
+{"id": "text_0002", "key": "5f0066650d0c", "error_type": "ValueError", "message": "effect: probabilities sum to 0.9900, not 1", "time": "2026-10-13T00:31:57-0400"}
+{"id": "text_0114", "key": "5f0066650d0c", "error_type": "ValueError", "message": "latent_severity: probabilities sum to 0.9900, not 1", "time": "2026-10-13T00:31:57-0400"}
+{"id": "text_0225", "key": "5f0066650d0c", "error_type": "ValueError", "message": "activated_risk: probabilities sum to 0.9900, not 1", "time": "2026-10-13T00:32:02-0400"}
+{"id": "text_0314", "key": "5f0066650d0c", "error_type": "ValueError", "message": "activated_risk: probabilities sum to 0.9900, not 1", "time": "2026-10-13T00:32:03-0400"}
+{"id": "text_0270", "key": "5f0066650d0c", "error_type": "ValueError", "message": "latent_risk: probabilities sum to 0.9900, not 1", "time": "2026-10-13T00:32:04-0400"}
+{"id": "text_0250", "key": "5f0066650d0c", "error_type": "ValueError", "message": "activated_risk: probabilities sum to 0.9900, not 1", "time": "2026-10-13T00:32:05-0400"}
+{"id": "text_0046", "key": "5f0066650d0c", "error_type": "ValueError", "message": "latent_severity: probabilities sum to 0.9900, not 1", "time": "2026-10-13T00:32:05-0400"}

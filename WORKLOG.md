@@ -935,8 +935,42 @@ Numbers only. 5-item accuracy is not reported (too few items to mean anything). 
   the old rule, so they were removed and are re-called in the full run.
 - A response without an answer for every question sent (e.g. an error body with HTTP 200) now
   raises: logged as an error, never saved as a reply.
-- Probabilities must sum to 1 within 1e-3 (`PROB_SUM_TOLERANCE`; Kev's deviate by ~1e-4).
+- Probabilities must sum to 1 within 0.03 (`PROB_SUM_TOLERANCE`). First set to 1e-3; the full Jev runs then failed 11 + 7 items whose probabilities, rounded to 2 decimals, summed to 0.99 (2026-10-13). Those calls were never saved and were re-called with 0.03.
 - Configs: `base_url` / `key_env` / `params` are rejected on providers other than `systemone`.
 - Kev's URL lives in `configs/part2_kev.yaml`; there is no `KEV_BASE_URL` env var (docs corrected).
 - Not changed, flagged for Tyler: the gpt-6-luna lowest-effort mapping is a model id in
   `models/openai_client.py` (`MIN_EFFORT`).
+
+### gpt-6-luna lowest effort stays in the OpenAI client: DECIDED (Noa, 2026-10-13)
+`MIN_EFFORT = {"gpt-6-luna": "none"}` in `models/openai_client.py` is kept: it is a fact about the
+OpenAI API (luna's lowest reasoning effort is "none", not "minimal"), like the client's other
+provider quirks, and it behaves correctly. *Alternative considered:* moving it to the config as
+`params: {effort: none}`, which would mean letting `params` reach the OpenAI client (Tyler's code)
+for little gain. Tyler can still ask for the move.
+
+## 2026-10-13: Part 2 full runs, hosted decision models (319 items each)
+
+Numbers only; interpretation is Noa's. All runs `decision_short`, independent questions, except
+`part2_luna_gen` (`text_verbatim`). Every run 319/319, 0 errors after one retry pass (Jev: 11 and
+7 items first failed the 1e-3 probability-sum check, see "Code-review fixes"), checked for
+duplicates, mixed cache keys, served versions, probability sums and reply = top option (all clean).
+Severity columns are exact-level accuracy, as in Fig 4.
+
+| Run | System | Q1 risk type | Q2 severity | Q3 effect | Q4 activated | Parse fail | p50 latency | API cost |
+|---|---|---|---|---|---|---|---|---|
+| `part2_jev` | Jev 1.13 | 82.1% | 52.7% | 49.5% | 48.0% | 0.0% | 0.15 s | $0.014 |
+| `part2_jev_reversed` | Jev, options reversed | 81.2% | 54.2% | 51.7% | 46.4% | 0.0% | 0.15 s | $0.014 |
+| `part2_luna_decide` | gpt-6-luna, Decisions | 82.1% | 37.9% | 39.8% | 46.1% | 0.9% (3 Q1 refusals) | 0.13 s | $0.030 |
+| `part2_luna_gen` | gpt-6-luna, generate | 83.4% | 69.0% | 64.3% | 57.7% | 0.0% | 2.66 s | $0.073 |
+| `part2_kev` | Kev-4B (Modal) | 42.9% | 38.2% | 58.6% | 42.9% | 0.0% | 0.39 s | GPU time |
+| `part2_codiv` | OpenJev think 0 | 50.5% | 24.8% | 42.6% | 30.7% | 0.0% | 0.52 s | $0 |
+| `part2_codiv` | Laya | 23.5% | 37.9% | 30.1% | 27.9% | 0.0% | 0.41 s | $0 |
+| `part2_openjev_think512` | OpenJev think 512 | 61.4% | 39.2% | 65.8% | 48.3% | 0.0% | 1.55 s | $0 |
+
+- API total $0.131 (tokens x list price; Codiv free tier). Kev: Modal L40S time for warm-up,
+  the run and idle shutdown (a few minutes; exact charge on the Modal dashboard).
+- Answer distributions (pred vs key counts) per run are on the run pages; notable counts:
+  Q1 "No realistic injury possible" (key: 5) predicted by Laya 208, Kev 176, OpenJev think 0 131,
+  think 512 115, luna generate 44, luna Decisions 38, Jev 28. Q3 "eliminates" (key: 60) predicted
+  0-19 times by every decision model. Laya predicts "moderate" for Q4 on 306/319.
+- Codiv runs used `--workers 1` (60 requests/min limit): no rate-limit errors.

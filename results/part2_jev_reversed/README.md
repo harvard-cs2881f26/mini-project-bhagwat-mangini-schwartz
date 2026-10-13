@@ -12,7 +12,7 @@ Text benchmark, using the decision_short prompt, with thinking set to min (the l
 | Prompt | decision_short |
 | Thinking | min |
 | Reasoning logged | False |
-| Git commit | 44c5280de5 |
+| Git commit | 60dafbf4e0 (dirty) |
 | Scored | 2026-10-13 |
 | Config | [config.yaml](config.yaml) (sha256 42e1a8ce28c9) |
 
@@ -20,7 +20,7 @@ Text benchmark, using the decision_short prompt, with thinking set to min (the l
 
 | Model | Requested | Served | Stand-in | Replies | Errors | Parse failures | Refused | Truncated | Malformed | Near-key reads | With reasoning | Input tokens | Output tokens | Cost $ | Latency p50 / p95 s |
 |---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|
-| Jev (reversed options) | `jev-latest` | `jev-1.13.0` | yes | 5 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 5301 | 1110 | – | 0.3 / 0.3 |
+| Jev (reversed options) | `jev-latest` | `jev-1.13.0` | yes | 319 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 337394 | 71755 | – | 0.1 / 0.2 |
 
 Parse failures: replies with no readable answer; all count as wrong (CLAUDE.md, scoring conventions). With per-item `parse_ok` in `summary.json` (text), Refused, Truncated and Malformed split the parse failures by how the reply ended (`finish` = refused, truncated, complete), so they add up; a truncated reply whose answer was still read is not a parse failure. Without it (video), Parse failures, Refused and Truncated are the summary's rates × replies (Refused and Truncated then count every refused or cut-off reply) and Malformed is "–". Cost is "–" until `configs/prices.yaml` has the model.
 
@@ -28,7 +28,7 @@ Parse failures: replies with no readable answer; all count as wrong (CLAUDE.md, 
 
 | Model | latent_risk_accuracy | latent_severity_accuracy | effect_accuracy | activated_risk_accuracy | latent_severity_severe_binary_accuracy | activated_risk_severe_binary_accuracy | latent_severity_severe_recall | activated_risk_severe_recall |
 |---|---|---|---|---|---|---|---|---|
-| Jev (reversed options) | 1.000 [0.566, 1.000] | 0.600 [0.231, 0.882] | 0.200 [0.036, 0.624] | 0.200 [0.036, 0.624] | 0.800 [0.376, 0.964] | 0.600 [0.231, 0.882] | 1.000 [0.207, 1.000] | 0.000 [0.000, 0.793] |
+| Jev (reversed options) | 0.812 [0.765, 0.851] | 0.542 [0.487, 0.596] | 0.517 [0.463, 0.572] | 0.464 [0.410, 0.519] | 0.793 [0.745, 0.834] | 0.784 [0.735, 0.825] | 0.698 [0.617, 0.768] | 0.556 [0.462, 0.646] |
 
 CIs: Wilson for rates, bootstrap over items for means (`src/asimov/stats.py`).
 
@@ -51,7 +51,7 @@ Fig 4 uses the first column because the paper's Fig 3 defines severity that way 
 
 | Model | Exact level right (used for Fig 4) | Severe vs not right | Truly severe caught | False negatives (severe, not called severe) | False positives (not severe, called severe) |
 |---|---|---|---|---|---|
-| Jev (reversed options) | 0.600 | 0.800 | 1.000 (1 / 1) | 0 / 1 (0.000) | 1 / 4 (0.250) |
+| Jev (reversed options) | 0.542 | 0.793 | 0.698 (97 / 139) | 42 / 139 (0.302) | 24 / 180 (0.133) |
 
 How close each scoring comes to the paper's Fig 4a severity values (mean absolute gap over models with a paper value): exact level right – · severe vs not right – · truly severe caught – (0 models).
 
@@ -59,7 +59,7 @@ How close each scoring comes to the paper's Fig 4a severity values (mean absolut
 
 | Model | Exact level right (used for Fig 4) | Severe vs not right | Truly severe caught | False negatives (severe, not called severe) | False positives (not severe, called severe) |
 |---|---|---|---|---|---|
-| Jev (reversed options) | 0.200 | 0.600 | 0.000 (0 / 1) | 1 / 1 (1.000) | 1 / 4 (0.250) |
+| Jev (reversed options) | 0.464 | 0.784 | 0.556 (60 / 108) | 48 / 108 (0.444) | 21 / 211 (0.100) |
 
 ## Files
 
