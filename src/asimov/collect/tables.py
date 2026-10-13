@@ -12,6 +12,7 @@ from asimov.claims import is_stand_in
 from asimov.collect.load import ModelResult, RunData
 from asimov.collect.metrics import item_rows
 from asimov.collect.run_ids import RunLabel
+from asimov.prices import Price, call_cost
 
 LEADING = (
     "run",
@@ -55,24 +56,22 @@ PER_ITEM_COLUMNS = (
     "parse_ok",
     "finish",
 )
-PER_MTOK = 1e6
 LATENCY_DIGITS = 3  # rounded so index.csv is the same on every machine
 COST_DIGITS = 6
 CSV_DIGITS = 6  # every float in a CSV, so collect.py --check gives the same bytes on every machine and numpy version
 
 
-def cost_usd(summary: dict, prices: dict) -> float | None:
-    """$ from logged tokens x configs/prices.yaml (per million tokens); None when the model has no price."""
-    price = prices.get(summary.get("model"))
-    if not price:
+def cost_usd(model: ModelResult, prices: dict) -> float | None:
+    """$ from logged tokens x configs/prices.yaml (asimov.prices.call_cost); None when the model has no $ price.
+    Summary totals, plus thinking tokens summed from the saved replies (summaries leave them out)."""
+    entry = prices.get(model.summary.get("model"))
+    if not entry:
         return None
-    cached = summary.get("cached_input_tokens") or 0
-    fresh = (summary.get("input_tokens") or 0) - cached
-    cached_rate = price.get("cached_input_per_mtok", price["input_per_mtok"])
-    total = (
-        fresh * price["input_per_mtok"] + cached * cached_rate + (summary.get("output_tokens") or 0) * price["output_per_mtok"]
-    )
-    return round(total / PER_MTOK, COST_DIGITS)
+    s = model.summary
+    thinking = sum(u.get("thinking_tokens") or 0 for u in model.usage.values())
+    totals = {k: s.get(k) for k in ("input_tokens", "output_tokens", "cached_input_tokens")} | {"thinking_tokens": thinking}
+    cost = call_cost(totals, Price.model_validate(entry))
+    return None if cost is None else round(cost, COST_DIGITS)
 
 
 def index_row(run: RunData, model: ModelResult, prices: dict, labels: dict[str, RunLabel]) -> dict:
@@ -88,7 +87,7 @@ def index_row(run: RunData, model: ModelResult, prices: dict, labels: dict[str, 
         "stand_in": is_stand_in(s["name"]),
         "latency_p50_s": p50,
         "latency_p95_s": p95,
-        "cost_usd": cost_usd(s, prices),
+        "cost_usd": cost_usd(model, prices),
     }
     return {**s, **made}
 

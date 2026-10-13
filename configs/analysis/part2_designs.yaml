@@ -1,0 +1,15 @@
+# Part 2 designs D (route by confidence) and B (split by question), text benchmark. Read by scripts/cascade.py,
+# checked by asimov.cascade.DesignConfig (unknown keys fail). Outputs: results/part2_designs/, figures/part2_designs/.
+# Every choice was fixed before looking at the results (WORKLOG 2026-10-13, "Part 2 design analysis, B and D").
+# Runs are named by run name + model id; another model is one more line here.
+escalation:                                   # the LLM low-confidence items go to; each is paired with every `first`
+  - {run: repro_fig4, model: gpt-5}           # thinking min
+  - {run: repro_fig4, model: gpt-5-mini}      # second target (Noa: only if no extra work; it is one line)
+first:                                        # decision models that answer first
+  - {run: part2_jev, model: jev-latest}               # Jev
+  - {run: part2_luna_decide, model: gpt-6-luna}       # luna Decisions
+  - {run: part2_codiv, model: openjev-latest}         # OpenJev think 0
+  - {run: part2_kev, model: kev-latest}               # Kev-4B
+confidence: min_top_probability               # lowest top-option probability over the item's 4 questions
+fixed_fractions: [0.25, 0.5, 0.75]            # D's table: share of items sent to the LLM (no threshold chosen from results)
+split_headline: [latent_risk]                 # B's pre-registered split: decision model for Q1, the LLM for Q2-Q4

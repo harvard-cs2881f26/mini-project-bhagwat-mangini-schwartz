@@ -109,6 +109,9 @@ src/asimov/models/reply_info.py  how a reply ended (complete/truncated/refused),
 src/asimov/runner.py          benchmark-agnostic: cache, calls, errors, scoring via the registry
 src/asimov/run_ids.py         run IDs (results/run_ids.yaml) and each run's folder, results/<id>_<run>/
 src/asimov/config.py          run config schema (pydantic; unknown keys fail)
+src/asimov/prices.py          configs/prices.yaml loader + cost of a call (Gemini thinking billed as output)
+src/asimov/cascade.py         Part 2 designs D (route by confidence) and B (split by question), pure
+scripts/cascade.py            configs/analysis/<name>.yaml -> results/<name>/ tables + figures/<name>/ (no calls)
 configs/*.yaml                run, benchmark, prompt, thinking, log_reasoning (optional), models
 tests/                        unit tests for our code (not model evals)
 data/README.md                schemas with real examples, read before touching a loader

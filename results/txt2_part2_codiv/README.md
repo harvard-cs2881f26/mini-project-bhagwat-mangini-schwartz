@@ -151,12 +151,12 @@ Note: Compares Fig 4b (effect, activated risk) with Fig 4a (latent risk, severit
 
 | Model | Input tokens / item | Output tokens / item | Latency p50 / p95 s | Refused | Parse failures | $ / item | $ run |
 |---|---|---|---|---|---|---|---|
-| OpenJev (think 0) | 721 | 0 | 0.5 / 0.8 | 0 | 0 | – | – |
-| Laya | 848 | 0 | 0.4 / 0.8 | 0 | 0 | – | – |
+| OpenJev (think 0) | 721 | 0 | 0.5 / 0.8 | 0 | 0 | 0.0000 | 0.00 |
+| Laya | 848 | 0 | 0.4 / 0.8 | 0 | 0 | 0.0000 | 0.00 |
 
 Per item: the model's totals over this run divided by its replies. Refused and Parse failures as in Models below. $ comes from logged tokens × `configs/prices.yaml`; "–" until that file has the model.
 
-**Key insight:** Laya is the fastest per reply (median 0.4 s) and OpenJev (think 0) the slowest (0.5 s); OpenJev (think 0) and Laya write the most output tokens per item (0) and OpenJev (think 0) and Laya the fewest (0).
+**Key insight:** Laya is the fastest per reply (median 0.4 s) and OpenJev (think 0) the slowest (0.5 s); OpenJev (think 0) and Laya write the most output tokens per item (0) and OpenJev (think 0) and Laya the fewest (0); the whole run cost $0.00.
 
 ## Settings
 
@@ -174,8 +174,8 @@ Per item: the model's totals over this run divided by its replies. Refused and P
 
 | Model | Requested | Served | Stand-in | Replies | Errors | Parse failures | Refused | Truncated | Malformed | Near-key reads | With reasoning | Input tokens | Output tokens | Cost $ | Latency p50 / p95 s |
 |---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|
-| OpenJev (think 0) | `openjev-latest` | `openjev-0.1` | yes | 319 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 230039 | 0 | – | 0.5 / 0.8 |
-| Laya | `laya-1.0` | `laya-1.0` |  | 319 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 270495 | 0 | – | 0.4 / 0.8 |
+| OpenJev (think 0) | `openjev-latest` | `openjev-0.1` | yes | 319 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 230039 | 0 | 0.00 | 0.5 / 0.8 |
+| Laya | `laya-1.0` | `laya-1.0` |  | 319 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 270495 | 0 | 0.00 | 0.4 / 0.8 |
 
 Parse failures: replies with no readable answer; all count as wrong (CLAUDE.md, scoring conventions). With per-item `parse_ok` in `summary.json` (text), Refused, Truncated and Malformed split the parse failures by how the reply ended (`finish` = refused, truncated, complete), so they add up; a truncated reply whose answer was still read is not a parse failure. Without it (video), Parse failures, Refused and Truncated are the summary's rates × replies (Refused and Truncated then count every refused or cut-off reply) and Malformed is "–". Cost is "–" until `configs/prices.yaml` has the model.
 

@@ -120,6 +120,16 @@ def test_cost_from_price_table(results, claims):
     assert index[1]["cost_usd"] == ""
 
 
+def test_cost_counts_thinking_tokens_billed_as_output(results, claims):
+    """Gemini bills thinking as output, but summaries leave it out: it's summed from the saved replies (WORKLOG "Cost method")."""
+    path = results / "text_run" / "gpt-5" / "responses.jsonl"
+    rows = [json.loads(line) for line in path.read_text().splitlines()]
+    path.write_text("".join(json.dumps({**r, "usage": {"thinking_tokens": 50}}) + "\n" for r in rows))
+    prices = {"gpt-5": {"input_per_mtok": 1.0, "output_per_mtok": 10.0, "thinking_as_output": True}}
+    index = read_csv(build(load_results(results), claims, prices, {}, [])["index.csv"])
+    assert float(index[0]["cost_usd"]) == pytest.approx((1000 + (100 + 4 * 50) * 10) / 1e6)  # the stale-key row is not counted
+
+
 def test_per_item_rows(results, claims):
     rows = read_csv(build(load_results(results), claims, {}, {}, [])["per_item.csv"])
     assert len(rows) == 2 * 4 * 4 + 3 * 2
