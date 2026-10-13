@@ -1141,6 +1141,15 @@ Qwen generate ~7.7 tokens/s, 42-111 s/item, peak 11.2 GB, load 11-14 s; 1 of 17 
   Overlap: 2 items both truncated and with an invalid "E"; failing items = 18 invalid-only +
   14 truncated-only + 2 both + 1 other (a missing key, not truncated).
 
+### Run IDs renumbered and logprob-vs-generate agreement (2026-10-14)
+- Main gave txt9-txt14 to the variant runs (PR #20) and the open grid PR #21 uses txt15-txt24, so this
+  branch's runs were renumbered before merging: NLI txt25, Qwen-Base logprob txt26, Qwen generate
+  txt27, Qwen logprob txt28, Qwen-Base one-shot txt29 (folders and figures moved; IDs above updated).
+- Agreement on all 319 items, `scripts/agreement.py`, Qwen3.5-4B option logits (fp32, txt28) vs the
+  same model's generated answer (txt27), numbers only: latent_risk 190/319, latent_severity 124/319
+  (generate unanswered 28), effect 94/319 (unanswered 10), activated_risk 132/319 (unanswered 23).
+  PLAN Step C expected logprob argmax to agree with generation "on most items".
+
 ## 2026-10-13: Part 2 variant runs
 
 Numbers only; interpretation is Noa's. Six runs approved by Noa (2026-10-13), all 319 items. Each
