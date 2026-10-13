@@ -755,3 +755,31 @@ still wait for the Fig 4 review and docs/HYPOTHESIS.md.
   - Against the paper's Fig 4a values, 4-way accuracy fits worst (mean gap 0.17). Severe recall fits best (0.07), and high-vs-low is similar (0.07), but its always-"high" baseline is 0.881.
   - Severe recall ignores false positives. The big models' false-positive rates are 28–40% of the not-severe items; GPT-5 Mini's is 8%, with 27% false negatives.
   - Proposed: severe recall on the paper-style Fig 4a, labelled as inferred, with 4-way and severe FN/FP in our own analysis.
+
+### Fig 4a severity axis: severe recall: DECIDED (Noa, 2026-10-12), implementation pending
+- **The decision:** Fig 4a's severity axis is **severe recall**, labelled as our inference of the
+  paper's metric: the share of truly severe injuries the model called severe, which equals 1 − the
+  false-negative rate. Our own tables and write-up also report 4-way accuracy and severe false
+  negatives and false positives (counts and rates). Severe recall must never be shown alone, since
+  it ignores false positives and always answering "severe" scores 1.0.
+- *Evidence:* mean gap to the paper's 8 plotted Fig 4a values (`min` run):
+  - 4-way 0.172;
+  - severe-vs-not 0.108;
+  - **severe recall 0.068**;
+  - high-vs-low 0.073, but its always-"high" baseline is 0.881, uninformative;
+  - high recall 0.074.
+
+  It also matches the paper's wording, "high-severity judgment".
+- *Alternatives considered:* 4-way (the earlier decision, today); high-vs-low; showing only 4-way
+  with severe recall in a table.
+- **Fig 4b is unchanged.** Its activated-risk axis stays 4-way, which already matches the paper:
+  best 0.66 vs ours 0.671.
+- **Not done yet, needs its own PR:**
+  - `configs/paper/claims.yaml` (frozen, reviewed by Noa) records the paper's Fig 4a severity values
+    as `latent_severity_accuracy`, i.e. 4-way. The comparison figure and `paper_check.md` match
+    paper values by metric name. Switching the axis therefore needs Noa to re-label those claims as
+    "the paper's Fig 4a severity axis, metric not stated", and `plot.py`/`collect.py` to compare them
+    with our severe recall.
+  - `plot.py`'s `--severity` currently applies to 4a and 4b alike; it should apply to 4a only.
+  - Also: a short follow-up to the first author (Tyler's 2026-10-10 email) asking which metric
+    Fig 4a plots.
