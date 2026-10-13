@@ -604,3 +604,5 @@ still wait for the Fig 4 review and docs/HYPOTHESIS.md.
   Return value and printed table still show only the models just run.
 - *Alternative considered:* merge new rows into the old combined file. Rejected: two sources of
   truth; the per-model summaries already hold everything.
+- **2026-10-12: Gemini 3.1 Pro complete, 287/287**, 0 errors (remaining 122 run after the daily cap reset,
+  2 at a time). Run by Claude at Tyler's request. Summaries rescored with `--no-calls` at a clean commit.
