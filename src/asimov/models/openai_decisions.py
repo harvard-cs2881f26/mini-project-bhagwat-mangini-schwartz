@@ -19,6 +19,7 @@ from asimov.models.decision import Decided, generate_decision
 
 class OpenAIDecisionsClient:
     provider = "openai_decisions"
+    request_settings: frozenset[str] = frozenset()  # thinking and log_reasoning are ignored: decision services have neither
 
     def __init__(self, model: str, params: dict | None = None):
         if params:

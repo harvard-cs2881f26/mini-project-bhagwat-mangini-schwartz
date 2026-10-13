@@ -153,3 +153,11 @@ def test_finish_categories_and_cached_tokens_in_summary(tmp_path):
     assert {o["finish"] for o in summary["per_item"].values()} == {"complete"}
     row = json.loads(lines(tmp_path / "t" / "mock-always-no" / "responses.jsonl")[0])
     assert "cached_input_tokens" in row["usage"]
+
+
+def test_subset_run_keeps_other_models_in_combined_summary(tmp_path):
+    run(CFG, limit=2, only=["mock-always-no"], results_dir=tmp_path)
+    run(CFG, limit=2, only=["mock-error"], results_dir=tmp_path)
+    combined = json.loads((tmp_path / "t" / "summary.json").read_text())
+    assert [r["model"] for r in combined] == ["mock-always-no", "mock-error"]
+    assert combined[0]["n"] == 2 and "per_item" not in combined[0]

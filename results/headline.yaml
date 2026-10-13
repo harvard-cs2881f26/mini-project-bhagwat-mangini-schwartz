@@ -1,0 +1,13 @@
+# Hand-edited (docs/PLAN.md §11): the official run per figure, and owners' notes shown on results/README.md.
+# scripts/collect.py writes this file once, when it's missing, and never overwrites it.
+figures:
+  fig4:
+    run: repro_fig4
+    note: ''
+  fig5:
+    run: repro_fig5
+    note: ''
+  fig6:
+    run: null
+    note: ''
+runs: {}

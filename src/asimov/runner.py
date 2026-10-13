@@ -178,7 +178,8 @@ def run_model(bench: Benchmark, spec: dict, cfg: dict, items, out_dir: Path, wor
     summary = {"name": spec["name"], "provider": provider, "model": model, **service, "prompt": prompt,
                "thinking": thinking, "log_reasoning": log_reasoning, **made, "key": key, "errors": errors,
                **token_totals(provider, rows), **finish_rates(finishes),
-               "n_with_reasoning": sum(bool(r.get("reasoning", "").strip()) for r in rows), **s}
+               "n_with_reasoning": sum(bool(r.get("reasoning", "").strip()) for r in rows),
+               "n_reused": sum("reused_from" in r for r in rows), **s}  # copied by asimov.reuse
     (mdir / "summary.json").write_text(json.dumps({**summary, "per_item": per_item}, indent=1))
     return summary
 
@@ -231,5 +232,18 @@ def run(cfg: dict, limit: int | None = None, only: list[str] | None = None,
             print(f"\n== {spec['name']}: skipped, {var} not set")
             continue
         rows.append(run_model(bench, spec, cfg, items, out_dir, workers, show, made, call_models))
-    (out_dir / "summary.json").write_text(json.dumps(rows, indent=1))
+    write_combined(cfg, out_dir)
     return rows
+
+
+def write_combined(cfg: dict, out_dir: Path) -> None:
+    """results/<run>/summary.json: one row per config model, from each model's own summary.json,
+    so running a subset (--models) never drops the other models' rows."""
+    combined = []
+    for spec in cfg["models"]:
+        path = out_dir / spec["model"] / "summary.json"
+        if path.exists():
+            s = json.loads(path.read_text())
+            s.pop("per_item", None)
+            combined.append(s)
+    (out_dir / "summary.json").write_text(json.dumps(combined, indent=1))

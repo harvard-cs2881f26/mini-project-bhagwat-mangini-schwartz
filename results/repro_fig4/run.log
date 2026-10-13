@@ -1,0 +1,31 @@
+
+== GPT-5 Nano (gpt-5-nano): 319 items, 5 saved, 314 to call
+
+== GPT-5 Mini (gpt-5-mini): 319 items, 5 saved, 314 to call
+
+== GPT-5 (gpt-5): 319 items, 5 saved, 314 to call
+
+== Claude Sonnet 4 (4.5) (claude-sonnet-4-5-20250929): 319 items, 5 saved, 314 to call
+
+== Claude Opus 4.1 (4.5) (claude-opus-4-5-20251101): 319 items, 5 saved, 314 to call
+
+== Gemini 2.5 Flash-Lite (3.1) (gemini-3.1-flash-lite): 319 items, 5 saved, 314 to call
+
+== Gemini 2.5 Flash (3) (gemini-3-flash-preview): 319 items, 5 saved, 314 to call
+
+== Gemini 2.5 Pro (3.1) (gemini-3.1-pro-preview): 319 items, 5 saved, 314 to call
+
+model                           n  risk type  severity  effect  activated  parse fail errors
+GPT-5 Nano                    319      54.9%     52.7%   46.7%      40.4%        1.9%      0
+GPT-5 Mini                    319      88.7%     70.2%   56.1%      52.7%        0.0%      0
+GPT-5                         319      93.4%     77.4%   64.3%      65.5%        0.0%      0
+Claude Sonnet 4 (4.5)         319      87.5%     65.8%   64.6%      60.2%        0.3%      0
+Claude Opus 4.1 (4.5)         319      91.8%     73.7%   67.1%      65.5%        0.0%      0
+Gemini 2.5 Flash-Lite (3.1)   319      86.2%     68.0%   66.5%      60.8%        0.6%      0
+Gemini 2.5 Flash (3)          319      92.8%     71.5%   69.0%      67.1%        0.6%      0
+Gemini 2.5 Pro (3.1)          319      92.5%     67.4%   68.7%      60.5%        0.6%      0
+
+Saved under results/repro_fig4/
+real 3400.81
+user 11.14
+sys 2.25

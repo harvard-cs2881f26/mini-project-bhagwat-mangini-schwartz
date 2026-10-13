@@ -21,6 +21,7 @@ REPLIES = {
 
 class MockClient:
     provider = "mock"
+    request_settings: frozenset[str] = frozenset()  # replies are fixed, whatever the settings
 
     def __init__(self, model: str):
         if model not in REPLIES and model != "mock-error":
@@ -41,6 +42,7 @@ class MockDecisionClient:
     Every question mode works (models.decision.generate_decision); raw is {} per call.
     """
     provider = "mock_decision"
+    request_settings: frozenset[str] = frozenset()  # replies are fixed; thinking and log_reasoning are ignored
     MODELS = ("mock-decide-first", "mock-decide-uniform")
 
     def __init__(self, model: str):

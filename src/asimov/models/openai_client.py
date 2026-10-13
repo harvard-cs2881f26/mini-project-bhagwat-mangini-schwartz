@@ -35,6 +35,7 @@ def to_input(parts: list[Part]) -> list[dict]:
 
 class OpenAIClient:
     provider = "openai"
+    request_settings = frozenset({"thinking", "log_reasoning"})  # both change the `reasoning` param sent
 
     def __init__(self, model: str):
         self.model = model

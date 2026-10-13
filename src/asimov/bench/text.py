@@ -2,8 +2,11 @@
 
 The prompt already holds the scenario, the instruction, all four questions with their lettered
 options and the JSON output format, so one call answers one item. Nothing is added or removed:
-no item ID, no wrapper, no system prompt. A prompt variant (H1) would be a new prompt name with
-its own `prompt_version`, so its replies never mix with these.
+no item ID, no wrapper, no system prompt.
+
+Prompt variants (not for the reproduction) add text after the prompt, kept in
+`experiments/<name>/suffix.txt`; the added text is part of `prompt_version`, so their replies
+never mix with the verbatim prompt's.
 
 Decision prompts (Part 2) send one DecisionPart instead: the item's scenario and instruction as
 the state, and its four questions with the paper's options, worded from
@@ -11,6 +14,8 @@ prompts/decision_questions.yaml (the one home for that wording). Their names are
 `decision_<wording>[_letters][_<mode>]` (parse_decision_prompt): wording `short` or `full`,
 `_letters` for A-E option values, and `_cumulative` (none = independent, non-cumulative) for
 whether a question sees the model's own earlier picks (models.decision.generate_decision).
+A name is a decision prompt only if parse_decision_prompt accepts it; every other name is a text
+prompt (verbatim or a suffix variant).
 """
 
 from __future__ import annotations
@@ -27,10 +32,21 @@ import yaml
 from asimov.bench import Benchmark
 from asimov.bench.parts import MODES, DecisionPart, DecisionQuestion, Mode, Part, TextPart
 from asimov.bench.text_score import score
-from asimov.data.text import ParsedPrompt, Question, TextItem, load_text_answers, load_text_items, parse_prompt
+from asimov.data.text import (
+    ParsedPrompt,
+    Question,
+    TextItem,
+    load_text_answers,
+    load_text_items,
+    load_text_options,
+    parse_prompt,
+)
 
 DATASET_VERSION = "asimov_v2_injuries/0.1.0"
-PROMPT_NAME = "text_verbatim"  # the dataset's prompt, unchanged
+PROMPT_NAME = "text_verbatim"  # the dataset's prompt, unchanged (the reproduction)
+LETTER_ONLY = "text_letter_only"  # + "write only the option letter" (experiments/text_letter_only)
+TEXT_PROMPTS = (PROMPT_NAME, LETTER_ONLY)
+EXPERIMENTS = Path(__file__).resolve().parents[3] / "experiments"
 # decision_<wording>[_letters][_<mode>]: wording = the paper's full text per question or the short text
 # in the wording file; option values are short names (e.g. "severe") unless `_letters` (A-E); mode
 # `_cumulative` passes the model's own earlier picks to later questions (none = independent, non-cumulative).
@@ -58,25 +74,36 @@ def parse_decision_prompt(name: str) -> DecisionPrompt:
 
 
 DECISION_PROMPTS = tuple(decision_prompt_name(w, letters, mode) for mode in MODES for w in WORDINGS for letters in (False, True))
-PROMPTS = (PROMPT_NAME, *DECISION_PROMPTS)
+PROMPTS = (*TEXT_PROMPTS, *DECISION_PROMPTS)
 WORDING = Path(__file__).resolve().parents[1] / "prompts" / "decision_questions.yaml"
 # Sections of the wording file a decision request uses; their content (not the file's bytes, so
 # comments don't count) is hashed into prompt_version. `context` only matters to cumulative.
 REQUEST_SECTIONS = ("state", "short", "names")
 
 
-def prompt_version(prompt_name: str) -> str:
-    """Everything our code adds beyond the item: the dataset version and prompt name, plus for
-    decision prompts a hash of the wording sections the request uses."""
-    if prompt_name not in PROMPTS:
+def suffix(prompt_name: str) -> str:
+    """Text added after the dataset's prompt: none for the verbatim prompt."""
+    if prompt_name not in TEXT_PROMPTS:
         raise ValueError(f"unknown text prompt {prompt_name!r}; choose from {PROMPTS}")
-    if prompt_name in DECISION_PROMPTS:
+    return "" if prompt_name == PROMPT_NAME else (EXPERIMENTS / prompt_name / "suffix.txt").read_text().strip()
+
+
+def is_decision_prompt(prompt_name: str) -> bool:
+    """True for exactly the names parse_decision_prompt accepts (all in DECISION_PROMPTS)."""
+    return DECISION_NAME.fullmatch(prompt_name) is not None
+
+
+def prompt_version(prompt_name: str) -> str:
+    """Everything our code adds beyond the item: the dataset version and prompt name, plus any added
+    text (prompt variants) or, for decision prompts, a hash of the wording sections the request uses."""
+    if is_decision_prompt(prompt_name):
         sections = REQUEST_SECTIONS
         if parse_decision_prompt(prompt_name).mode != "independent":
             sections = (*sections, "context")
         used = json.dumps({k: wording()[k] for k in sections}, sort_keys=True)
         return f"{DATASET_VERSION}|{prompt_name}|{hashlib.sha256(used.encode()).hexdigest()[:12]}"
-    return f"{DATASET_VERSION}|{prompt_name}"
+    added = suffix(prompt_name)  # rejects unknown names
+    return f"{DATASET_VERSION}|{prompt_name}" + (f"|{added}" if added else "")
 
 
 @cache
@@ -117,10 +144,15 @@ def decision_request(parsed: ParsedPrompt, prompt_name: str) -> DecisionPart:
 
 
 def build_request(item: TextItem, prompt_name: str = PROMPT_NAME) -> list[Part]:
-    prompt_version(prompt_name)  # rejects unknown names
-    if prompt_name in DECISION_PROMPTS:
+    if is_decision_prompt(prompt_name):
         return [decision_request(parse_prompt(item.prompt), prompt_name)]
-    return [TextPart(item.prompt)]
+    added = suffix(prompt_name)  # rejects unknown names
+    return [TextPart(item.prompt + (f"\n\n{added}" if added else ""))]
+
+
+def score_text(answers: dict, replies: dict[str, str]) -> dict:
+    """The scorer, given each item's option text so answers written as text are read as letters."""
+    return score(answers, replies, options=load_text_options())
 
 
 BENCHMARK = Benchmark(
@@ -128,7 +160,7 @@ BENCHMARK = Benchmark(
     load_items=load_text_items,
     load_answers=load_text_answers,
     build_request=build_request,
-    score=score,
+    score=score_text,
     prompt_version=prompt_version,
     columns=(
         ("risk type", "latent_risk_accuracy", True),

@@ -36,6 +36,7 @@ OUR_PARAMS = ("option_order",)
 
 class SystemOneClient:
     provider = "systemone"
+    request_settings: frozenset[str] = frozenset()  # thinking and log_reasoning are ignored: decision services have neither
 
     def __init__(
         self,

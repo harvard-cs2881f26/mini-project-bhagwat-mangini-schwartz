@@ -20,28 +20,38 @@ PAPER_MODELS = {
 }
 
 
-def get_client(provider: str, model: str, base_url: str | None = None, key_env: str | None = None,
-               params: dict | None = None):
-    """base_url, key_env, params: decision services only (Part 2; asimov.config.ModelSpec)."""
+def client_class(provider: str):
     if provider == "anthropic":
         from asimov.models.anthropic_client import AnthropicClient
-        return AnthropicClient(model)
+        return AnthropicClient
     if provider == "openai":
         from asimov.models.openai_client import OpenAIClient
-        return OpenAIClient(model)
+        return OpenAIClient
     if provider == "gemini":
         from asimov.models.gemini_client import GeminiClient
-        return GeminiClient(model)
+        return GeminiClient
     if provider == "mock":
         from asimov.models.mock import MockClient
-        return MockClient(model)
+        return MockClient
     if provider == "systemone":
         from asimov.models.systemone import SystemOneClient
-        return SystemOneClient(model, base_url=base_url, key_env=key_env, params=params or {})
+        return SystemOneClient
     if provider == "openai_decisions":
         from asimov.models.openai_decisions import OpenAIDecisionsClient
-        return OpenAIDecisionsClient(model, params=params or {})
+        return OpenAIDecisionsClient
     if provider == "mock_decision":
         from asimov.models.mock import MockDecisionClient
-        return MockDecisionClient(model)
+        return MockDecisionClient
     raise ValueError(f"unknown provider {provider}")
+
+
+def get_client(provider: str, model: str, **service):
+    """service: base_url, key_env, params, for decision services only (Part 2; asimov.config.ModelSpec).
+    Passed through only when given, so LLM clients are built as `client_class(provider)(model)`."""
+    options = {k: v for k, v in service.items() if v is not None}
+    return client_class(provider)(model, **options)
+
+
+def request_settings(provider: str) -> frozenset[str]:
+    """Config settings that change what this provider's client sends (asimov.reuse uses it)."""
+    return client_class(provider).request_settings
