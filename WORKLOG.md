@@ -619,7 +619,7 @@ No existing cache key changed. Each change is its own commit in PR #4.
   numbers, so the reason against is practical: it costs a few minutes of agent time per run, CI has
   no model access, and the paper doesn't change between runs.
 
-### Statistics methods: PROPOSED (Noa to confirm)
+### Statistics methods: DECIDED (Noa, confirmed 2026-10-12 after PR #8 merged)
 - Formulas live in `src/asimov/stats.py`; `scripts/collect.py` and `scripts/plot.py` import them.
 - **Accuracy CIs: Wilson score interval, 95%.** Stays inside [0, 1] and behaves at 0/n and n/n.
   *Alternatives:* Clopper-Pearson exact (too conservative: wider than its nominal 95%); Wald
