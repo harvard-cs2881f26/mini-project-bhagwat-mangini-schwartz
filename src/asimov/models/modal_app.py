@@ -9,9 +9,8 @@ Each class is parametrized by the config's params, so one container holds one mo
 @modal.enter it builds the ordinary client (backend local) with this repo's code (src/asimov is
 copied into the image), on CUDA; weights download once to a Modal Volume at the pinned revision.
 Public models only: no secrets are sent. Only imported by `modal deploy`, never by the runner or CI.
+No `from __future__ import annotations`: Modal reads the class parameters' types at deploy time.
 """
-
-from __future__ import annotations
 
 import time
 from importlib.util import find_spec
