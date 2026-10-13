@@ -743,7 +743,7 @@ config schema change). Two modes; the orchestration is in one place,
   (new run name). The free mock config `smoke_mock_decision_cumulative` covers the mode in tests.
 - **Still OPEN (scoring):** in cumulative mode a model's Q2 rates the severity of *its own* Q1
   injury, which need not be the key's Q1 injury, so a "wrong" Q2 may be right for its own Q1.
-  How to score that is not decided.
+  How to score that is not decided. Resolved 2026-10-14: see "Cumulative-mode scoring: DECIDED".
 
 ## 2026-10-12: Fig. 4 with `thinking: default` (`repro_fig4_default`), Noa
 
@@ -1443,3 +1443,30 @@ sum to 1, reply = top option, 0 exact ties). Kev redeployed (approved) and stopp
   items; 29 invalid "E" answers on 4-option severity questions remain (the cap doesn't change
   them). Still above Noa's 2% stop line: held for her review. Output tokens p50 434; compute
   p50 16.8 s per item (`raw.remote.compute_s`), run with `--workers 1`.
+
+## 2026-10-14: Cumulative-mode scoring: DECIDED (Noa, decided 2026-10-13)
+Resolves the "Still OPEN (scoring)" bullet under "Decision question modes". In cumulative mode a
+model's Q2-Q4 follow its own Q1 pick, so a Q2 that is wrong against the key may be right for the
+injury the model picked.
+- **Decision (option c, "both"):** every text run reports
+  - strict accuracy against the answer key, unchanged (`<q>_accuracy`);
+  - Q2-Q4 accuracy on only the items whose Q1 (`latent_risk`) matched the key:
+    `latent_severity_accuracy_q1_matched`, `effect_accuracy_q1_matched`,
+    `activated_risk_accuracy_q1_matched`, with the subset size `n_q1_matched`. Each is `None`
+    when no item's Q1 matched. Code: `bench/text_score.py`; 2 tests in `tests/test_text.py`.
+- *Alternatives considered:* (a) strict only (simpler, but counts a Q2 that is consistent with the
+  model's own wrong Q1 as wrong); (b) matched only (drops every item whose Q1 was wrong, so it
+  hides Q1 errors and changes the denominator).
+- **Caveat:** the matched subset differs per model (it depends on which Q1s each model got right),
+  so matched accuracies compare models on different items. Compare models on strict accuracy;
+  read the matched numbers within one model, alongside `n_q1_matched`.
+- **Applies to every text run**, not only cumulative ones (in independent mode it measures Q2-Q4
+  on the items where Q1 was right). All 34 text runs with results (`txt0`-`txt33`) were rescored
+  from saved replies with `scripts/run.py <config> --no-calls --no-collect` ($0). Skipped: the
+  mock/smoke configs. txt30-txt33 (merged later, PR #22) were rescored the same way when this PR
+  was updated against main.
+- **No strict number changed.** Checked by comparing every rescored `summary.json` (75 files: run
+  and per-model) key by key against the committed version: the only differences are the 4 new
+  fields and provenance (`git_commit`, `scored_at`, `git_dirty`). The regenerated results pages
+  differ only in commit and scored date; `collect.py --check` and pytest pass. The new fields are
+  in `summary.json` only; the results pages don't show them yet.
