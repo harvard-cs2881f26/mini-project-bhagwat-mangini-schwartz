@@ -18,7 +18,8 @@ from asimov.collect.metrics import Estimate, estimate
 from asimov.collect.run_ids import settings
 from asimov.collect.tables import per_item
 
-# Fig 4a/4b severity axis: Noa picks which goes in the report; 4-way is the default (WORKLOG 2026-10-12).
+# Fig 4a/4b severity axis: DECIDED, 4-way (multiple choice, exact level right), WORKLOG 2026-10-12 (Noa).
+# The other two stay available as `scripts/plot.py --severity binary|recall` for comparison.
 SEVERITY = {"4way": "_accuracy", "binary": "_severe_binary_accuracy", "recall": "_severe_recall"}
 # Goes between the axis name and "(Higher is Better)", e.g. "Severity Accuracy, severe vs not (Higher is Better)".
 SEVERITY_LABEL = {"4way": "", "binary": ", severe vs not", "recall": ", severe recall"}

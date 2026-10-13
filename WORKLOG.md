@@ -786,12 +786,29 @@ still wait for the Fig 4 review and docs/HYPOTHESIS.md.
   - Also: a short follow-up to the first author (Tyler's 2026-10-10 email) asking which metric
     Fig 4a plots.
 
-### Fig 4a severity axis: back to multiple-choice correctness: DECIDED (Noa, 2026-10-12)
-- **Supersedes** "Fig 4a severity axis: severe recall" above. Fig 4a's severity axis stays the
-  normal multiple-choice score (exact letter, 4 options: `latent_severity_accuracy`), as in the first
-  decision. Nothing needed changing: claims, figures and the txt0 write-up already use it.
-- Severe recall, severe-vs-not and the severe false negatives/positives stay in every summary and on
-  the run pages, and `scripts/plot.py --severity recall|binary` still draws those versions.
-- *Alternative considered:* severe recall, the closest match to the paper's plotted values (mean gap
-  0.068 vs 0.172 for 4-way, evidence in the entry above). The open question to the first author
-  about which metric Fig 4a plots still stands.
+## 2026-10-12: Fig 4 severity axis, final (Noa)
+
+### Fig 4a/4b severity score: exact level on the multiple-choice question: DECIDED (Noa), supersedes the "severe recall" entry above
+- **Fig 4 stays on the paper's own definition:** the share of multiple-choice severity questions
+  answered with exactly the right level (none / minor / moderate / severe), `<q>_accuracy`. The
+  figures and results pages say so explicitly.
+- **Why it was reversed (same day):** the paper's metric-definition figure (Fig 3) describes the
+  severity score as a 4-choice accuracy. This was recorded by Session 2's paper-reader in the
+  frozen claims file ("Fig 3 defines Q2 as 4-choice severity accuracy"). A reproduction uses the
+  paper's stated definition.
+- **What it means for the comparison:** under that definition our severity values are well below
+  the paper's plotted ones (mean gap 0.17 over 8 models). The paper's plotted values sit closer to
+  other ways of scoring. "Truly severe caught" (severe recall) fits best, with a mean gap of 0.07.
+  That mismatch is reported as a finding, not removed by switching metrics.
+- **Every way of scoring severity is shown side by side** on each text run's results page, under
+  "Ways to score severity":
+  - exact level right;
+  - severe vs not right;
+  - truly severe caught;
+  - false negatives and false positives;
+  - how close each one comes to the paper.
+- *Alternative considered:* putting "truly severe caught" on the Fig 4a axis, briefly DECIDED
+  earlier today. Rejected: it fits the paper's numbers, but the paper never says it used it, and
+  it ignores false positives.
+- **Open:** ask the first author which scoring Fig 4a plots, given that Fig 3 and the plotted values
+  disagree (a follow-up to Tyler's 2026-10-10 email). `configs/paper/claims.yaml` is unchanged.

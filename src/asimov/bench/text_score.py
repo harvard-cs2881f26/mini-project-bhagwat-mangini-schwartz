@@ -29,9 +29,10 @@ Decisions (WORKLOG 2026-10-12):
   reply whose answers are readable is scored as usual.
 - Whether each `<question>_rationale` is present (non-blank) is recorded per item and as a rate;
   it doesn't affect scoring.
-- Severity (Q2 latent severity, Q4 activated risk) is scored three ways, since the paper's text
-  and figure disagree on which it plots (choice deferred to Session 2): 4-way accuracy,
-  severe-vs-not accuracy (D vs A/B/C) and severe recall (gold D answered D).
+- Severity (Q2 latent severity, Q4 activated risk) is scored several ways: 4-way accuracy (the
+  exact level on the multiple-choice question; Fig 4 uses this, as the paper's Fig 3 defines it,
+  Noa, WORKLOG 2026-10-12), severe-vs-not accuracy (D vs A/B/C), severe recall (gold D answered D)
+  and severe false negatives / false positives. Results pages compare them ("Ways to score severity").
 """
 
 from __future__ import annotations

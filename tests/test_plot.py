@@ -346,3 +346,12 @@ def test_small_multiple_panels_get_at_least_two_percent_ticks():
     assert plot.panel_percent_step((0.84, 0.942)) == 0.05  # 85%, 90%
     assert plot.panel_percent_step((0.854, 0.942)) == 0.02  # only 90% at 5-point steps
     assert plot.panel_percent_step((0.861, 0.899)) == 0.01  # only 88% at 2-point steps
+
+
+def test_fig4_severity_axis_says_multiple_choice_exact_level():
+    for question in ("latent_severity", "activated_risk"):
+        title = plot.READABLE[f"{question}_accuracy"]
+        assert "exact" in title and "multiple-choice" in title
+        assert title.count("\n") == 1  # the two-line style of the other axis titles
+    assert plot.FIG4["fig4a"][2] == "Severity Accuracy"  # paper-style figures keep the paper's wording
+    assert plot.FIG4["fig4b"][2] == "Activated Risk Accuracy"
