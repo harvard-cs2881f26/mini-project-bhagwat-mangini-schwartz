@@ -1,0 +1,8 @@
+# Variant of part2_luna_decide.yaml with one change: prompt decision_short -> decision_short_cumulative
+# (one call per question; each state adds the model's own earlier picks).
+run: part2_luna_decide_cumulative
+benchmark: text
+prompt: decision_short_cumulative
+thinking: min
+models:
+  - {name: gpt-6-luna (Decisions), provider: openai_decisions, model: gpt-6-luna}

@@ -1,0 +1,9 @@
+# Variant of part2_openjev_think512.yaml with one change: prompt decision_short ->
+# decision_short_cumulative. Codiv: run with --workers 1 (60 requests/min).
+run: part2_openjev_think512_cumulative
+benchmark: text
+prompt: decision_short_cumulative
+thinking: min
+models:
+  - {name: OpenJev (think 512), provider: systemone, model: openjev-latest, base_url: "https://api.codiv.ai",
+     key_env: CODIV_API_KEY, params: {think: 512}}
