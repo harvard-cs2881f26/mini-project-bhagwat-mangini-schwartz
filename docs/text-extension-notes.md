@@ -28,9 +28,9 @@ NLI). The systems and their configs are in docs/PLAN.md (Session 3 Status row) a
 | Option | What it is | Cost | Recommendation |
 |---|---|---|---|
 | **A. All questions, every model** | Every system answers all 4 questions on all 319 items; results per question | the runs themselves (~$0.55 hosted + local) | **Do.** Everything else is computed from it |
-| **B. Split by question** | A decision model answers some questions (e.g. Q1-Q2), an LLM the rest (e.g. Q3-Q4); cost = the sum | $0, simulated from saved runs | **Do**, with the split fixed before looking at results, or every split reported as a table |
+| **B. Split by question** | A decision model answers some questions, an LLM the rest. Simulated from saved runs, the LLM call still answers all 4 (one call per item), so cost = decision model + full LLM call: **B can change accuracy, not lower cost.** Lowering cost would need a shorter LLM prompt asking only the LLM's questions (a new prompt variant, new paid runs) | $0 simulated | **Do, as an accuracy table:** all 16 splits (each question to the decision model or the LLM), optionally one headline split named before results (decision model for Q1 only, the best fit above) |
 | C. Decision model's Q1 → LLM for Q2-Q4 | The decision model's injury pick goes into the LLM's prompt | new LLM prompt variant + paid LLM calls | Skip: most of it is covered by cumulative mode inside the decision models |
-| **D. Route by confidence (cascade)** | The decision model answers; items where its top probability is below a threshold go to an LLM; accuracy vs cost as the threshold moves, plus a perfect-router upper bound | $0, simulated from saved runs | **Do**: the most direct accuracy-vs-cost answer |
+| **D. Route by confidence (cascade)** | The decision model answers; items where its top probability is below a threshold go to an LLM; accuracy vs cost as the threshold moves, plus a perfect-router upper bound | $0, simulated from saved runs | **Do, and lead with it**: the option that answers the accuracy-vs-cost question |
 | E. Recast Q3 as yes/no for safety classifiers | "Does the instruction increase injury risk?" for Llama Guard / ShieldGemma etc. | new models; a different task from the paper's | Skip unless the H2 owner wants it |
 
 Related variants already built (one config line each): question modes `independent` vs
@@ -52,7 +52,9 @@ think 0 vs 512, full vs short wording, letters vs option names (WORKLOG 2026-10-
    decision model(s) go first.
 2. D: the item-confidence rule, and whether a single threshold is reported (chosen on held-out
    folds) or only the whole curve.
-3. B: the split to pre-register, or "report all splits".
+3. B: report all 16 splits (recommended), and whether to name one headline split before results
+   (suggested: decision model for Q1 only). Corrected 2026-10-13: an earlier draft said B lowers cost
+   and suggested Q1-Q2; in the free simulation B cannot lower cost (see the table).
 4. The scoring question still OPEN: how Q2-Q4 are read when a model's Q1 injury differs from the key's.
 
 **Guard rail:** choosing a split, threshold or model *because* it scored best on the 319 items is
