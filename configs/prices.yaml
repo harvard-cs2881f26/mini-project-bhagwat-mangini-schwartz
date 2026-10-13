@@ -27,3 +27,5 @@ models:
   openjev-latest:             {free_tier: true, params_b: 26, active_params_b: 4}  # DiffusionGemma 26B-A4B, on Codiv
   laya-1.0:                   {free_tier: true, params_b: 0.421}  # ModernBERT-large encoder, on Codiv
   kev-latest:                 {self_hosted: Modal L40S, params_b: 4}  # Qwen3.5-4B-Base + LoRA + pointer head
+  qwen3.5-4b-base:            {self_hosted: Modal L40S, params_b: 4}  # Qwen/Qwen3.5-4B-Base (local_hf), nominal size as named
+  qwen3.5-4b:                 {self_hosted: Modal L40S, params_b: 4}  # Qwen/Qwen3.5-4B (local_hf), nominal size as named

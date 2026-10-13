@@ -1,0 +1,27 @@
+# EXPLORATORY: framed after the Part 2 results were seen; only contrasts (1) and (2) were pre-registered
+contrast,a,b,kind,metric,n,diff,diff_lo,diff_hi,a_only,b_only,mcnemar_p,holm_p
+1,Kev-4B short,Qwen-Base probs zero-shot,pre-registered,mean,319,0.010188,-0.016458,0.037618,,,,
+1,Kev-4B short,Qwen-Base probs zero-shot,pre-registered,latent_risk,319,-0.253918,-0.304075,-0.206897,3,84,0.0,0.0
+1,Kev-4B short,Qwen-Base probs zero-shot,pre-registered,latent_severity,319,-0.025078,-0.0721,0.025078,27,35,0.374152,0.748303
+1,Kev-4B short,Qwen-Base probs zero-shot,pre-registered,effect,319,0.225705,0.172414,0.282132,84,12,0.0,0.0
+1,Kev-4B short,Qwen-Base probs zero-shot,pre-registered,activated_risk,319,0.094044,0.047022,0.141066,46,16,0.000176,0.00194
+2,Qwen probs,Qwen generate,pre-registered,mean,319,-0.175549,-0.213166,-0.138715,,,,
+2,Qwen probs,Qwen generate,pre-registered,latent_risk,319,-0.200627,-0.250784,-0.15047,10,74,0.0,0.0
+2,Qwen probs,Qwen generate,pre-registered,latent_severity,319,-0.22884,-0.294671,-0.166144,26,99,0.0,0.0
+2,Qwen probs,Qwen generate,pre-registered,effect,319,-0.137931,-0.222571,-0.056426,73,117,0.001738,0.013903
+2,Qwen probs,Qwen generate,pre-registered,activated_risk,319,-0.134796,-0.203762,-0.068966,43,86,0.000192,0.00194
+3,Qwen generate,Kev-4B short,exploratory,mean,319,0.184169,0.148903,0.220219,,,,
+3,Qwen generate,Kev-4B short,exploratory,latent_risk,319,0.341693,0.288401,0.398119,113,4,0.0,0.0
+3,Qwen generate,Kev-4B short,exploratory,latent_severity,319,0.23511,0.175549,0.297806,95,20,0.0,0.0
+3,Qwen generate,Kev-4B short,exploratory,effect,319,0.009404,-0.065831,0.087774,84,81,0.876331,0.876331
+3,Qwen generate,Kev-4B short,exploratory,activated_risk,319,0.15047,0.090909,0.213166,77,29,3e-06,4.1e-05
+4,Qwen generate,Jev,exploratory,mean,319,0.060345,0.026646,0.096395,,,,
+4,Qwen generate,Jev,exploratory,latent_risk,319,-0.050157,-0.100313,0.003135,27,43,0.072238,0.288952
+4,Qwen generate,Jev,exploratory,latent_severity,319,0.090909,0.028213,0.153605,73,44,0.009341,0.065385
+4,Qwen generate,Jev,exploratory,effect,319,0.100313,0.015674,0.184953,112,80,0.025016,0.150097
+4,Qwen generate,Jev,exploratory,activated_risk,319,0.100313,0.047022,0.159875,60,28,0.000846,0.007618
+5,Kev-4B full,Qwen-Base probs one-shot,exploratory,mean,319,0.000784,-0.026646,0.028213,,,,
+5,Kev-4B full,Qwen-Base probs one-shot,exploratory,latent_risk,319,-0.22884,-0.282132,-0.178683,7,80,0.0,0.0
+5,Kev-4B full,Qwen-Base probs one-shot,exploratory,latent_severity,319,0.056426,0.003135,0.109718,49,31,0.056664,0.283322
+5,Kev-4B full,Qwen-Base probs one-shot,exploratory,effect,319,0.131661,0.07837,0.184953,60,18,2e-06,2.6e-05
+5,Kev-4B full,Qwen-Base probs one-shot,exploratory,activated_risk,319,0.043887,-0.00627,0.090909,39,25,0.103422,0.310266

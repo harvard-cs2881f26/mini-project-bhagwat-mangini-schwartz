@@ -30,6 +30,7 @@ class ModelResult:
     usage: dict[str, dict] = field(default_factory=dict)  # item id -> the reply's token usage (incl. Gemini thinking_tokens)
     probs: dict[str, dict] = field(default_factory=dict)  # item id -> question -> letter -> probability (decision models)
     item_latency: dict[str, float] = field(default_factory=dict)  # item id -> latency_s, for replies that have one
+    item_compute_s: dict[str, float] = field(default_factory=dict)  # item id -> raw.remote.compute_s (Modal rows only)
 
     @property
     def name(self) -> str:
@@ -50,7 +51,7 @@ def load_model(mdir: Path) -> ModelResult:
     full = json.loads((mdir / "summary.json").read_text())
     per_item = full.pop("per_item", {}) or {}
     key = full.get("key")
-    latencies, served, replies, usage, probs, item_latency = [], set(), {}, {}, {}, {}
+    latencies, served, replies, usage, probs, item_latency, item_compute_s = [], set(), {}, {}, {}, {}, {}
     path = mdir / "responses.jsonl"
     for line in path.read_text().splitlines() if path.exists() else []:
         row = json.loads(line)
@@ -64,7 +65,12 @@ def load_model(mdir: Path) -> ModelResult:
         usage[row["id"]] = row.get("usage") or {}
         if row.get("probs"):
             probs[row["id"]] = row["probs"]
-    return ModelResult(full, per_item, tuple(latencies), tuple(sorted(served - {""})), replies, usage, probs, item_latency)
+        raw = row.get("raw")
+        remote = raw.get("remote") if isinstance(raw, dict) else None
+        if remote and remote.get("compute_s") is not None:  # Modal GPU time, without the queue (WORKLOG "Modal latency")
+            item_compute_s[row["id"]] = float(remote["compute_s"])
+    served_models = tuple(sorted(served - {""}))
+    return ModelResult(full, per_item, tuple(latencies), served_models, replies, usage, probs, item_latency, item_compute_s)
 
 
 def model_order(config: dict | None, results: list[ModelResult]) -> list[ModelResult]:

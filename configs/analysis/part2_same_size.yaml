@@ -1,0 +1,35 @@
+# EXPLORATORY: same-size comparison, ~4B Qwen-family systems against TypeSafe's decision models (text benchmark).
+# Framed 2026-10-14 (Noa) after the Part 2 results were seen. Contrasts (1) and (2) are the pre-registered pairs in
+# WORKLOG "Qwen pairing for Part 2: DECIDED"; (3)-(5) are exploratory. Rows and contrasts were fixed here before the
+# contrast results were computed. Read by scripts/same_size.py, checked by asimov.same_size.SameSizeConfig (unknown
+# keys fail). Outputs: results/part2_same_size/, figures/part2_same_size/. WORKLOG 2026-10-14, "Same-size comparison".
+# A configured run that isn't under results/ stops the script with an error.
+label: "EXPLORATORY: framed after the Part 2 results were seen; only contrasts (1) and (2) were pre-registered"
+rows:
+  - {run: part2_kev, model: kev-latest, label: "Kev-4B short", group: "Kev-4B (decision model)"}
+  - {run: part2_kev_cumulative, model: kev-latest, label: "Kev-4B short cumulative", group: "Kev-4B (decision model)"}
+  - {run: part2_kev_full, model: kev-latest, label: "Kev-4B full", group: "Kev-4B (decision model)"}
+  - {run: part2_kev_letters, model: kev-latest, label: "Kev-4B letters", group: "Kev-4B (decision model)"}
+  - {run: part2_kev_full_cumulative, model: kev-latest, label: "Kev-4B full cumulative", group: "Kev-4B (decision model)"}
+  - {run: part2_qwen_base_logprob, model: qwen3.5-4b-base, label: "Qwen-Base probs zero-shot",
+     group: "Qwen3.5-4B-Base option probabilities"}
+  - {run: part2_qwen_base_logprob_oneshot, model: qwen3.5-4b-base, label: "Qwen-Base probs one-shot",
+     group: "Qwen3.5-4B-Base option probabilities"}
+  - {run: part2_qwen_logprob, model: qwen3.5-4b, label: "Qwen probs", group: "Qwen3.5-4B option probabilities"}
+  - {run: part2_qwen_gen_2048, model: qwen3.5-4b, label: "Qwen generate", group: "Qwen3.5-4B generate",
+     flag: "8.2% parse failures, above Noa's 2% line"}
+  # part2_qwen_gen (txt27, 1024-token cap) is left out: superseded by part2_qwen_gen_2048 (txt33).
+  # The few-shot generate row goes here once run `part2_qwen_gen_fewshot` (in progress on another branch) is on main:
+  # - {run: part2_qwen_gen_fewshot, model: qwen3.5-4b, label: "Qwen generate few-shot", group: "Qwen3.5-4B generate"}
+  - {run: part2_jev, model: jev-latest, label: "Jev", group: "Reference: hosted decision models"}
+  - {run: part2_luna_decide, model: gpt-6-luna, label: "luna Decisions", group: "Reference: hosted decision models"}
+contrasts:  # a minus b, paired on the same items; Holm runs over every question test below together
+  - {a: "Kev-4B short", b: "Qwen-Base probs zero-shot", kind: pre-registered,
+     changes: "the decision training (same base model, short wording, option probabilities)"}
+  - {a: "Qwen probs", b: "Qwen generate", kind: pre-registered,
+     changes: "how the answer is produced (same weights: option probabilities vs a generated reply to the verbatim prompt)"}
+  - {a: "Qwen generate", b: "Kev-4B short", kind: exploratory,
+     changes: "post-trained model generating vs the decision-trained model on the same-size base"}
+  - {a: "Qwen generate", b: "Jev", kind: exploratory, changes: "~4B model generating vs TypeSafe's hosted decision model"}
+  - {a: "Kev-4B full", b: "Qwen-Base probs one-shot", kind: exploratory,
+     changes: "the decision training, against the main Qwen-Base row (one-shot); the wordings also differ"}
