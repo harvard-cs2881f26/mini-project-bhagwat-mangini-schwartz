@@ -16,14 +16,15 @@ from asimov.claims import Claims
 from asimov.collect.build import build
 from asimov.collect.checks import ACTION_QUESTIONS, LATENT_QUESTIONS
 from asimov.collect.load import ModelResult, load_model, load_results
-from asimov.collect.pages import FIGURES, GENERATED, FailureCounts, failure_counts
-from asimov.collect.run_ids import PREFIXES, assign_ids, describe, next_number, parse_ids
+from asimov.collect.pages import FIGURE_SUBHEADINGS, FIGURE_VERSION_NOTES, FIGURES, GENERATED, FailureCounts, failure_counts
+from asimov.collect.run_ids import assign_ids, describe
 from asimov.collect.tables import CSV_DIGITS, to_csv
+from asimov.run_ids import PREFIXES, next_number, parse_ids
 
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT / "scripts"))
 import collect  # noqa: E402  # pyright: ignore[reportMissingImports]
-from results_tree import make_results, text_run  # noqa: E402  # pyright: ignore[reportMissingImports]
+from results_tree import make_results, text_run, write_model  # noqa: E402  # pyright: ignore[reportMissingImports]
 
 
 @pytest.fixture
@@ -506,3 +507,80 @@ def test_summary_links_the_headline_runs_figures(results, claims):
     assert "![fig5a](../figures/vid0/fig5a_comparison.png)" in summary
     assert "![fig5b](../figures/vid0/fig5b_comparison.png)" in summary
     assert "](../figures/fig" not in summary  # no old top-level figure paths
+
+
+# ---- run folders: results/<id>_<run>/ -----------------------------------------------------------
+
+
+def id_folder_results(tmp_path: Path) -> Path:
+    """Runs in results/<id>_<run>/ folders, a comparison and headline runs, as the runner now writes them."""
+    res = tmp_path / "results"
+    text_run(res, "repro_a", [[True, True, False, True]] * 4, folder="txt0_repro_a")
+    text_run(res, "repro_b", [[False, False, False, True]] * 4, folder="txt1_repro_b")
+    video = {"v0": {"case": "error", "truth_s": 2.0, "pred_s": 2.0, "error_s": 0.0, "within_0_5": True, "risk_ok": True}}
+    write_model(res / "vid0_vid_a", "GPT-5", "gpt-5", "openai", "video", video, {"risk_accuracy": 1.0}, run="vid_a")
+    (res / "run_ids.yaml").write_text(yaml.safe_dump({"repro_a": "txt0", "repro_b": "txt1", "vid_a": "vid0"}))
+    (res / "comparisons.yaml").write_text(yaml.safe_dump({"comparisons": [{"name": "a_vs_b", "a": "repro_a", "b": "repro_b"}]}))
+    figures = {"fig4": {"run": "repro_a", "note": ""}, "fig5": {"run": "vid_a", "note": ""}}
+    (res / "headline.yaml").write_text(yaml.safe_dump({"figures": figures}))
+    return res
+
+
+def test_run_name_comes_from_the_config_not_the_folder(tmp_path):
+    res = tmp_path / "results"
+    text_run(res, "logical_name", [[True] * 4] * 4, folder="txt9_something_else")
+    (run,) = load_results(res)
+    assert (run.name, run.folder) == ("logical_name", "txt9_something_else")
+    files = build([run], empty_claims(), {}, {}, [], {"logical_name": "txt9"})
+    assert "txt9_something_else/README.md" in files and "# Run `txt9`: `logical_name`" in files["txt9_something_else/README.md"]
+
+
+def test_run_name_falls_back_to_the_summaries(tmp_path):
+    res = tmp_path / "results"
+    text_run(res, "from_summaries", [[True] * 4] * 4, folder="txt0_from_summaries")
+    (res / "txt0_from_summaries" / "config.yaml").unlink()
+    assert [r.name for r in load_results(res)] == ["from_summaries"]
+
+
+def test_page_links_point_to_existing_files(tmp_path):
+    res = id_folder_results(tmp_path)
+    args = ["--results", str(res), "--claims", str(write_claims(tmp_path))]
+    assert collect.main(args) == 0 and collect.main([*args, "--check"]) == 0
+    files = build(load_results(res), empty_claims(), {}, load_yaml_file(res / "headline.yaml"), load_comparisons(res))
+    assert {"txt0_repro_a/README.md", "txt1_repro_b/README.md", "vid0_vid_a/README.md", "compare/a_vs_b.md"} <= set(files)
+    checked = 0
+    for rel in (p for p in files if p.endswith(".md")):
+        page = res / rel
+        for link in re.findall(r"\]\(([^)#\s]+)\)", page.read_text()):
+            target = (page.parent / link).resolve()
+            if link.startswith("http") or not target.is_relative_to(res.resolve()):
+                continue  # figures/ and WORKLOG.md sit outside this temporary results/
+            assert target.exists(), f"{rel}: broken link {link}"
+            checked += 1
+    assert checked > 10
+    summary = (res / "README.md").read_text()
+    assert "(txt0_repro_a/README.md)" in summary and "(vid0_vid_a/README.md)" in summary
+
+
+def load_yaml_file(path: Path) -> dict:
+    return yaml.safe_load(path.read_text())
+
+
+def load_comparisons(res: Path) -> list[dict]:
+    return load_yaml_file(res / "comparisons.yaml")["comparisons"]
+
+
+def test_each_figure_subheading_has_its_plain_language_note(results, claims):
+    page = run_page(results, claims)
+    for version, heading in FIGURE_SUBHEADINGS.items():
+        note = FIGURE_VERSION_NOTES[version]
+        assert f"### {heading}\n\n{note}\n\n![" in page
+    assert page.index(FIGURE_VERSION_NOTES["comparison"]) < page.index(FIGURE_VERSION_NOTES["paper"])
+
+
+def test_mock_runs_get_no_id_and_keep_a_plain_folder(tmp_path):
+    from asimov.run_ids import run_dir
+
+    assert run_dir(tmp_path, "smoke_mock", "video", ["mock"]) == tmp_path / "smoke_mock"
+    assert not (tmp_path / "run_ids.yaml").exists()
+    assert run_dir(tmp_path, "real_run", "video", ["openai", "mock"]).name == "vid0_real_run"

@@ -1,29 +1,20 @@
-"""Short, stable run IDs (txt0, vid0, ...) and a generated one-sentence description of each run.
+"""Run IDs for collect (by scoring order) and a generated one-sentence description of each run.
 
-Pure: the I/O is in load.py and collect.py. results/run_ids.yaml maps run name -> id. An ID, once given, is never
-changed or reused, even after its run is deleted, so a run ID quoted in a slide or a note always means the same run.
+Pure: the I/O is in load.py and collect.py. The ID facts (prefixes, numbering, run_ids.yaml) are in asimov.run_ids.
+results/run_ids.yaml maps run name -> id; IDs are never changed or reused.
 Descriptions are never hand-written: `describe` builds one sentence from the run's own settings. It never refers
 to other runs or to the run's position, so it stays true when runs are added or deleted. All wording is in the tables below.
 """
 
 from __future__ import annotations
 
-import re
 from collections.abc import Iterable
 from dataclasses import dataclass
 from datetime import datetime, timezone
 
-import yaml
-
 from asimov.collect.load import RunData
+from asimov.run_ids import next_number, prefix
 
-PREFIXES = {"text": "txt", "video": "vid", "image": "img", "image_rationale": "imgr"}  # benchmark -> ID prefix
-RUN_IDS_FILE = "run_ids.yaml"
-RUN_IDS_HEADER = """\
-# run name -> run ID. Maintained by scripts/collect.py, which adds every new run: don't edit by hand.
-# An ID is the benchmark prefix plus a number, in scoring order; it is never changed or reused, even after a run is deleted.
-"""
-ID_PATTERN = re.compile(r"^([a-z]+)(\d+)$")
 NEVER_SCORED = datetime.max.replace(tzinfo=timezone.utc)  # a run without scored_at sorts last
 
 # ---- wording: change it here -----------------------------------------------------------------
@@ -64,18 +55,6 @@ def first_scored(run: RunData) -> datetime:
     return min(stamps, default=NEVER_SCORED)
 
 
-def prefix(benchmark: str) -> str:
-    if benchmark not in PREFIXES:
-        raise ValueError(f"no run ID prefix for benchmark {benchmark!r}; add it to PREFIXES in asimov/collect/run_ids.py")
-    return PREFIXES[benchmark]
-
-
-def next_number(ids: dict[str, str], run_prefix: str) -> int:
-    """One more than the highest number any ID (past or present) has under this exact prefix."""
-    used = [int(m[2]) for v in ids.values() if (m := ID_PATTERN.match(v)) and m[1] == run_prefix]
-    return max(used, default=-1) + 1
-
-
 def assign_ids(existing: dict[str, str], runs: Iterable[RunData]) -> dict[str, str]:
     """Every existing entry unchanged; each new run gets the next free number for its prefix, by first scored_at, then name."""
     ids = dict(existing)
@@ -87,20 +66,6 @@ def assign_ids(existing: dict[str, str], runs: Iterable[RunData]) -> dict[str, s
 
 def missing_ids(existing: dict[str, str], runs: Iterable[RunData]) -> list[str]:
     return sorted(r.name for r in runs if r.name not in existing)
-
-
-def parse_ids(raw: dict | None) -> dict[str, str]:
-    """results/run_ids.yaml as loaded; fails on any entry that isn't `run name: id` (e.g. the old {id, description})."""
-    ids = {}
-    for name, value in (raw or {}).items():
-        if not isinstance(value, str) or not ID_PATTERN.match(value):
-            raise ValueError(f"results/{RUN_IDS_FILE}: entry {name!r} must be run name -> id (e.g. txt0), got {value!r}")
-        ids[str(name)] = value
-    return ids
-
-
-def run_ids_yaml(ids: dict[str, str]) -> str:
-    return RUN_IDS_HEADER + yaml.safe_dump(ids, sort_keys=False)
 
 
 # ---- descriptions ----------------------------------------------------------------------------

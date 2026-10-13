@@ -2,7 +2,7 @@
 
 Generated numbers and mechanical checks (is the paper value inside our CI, gaps with paired CIs), shown on
 paper_check.md and in each run page's "Comparison with the paper" section. Whether the reproduction holds is the
-owner's call, made in the run's hand-written write-up (results/<run>/writeup.md, CLAUDE.md).
+owner's call, made in the run's hand-written write-up (results/<id>_<run>/writeup.md, CLAUDE.md).
 """
 
 from __future__ import annotations

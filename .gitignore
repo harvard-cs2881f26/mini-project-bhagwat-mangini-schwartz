@@ -5,7 +5,7 @@
 data/*
 !data/README.md
 
-# Model outputs ARE committed (results/<run>/responses.jsonl, summary.json, figures) so the
+# Model outputs ARE committed (results/<id>_<run>/responses.jsonl, summary.json, figures) so the
 # team shares one set of responses and nobody pays to re-run them. Only local review images
 # derived from the dataset stay out.
 results/box_check/
@@ -17,7 +17,7 @@ __pycache__/
 .pytest_cache/
 .DS_Store
 
-# free mock runs are regenerated on demand
+# free mock runs are regenerated on demand (mock-only runs keep plain results/<run>/ folders, no run ID)
 results/smoke_mock/
 results/smoke_mock_text/
 

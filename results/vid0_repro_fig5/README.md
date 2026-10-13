@@ -6,19 +6,23 @@ Video benchmark, using the video_v2 prompt, with thinking set to min (the lowest
 
 ## Write-up
 
-No write-up yet: add results/repro_fig5/writeup.md, then rerun `python scripts/collect.py` (this page includes it, so `collect.py --check` fails until you do).
+No write-up yet: add results/vid0_repro_fig5/writeup.md, then rerun `python scripts/collect.py` (this page includes it, so `collect.py --check` fails until you do).
 
 ## Figures
 
-Drawn by `scripts/plot.py` into `figures/vid0/` (PNG and PDF). Comparison: ours with 95% CIs, the paper's values and majority baselines; paper-style: the paper's look, our values only. Fig 5a pairs this run with the headline text run `txt0` [`repro_fig4`](../repro_fig4/README.md) ([`headline.yaml`](../headline.yaml)).
+Drawn by `scripts/plot.py` into `figures/vid0/` (PNG and PDF). Comparison: ours with 95% CIs, the paper's values and majority baselines; paper-style: the paper's look, our values only. Fig 5a pairs this run with the headline text run `txt0` [`repro_fig4`](../txt0_repro_fig4/README.md) ([`headline.yaml`](../headline.yaml)).
 
 ### Comparison versions
+
+These put our results and the paper's on the same chart. Filled marks are our run, with bars for the 95% range the true score likely falls in. Hollow marks (diamonds on the bar chart) are the paper's reported values. Each figure has a 'How to read this' box explaining its axes.
 
 ![fig5a, comparison](../../figures/vid0/fig5a_comparison.png)
 
 ![fig5b, comparison](../../figures/vid0/fig5b_comparison.png)
 
 ### Paper-style versions
+
+These redraw the paper's own figures with our results: same chart type, axes, wording, colors and layout as the paper, with our values in place of theirs. They have no error bars or paper values, so they can sit next to the paper's figure on a slide for a side-by-side look. To see how our numbers differ from the paper's, use the comparison versions above.
 
 ![fig5a, paper](../../figures/vid0/fig5a_paper.png)
 

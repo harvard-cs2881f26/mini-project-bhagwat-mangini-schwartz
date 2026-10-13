@@ -1,6 +1,7 @@
 """Everything collect.py writes, as {path under results/: text}. Pure: same runs in, same bytes out.
 
-Never results/<run>/writeup.md: that is hand-written, and only read (into the run page).
+Run pages go in each run's own folder (results/<id>_<run>/). Never its writeup.md: that is hand-written, and only
+read (into the run page).
 """
 
 from __future__ import annotations
@@ -57,11 +58,10 @@ def build(
         "README.md": pages.summary_page(runs, index, headline, claims, labels),
     }
     for run in runs:
-        has_claims = any(c.benchmark == run.benchmark for c in claims.claims)
-        files[f"{run.name}/README.md"] = pages.run_page(run, index, claims, labels, runs, headline)
-        if has_claims:
-            files[f"{run.name}/paper_check.md"] = pages.paper_check_page(run, claims)
-            files[f"{run.name}/table.csv"] = to_csv(pages.check_csv_rows(run, claims), ())
+        files[f"{run.folder}/README.md"] = pages.run_page(run, index, claims, labels, runs, headline)
+        if pages.has_paper_check(run, claims):
+            files[f"{run.folder}/paper_check.md"] = pages.paper_check_page(run, claims)
+            files[f"{run.folder}/table.csv"] = to_csv(pages.check_csv_rows(run, claims), ())
     by_name = {r.name: r for r in runs}
     for comp in comparisons:
         a, b = by_name.get(comp["a"]), by_name.get(comp["b"])

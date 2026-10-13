@@ -1,6 +1,6 @@
 """Every committed run records how it was made (CLAUDE.md: results only come from scripts/run.py).
 
-For each results/<run>/ with a summary.json: the config copy exists and validates, every model's
+For each run folder (results/<id>_<run>/) with a summary.json: the config copy exists and validates, every model's
 summary.json has the provenance fields, and the saved replies behind it carry the fields we rely
 on. Reads only results/, so it runs on CI without the dataset. Results made with an older runner,
 or outside scripts/run.py, fail here: rescore them with `scripts/run.py <config> --no-calls` (free).
@@ -13,6 +13,7 @@ import pytest
 import yaml
 
 from asimov.config import RunConfig
+from asimov.run_ids import folder_name, read_ids
 
 RESULTS = Path(__file__).resolve().parents[1] / "results"
 SUMMARY_FIELDS = {
@@ -44,7 +45,13 @@ REPLY_FIELDS = {
     "time",
     "raw",
 }
+IDS = read_ids(RESULTS)
 RUNS = sorted(p for p in RESULTS.glob("*") if p.is_dir() and any(p.glob("*/summary.json")))
+
+
+def expected_folder(run_name: str) -> str:
+    """results/<id>_<run>/; a run with no ID yet (a local mock run from before IDs) is still in results/<run>/."""
+    return folder_name(IDS[run_name], run_name) if run_name in IDS else run_name
 
 
 def model_summaries(run: Path) -> list[tuple[Path, dict]]:
@@ -52,7 +59,7 @@ def model_summaries(run: Path) -> list[tuple[Path, dict]]:
 
 
 def test_there_is_something_to_check():
-    assert RUNS, "no results/<run>/ folders found"
+    assert RUNS, "no run folders found under results/"
 
 
 @pytest.mark.parametrize("run", RUNS, ids=lambda p: p.name)
@@ -61,7 +68,8 @@ def test_run_has_a_valid_config_copy(run):
     assert copy.exists(), f"{copy} missing: results must come from scripts/run.py"
     cfg = yaml.safe_load(copy.read_text())
     RunConfig.model_validate(cfg)
-    assert cfg["run"] == run.name, f"{copy} says run: {cfg['run']!r}, but the folder is {run.name!r}"
+    want = expected_folder(cfg["run"])
+    assert run.name == want, f"{copy} says run: {cfg['run']!r}, so the folder should be {want!r}, not {run.name!r}"
 
 
 @pytest.mark.parametrize("run", RUNS, ids=lambda p: p.name)
@@ -69,7 +77,7 @@ def test_summaries_record_how_they_were_made(run):
     for path, s in model_summaries(run):
         missing = SUMMARY_FIELDS - set(s)
         assert not missing, f"{path} lacks {sorted(missing)}: rescore with scripts/run.py --no-calls"
-        assert s["run"] == run.name and len(s["config_sha256"]) == 64
+        assert expected_folder(s["run"]) == run.name and len(s["config_sha256"]) == 64
         if s["n"]:
             missing = SCORED_FIELDS - set(s)
             assert not missing, f"{path} lacks {sorted(missing)}"

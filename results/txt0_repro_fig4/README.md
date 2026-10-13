@@ -38,9 +38,11 @@ The large models reproduce the paper on risk-type recognition, but our severity 
 
 ## Figures
 
-Drawn by `scripts/plot.py` into `figures/txt0/` (PNG and PDF). Comparison: ours with 95% CIs, the paper's values and majority baselines; paper-style: the paper's look, our values only. Fig 5a pairs this run with the headline video run `vid0` [`repro_fig5`](../repro_fig5/README.md) ([`headline.yaml`](../headline.yaml)).
+Drawn by `scripts/plot.py` into `figures/txt0/` (PNG and PDF). Comparison: ours with 95% CIs, the paper's values and majority baselines; paper-style: the paper's look, our values only. Fig 5a pairs this run with the headline video run `vid0` [`repro_fig5`](../vid0_repro_fig5/README.md) ([`headline.yaml`](../headline.yaml)).
 
 ### Comparison versions
+
+These put our results and the paper's on the same chart. Filled marks are our run, with bars for the 95% range the true score likely falls in. Hollow marks (diamonds on the bar chart) are the paper's reported values. Each figure has a 'How to read this' box explaining its axes.
 
 ![fig4a, comparison](../../figures/txt0/fig4a_comparison.png)
 
@@ -49,6 +51,8 @@ Drawn by `scripts/plot.py` into `figures/txt0/` (PNG and PDF). Comparison: ours 
 ![fig5a, comparison](../../figures/txt0/fig5a_comparison.png)
 
 ### Paper-style versions
+
+These redraw the paper's own figures with our results: same chart type, axes, wording, colors and layout as the paper, with our values in place of theirs. They have no error bars or paper values, so they can sit next to the paper's figure on a slide for a side-by-side look. To see how our numbers differ from the paper's, use the comparison versions above.
 
 ![fig4a, paper](../../figures/txt0/fig4a_paper.png)
 

@@ -30,6 +30,7 @@ import collect  # noqa: E402  (scripts/collect.py)
 import plot  # noqa: E402  (scripts/plot.py)
 from asimov.bench import get_benchmark  # noqa: E402
 from asimov.collect.load import SKIP_PROVIDERS  # noqa: E402
+from asimov.run_ids import run_dir  # noqa: E402
 from asimov.runner import run  # noqa: E402
 
 
@@ -61,7 +62,7 @@ def main() -> None:
             continue
         cells = " ".join(f"{fmt(r[key], pct):>{len(label) + 1}s}" for label, key, pct in cols)
         print(f"{r['name']:28s} {r['n']:4d} {cells} {r['errors']:6d}")
-    print(f"\nSaved under results/{cfg['run']}/")
+    print(f"\nSaved under {run_dir(ROOT / 'results', cfg['run'], cfg['benchmark']).relative_to(ROOT)}/")
     if not args.no_collect and any(m["provider"] not in SKIP_PROVIDERS for m in cfg["models"]):
         collect.main([])  # results pages stay in step with the replies (docs/PLAN.md §11)
         plot.main([])  # and so do the figures the run pages link

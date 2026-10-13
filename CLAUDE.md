@@ -67,7 +67,7 @@ API keys go in `.env` (copy `.env.example`).
 
 1. Write a config in `configs/` (fields are checked by `asimov/config.py`; unknown keys fail):
    ```yaml
-   run: repro_fig6          # results/<run>/; any new setting needs a new run name
+   run: repro_fig6          # folder results/<id>_<run>/, e.g. img0_repro_fig6; any new setting needs a new run name
    benchmark: image         # a registered benchmark: text, video, ... (see "Adding a benchmark")
    prompt: <prompt name>
    thinking: min            # min | default
@@ -78,14 +78,17 @@ API keys go in `.env` (copy `.env.example`).
 2. `python scripts/run.py <config> --limit 5` first: it prints each reply. Check them and work out
    the cost before any full run (ask before spending, per the hard rules).
 3. Full run: the same command without `--limit`. Run it once more to retry errors; cached replies
-   are free, and failed calls are listed in `results/<run>/<model>/errors.jsonl`.
+   are free, and failed calls are listed in `results/<id>_<run>/<model>/errors.jsonl`.
 4. After a scoring change: `python scripts/run.py <config> --no-calls` rescores the saved replies
    (free, no keys needed).
-5. Commit `results/<run>/`: `config.yaml`, each model's `responses.jsonl` and `summary.json`.
+5. Commit `results/<id>_<run>/`: `config.yaml`, each model's `responses.jsonl` and `summary.json`.
    `tests/test_results_schema.py` checks them on CI.
 
 Reusing a run name with a different config stops the run (`ConfigChanged`); comment-only edits
-are fine. `--models <name or id>` runs a subset of the config's models.
+are fine. A run's folder is `results/<id>_<run>/` (e.g. `results/txt0_repro_fig4/`): on its first run
+a new run name gets the next ID for its benchmark in `results/run_ids.yaml` (`asimov/run_ids.py`),
+and a legacy `results/<run>/` folder is renamed. Everywhere else (configs, summaries, the cache) the
+run name stays the plain one. `--models <name or id>` runs a subset of the config's models.
 
 ## Layout
 
@@ -104,6 +107,7 @@ src/asimov/bench/<bench>.py   build_request + BENCHMARK; scorer in <bench>_score
 src/asimov/models/            one client per provider + mock; get_client(provider, model)
 src/asimov/models/reply_info.py  how a reply ended (complete/truncated/refused), cached tokens
 src/asimov/runner.py          benchmark-agnostic: cache, calls, errors, scoring via the registry
+src/asimov/run_ids.py         run IDs (results/run_ids.yaml) and each run's folder, results/<id>_<run>/
 src/asimov/config.py          run config schema (pydantic; unknown keys fail)
 configs/*.yaml                run, benchmark, prompt, thinking, log_reasoning (optional), models
 tests/                        unit tests for our code (not model evals)
@@ -167,6 +171,16 @@ says so in its docstring.
   failures, cross `finish` with the per-item parse result rather than adding the rates.
 - **Never change a scoring rule silently.** Log it in WORKLOG with the alternative, then rescore
   saved replies for free (`scripts/run.py <config> --no-calls`, added in PR #4), and say what changed.
+
+## Write-ups
+
+- Each run's report includes `results/<run folder>/writeup.md` (e.g. `results/txt0_repro_fig4/writeup.md`),
+  which is hand-maintained: `collect.py` never writes it. After editing it, rerun
+  `python scripts/collect.py`.
+- Structure: `### Summary` (verdict first), `### Comparison with the paper` (claim by claim, with our
+  numbers, CIs and the paper's values), `### Key takeaways` (numbered), `### Caveats`.
+- No authorship or "drafted by" note in the write-up. Check every number against the run's pages
+  before writing it.
 
 ## Style
 

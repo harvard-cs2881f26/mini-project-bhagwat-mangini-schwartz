@@ -1,7 +1,7 @@
 """Markdown pages under results/: pure functions from loaded runs to text.
 
 Pages hold generated numbers, mechanical checks against the paper and links to the figures drawn by
-scripts/plot.py, plus each run's hand-written write-up (results/<run>/writeup.md), included verbatim.
+scripts/plot.py, plus each run's hand-written write-up (results/<id>_<run>/writeup.md), included verbatim.
 The generated parts never interpret the results: that is the write-up's job, written by the owner
 (CLAUDE.md). No prompt or scenario text: that's dataset content we don't commit.
 """
@@ -46,6 +46,20 @@ PAIRED_FIGURE = "fig5a"
 PARTNER_FIGURE = {"text": "fig5", "video": "fig4"}  # benchmark -> the headline.yaml figure holding its Fig 5a partner
 FIGURE_VERSIONS = ("comparison", "paper")  # order on the pages: comparison first
 FIGURES_DIR = "figures"  # at the repo root, next to results/
+FIGURE_SUBHEADINGS = {"comparison": "Comparison versions", "paper": "Paper-style versions"}
+FIGURE_VERSION_NOTES = {  # the plain-language paragraph under each subheading of a run page's Figures section
+    "comparison": (
+        "These put our results and the paper's on the same chart. Filled marks are our run, with bars for the 95% "
+        "range the true score likely falls in. Hollow marks (diamonds on the bar chart) are the paper's reported "
+        "values. Each figure has a 'How to read this' box explaining its axes."
+    ),
+    "paper": (
+        "These redraw the paper's own figures with our results: same chart type, axes, wording, colors and layout "
+        "as the paper, with our values in place of theirs. They have no error bars or paper values, so they can "
+        "sit next to the paper's figure on a slide for a side-by-side look. To see how our numbers differ from the "
+        "paper's, use the comparison versions above."
+    ),
+}
 
 
 def fig5a_partner(run: RunData, runs: list[RunData], headline: dict) -> RunData | None:
@@ -230,7 +244,7 @@ WRITEUP_NOTE = (
 def writeup_section(run: RunData) -> str:
     if run.writeup is None or not run.writeup.strip():
         body = (
-            f"No write-up yet: add results/{run.name}/writeup.md, then rerun `python scripts/collect.py` "
+            f"No write-up yet: add results/{run.folder}/writeup.md, then rerun `python scripts/collect.py` "
             "(this page includes it, so `collect.py --check` fails until you do)."
         )
     else:
@@ -251,17 +265,22 @@ def figures_section(run: RunData, runs: list[RunData], headline: dict, labels: d
     if partner is not None:
         intro += (
             f" Fig 5a pairs this run with the headline {partner.benchmark} run `{labels[partner.name].id}` "
-            f"[`{partner.name}`](../{partner.name}/README.md) ([`headline.yaml`](../headline.yaml))."
+            f"[`{partner.name}`](../{partner.folder}/README.md) ([`headline.yaml`](../headline.yaml))."
         )
     parts = ["## Figures", intro]
-    for version, title in zip(FIGURE_VERSIONS, ("Comparison versions", "Paper-style versions"), strict=True):
+    for version in FIGURE_VERSIONS:
         images = [f"![{f}, {version}](../../{figure_file(run_id, f, version)})" for f in names]
-        parts.append(f"### {title}\n\n" + "\n\n".join(images))
+        parts.append("\n\n".join([f"### {FIGURE_SUBHEADINGS[version]}", FIGURE_VERSION_NOTES[version], *images]))
     return "\n\n".join(parts)
 
 
+def has_paper_check(run: RunData, claims: Claims) -> bool:
+    """Whether the run gets a paper_check.md and table.csv: the paper reports numbers for its benchmark."""
+    return any(c.benchmark == run.benchmark for c in claims.claims)
+
+
 def paper_section(run: RunData, claims: Claims) -> str:
-    if not any(c.benchmark == run.benchmark for c in claims.claims):
+    if not has_paper_check(run, claims):
         return "## Comparison with the paper\n\nNo paper numbers for this benchmark in `configs/paper/claims.yaml`."
     parts = paper_check_parts(run, claims, level=3)
     parts[0] += " The same, as its own page: [paper_check.md](paper_check.md)."
@@ -462,7 +481,9 @@ def figure_section(
     ]
     drawn = run_figures(run, runs, headline)
     images = " ".join(f"![{f}](../{figure_file(labels[run.name].id, f, 'comparison')})" for f in files if f in drawn)
-    run_line = f"Run: `{labels[run.name].id}` [`{run.name}`]({run.name}/README.md) · [paper check]({run.name}/paper_check.md)"
+    run_line = f"Run: `{labels[run.name].id}` [`{run.name}`]({run.folder}/README.md)"
+    if has_paper_check(run, claims):
+        run_line += f" · [paper check]({run.folder}/paper_check.md)"
     lines = [title, run_line]
     if note:
         lines.append(f"Note ({run.name} owner): {note}")
@@ -478,7 +499,7 @@ def all_runs_section(runs: list[RunData], index: dict[tuple[str, str], dict], no
     rows = [
         [
             f"`{labels[r.name].id}`",
-            f"[`{r.name}`]({r.name}/README.md)",
+            f"[`{r.name}`]({r.folder}/README.md)",
             cell_text(labels[r.name].description),
             r.benchmark,
             scored_date(r),
@@ -552,7 +573,7 @@ def disagreements(a: ModelResult, b: ModelResult, benchmark: str) -> str:
 
 
 def comparison_page(name: str, a: RunData, b: RunData, note: str, labels: dict[str, RunLabel]) -> str:
-    link_a, link_b = (f"`{labels[r.name].id}` [`{r.name}`](../{r.name}/README.md)" for r in (a, b))
+    link_a, link_b = (f"`{labels[r.name].id}` [`{r.name}`](../{r.folder}/README.md)" for r in (a, b))
     parts = [
         GENERATED,
         f"# Comparison `{name}`: {link_a} (A) vs {link_b} (B)",

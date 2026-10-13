@@ -20,7 +20,7 @@ session: Claude stops, shows the numbers, waits for a yes, and carries on.
 |---|---|---|---|
 | Before 1: Part 1 decisions | Noa | done | thinking = `min`; all 8 `PAPER_MODELS`; severity axis = 4-way exact letter (decided early, in Session 1). WORKLOG 2026-10-12 |
 | Session 1: build + run Fig 4 | Claude (Noa approves spend) | done, merged (PR #4) | [PR #4](https://github.com/gini007/mini-project-asimov-v2/pull/4); [PR #5](https://github.com/gini007/mini-project-asimov-v2/pull/5) merged; replies: 8 models × 319/319, 0 failed calls (`repro_fig4`); cost: $15.11 full run, about $15.36 for the session incl. 5-item runs (WORKLOG 2026-10-12); pytest: 168 passed on full data; 161 passed, 7 skipped on the 5-item sample; CI green |
-| Session 2: stats + Fig 4 plot | Claude | done, merged (PR #8) | [PR #8](https://github.com/gini007/mini-project-asimov-v2/pull/8); pages: `results/README.md`, `results/repro_fig4/README.md`, `results/repro_fig4/paper_check.md`; figures: `figures/fig4a`, `4b`, `5a`, `5b` (paper + comparison); claims file reviewed and frozen (five matching reads, no published exact numbers); verifier: 495/496 match, 1 bootstrap bound within Monte Carlo noise (`results/verify/`); pytest 229 passed, 7 skipped; CI green incl. `collect.py --check`; stats methods DECIDED in WORKLOG |
+| Session 2: stats + Fig 4 plot | Claude | done, merged (PR #8) | [PR #8](https://github.com/gini007/mini-project-asimov-v2/pull/8); pages: `results/README.md`, `results/txt0_repro_fig4/README.md`, `results/txt0_repro_fig4/paper_check.md`; figures: `figures/fig4a`, `4b`, `5a`, `5b` (paper + comparison); claims file reviewed and frozen (five matching reads, no published exact numbers); verifier: 495/496 match, 1 bootstrap bound within Monte Carlo noise (`results/verify/`); pytest 229 passed, 7 skipped; CI green incl. `collect.py --check`; stats methods DECIDED in WORKLOG |
 | Optional: Weave export (Noa's runs) | Claude, after Noa checks dataset terms | todo | |
 | Between 2 and 3: review, Part 2 scope, hypothesis | Noa (+ team) | Part 2 scope decided 2026-10-12; Part 1 review + hypothesis still to do | WORKLOG 2026-10-12 ("Part 2 approved") |
 | Session 3: build decision-model systems | Claude (Noa approves smoke spend) | starting | branch `decision-systems` |
@@ -104,12 +104,12 @@ Outcomes are in WORKLOG 2026-10-12 ("Fig. 4 (text) benchmark and run settings").
   `run: repro_fig4_default`, so the two summaries never overwrite each other (replies are already
   kept apart by the cache key). Don't flip `thinking:` inside an existing config.
 - **Self-describing summaries (small runner change, PR for Tyler).** Each
-  `results/<run>/<model>/summary.json` also records `benchmark`, `run`, the cache `key`, the
+  `results/<id>_<run>/<model>/summary.json` also records `benchmark`, `run`, the cache `key`, the
   config path and a hash of its contents, the git commit, a timestamp, and `n`. Rebuild the
   video summaries from saved replies (free) so old and new runs carry the same fields. Cost in $
   is added in Session 4 with the price table.
 - **One run name = one config (same runner PR).** At the start of a run the runner writes
-  `results/<run>/config.yaml`, an exact copy of the config used. If that file already exists with
+  `results/<id>_<run>/config.yaml`, an exact copy of the config used. If that file already exists with
   different contents, the runner stops with a message asking for a new `run:` name, so results
   from different settings can never mix under one name (§11).
 - Tests: loader counts and keys, request = verbatim prompt, scorer on hand-made replies
@@ -142,13 +142,13 @@ of access and hardware needs. Reading docs is free and builds nothing, so it sav
 **Built in Session 1 (reuse it, don't rebuild).** Details in WORKLOG 2026-10-12.
 - `scripts/run.py <config> --no-calls`: rescores saved replies for free and keeps the last real
   run's error count.
-- `results/<run>/<model>/errors.jsonl`: failed calls, never reused as replies (a rerun retries them).
+- `results/<id>_<run>/<model>/errors.jsonl`: failed calls, never reused as replies (a rerun retries them).
 - `src/asimov/models/reply_info.py`: `finish` per item (`complete` / `truncated` / `refused`);
   the runner adds `truncation_rate`, `refusal_rate` and `cached_input_tokens` per model.
 - `log_reasoning` config flag: reasoning summaries go in a separate `reasoning` field, never
   scored; part of the cache key only when on (`runner.run_key`).
 - `src/asimov/config.py`: pydantic configs (`RunConfig`, `ModelSpec`); extra keys fail at load.
-- `results/<run>/config.yaml` per run: one run name = one config (`runner.ConfigChanged`).
+- `results/<id>_<run>/config.yaml` per run: one run name = one config (`runner.ConfigChanged`).
 - Self-describing `summary.json`: `benchmark`, `run`, `key`, `config_path`, `config_sha256`,
   `git_commit`, `scored_at`, `n`.
 - Text benchmark: `data/text.py`, `bench/text.py`, `bench/text_score.py` (per item: pred, gold,
@@ -180,10 +180,10 @@ of access and hardware needs. Reading docs is free and builds nothing, so it sav
   This session builds Fig 4a, 4b and 5a (5a needs the text run). Fig 5b uses Tyler's existing
   video results, so build it too, but tell Tyler since it's his figure. Fig 6 waits for the image
   scorer; leave a stub that says so. Output: `figures/<fig>_{paper,comparison}.png` + `.pdf`.
-- `results/repro_fig4/table.csv`: ours vs paper with CIs; large-minus-small gaps with bootstrap
+- `results/txt0_repro_fig4/table.csv`: ours vs paper with CIs; large-minus-small gaps with bootstrap
   CIs; 4a-vs-4b per model.
 - **Results pages (§11).** `scripts/collect.py` also renders `results/README.md` (summary) and
-  `results/<run>/README.md` (one page per run), and creates `results/headline.yaml` with the
+  `results/<id>_<run>/README.md` (one page per run), and creates `results/headline.yaml` with the
   current runs filled in for owners to edit. Includes Tyler's video run. Hook it into the end of
   `scripts/run.py`, and add a `collect.py --check` step to the CI workflow (tell Tyler and Riddhi,
   since it affects their PRs).
@@ -393,7 +393,7 @@ can review them separately. If he can't review in time, split them into a small 
 data or answer keys edited, tests weakened, a fact from the §9.2 table defined twice, I/O in
 pure functions, bare `except`, magic numbers, dead code, names that differ from §9.3; returns
 findings by severity with file:line and a one-line fix), `run-monitor` (haiku; reads
-`results/<run>/*/responses.jsonl`; returns rows done, parse %, errors by type, cost so far in
+`results/<id>_<run>/*/responses.jsonl`; returns rows done, parse %, errors by type, cost so far in
 ≤ 15 lines), `stats-verifier` (never reads `src/asimov/stats.py`), `docs-reader`, `skeptic`,
 `paper-reader` (reads the paper only, writes a draft `configs/paper/claims.yaml`, marks every
 value it can't read exactly as `approx: true`; never sees our results, so it can't be swayed by them).
@@ -552,7 +552,8 @@ results/
   comparisons.yaml         ← hand-edited: which runs to compare
   compare/<name>.md        ← comparison pages (generated)
   index.csv  per_item.csv  ← machine-readable tables
-  <run>/
+  run_ids.yaml             ← run name -> run ID (txt0, vid0, ...), added by the runner and collect.py
+  <id>_<run>/              ← one folder per run, e.g. txt0_repro_fig4/ (asimov.run_ids.run_dir)
     README.md              ← run page (generated)
     config.yaml            ← exact config used, written by the runner at run start
     paper_check.md         ← ours vs every paper number this run can test (generated)
@@ -566,7 +567,7 @@ figures/
 - "All runs" table, newest first: run (link), benchmark, date, models, thinking, prompt version,
   git commit, cost, and the owner's note from `headline.yaml`.
 
-**Run page (`results/<run>/README.md`).**
+**Run page (`results/<id>_<run>/README.md`).**
 - Settings: benchmark, thinking, prompt version and a link to the prompt, git commit, date, link
   to `config.yaml`.
 - Per model: requested vs served model id, stand-in note, replies / errors / parse failures,
@@ -581,7 +582,7 @@ for both runs, the difference with a paired bootstrap CI and McNemar p-value, th
 and the items where they disagree (item id, each side's answer and a short reply excerpt inside
 `<details>`). No prompt or scenario text in any page: that's dataset content we don't commit.
 
-**Paper check (`results/<run>/paper_check.md`, linked from the run page and the summary).**
+**Paper check (`results/<id>_<run>/paper_check.md`, linked from the run page and the summary).**
 Rebuilt after every run from `configs/paper/claims.yaml`, which is written once by re-reading the
 paper (Session 2) and re-read only if the paper changes (e.g. a new arXiv version).
 - One row per paper claim that this run can test: claim id, figure/section, the paper's quote,
@@ -589,7 +590,7 @@ paper (Session 2) and re-read only if the paper changes (e.g. a new arXiv versio
 - Stand-in models are flagged on every row, since they aren't the paper's model.
 - The paper's three headline claims (big models spot risks well, small models lag, actions are
   harder) appear as their computed checks (§3 claims a-c) with the numbers behind each.
-- The mechanical checks, plus the run's write-up (`results/<run>/writeup.md`) on what they show.
+- The mechanical checks, plus the run's write-up (`results/<id>_<run>/writeup.md`) on what they show.
 - **Why not have an LLM re-read the paper on every run:** the paper doesn't change between runs,
   an LLM read costs money and can misread a number differently each time. Reading once into a
   reviewed file and comparing by code is free, repeatable and auditable.
@@ -608,4 +609,4 @@ paper (Session 2) and re-read only if the paper changes (e.g. a new arXiv versio
 3. Only `headline.yaml` and `comparisons.yaml` are hand-edited (plus `configs/paper/claims.yaml`
    once, at review): owners pick the official run per figure, choose comparisons, and write notes
    in their own words.
-4. Each run page includes its write-up (`results/<run>/writeup.md`): what the results show, the comparison with the paper, and key takeaways.
+4. Each run page includes its write-up (`results/<id>_<run>/writeup.md`): what the results show, the comparison with the paper, and key takeaways.

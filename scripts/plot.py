@@ -39,7 +39,7 @@ from asimov.claims import CLAIMS_PATH, Claims, load_claims, model_key  # noqa: E
 from asimov.collect.build import default_headline  # noqa: E402
 from asimov.collect.load import RunData, load_results, load_yaml  # noqa: E402
 from asimov.collect.pages import PAIRED_FIGURE, fig5a_partner, run_figures  # noqa: E402
-from asimov.collect.run_ids import RUN_IDS_FILE, assign_ids, parse_ids  # noqa: E402
+from asimov.collect.run_ids import assign_ids  # noqa: E402
 from asimov.plot_data import (  # noqa: E402
     SEVERITY,
     SEVERITY_LABEL,
@@ -57,6 +57,7 @@ from asimov.plot_data import (  # noqa: E402
     severity_metric,
     text_vs_video,
 )
+from asimov.run_ids import RUN_IDS_FILE, parse_ids  # noqa: E402
 
 # The paper's look: seaborn "darkgrid" (grey panel, white grid, no tick marks), without seaborn itself
 STYLE: dict[RcKeyType, Any] = {
