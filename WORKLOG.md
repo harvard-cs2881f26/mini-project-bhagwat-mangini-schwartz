@@ -1407,6 +1407,43 @@ Q2 6/32/142/139, Q3 60/97/121/41, Q4 78/43/90/108.
 | `part2_openjev_think512_full` | 66/82/74/67/30 | 22/68/92/137 | 49/108/105/57 | 126/50/47/96 |
 | `part2_openjev_think512_cumulative` | 54/52/49/44/120 | 110/61/62/86 | 14/159/80/66 | 189/40/30/60 |
 
+## 2026-10-14: Part 2 follow-ups (Noa's decisions this morning)
+
+- **One-shot worked example: DECIDED (Noa, 2026-10-14).** The hedge-trimmer example in the
+  `oneshot` section of `src/asimov/prompts/decision_questions.yaml` is approved as drafted (comment
+  updated; comments aren't hashed, so no prompt version changed). *Alternative considered:* a
+  different made-up example.
+- **fp32 reruns kept under the same run names: DECIDED (Noa delegated to Claude, 2026-10-14).**
+  `part2_qwen_base_logprob` (txt26) and `part2_qwen_logprob` (txt28) were rerun after the fp32 fix by
+  deleting their `results/<run>/config.yaml` copies (the ConfigChanged guard). Kept as is: the bf16
+  and fp32 replies sit under different cache keys (`logit_dtype` is in params), summaries and pages
+  use only the current (fp32) key, and every row records `logit_dtype`. *Alternative considered:*
+  new run names (`..._fp32`). Bypassing the guard is not a pattern to repeat: new settings get a
+  new run name, as for the generation-cap rerun below.
+- **Qwen generate rerun with a 2048-token cap: DECIDED (Noa, 2026-10-14).** txt27 had 11.0% parse
+  failures (29 invalid "E" answers on 4-option questions; 29 replies at the 1024-token cap, 16 of
+  them unparseable). New config `part2_qwen_gen_2048` (own run name; only change `params:
+  max_new_tokens: 2048`, now a client setting with 1024 as default). It fixes cut-off replies, not
+  the invalid "E" answers. *Alternative considered:* keep txt27 and report the 11%.
+- **Kev redeploy for the 3 missing grid cells: approved (Noa, 2026-10-14):** `part2_kev_full`,
+  `part2_kev_letters`, `part2_kev_full_cumulative` (configs from PR #21).
+
+### Follow-up runs (2026-10-14): numbers only
+All 319/319, 0 errors; bug checks clean (one cache key, no duplicates, served version, probabilities
+sum to 1, reply = top option, 0 exact ties). Kev redeployed (approved) and stopped afterwards.
+
+| Run | System | Change from base | Q1 | Q2 | Q3 | Q4 | Parse fail |
+|---|---|---|---|---|---|---|---|
+| txt30 `part2_kev_full` | Kev-4B | full wording | 58.0% | 59.6% | 64.6% | 40.1% | 0.0% |
+| txt31 `part2_kev_letters` | Kev-4B | letters as option values | 43.9% | 41.4% | 55.8% | 41.1% | 0.0% |
+| txt32 `part2_kev_full_cumulative` | Kev-4B | full wording + cumulative | 58.0% | 53.9% | 59.9% | 51.1% | 0.0% |
+| txt33 `part2_qwen_gen_2048` | Qwen3.5-4B generate | cap 2048 (was 1024, txt27) | 77.1% | 61.8% | 59.6% | 58.0% | 8.2% |
+
+- txt33 vs txt27: replies at the cap 29 -> 11 (5 of them unparseable); parse failures 35 -> 26
+  items; 29 invalid "E" answers on 4-option severity questions remain (the cap doesn't change
+  them). Still above Noa's 2% stop line: held for her review. Output tokens p50 434; compute
+  p50 16.8 s per item (`raw.remote.compute_s`), run with `--workers 1`.
+
 ## 2026-10-14: Cumulative-mode scoring: DECIDED (Noa, decided 2026-10-13)
 Resolves the "Still OPEN (scoring)" bullet under "Decision question modes". In cumulative mode a
 model's Q2-Q4 follow its own Q1 pick, so a Q2 that is wrong against the key may be right for the
@@ -1424,10 +1461,10 @@ injury the model picked.
   so matched accuracies compare models on different items. Compare models on strict accuracy;
   read the matched numbers within one model, alongside `n_q1_matched`.
 - **Applies to every text run**, not only cumulative ones (in independent mode it measures Q2-Q4
-  on the items where Q1 was right). All 30 text runs with results (`txt0`-`txt29`) were rescored
+  on the items where Q1 was right). All 34 text runs with results (`txt0`-`txt33`) were rescored
   from saved replies with `scripts/run.py <config> --no-calls --no-collect` ($0). Skipped: the
-  mock/smoke configs and the Kev configs never run (`part2_kev_full`, `part2_kev_letters`,
-  `part2_kev_full_cumulative`).
+  mock/smoke configs. txt30-txt33 (merged later, PR #22) were rescored the same way when this PR
+  was updated against main.
 - **No strict number changed.** Checked by comparing every rescored `summary.json` (75 files: run
   and per-model) key by key against the committed version: the only differences are the 4 new
   fields and provenance (`git_commit`, `scored_at`, `git_dirty`). The regenerated results pages

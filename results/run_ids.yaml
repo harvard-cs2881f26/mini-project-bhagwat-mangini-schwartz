@@ -32,3 +32,7 @@ part2_qwen_base_logprob: txt26
 part2_qwen_gen: txt27
 part2_qwen_logprob: txt28
 part2_qwen_base_logprob_oneshot: txt29
+part2_kev_full: txt30
+part2_kev_letters: txt31
+part2_kev_full_cumulative: txt32
+part2_qwen_gen_2048: txt33

@@ -63,6 +63,7 @@ class LocalHF:
     mode: str = modal.parameter()
     template: str = modal.parameter()
     logit_dtype: str = modal.parameter(default="fp32")
+    max_new_tokens: int = modal.parameter(default=1024)  # generate mode only (models.local_hf.MAX_NEW_TOKENS)
 
     @modal.enter()
     def load(self) -> None:
@@ -70,7 +71,7 @@ class LocalHF:
 
         t0 = time.perf_counter()
         params = {"repo": self.repo, "revision": self.revision, "mode": self.mode, "template": self.template,
-                  "logit_dtype": self.logit_dtype}  # fmt: skip
+                  "logit_dtype": self.logit_dtype, "max_new_tokens": self.max_new_tokens}  # fmt: skip
         self.client = LocalHFClient("modal", params)
         self.info = where(self.client, time.perf_counter() - t0)
         weights.commit()

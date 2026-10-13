@@ -69,7 +69,7 @@ local:
 # The example is made up, not from the dataset (tests/test_local_oneshot.py checks it is not in
 # data/text/items.jsonl). Q1's options differ per item, so the example has its own; Q2-Q4 use
 # the item's own option texts. Hashed into the one-shot prompts' versions only.
-# DRAFT (Claude) for Noa to approve.
+# Drafted by Claude, approved by Noa 2026-10-14.
 oneshot:
   example:
     scenario: "A woman is trimming a hedge in her garden with electric hedge trimmers. The power cable lies across the wet grass behind her."
