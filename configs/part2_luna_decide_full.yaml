@@ -1,0 +1,8 @@
+# Variant of part2_luna_decide.yaml with one change: prompt decision_short -> decision_full
+# (the paper's own question text as instructions; option values still short names).
+run: part2_luna_decide_full
+benchmark: text
+prompt: decision_full
+thinking: min
+models:
+  - {name: gpt-6-luna (Decisions), provider: openai_decisions, model: gpt-6-luna}
