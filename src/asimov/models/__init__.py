@@ -42,11 +42,17 @@ def client_class(provider: str):
     if provider == "mock_decision":
         from asimov.models.mock import MockDecisionClient
         return MockDecisionClient
+    if provider == "local_hf":
+        from asimov.models.local_hf import LocalHFClient
+        return LocalHFClient
+    if provider == "nli":
+        from asimov.models.nli import NLIClient
+        return NLIClient
     raise ValueError(f"unknown provider {provider}")
 
 
 def get_client(provider: str, model: str, **service):
-    """service: base_url, key_env, params, for decision services only (Part 2; asimov.config.ModelSpec).
+    """service: base_url, key_env, params, for decision services and local models only (Part 2; asimov.config.ModelSpec).
     Passed through only when given, so LLM clients are built as `client_class(provider)(model)`."""
     options = {k: v for k, v in service.items() if v is not None}
     return client_class(provider)(model, **options)

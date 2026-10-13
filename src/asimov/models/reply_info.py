@@ -6,12 +6,13 @@ parameters. The runner records them per item and per model for every benchmark.
 
 finish(provider, raw):
     "truncated"  cut off by the output-token limit (OpenAI status "incomplete" for
-                 max_output_tokens, Claude stop_reason "max_tokens", Gemini finish_reason MAX_TOKENS)
+                 max_output_tokens, Claude stop_reason "max_tokens", Gemini finish_reason MAX_TOKENS,
+                 local generation finish_reason "length": the MAX_NEW_TOKENS cap in models/local_hf.py)
     "refused"    a refusal or safety block (OpenAI refusal content or content_filter, Claude
                  stop_reason "refusal", Gemini prompt_feedback.block_reason or a safety finish_reason;
                  decision models: any question answered with something other than a choice, in
                  any call of a cumulative reply)
-    "complete"   anything else
+    "complete"   anything else (local option-probability and NLI models always answer every question)
 """
 
 from __future__ import annotations
@@ -58,9 +59,13 @@ def _decision(raw: dict) -> Finish:
     return "refused" if any(a.get("type") != "choice" for a in answers) else "complete"
 
 
+def _local_hf(raw: dict) -> Finish:
+    return "truncated" if raw.get("finish_reason") == "length" else "complete"
+
+
 def finish(provider: str, raw: dict) -> Finish:
     reader = {"openai": _openai, "anthropic": _anthropic, "gemini": _gemini,
-              "systemone": _decision, "openai_decisions": _decision}.get(provider)
+              "systemone": _decision, "openai_decisions": _decision, "local_hf": _local_hf}.get(provider)
     return reader(raw) if reader else "complete"
 
 

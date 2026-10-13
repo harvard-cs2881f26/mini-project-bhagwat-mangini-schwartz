@@ -268,3 +268,27 @@ def test_script_stamps_runs_smaller_than_the_llm_run(tree):
     path.write_text(json.dumps(summary))
     assert cascade_script.main(args(tree)) == 0
     assert "smoke run, not a result" in (tree["results"] / "designs" / "tables.md").read_text()
+
+
+def test_a_config_label_is_printed_under_the_title(tree):
+    assert cascade_script.main(args(tree)) == 0
+    assert "EXPLORATORY" not in (tree["results"] / "designs" / "tables.md").read_text()
+    cfg = yaml.safe_load(tree["config"].read_text()) | {"label": "EXPLORATORY: post-hoc"}
+    tree["config"].write_text(yaml.safe_dump(cfg))
+    assert cascade_script.main(args(tree)) == 0
+    lines = (tree["results"] / "designs" / "tables.md").read_text().splitlines()
+    title = lines.index("# Part 2 designs D and B (text benchmark)")
+    assert lines[title + 1 : title + 3] == ["", "**EXPLORATORY: post-hoc**"]
+
+
+def test_figure_names_keep_dots_in_model_ids(tree):
+    usage = {"usage": {"input_tokens": 1000, "output_tokens": 100}}
+    write_run(tree["results"], "lite_run", "gemini-3.1-flash-lite", "gemini", [[True] * 4] * 4, usage)
+    cfg = yaml.safe_load(tree["config"].read_text()) | {"escalation": [{"run": "lite_run", "model": "gemini-3.1-flash-lite"}]}
+    tree["config"].write_text(yaml.safe_dump(cfg))
+    prices = yaml.safe_load(tree["prices"].read_text())
+    prices["models"]["gemini-3.1-flash-lite"] = {"input_per_mtok": 0.25, "output_per_mtok": 1.5}
+    tree["prices"].write_text(yaml.safe_dump(prices))
+    assert cascade_script.main(args(tree)) == 0
+    names = {p.name for p in (tree["figures"] / "designs").iterdir()}
+    assert names == {"cascade_dec-1_to_gemini-3.1-flash-lite.png", "cascade_dec-1_to_gemini-3.1-flash-lite.pdf"}

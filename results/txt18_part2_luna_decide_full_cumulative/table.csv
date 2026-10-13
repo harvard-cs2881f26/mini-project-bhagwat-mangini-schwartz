@@ -1,0 +1,50 @@
+approx,ci_hi,ci_lo,claim,diff,figure,kind,metric,model_paper,models_ours,ours,paper,paper_in_ci,stand_in,status
+True,,,fig4a_gemini_2_5_flash_lite_latent_risk_accuracy,,4a,value,latent_risk_accuracy,Gemini 2.5 Flash-Lite,,,0.82,,False,model not in this run
+True,,,fig4a_gemini_2_5_flash_lite_latent_severity_accuracy,,4a,value,latent_severity_accuracy,Gemini 2.5 Flash-Lite,,,0.78,,False,model not in this run
+True,,,fig4a_gemini_2_5_flash_latent_risk_accuracy,,4a,value,latent_risk_accuracy,Gemini 2.5 Flash,,,0.93,,False,model not in this run
+True,,,fig4a_gemini_2_5_flash_latent_severity_accuracy,,4a,value,latent_severity_accuracy,Gemini 2.5 Flash,,,0.94,,False,model not in this run
+True,,,fig4a_gemini_2_5_pro_latent_risk_accuracy,,4a,value,latent_risk_accuracy,Gemini 2.5 Pro,,,0.94,,False,model not in this run
+True,,,fig4a_gemini_2_5_pro_latent_severity_accuracy,,4a,value,latent_severity_accuracy,Gemini 2.5 Pro,,,0.96,,False,model not in this run
+True,,,fig4a_claude_opus_4_1_latent_risk_accuracy,,4a,value,latent_risk_accuracy,Claude Opus 4.1,,,0.91,,False,model not in this run
+True,,,fig4a_claude_opus_4_1_latent_severity_accuracy,,4a,value,latent_severity_accuracy,Claude Opus 4.1,,,0.93,,False,model not in this run
+True,,,fig4a_claude_sonnet_4_latent_risk_accuracy,,4a,value,latent_risk_accuracy,Claude Sonnet 4,,,0.87,,False,model not in this run
+True,,,fig4a_claude_sonnet_4_latent_severity_accuracy,,4a,value,latent_severity_accuracy,Claude Sonnet 4,,,0.92,,False,model not in this run
+True,,,fig4a_gpt_5_nano_latent_risk_accuracy,,4a,value,latent_risk_accuracy,GPT 5 Nano,,,0.87,,False,model not in this run
+True,,,fig4a_gpt_5_nano_latent_severity_accuracy,,4a,value,latent_severity_accuracy,GPT 5 Nano,,,0.74,,False,model not in this run
+True,,,fig4a_gpt_5_mini_latent_risk_accuracy,,4a,value,latent_risk_accuracy,GPT 5 Mini,,,0.72,,False,model not in this run
+True,,,fig4a_gpt_5_mini_latent_severity_accuracy,,4a,value,latent_severity_accuracy,GPT 5 Mini,,,0.64,,False,model not in this run
+True,,,fig4a_gpt_5_latent_risk_accuracy,,4a,value,latent_risk_accuracy,GPT 5,,,0.92,,False,model not in this run
+True,,,fig4a_gpt_5_latent_severity_accuracy,,4a,value,latent_severity_accuracy,GPT 5,,,0.82,,False,model not in this run
+True,,,fig4b_gemini_2_5_flash_lite_effect_accuracy,,4b,value,effect_accuracy,Gemini 2.5 Flash-Lite,,,0.63,,False,model not in this run
+True,,,fig4b_gemini_2_5_flash_lite_activated_risk_accuracy,,4b,value,activated_risk_accuracy,Gemini 2.5 Flash-Lite,,,0.59,,False,model not in this run
+True,,,fig4b_gemini_2_5_flash_effect_accuracy,,4b,value,effect_accuracy,Gemini 2.5 Flash,,,0.71,,False,model not in this run
+True,,,fig4b_gemini_2_5_flash_activated_risk_accuracy,,4b,value,activated_risk_accuracy,Gemini 2.5 Flash,,,0.66,,False,model not in this run
+True,,,fig4b_gemini_2_5_pro_effect_accuracy,,4b,value,effect_accuracy,Gemini 2.5 Pro,,,0.7,,False,model not in this run
+True,,,fig4b_gemini_2_5_pro_activated_risk_accuracy,,4b,value,activated_risk_accuracy,Gemini 2.5 Pro,,,0.64,,False,model not in this run
+True,,,fig4b_claude_opus_4_1_effect_accuracy,,4b,value,effect_accuracy,Claude Opus 4.1,,,0.74,,False,model not in this run
+True,,,fig4b_claude_opus_4_1_activated_risk_accuracy,,4b,value,activated_risk_accuracy,Claude Opus 4.1,,,0.63,,False,model not in this run
+True,,,fig4b_claude_sonnet_4_effect_accuracy,,4b,value,effect_accuracy,Claude Sonnet 4,,,0.72,,False,model not in this run
+True,,,fig4b_claude_sonnet_4_activated_risk_accuracy,,4b,value,activated_risk_accuracy,Claude Sonnet 4,,,0.66,,False,model not in this run
+True,,,fig4b_gpt_5_nano_effect_accuracy,,4b,value,effect_accuracy,GPT 5 Nano,,,0.62,,False,model not in this run
+True,,,fig4b_gpt_5_nano_activated_risk_accuracy,,4b,value,activated_risk_accuracy,GPT 5 Nano,,,0.59,,False,model not in this run
+True,,,fig4b_gpt_5_mini_effect_accuracy,,4b,value,effect_accuracy,GPT 5 Mini,,,0.51,,False,model not in this run
+True,,,fig4b_gpt_5_mini_activated_risk_accuracy,,4b,value,activated_risk_accuracy,GPT 5 Mini,,,0.48,,False,model not in this run
+True,,,fig4b_gpt_5_effect_accuracy,,4b,value,effect_accuracy,GPT 5,,,0.67,,False,model not in this run
+True,,,fig4b_gpt_5_activated_risk_accuracy,,4b,value,activated_risk_accuracy,GPT 5,,,0.6,,False,model not in this run
+False,,,fig5a_gemini_2_5_pro_latent_risk_accuracy,,5a,value,latent_risk_accuracy,Gemini 2.5 Pro,,,0.94,,False,model not in this run
+False,,,fig5a_claude_opus_4_1_latent_risk_accuracy,,5a,value,latent_risk_accuracy,Claude Opus 4.1,,,0.91,,False,model not in this run
+False,,,fig5a_gpt_5_latent_risk_accuracy,,5a,value,latent_risk_accuracy,GPT 5,,,0.92,,False,model not in this run
+False,,,sec3_avg_latent_risk_accuracy,,,mean,latent_risk_accuracy,,,,0.923,,False,models or metric not in this run
+False,,,sec3_avg_latent_risk_accuracy_floor,,,bound,latent_risk_accuracy,,,,0.9,,False,"a bound, not a point value"
+False,,,sec3_avg_latent_severity_severe_binary_accuracy,,,mean,latent_severity_severe_binary_accuracy,,,,0.887,,False,models or metric not in this run
+False,,,sec3_gpt5_mini_latent_risk_accuracy_gap_vs_gpt5,,,gap,latent_risk_accuracy,GPT5-Mini,,,0.2,,False,model not in this run
+False,,,sec3_gpt5_nano_latent_risk_accuracy_gap_vs_gpt5,,,gap,latent_risk_accuracy,GPT5-Nano,,,0.05,,False,model not in this run
+False,,,sec3_gpt5_mini_latent_severity_severe_binary_accuracy_gap_vs_gpt5,,,gap,latent_severity_severe_binary_accuracy,GPT5-Mini,,,0.19,,False,model not in this run
+False,,,sec3_gpt5_nano_latent_severity_severe_binary_accuracy_gap_vs_gpt5,,,gap,latent_severity_severe_binary_accuracy,GPT5-Nano,,,0.17,,False,model not in this run
+False,,,sec3_avg_effect_accuracy_top,,,max,effect_accuracy,,,,0.74,,False,models or metric not in this run
+False,,,sec3_avg_activated_risk_accuracy_top,,,max,activated_risk_accuracy,,,,0.66,,False,models or metric not in this run
+False,,,appD_avg_majority_baseline_latent_severity,,,baseline,majority_baseline_latent_severity,,,,0.4451,,False,"derived from the dataset's counts, no model"
+False,,,appD_avg_majority_baseline_latent_severity_severe_binary,,,baseline,majority_baseline_latent_severity_severe_binary,,,,0.5643,,False,"derived from the dataset's counts, no model"
+False,,,appD_avg_majority_baseline_effect,,,baseline,majority_baseline_effect,,,,0.3793,,False,"derived from the dataset's counts, no model"
+False,,,appD_avg_majority_baseline_activated_risk,,,baseline,majority_baseline_activated_risk,,,,0.3386,,False,"derived from the dataset's counts, no model"
+False,,,appD_avg_majority_baseline_activated_risk_severe_binary,,,baseline,majority_baseline_activated_risk_severe_binary,,,,0.6614,,False,"derived from the dataset's counts, no model"

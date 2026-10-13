@@ -238,12 +238,13 @@ def b_section(a: Analysis) -> list[str]:
     return [*lines, ""]
 
 
-def tables_md(analyses: list[Analysis], cfg_path: Path, prices: PriceTable) -> str:
+def tables_md(analyses: list[Analysis], cfg_path: Path, prices: PriceTable, label: str | None = None) -> str:
     lines = [
         GENERATED,
         "",
         "# Part 2 designs D and B (text benchmark)",
         "",
+        *([f"**{label}**", ""] if label else []),
         f'From saved replies only (`{cfg_path.name}`); choices in WORKLOG 2026-10-13, "Part 2 design analysis". Numbers only.',
         "",
         "- Accuracy: the exact answer per question (Q2 and Q4: exact severity level, as in Fig 4). Mean of 4 = each item's "
@@ -267,7 +268,7 @@ def tables_md(analyses: list[Analysis], cfg_path: Path, prices: PriceTable) -> s
     return "\n".join(lines).rstrip() + "\n"
 
 
-def draw(a: Analysis, claims: Claims, path: Path) -> None:
+def draw(a: Analysis, claims: Claims, path: Path, banner: str | None = None) -> None:
     """One figure per pair: mean of 4 and each question, accuracy against $ per 1,000 items."""
     p = a.pair
     fig, axes = plt.subplots(2, 3, figsize=FIG_SIZE, sharex=True)
@@ -313,11 +314,12 @@ def draw(a: Analysis, claims: Claims, path: Path) -> None:
     note = f"n = {n}" + (f" (smoke run: fewer than {p.full_n})" if n < p.full_n else "")
     text = "\n".join([note, "◆ lowest-confidence share sent on", textwrap.fill(f"{p.first.name}: {p.first_note}", NOTE_WIDTH)])
     legend_ax.text(0, 0.35, text, fontsize=8, va="top")
-    fig.suptitle(f"{p.first.name} first; low-confidence items to {p.escalate.name}", fontsize=12)
+    title = f"{p.first.name} first; low-confidence items to {p.escalate.name}"
+    fig.suptitle(f"{banner}\n{title}" if banner else title, fontsize=12)
     fig.tight_layout()
     path.parent.mkdir(parents=True, exist_ok=True)
     for ext in FIG_FORMATS:
-        fig.savefig(path.with_suffix(f".{ext}"), dpi=FIG_DPI, metadata={"CreationDate": None} if ext == "pdf" else None)
+        fig.savefig(path.with_name(f"{path.name}.{ext}"), dpi=FIG_DPI, metadata={"CreationDate": None} if ext == "pdf" else None)
     plt.close(fig)
 
 
@@ -344,7 +346,7 @@ def main(argv: list[str] | None = None) -> int:
     cfg = DesignConfig.model_validate(yaml.safe_load(args.config.read_text()))
     prices = load_prices(args.prices)
     analyses = [analyse(p, cfg) for p in pairs(cfg, load_results(args.results), prices)]
-    files = csv_files(analyses) | {"tables.md": tables_md(analyses, args.config, prices)}
+    files = csv_files(analyses) | {"tables.md": tables_md(analyses, args.config, prices, cfg.label)}
     out = args.results / args.config.stem
     if args.check:
         stale = [name for name, text in files.items() if not (out / name).exists() or (out / name).read_text() != text]
@@ -356,7 +358,8 @@ def main(argv: list[str] | None = None) -> int:
         (out / name).write_text(text)
     claims = load_claims(args.claims)
     for a in analyses:
-        draw(a, claims, args.figures / args.config.stem / f"cascade_{a.pair.first_ref.model}_to_{a.pair.escalate_ref.model}")
+        name = f"cascade_{a.pair.first_ref.model}_to_{a.pair.escalate_ref.model}"
+        draw(a, claims, args.figures / args.config.stem / name, cfg.label)
     print(f"wrote {len(files)} tables to {out} and {len(analyses)} figures to {args.figures / args.config.stem}")
     return 0
 

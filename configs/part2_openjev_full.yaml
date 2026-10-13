@@ -1,0 +1,9 @@
+# Variant of part2_codiv.yaml (OpenJev think 0 row only, not Laya) with one change:
+# prompt decision_short -> decision_full. Codiv: run with --workers 1 (60 requests/min).
+run: part2_openjev_full
+benchmark: text
+prompt: decision_full
+thinking: min
+models:
+  - {name: OpenJev (think 0), provider: systemone, model: openjev-latest, base_url: "https://api.codiv.ai",
+     key_env: CODIV_API_KEY, params: {think: 0}}

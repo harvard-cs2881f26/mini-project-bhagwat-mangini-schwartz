@@ -58,6 +58,7 @@ PER_ITEM_COLUMNS = (
 )
 LATENCY_DIGITS = 3  # rounded so index.csv is the same on every machine
 COST_DIGITS = 6
+PRICED_BENCHMARKS = ("text",)  # video (Tyler) and image (Riddhi) costs are their owners' to add
 CSV_DIGITS = 6  # every float in a CSV, so collect.py --check gives the same bytes on every machine and numpy version
 
 
@@ -87,7 +88,7 @@ def index_row(run: RunData, model: ModelResult, prices: dict, labels: dict[str, 
         "stand_in": is_stand_in(s["name"]),
         "latency_p50_s": p50,
         "latency_p95_s": p95,
-        "cost_usd": cost_usd(model, prices),
+        "cost_usd": cost_usd(model, prices) if run.benchmark in PRICED_BENCHMARKS else None,
     }
     return {**s, **made}
 

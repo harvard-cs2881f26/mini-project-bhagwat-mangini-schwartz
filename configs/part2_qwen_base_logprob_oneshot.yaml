@@ -1,0 +1,14 @@
+# Part 2: Qwen3.5-4B-Base option probabilities, one-shot: as part2_qwen_base_logprob, but each question
+# starts with one made-up, answered example (`oneshot` in prompts/decision_questions.yaml), because the
+# zero-shot base model puts little probability on the letters after the answer cue (WORKLOG 2026-10-13).
+# Pre-registered (Noa, 2026-10-13): of the two base rows, the one with the higher median letter mass is
+# the main Qwen-Base row for the Kev comparison; both are reported.
+# Question mode: change prompt to decision_short_cumulative_oneshot_local (new run name).
+# Runs on a Modal L40S (backend: modal; models/modal_app.py, deploy it first), same code as locally.
+run: part2_qwen_base_logprob_oneshot
+benchmark: text
+prompt: decision_short_oneshot_local
+thinking: min  # required by the schema; not used (no thinking on a base model)
+models:
+  - {name: "Qwen3.5-4B-Base (logprob, one-shot)", provider: local_hf, model: qwen3.5-4b-base,
+     params: {repo: Qwen/Qwen3.5-4B-Base, revision: 1001bb4d826a52d1f399e183466143f4da7b741b, mode: logprob, template: plain, logit_dtype: fp32, backend: modal}}

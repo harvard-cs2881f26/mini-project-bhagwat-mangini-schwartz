@@ -1,0 +1,8 @@
+# Variant of part2_jev_full.yaml with one change: prompt decision_full -> decision_full_cumulative
+# (one call per question; each state adds the model's own earlier picks).
+run: part2_jev_full_cumulative
+benchmark: text
+prompt: decision_full_cumulative
+thinking: min
+models:
+  - {name: Jev, provider: systemone, model: jev-latest, base_url: "https://api.typesafe.ai", key_env: TYPESAFE_API_KEY}

@@ -1,0 +1,8 @@
+# Variant of part2_jev.yaml with one change: prompt decision_short -> decision_full
+# (the paper's own question text as instructions; option values still short names).
+run: part2_jev_full
+benchmark: text
+prompt: decision_full
+thinking: min
+models:
+  - {name: Jev, provider: systemone, model: jev-latest, base_url: "https://api.typesafe.ai", key_env: TYPESAFE_API_KEY}

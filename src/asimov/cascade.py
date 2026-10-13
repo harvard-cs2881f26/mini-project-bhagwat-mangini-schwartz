@@ -50,6 +50,7 @@ class DesignConfig(BaseModel):
     confidence: Literal["min_top_probability"]
     fixed_fractions: tuple[float, ...]  # D's table: share of items sent on, fixed before looking at results
     split_headline: tuple[str, ...]  # B's pre-registered split: the questions the decision model answers
+    label: str | None = None  # printed in bold under the tables' title and in each figure's title (e.g. EXPLORATORY)
 
     @field_validator("fixed_fractions")
     @classmethod
