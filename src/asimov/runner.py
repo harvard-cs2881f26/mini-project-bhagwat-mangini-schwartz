@@ -164,7 +164,8 @@ def run_model(bench: Benchmark, spec: dict, cfg: dict, items, out_dir: Path, wor
     summary = {"name": spec["name"], "provider": provider, "model": model, "prompt": prompt,
                "thinking": thinking, "log_reasoning": log_reasoning, **made, "key": key, "errors": errors,
                **token_totals(provider, rows), **finish_rates(finishes),
-               "n_with_reasoning": sum(bool(r.get("reasoning", "").strip()) for r in rows), **s}
+               "n_with_reasoning": sum(bool(r.get("reasoning", "").strip()) for r in rows),
+               "n_reused": sum("reused_from" in r for r in rows), **s}  # copied by asimov.reuse
     (mdir / "summary.json").write_text(json.dumps({**summary, "per_item": per_item}, indent=1))
     return summary
 

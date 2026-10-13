@@ -47,4 +47,5 @@ No run yet.
 | Run ID | Run | Description | Benchmark | Date | Models | Thinking | Prompt | Commit | Cost $ | Note |
 |---|---|---|---|---|---|---|---|---|---|---|
 | `vid0` | [`repro_fig5`](repro_fig5/README.md) | Video benchmark, using the video_v2 prompt, with thinking set to min (the lowest reasoning each provider allows), on 8 models. | video | 2026-10-12 | 8 | min | video_v2 | ae0477e | – |  |
-| `txt0` | [`repro_fig4`](repro_fig4/README.md) | Text benchmark, using the paper's prompt sent unchanged (text_verbatim), with thinking set to min (the lowest reasoning each provider allows), on 8 models. Reasoning summaries are saved. | text | 2026-10-12 | 8 | min | text_verbatim | 7b3ddf9 | – |  |
+| `txt1` | [`repro_fig4_default`](repro_fig4_default/README.md) | Text benchmark, using the paper's prompt sent unchanged (text_verbatim), with thinking set to default (each provider decides how much to reason), on 8 models. Reasoning summaries are saved. | text | 2026-10-12 | 8 | default | text_verbatim | d687d53 | – |  |
+| `txt0` | [`repro_fig4`](repro_fig4/README.md) | Text benchmark, using the paper's prompt sent unchanged (text_verbatim), with thinking set to min (the lowest reasoning each provider allows), on 8 models. Reasoning summaries are saved. | text | 2026-10-12 | 8 | min | text_verbatim | d687d53 | – |  |

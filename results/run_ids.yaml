@@ -2,3 +2,4 @@
 # An ID is the benchmark prefix plus a number, in scoring order; it is never changed or reused, even after a run is deleted.
 repro_fig4: txt0
 repro_fig5: vid0
+repro_fig4_default: txt1

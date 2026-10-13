@@ -20,17 +20,26 @@ PAPER_MODELS = {
 }
 
 
-def get_client(provider: str, model: str):
+def client_class(provider: str):
     if provider == "anthropic":
         from asimov.models.anthropic_client import AnthropicClient
-        return AnthropicClient(model)
+        return AnthropicClient
     if provider == "openai":
         from asimov.models.openai_client import OpenAIClient
-        return OpenAIClient(model)
+        return OpenAIClient
     if provider == "gemini":
         from asimov.models.gemini_client import GeminiClient
-        return GeminiClient(model)
+        return GeminiClient
     if provider == "mock":
         from asimov.models.mock import MockClient
-        return MockClient(model)
+        return MockClient
     raise ValueError(f"unknown provider {provider}")
+
+
+def get_client(provider: str, model: str):
+    return client_class(provider)(model)
+
+
+def request_settings(provider: str) -> frozenset[str]:
+    """Config settings that change what this provider's client sends (asimov.reuse uses it)."""
+    return client_class(provider).request_settings

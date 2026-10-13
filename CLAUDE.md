@@ -156,6 +156,8 @@ says so in its docstring.
   `bench/parse.locate_keys`. The exact key wins; otherwise one near-miss key per target is used,
   under the benchmark's own rule (e.g. "the key contains `severity`"); two competing near keys
   leave it unread. Count near-miss reads (a `near_key` status and rate) so slips stay visible.
+- **An option's text instead of its letter counts as that letter** when it matches one of the
+  item's own options (text: "No realistic injury possible" -> E), counted as `option_text`.
 - **Unanswered = wrong, never dropped.** Report the parse-failure rate for every model, and why
   each answer couldn't be read (missing key, invalid value, no JSON). Each owner sets when a high
   parse-failure rate stops their run for review; for text (Noa) it's above 2% for any model.

@@ -7,10 +7,11 @@ for the scorer. The request builder only ever receives `TextItem`s.
 
 from __future__ import annotations
 
+import re
 from dataclasses import dataclass
 from pathlib import Path
 
-from asimov.bench.text_score import QUESTIONS, response_key
+from asimov.bench.text_score import OPTIONS, QUESTIONS, response_key
 from asimov.data.rows import DATA_DIR, read_answer_json, read_rows
 
 
@@ -28,6 +29,31 @@ def parse_answer_raw(raw: str) -> dict[str, str]:
     """'```json{"latent_risk_response": "D", ...}```' -> {"latent_risk": "D", ...}"""
     d = read_answer_json(raw)
     return {q: d[response_key(q)] for q in QUESTIONS}
+
+
+OPTION_LINE = re.compile(r"\n([A-E])\. ([^\n]*)")
+
+
+def parse_options(prompt: str) -> dict[str, dict[str, str]]:
+    """Each question's lettered options from the prompt: {question: {letter: text}}.
+
+    Every prompt lists Q1 (A-E) then Q2, Q3, Q4 (A-D each), in that order (checked on all 319).
+    The scorer uses this to read a reply that gives an option's text instead of its letter.
+    """
+    lines = [(m.group(1), m.group(2).strip()) for m in OPTION_LINE.finditer(prompt)]
+    sizes = [len(OPTIONS[q]) for q in QUESTIONS]
+    if [letter for letter, _ in lines] != [letter for q in QUESTIONS for letter in OPTIONS[q]]:
+        raise ValueError(f"expected option lists of sizes {sizes}, found letters {''.join(x for x, _ in lines)}")
+    out, i = {}, 0
+    for q, n in zip(QUESTIONS, sizes, strict=True):
+        out[q] = dict(lines[i : i + n])
+        i += n
+    return out
+
+
+def load_text_options(data_dir: Path = DATA_DIR) -> dict[str, dict[str, dict[str, str]]]:
+    """Option text per item and question, for the scorer (prompt content, not answers)."""
+    return {r["id"]: parse_options(r["prompt"]) for r in read_rows("text", data_dir)}
 
 
 def load_text_answers(data_dir: Path = DATA_DIR) -> dict[str, dict[str, str]]:

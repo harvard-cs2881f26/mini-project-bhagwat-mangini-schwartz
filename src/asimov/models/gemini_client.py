@@ -34,6 +34,7 @@ def min_thinking(model: str) -> types.ThinkingConfig:
 
 class GeminiClient:
     provider = "gemini"
+    request_settings = frozenset({"thinking", "log_reasoning"})  # both change the thinking config sent
 
     def __init__(self, model: str):
         self.model = model
