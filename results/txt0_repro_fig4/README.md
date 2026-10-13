@@ -60,6 +60,12 @@ These redraw the paper's own figures with our results: same chart type, axes, wo
 
 ![fig5a, paper](../../figures/txt0/fig5a_paper.png)
 
+### Scoring choices
+
+The same severity answers (Q2) scored three ways, per model: the exact level (multiple choice, the score Fig 4a uses), severe vs not, and severe recall. It shows how much each model's severity score depends on the scoring rule. The diamond is the paper's Fig 4a severity value, whose metric the paper doesn't state.
+
+![severity_scoring](../../figures/txt0/severity_scoring.png)
+
 ## Comparison with the paper
 
 Paper: arXiv 2509.21651v2, read on 2026-10-12 into `configs/paper/claims.yaml`. Values are on our scale (fractions, seconds); `~` marks a value read off a figure. "Paper in CI" is only computed for single-model values. Stand-in rows compare our model to a different paper model. The same, as its own page: [paper_check.md](paper_check.md).

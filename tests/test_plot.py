@@ -149,7 +149,8 @@ def test_plot_writes_each_runs_figures_under_its_run_id(results, tmp_path, capsy
     expected = {"txt0": ("fig4a", "fig4b", "fig5a"), "txt1": ("fig4a", "fig4b", "fig5a"), "vid0": ("fig5a", "fig5b")}
     for run_id, figs in expected.items():
         drawn = {p.name for p in (out / run_id).iterdir()}
-        assert drawn == {f"{f}_{v}.{ext}" for f in figs for v in ("paper", "comparison") for ext in ("png", "pdf")}
+        extra = {f"severity_scoring.{ext}" for ext in ("png", "pdf")} if run_id.startswith("txt") else set()
+        assert drawn == {f"{f}_{v}.{ext}" for f in figs for v in ("paper", "comparison") for ext in ("png", "pdf")} | extra
     assert not list(out.glob("*.png")) and not list(out.glob("*.pdf"))  # nothing at the top level
     assert "fig6" in capsys.readouterr().out  # stub says it waits for the image scorer
     assert plot.main([*args, "--severity", "binary"]) == 0
@@ -280,3 +281,12 @@ def test_reading_notes_match_the_figure():
 def test_tick_names_wrap_without_running_into_each_other():
     assert plot.tick_name("Gemini 2.5 Flash-Lite (3.1)") == "Gemini 2.5\nFlash-Lite\n(3.1)"
     assert plot.tick_name("GPT-5") == "GPT-5"
+
+
+def test_severity_scoring_chart_for_text_runs(results, tmp_path):
+    from asimov.claims import Claims
+
+    run = next(r for r in load_results(results) if r.benchmark == "text")
+    paths = plot.severity_scoring(run, Claims.model_validate(CLAIMS), tmp_path)
+    assert {p.name for p in paths} == {"severity_scoring.png", "severity_scoring.pdf"}
+    assert [label for _, label, _ in plot.SCORING] == ["Multiple choice (exact level)", "Severe vs not", "Severe recall"]

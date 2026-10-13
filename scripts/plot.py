@@ -35,10 +35,11 @@ ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT / "src"))
 
 from asimov.bench.text_score import QUESTIONS  # noqa: E402
-from asimov.claims import CLAIMS_PATH, Claims, load_claims, model_key  # noqa: E402
+from asimov.claims import CLAIMS_PATH, Claims, load_claims, model_key, paper_value  # noqa: E402
 from asimov.collect.build import default_headline  # noqa: E402
 from asimov.collect.load import RunData, load_results, load_yaml  # noqa: E402
-from asimov.collect.pages import PAIRED_FIGURE, fig5a_partner, run_figures  # noqa: E402
+from asimov.collect.metrics import estimate  # noqa: E402
+from asimov.collect.pages import EXTRA_FIGURES, PAIRED_FIGURE, fig5a_partner, run_figures  # noqa: E402
 from asimov.collect.run_ids import assign_ids  # noqa: E402
 from asimov.plot_data import (  # noqa: E402
     SEVERITY,
@@ -603,6 +604,76 @@ def fig5b(run: RunData, claims: Claims, out: Path) -> list[Path]:
     return written
 
 
+# Severity scoring chart: one model's Q2 answers scored three ways (validated dataviz palette, slots 1-3, so
+# the series never look like the per-model colors).
+SCORING = (
+    (f"{QUESTIONS[1]}_accuracy", "Multiple choice (exact level)", "#2a78d6"),
+    (f"{QUESTIONS[1]}_severe_binary_accuracy", "Severe vs not", "#eb6834"),
+    (f"{QUESTIONS[1]}_severe_recall", "Severe recall", "#1baf7a"),
+)
+SCORING_BAR = 0.26
+SCORING_NOTES = [
+    "Each group is one model. Its three bars score the same severity answers three ways.",
+    "Multiple choice: right only if the model picks the exact level (no / minor / moderate / severe). Fig 4a uses this.",
+    "Severe vs not: right if the model gets 'severe or not' right, even with the wrong level.",
+    "Severe recall: of the truly severe cases, the share the model called severe.",
+    "Thin lines show the 95% range the true score likely falls in.",
+    "Diamond = the paper's Fig 4a severity value (the paper doesn't say which scoring it used).",
+]
+
+
+def severity_scoring(run: RunData, claims: Claims, out: Path) -> list[Path]:
+    """Grouped bars: per model, Q2 severity accuracy under each scoring rule, with 95% CIs and the paper's 4a value."""
+    models = in_paper_order(list(run.models))
+    with plt.rc_context(STYLE):
+        width = max(FIG5A_MIN_WIDTH, FIG5A_INCHES_PER_MODEL * len(models) + FIG5A_EXTRA_WIDTH)
+        fig, ax = plt.subplots(figsize=(width, FIG5A_HEIGHT))
+        xs = list(range(len(models)))
+        for k, (metric, label, c) in enumerate(SCORING):
+            pos = [x + (k - 1) * SCORING_BAR for x in xs]
+            ests = [estimate(m, run.benchmark, metric) for m in models]
+            values = [nan if e is None else e.value for e in ests]
+            err = [
+                [0 if e is None or e.lo is None else e.value - e.lo for e in ests],
+                [0 if e is None or e.hi is None else e.hi - e.value for e in ests],
+            ]
+            ax.bar(
+                pos,
+                values,
+                SCORING_BAR,
+                color=c,
+                edgecolor="white",
+                linewidth=1,
+                label=label,
+                yerr=err,
+                error_kw={"elinewidth": 1, "ecolor": INK, "alpha": CI_ALPHA},
+            )
+        theirs = [paper_value(claims, run.benchmark, m.name, f"{QUESTIONS[1]}_accuracy", "4a") for m in models]
+        shown = [(x, v) for x, v in zip(xs, theirs, strict=True) if v is not None]
+        if shown:
+            ax.scatter(
+                [x for x, _ in shown],
+                [v for _, v in shown],
+                marker="D",
+                s=PAPER_MARKER_SIZE,
+                facecolors="white",
+                edgecolors=INK,
+                zorder=3,
+                label="Paper Fig 4a value",
+            )
+        ax.set_xticks(xs, [tick_name(m.name) for m in models], fontsize=TICK_FONTSIZE)
+        ax.set(
+            xlabel="Model",
+            ylabel="Severity score (Q2)\n% of scenarios (recall: % of severe ones)",
+            ylim=(0, 1.05),
+            title="Severity: the same answers scored three ways",
+        )
+        percent_axis(ax.yaxis)
+        ax.legend(title="Scoring", **OUTSIDE_LEGEND)
+        reading_notes(ax, SCORING_NOTES)
+        return save(fig, out, "severity_scoring")
+
+
 def draw_run(run: RunData, runs: list[RunData], headline: dict, claims: Claims, severity: str, out: Path) -> list[Path]:
     """This run's figures (pages.run_figures) into `out`, which is figures/<run_id>/."""
     names = run_figures(run, runs, headline)
@@ -616,6 +687,8 @@ def draw_run(run: RunData, runs: list[RunData], headline: dict, claims: Claims, 
         written += fig5a(text_vs_video(text, video, claims, only_paper_models=False), "fig5a_comparison", out, True)
     if "fig5b" in names:
         written += fig5b(run, claims, out)
+    if "severity_scoring" in EXTRA_FIGURES.get(run.benchmark, ()):
+        written += severity_scoring(run, claims, out)
     return written
 
 

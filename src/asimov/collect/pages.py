@@ -45,6 +45,14 @@ OWN_FIGURES = {"text": ("fig4a", "fig4b"), "video": ("fig5b",)}
 PAIRED_FIGURE = "fig5a"
 PARTNER_FIGURE = {"text": "fig5", "video": "fig4"}  # benchmark -> the headline.yaml figure holding its Fig 5a partner
 FIGURE_VERSIONS = ("comparison", "paper")  # order on the pages: comparison first
+# Our own extra charts (one version each, no paper-style twin), drawn for every run of the benchmark.
+EXTRA_FIGURES = {"text": ("severity_scoring",)}
+EXTRA_SUBHEADING = "Scoring choices"
+EXTRA_NOTE = (
+    "The same severity answers (Q2) scored three ways, per model: the exact level (multiple choice, the score Fig 4a "
+    "uses), severe vs not, and severe recall. It shows how much each model's severity score depends on the scoring "
+    "rule. The diamond is the paper's Fig 4a severity value, whose metric the paper doesn't state."
+)
 FIGURES_DIR = "figures"  # at the repo root, next to results/
 FIGURE_SUBHEADINGS = {"comparison": "Comparison versions", "paper": "Paper-style versions"}
 FIGURE_VERSION_NOTES = {  # the plain-language paragraph under each subheading of a run page's Figures section
@@ -83,6 +91,11 @@ def run_figures(run: RunData, runs: list[RunData], headline: dict) -> list[str]:
 def figure_file(run_id: str, fig: str, version: str, suffix: str = "", ext: str = "png") -> str:
     """Path from the repo root: figures/<run_id>/<fig>_<version><suffix>.<ext> (suffix e.g. "_severity-binary")."""
     return f"{FIGURES_DIR}/{run_id}/{fig}_{version}{suffix}.{ext}"
+
+
+def extra_figure_file(run_id: str, fig: str, ext: str = "png") -> str:
+    """Path from the repo root: figures/<run_id>/<fig>.<ext> (one version only)."""
+    return f"{FIGURES_DIR}/{run_id}/{fig}.{ext}"
 
 
 def num(v: float | None, digits: int = 3) -> str:
@@ -271,6 +284,10 @@ def figures_section(run: RunData, runs: list[RunData], headline: dict, labels: d
     for version in FIGURE_VERSIONS:
         images = [f"![{f}, {version}](../../{figure_file(run_id, f, version)})" for f in names]
         parts.append("\n\n".join([f"### {FIGURE_SUBHEADINGS[version]}", FIGURE_VERSION_NOTES[version], *images]))
+    extras = EXTRA_FIGURES.get(run.benchmark, ())
+    if extras:
+        images = [f"![{f}](../../{extra_figure_file(run_id, f)})" for f in extras]
+        parts.append("\n\n".join([f"### {EXTRA_SUBHEADING}", EXTRA_NOTE, *images]))
     return "\n\n".join(parts)
 
 
