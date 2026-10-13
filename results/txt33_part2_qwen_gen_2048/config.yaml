@@ -1,0 +1,13 @@
+# Rerun of part2_qwen_gen (txt27) with the generation cap raised from 1024 to 2048 tokens (Noa, 2026-10-14):
+# 29/319 replies hit the 1024 cap there (16 of them unparseable). Only change: params max_new_tokens.
+# Part 2: Qwen3.5-4B (post-trained), local (free), generating an answer to the paper's verbatim
+# prompt: chat template, thinking off, greedy decoding, at most MAX_NEW_TOKENS (models/local_hf.py);
+# scored by the unchanged Fig 4 scorer. Pairs with part2_qwen_logprob (same model, option logits).
+# Runs on a Modal L40S (backend: modal; models/modal_app.py, deploy it first), same code as locally.
+run: part2_qwen_gen_2048
+benchmark: text
+prompt: text_verbatim
+thinking: min  # required by the schema; thinking is always off for local models
+models:
+  - {name: Qwen3.5-4B (generate), provider: local_hf, model: qwen3.5-4b,
+     params: {repo: Qwen/Qwen3.5-4B, revision: 851bf6e806efd8d0a36b00ddf55e13ccb7b8cd0a, mode: generate, template: chat, backend: modal, max_new_tokens: 2048}}
