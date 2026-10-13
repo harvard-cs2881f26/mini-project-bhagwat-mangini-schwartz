@@ -885,3 +885,15 @@ Numbers only. 5-item accuracy is not reported (too few items to mean anything). 
 - Jev, normal vs reversed option order: same answer on 18/20 question-answers (2 severity
   answers moved by one level). 5 items only; the full runs measure this properly.
 - The Decisions API reports the served model as `gpt-6-luna`, with no dated version.
+
+### Kev-4B on Modal (2026-10-13)
+- Deployed with Kev's own `skills/kev-deploy/scripts/kev_serve.py` (sha256 `65ac20e8...`, runs kev
+  package commit `fc4a17e`), `KEV_MODEL=jaredpalmer/kev-4b@v1.0`, bearer auth (`KEV_API_KEY`),
+  Modal workspace `nschwartz`, app `kev`, URL `https://nschwartz--kev-api.modal.run`, L40S (H100
+  fallback), scales to zero after 5 idle minutes (no cost while idle). `/v1/models` reports base
+  `Qwen/Qwen3.5-4B-Base`, LoRA rank 16, bf16, **temperature 2.41**: Kev scales its probabilities
+  with its own fitted temperature. Argmax (accuracy) is unchanged; Brier/ECE are not comparable to
+  an untempered model without noting this.
+- First cold start 179 s. Smoke (`part2_kev`, 5 items): 0 errors, 0 parse failures, ~590 input
+  tokens per item, server latency 248-682 ms (`raw.latency_ms`), ~1 s round trip.
+  Kev reports output tokens (~350 per item); no tokens are billed (own GPU). Cost is GPU time.
