@@ -6,7 +6,7 @@ Headline numbers per figure, from the run chosen in [`headline.yaml`](headline.y
 
 ## Fig 4 (text)
 
-Run: [`repro_fig4`](repro_fig4/README.md) · [paper check](repro_fig4/paper_check.md)
+Run: `txt0` [`repro_fig4`](repro_fig4/README.md) · [paper check](repro_fig4/paper_check.md)
 
 | Model | latent_risk_accuracy | paper | latent_severity_accuracy | paper | effect_accuracy | paper | activated_risk_accuracy | paper |
 |---|---|---|---|---|---|---|---|---|
@@ -23,7 +23,7 @@ Run: [`repro_fig4`](repro_fig4/README.md) · [paper check](repro_fig4/paper_chec
 
 ## Fig 5 (video)
 
-Run: [`repro_fig5`](repro_fig5/README.md) · [paper check](repro_fig5/paper_check.md)
+Run: `vid0` [`repro_fig5`](repro_fig5/README.md) · [paper check](repro_fig5/paper_check.md)
 
 | Model | risk_accuracy | paper | timing_mae_s | paper | within_0_5_rate | paper |
 |---|---|---|---|---|---|---|
@@ -44,7 +44,7 @@ No run yet.
 
 ## All runs
 
-| Run | Benchmark | Date | Models | Thinking | Prompt | Commit | Cost $ | Note |
-|---|---|---|---|---|---|---|---|---|
-| [`repro_fig5`](repro_fig5/README.md) | video | 2026-10-12 | 8 | min | video_v2 | ae0477e | – |  |
-| [`repro_fig4`](repro_fig4/README.md) | text | 2026-10-12 | 8 | min | text_verbatim | 7b3ddf9 | – |  |
+| Run ID | Run | Description | Benchmark | Date | Models | Thinking | Prompt | Commit | Cost $ | Note |
+|---|---|---|---|---|---|---|---|---|---|---|
+| `vid0` | [`repro_fig5`](repro_fig5/README.md) | Video benchmark, using the video_v2 prompt, with thinking set to min (the lowest reasoning each provider allows), on 8 models. | video | 2026-10-12 | 8 | min | video_v2 | ae0477e | – |  |
+| `txt0` | [`repro_fig4`](repro_fig4/README.md) | Text benchmark, using the paper's prompt sent unchanged (text_verbatim), with thinking set to min (the lowest reasoning each provider allows), on 8 models. Reasoning summaries are saved. | text | 2026-10-12 | 8 | min | text_verbatim | 7b3ddf9 | – |  |

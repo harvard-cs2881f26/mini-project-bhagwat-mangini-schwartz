@@ -6,7 +6,8 @@
 
 Reads results/<run>/*/summary.json and responses.jsonl, configs/paper/claims.yaml, and
 configs/prices.yaml if it exists. Hand-edited inputs: results/headline.yaml (created once if
-missing) and results/comparisons.yaml. Every other file it writes is generated: never edit it.
+missing) and results/comparisons.yaml. results/run_ids.yaml (run name -> short run ID) is maintained here:
+new runs are added, existing IDs never change. Every other file it writes is generated: never edit it.
 """
 
 from __future__ import annotations
@@ -22,6 +23,7 @@ from asimov.claims import CLAIMS_PATH, load_claims  # noqa: E402
 from asimov.collect.build import COMPARISONS_DEFAULT, build, headline_yaml  # noqa: E402
 from asimov.collect.load import load_results, load_yaml  # noqa: E402
 from asimov.collect.pages import GENERATED  # noqa: E402
+from asimov.collect.run_ids import RUN_IDS_FILE, assign_ids, missing_ids, parse_ids, run_ids_yaml  # noqa: E402
 
 PRICES_PATH = ROOT / "configs" / "prices.yaml"
 # Paths collect.py may have written earlier. A match is orphaned when the rebuild no longer makes it and it's
@@ -61,11 +63,18 @@ def main(argv: list[str] | None = None) -> int:
             comparisons_path.write_text(COMPARISONS_DEFAULT)
     headline = load_yaml(headline_path, {})
     comparisons = load_yaml(comparisons_path, {}).get("comparisons") or []
-    files = build(runs, load_claims(args.claims), load_yaml(args.prices, {}) or {}, headline, comparisons)
+    run_ids_path = args.results / RUN_IDS_FILE
+    existing = parse_ids(load_yaml(run_ids_path, {}))
+    ids = assign_ids(existing, runs)
+    files = build(runs, load_claims(args.claims), load_yaml(args.prices, {}) or {}, headline, comparisons, ids)
 
     orphans = orphaned_files(args.results, files)
     if args.check:
         stale = stale_files(args.results, files)
+        unlabeled = missing_ids(existing, runs)
+        if unlabeled:
+            stale.append(RUN_IDS_FILE)
+            print(f"{RUN_IDS_FILE} is stale: runs without an ID: {', '.join(unlabeled)}")
         if stale:
             print("results pages are stale: run scripts/collect.py and commit. Differs: " + ", ".join(stale))
         if orphans:
@@ -74,6 +83,8 @@ def main(argv: list[str] | None = None) -> int:
             return 1
         print(f"results pages are up to date ({len(files)} files)")
         return 0
+    if ids != existing or not run_ids_path.exists():
+        run_ids_path.write_text(run_ids_yaml(ids))
     for rel, text in files.items():
         path = args.results / rel
         path.parent.mkdir(parents=True, exist_ok=True)
