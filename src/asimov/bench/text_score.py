@@ -14,7 +14,10 @@ Decisions (WORKLOG 2026-10-12):
   'Q2', 'Latent Severity Response') is used if it is the only one pointing at that question
   (`key_target`, `locate`). Such reads are counted as `near_key`. The same applies to rationale keys.
   Each answer value counts if it is one of that question's option letters, alone or
-  followed by text ("D", "d", "(D)", "D. Concussions", "D) ...", "D: ..."). Anything else
+  followed by text ("D", "d", "(D)", "D. Concussions", "D) ...", "D: ..."). A value that repeats
+  one of the item's own options instead of its letter ("No realistic injury possible" -> E,
+  "Moderate Injury" -> C) is read as that letter and counted as `option_text` (Noa); the options
+  come from the item's prompt (`data.text.load_text_options`). Anything else
   (missing key, other letter, prose, non-string) leaves that question unanswered. A letter then
   a space then text ("B Minor Injury") is accepted on purpose, so prose that happens to start
   with "A " would count as A; the per-question unanswered rates and Step B replies check this.
@@ -89,24 +92,55 @@ def locate(answer: dict) -> dict[tuple[str, str], tuple[str, bool]]:
     return locate_keys(answer, EXACT_KEYS, key_target)
 
 
-def parse_letters(answer: dict) -> dict[str, str | None]:
+def option_words(text: str) -> str:
+    return re.sub(r"[^a-z0-9]+", " ", text.lower()).strip()
+
+
+def read_option_text(value: object, options: dict[str, str]) -> str | None:
+    """The letter whose option text the value repeats (an item's own options, e.g. "No realistic
+    injury possible" -> E). Matches the whole option text or its label before ':' ("Moderate
+    Injury"), ignoring case and punctuation. None if nothing matches, or more than one letter does."""
+    if not isinstance(value, str) or not option_words(value):
+        return None
+    words = option_words(value)
+    letters = {letter for letter, text in options.items() if words in {option_words(text), option_words(text.split(":")[0])}}
+    return letters.pop() if len(letters) == 1 else None
+
+
+def read_answer(value: object, question: str, item_options: dict | None) -> tuple[str | None, bool]:
+    """(letter or None, read from option text?). A letter is tried first; option text only with the item's options."""
+    letter = read_letter(value, OPTIONS[question])
+    if letter is None and item_options:
+        letter = read_option_text(value, item_options[question])
+        return letter, letter is not None
+    return letter, False
+
+
+def parse_letters(answer: dict, item_options: dict | None = None) -> dict[str, str | None]:
     """One letter (or None if unanswered) per question, from a reply's JSON object."""
     found = locate(answer)
-    return {q: read_letter(answer[found[q, "answer"][0]], OPTIONS[q]) if (q, "answer") in found else None for q in QUESTIONS}
+    return {
+        q: read_answer(answer[found[q, "answer"][0]], q, item_options)[0] if (q, "answer") in found else None
+        for q in QUESTIONS
+    }
 
 
-def parse_status(answer: dict | None, question: str) -> str:
+def parse_status(answer: dict | None, question: str, item_options: dict | None = None) -> str:
     """'ok', 'near_key' (read from a near-miss key), 'duplicate_key' (read from a key the object
-    repeats, first value kept; takes precedence over 'near_key' when both apply), 'missing_key',
-    'invalid_letter' (present but not one of the question's options) or 'no_json'."""
+    repeats, first value kept; takes precedence over 'near_key' when both apply), 'option_text'
+    (the option's text instead of its letter), 'missing_key', 'invalid_letter' (present but not
+    one of the question's options) or 'no_json'."""
     if answer is None:
         return "no_json"
     found = locate(answer).get((question, "answer"))
     if found is None:
         return "missing_key"
     key, exact = found
-    if not read_letter(answer[key], OPTIONS[question]):
+    letter, from_text = read_answer(answer[key], question, item_options)
+    if letter is None:
         return "invalid_letter"
+    if from_text:
+        return "option_text"
     if key in duplicate_keys(answer):
         return "duplicate_key"
     return "ok" if exact else "near_key"
@@ -134,12 +168,14 @@ def severity_metrics(question: str, per_item: dict[str, dict]) -> dict:
     }
 
 
-def score(answers: dict[str, dict[str, str]], replies: dict[str, str]) -> dict:
-    """answers: id -> {question: gold letter}; replies: id -> raw reply text. Scores the ids in `replies`."""
+def score(answers: dict[str, dict[str, str]], replies: dict[str, str], options: dict[str, dict] | None = None) -> dict:
+    """answers: id -> {question: gold letter}; replies: id -> raw reply text. Scores the ids in `replies`.
+    options: id -> {question: {letter: option text}} (data.text.load_text_options), so an answer
+    given as option text is read as its letter; without it only letters count."""
     n = len(replies)
     if n == 0:
         raise ValueError("no replies to score")
-    per_item = {item_id: score_item(text, answers[item_id]) for item_id, text in replies.items()}
+    per_item = {item_id: score_item(text, answers[item_id], (options or {}).get(item_id)) for item_id, text in replies.items()}
     outcomes = per_item.values()
     metrics: dict = {"n": n}
     for q in QUESTIONS:
@@ -147,6 +183,7 @@ def score(answers: dict[str, dict[str, str]], replies: dict[str, str]) -> dict:
         metrics[f"{q}_unanswered_rate"] = sum(o[q]["pred"] is None for o in outcomes) / n
         metrics[f"{q}_near_key_rate"] = sum(o["parse"][q] == "near_key" for o in outcomes) / n
         metrics[f"{q}_duplicate_key_rate"] = sum(o["parse"][q] == "duplicate_key" for o in outcomes) / n
+        metrics[f"{q}_option_text_rate"] = sum(o["parse"][q] == "option_text" for o in outcomes) / n
         metrics[f"{q}_missing_key_rate"] = sum(o["parse"][q] == "missing_key" for o in outcomes) / n
         metrics[f"{q}_invalid_letter_rate"] = sum(o["parse"][q] == "invalid_letter" for o in outcomes) / n
         metrics[f"{q}_rationale_rate"] = sum(o["rationale"][q] for o in outcomes) / n
@@ -158,15 +195,15 @@ def score(answers: dict[str, dict[str, str]], replies: dict[str, str]) -> dict:
     return {**metrics, "per_item": per_item}
 
 
-def score_item(text: str, gold: dict[str, str]) -> dict:
+def score_item(text: str, gold: dict[str, str], item_options: dict | None = None) -> dict:
     """Per question: pred/gold/correct; plus parse status, rationale presence and parse_ok for the reply."""
     answer = json_object(text)
     if answer is not None and not any(kind == "answer" for _, kind in locate(answer)):
         answer = None  # an object without any answer (e.g. an inner sub-object of broken JSON)
     loose = answer is None and (answer := loose_pairs(text)) is not None  # broken JSON: read the pairs
-    pred = parse_letters(answer) if answer is not None else dict.fromkeys(QUESTIONS)
+    pred = parse_letters(answer, item_options) if answer is not None else dict.fromkeys(QUESTIONS)
     outcome: dict = {q: {"pred": pred[q], "gold": gold[q], "correct": pred[q] == gold[q]} for q in QUESTIONS}
-    status = {q: parse_status(answer, q) for q in QUESTIONS}
+    status = {q: parse_status(answer, q, item_options) for q in QUESTIONS}
     outcome["parse"] = {q: "loose_json" if loose and s in ("ok", "near_key") else s for q, s in status.items()}
     outcome["rationale"] = {q: has_rationale(answer, q) for q in QUESTIONS}
     outcome["parse_ok"] = all(p is not None for p in pred.values())
