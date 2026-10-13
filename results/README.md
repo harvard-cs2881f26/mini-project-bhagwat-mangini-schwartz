@@ -47,4 +47,5 @@ No run yet.
 | Run | Benchmark | Date | Models | Thinking | Prompt | Commit | Cost $ | Note |
 |---|---|---|---|---|---|---|---|---|
 | [`repro_fig5`](repro_fig5/README.md) | video | 2026-10-12 | 8 | min | video_v2 | ae0477e | – |  |
-| [`repro_fig4`](repro_fig4/README.md) | text | 2026-10-12 | 8 | min | text_verbatim | 7b3ddf9 | – |  |
+| [`repro_fig4_default`](repro_fig4_default/README.md) | text | 2026-10-12 | 8 | default | text_verbatim | d687d53 | – |  |
+| [`repro_fig4`](repro_fig4/README.md) | text | 2026-10-12 | 8 | min | text_verbatim | d687d53 | – |  |

@@ -10,7 +10,7 @@
 | Prompt | text_verbatim |
 | Thinking | min |
 | Reasoning logged | True |
-| Git commit | 7b3ddf9c06 |
+| Git commit | d687d53800 |
 | Scored | 2026-10-12 |
 | Config | [config.yaml](config.yaml) (sha256 055fc2c1420b) |
 
