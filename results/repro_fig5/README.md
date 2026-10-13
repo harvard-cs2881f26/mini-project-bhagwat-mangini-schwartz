@@ -10,7 +10,7 @@
 | Prompt | video_v2 |
 | Thinking | min |
 | Reasoning logged | False |
-| Git commit | 691105c9de |
+| Git commit | ae0477e43f |
 | Scored | 2026-10-12 |
 | Config | [config.yaml](config.yaml) (sha256 e312003f730d) |
 
@@ -18,14 +18,14 @@
 
 | Model | Requested | Served | Stand-in | Replies | Errors | Parse failures | Refused | Truncated | Malformed | Near-key reads | With reasoning | Input tokens | Output tokens | Cost $ | Latency p50 / p95 s |
 |---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|
-| GPT-5 Nano | `gpt-5-nano` | `gpt-5-nano-2025-08-07` |  | 287 | 0 | 0 | 0 | 0 | – | 0 | – | 6443150 | 14623 | – | 2.2 / 4.3 |
-| GPT-5 Mini | `gpt-5-mini` | `gpt-5-mini-2025-08-07` |  | 287 | 0 | 0 | 0 | 0 | – | 0 | – | 5180350 | 14613 | – | 1.9 / 3.1 |
-| GPT-5 | `gpt-5` | `gpt-5-2025-08-07` |  | 287 | 0 | 0 | 0 | 0 | – | 0 | – | 4284910 | 14645 | – | 4.7 / 7.8 |
-| Claude Sonnet 4 (4.5) | `claude-sonnet-4-5-20250929` | `claude-sonnet-4-5-20250929` | yes | 287 | 0 | 0 | 0 | 0 | – | 0 | – | 5628070 | 30824 | – | 2.2 / 10.9 |
-| Claude Opus 4.1 (4.5) | `claude-opus-4-5-20251101` | `claude-opus-4-5-20251101` | yes | 287 | 0 | 0 | 0 | 0 | – | 0 | – | 5628070 | 11217 | – | 3.2 / 7.1 |
-| Gemini 2.5 Flash-Lite (3.1) | `gemini-3.1-flash-lite` | `gemini-3.1-flash-lite` | yes | 287 | 0 | 2 | 2 | 0 | – | 0 | – | 5121616 | 9761 | – | 4.2 / 6.8 |
-| Gemini 2.5 Flash (3) | `gemini-3-flash-preview` | `gemini-3-flash-preview` | yes | 287 | 0 | 2 | 2 | 0 | – | 0 | – | 5156816 | 9811 | – | 3.1 / 6.1 |
-| Gemini 2.5 Pro (3.1) | `gemini-3.1-pro-preview` | `gemini-3.1-pro-preview` | yes | 165 | 122 | 1 | 1 | 0 | – | 0 | – | 2964720 | 6444 | – | 7.4 / 11.7 |
+| GPT-5 Nano | `gpt-5-nano` | `gpt-5-nano-2025-08-07` |  | 287 | 0 | 0 | 0 | 0 | – | 0 | 0 | 6443150 | 14623 | – | 2.2 / 4.3 |
+| GPT-5 Mini | `gpt-5-mini` | `gpt-5-mini-2025-08-07` |  | 287 | 0 | 0 | 0 | 0 | – | 0 | 0 | 5180350 | 14613 | – | 1.9 / 3.1 |
+| GPT-5 | `gpt-5` | `gpt-5-2025-08-07` |  | 287 | 0 | 0 | 0 | 0 | – | 0 | 0 | 4284910 | 14645 | – | 4.7 / 7.8 |
+| Claude Sonnet 4 (4.5) | `claude-sonnet-4-5-20250929` | `claude-sonnet-4-5-20250929` | yes | 287 | 0 | 0 | 0 | 0 | – | 0 | 0 | 5628070 | 30824 | – | 2.2 / 10.9 |
+| Claude Opus 4.1 (4.5) | `claude-opus-4-5-20251101` | `claude-opus-4-5-20251101` | yes | 287 | 0 | 0 | 0 | 0 | – | 0 | 0 | 5628070 | 11217 | – | 3.2 / 7.1 |
+| Gemini 2.5 Flash-Lite (3.1) | `gemini-3.1-flash-lite` | `gemini-3.1-flash-lite` | yes | 287 | 0 | 2 | 2 | 0 | – | 0 | 0 | 5121616 | 9761 | – | 4.2 / 6.8 |
+| Gemini 2.5 Flash (3) | `gemini-3-flash-preview` | `gemini-3-flash-preview` | yes | 287 | 0 | 2 | 2 | 0 | – | 0 | 0 | 5156816 | 9811 | – | 3.1 / 6.1 |
+| Gemini 2.5 Pro (3.1) | `gemini-3.1-pro-preview` | `gemini-3.1-pro-preview` | yes | 287 | 122 | 2 | 2 | 0 | – | 0 | 0 | 5139216 | 11200 | – | 8.7 / 19.8 |
 
 Parse failures: replies with no readable answer; all count as wrong (CLAUDE.md, scoring conventions). With per-item `parse_ok` in `summary.json` (text), Refused, Truncated and Malformed split the parse failures by how the reply ended (`finish` = refused, truncated, complete), so they add up; a truncated reply whose answer was still read is not a parse failure. Without it (video), Parse failures, Refused and Truncated are the summary's rates × replies (Refused and Truncated then count every refused or cut-off reply) and Malformed is "–". Cost is "–" until `configs/prices.yaml` has the model.
 
@@ -40,7 +40,7 @@ Parse failures: replies with no readable answer; all count as wrong (CLAUDE.md, 
 | Claude Opus 4.1 (4.5) | 0.596 [0.538, 0.651] | 0.460 [0.403, 0.518] | 1.332 [1.132, 1.545] | 0.597 [0.486, 0.700] |
 | Gemini 2.5 Flash-Lite (3.1) | 0.634 [0.577, 0.688] | 0.449 [0.393, 0.507] | 1.476 [1.226, 1.753] | 0.584 [0.473, 0.688] |
 | Gemini 2.5 Flash (3) | 0.582 [0.524, 0.637] | 0.436 [0.379, 0.493] | 1.310 [1.108, 1.525] | 0.636 [0.525, 0.735] |
-| Gemini 2.5 Pro (3.1) | 0.648 [0.573, 0.717] | 0.558 [0.481, 0.631] | 0.994 [0.776, 1.224] | 0.696 [0.552, 0.809] |
+| Gemini 2.5 Pro (3.1) | 0.631 [0.573, 0.684] | 0.519 [0.461, 0.576] | 1.141 [0.954, 1.333] | 0.675 [0.565, 0.769] |
 
 CIs: Wilson for rates, bootstrap over items for means (`src/asimov/stats.py`).
 
