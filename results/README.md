@@ -34,7 +34,7 @@ Run: [`repro_fig5`](repro_fig5/README.md) · [paper check](repro_fig5/paper_chec
 | Claude Opus 4.1 (4.5) | 0.596 [0.538, 0.651] | 0.640 | 1.332 [1.132, 1.545] | 2.410 | 0.460 [0.403, 0.518] | 0.319 |
 | Gemini 2.5 Flash-Lite (3.1) | 0.634 [0.577, 0.688] | – | 1.476 [1.226, 1.753] | 1.430 | 0.449 [0.393, 0.507] | 0.290 |
 | Gemini 2.5 Flash (3) | 0.582 [0.524, 0.637] | – | 1.310 [1.108, 1.525] | 1.400 | 0.436 [0.379, 0.493] | 0.344 |
-| Gemini 2.5 Pro (3.1) | 0.648 [0.573, 0.717] | 0.840 | 0.994 [0.776, 1.224] | 0.720 | 0.558 [0.481, 0.631] | 0.560 |
+| Gemini 2.5 Pro (3.1) | 0.631 [0.573, 0.684] | 0.840 | 1.141 [0.954, 1.333] | 0.720 | 0.519 [0.461, 0.576] | 0.560 |
 
 ![fig5a](../figures/fig5a_comparison.png) ![fig5b](../figures/fig5b_comparison.png)
 
@@ -46,5 +46,5 @@ No run yet.
 
 | Run | Benchmark | Date | Models | Thinking | Prompt | Commit | Cost $ | Note |
 |---|---|---|---|---|---|---|---|---|
-| [`repro_fig5`](repro_fig5/README.md) | video | 2026-10-12 | 8 | min | video_v2 | 691105c | – |  |
+| [`repro_fig5`](repro_fig5/README.md) | video | 2026-10-12 | 8 | min | video_v2 | ae0477e | – |  |
 | [`repro_fig4`](repro_fig4/README.md) | text | 2026-10-12 | 8 | min | text_verbatim | 7b3ddf9 | – |  |

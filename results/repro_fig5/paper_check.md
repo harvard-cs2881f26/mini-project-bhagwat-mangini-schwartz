@@ -6,15 +6,15 @@ Paper: arXiv 2509.21651v2, read on 2026-10-12 into `configs/paper/claims.yaml`. 
 
 | Claim | Fig / § | Kind | Model (paper) | Ours | Metric | Paper | Ours [95% CI] | Diff | Paper in CI | Stand-in | Status |
 |---|---|---|---|---|---|---|---|---|---|---|---|
-| `fig5a_gemini_2_5_pro_risk_accuracy` | 5a / 3 | value | Gemini 2.5 Pro | Gemini 2.5 Pro (3.1) | risk_accuracy | 0.840 | 0.648 [0.573, 0.717] | -0.192 | no | yes | checked |
+| `fig5a_gemini_2_5_pro_risk_accuracy` | 5a / 3 | value | Gemini 2.5 Pro | Gemini 2.5 Pro (3.1) | risk_accuracy | 0.840 | 0.631 [0.573, 0.684] | -0.209 | no | yes | checked |
 | `fig5a_claude_opus_4_1_risk_accuracy` | 5a / 3 | value | Claude Opus 4.1 | Claude Opus 4.1 (4.5) | risk_accuracy | 0.640 | 0.596 [0.538, 0.651] | -0.044 | yes | yes | checked |
 | `fig5a_gpt_5_risk_accuracy` | 5a / 3 | value | GPT 5 | GPT-5 | risk_accuracy | 0.440 | 0.488 [0.431, 0.545] | 0.048 | yes |  | checked |
 | `fig5b_gemini_2_5_flash_lite_timing_mae_s` | 5b / 3 | value | Gemini 2.5 Flash-lite | Gemini 2.5 Flash-Lite (3.1) | timing_mae_s | 1.430~ | 1.476 [1.226, 1.753] | 0.046 | yes | yes | checked |
 | `fig5b_gemini_2_5_flash_lite_within_0_5_rate` | 5b / 3 | value | Gemini 2.5 Flash-lite | Gemini 2.5 Flash-Lite (3.1) | within_0_5_rate | 0.290~ | 0.449 [0.393, 0.507] | 0.159 | no | yes | checked |
 | `fig5b_gemini_2_5_flash_timing_mae_s` | 5b / 3 | value | Gemini 2.5 Flash | Gemini 2.5 Flash (3) | timing_mae_s | 1.400~ | 1.310 [1.108, 1.525] | -0.090 | yes | yes | checked |
 | `fig5b_gemini_2_5_flash_within_0_5_rate` | 5b / 3 | value | Gemini 2.5 Flash | Gemini 2.5 Flash (3) | within_0_5_rate | 0.344~ | 0.436 [0.379, 0.493] | 0.092 | no | yes | checked |
-| `fig5b_gemini_2_5_pro_timing_mae_s` | 5b / 3 | value | Gemini 2.5 Pro | Gemini 2.5 Pro (3.1) | timing_mae_s | 0.720~ | 0.994 [0.776, 1.224] | 0.274 | no | yes | checked |
-| `fig5b_gemini_2_5_pro_within_0_5_rate` | 5b / 3 | value | Gemini 2.5 Pro | Gemini 2.5 Pro (3.1) | within_0_5_rate | 0.560~ | 0.558 [0.481, 0.631] | -0.002 | yes | yes | checked |
+| `fig5b_gemini_2_5_pro_timing_mae_s` | 5b / 3 | value | Gemini 2.5 Pro | Gemini 2.5 Pro (3.1) | timing_mae_s | 0.720~ | 1.141 [0.954, 1.333] | 0.421 | no | yes | checked |
+| `fig5b_gemini_2_5_pro_within_0_5_rate` | 5b / 3 | value | Gemini 2.5 Pro | Gemini 2.5 Pro (3.1) | within_0_5_rate | 0.560~ | 0.519 [0.461, 0.576] | -0.041 | yes | yes | checked |
 | `fig5b_claude_opus_4_1_timing_mae_s` | 5b / 3 | value | Claude Opus 4.1 | Claude Opus 4.1 (4.5) | timing_mae_s | 2.410~ | 1.332 [1.132, 1.545] | -1.078 | no | yes | checked |
 | `fig5b_claude_opus_4_1_within_0_5_rate` | 5b / 3 | value | Claude Opus 4.1 | Claude Opus 4.1 (4.5) | within_0_5_rate | 0.319~ | 0.460 [0.403, 0.518] | 0.141 | no | yes | checked |
 | `fig5b_claude_sonnet_4_timing_mae_s` | 5b / 3 | value | Claude Sonnet 4 | Claude Sonnet 4 (4.5) | timing_mae_s | 1.810~ | 1.296 [1.068, 1.532] | -0.514 | no | yes | checked |
@@ -28,5 +28,5 @@ Paper: arXiv 2509.21651v2, read on 2026-10-12 into `configs/paper/claims.yaml`. 
 | `sec3_claude_opus_4_1_risk_accuracy_gap_text_minus_video` | – / 3 | gap | Claude Opus 4.1 | – | risk_accuracy | 0.270 | – | – | – |  | not checked by code (see note) |
 | `sec3_gpt5_risk_accuracy_gap_text_minus_video` | – / 3 | gap | GPT5 | – | risk_accuracy | 0.400 | – | – | – |  | not checked by code (see note) |
 | `sec3_gemini_2_5_pro_timing_mae_s` | – / 3 | bound | Gemini 2.5 Pro | – | timing_mae_s | 0.750 | – | – | – |  | a bound, not a point value |
-| `sec3_gemini_2_5_pro_within_0_5_rate` | – / 3 | value | Gemini 2.5 Pro | Gemini 2.5 Pro (3.1) | within_0_5_rate | 0.560 | 0.558 [0.481, 0.631] | -0.002 | yes | yes | checked |
+| `sec3_gemini_2_5_pro_within_0_5_rate` | – / 3 | value | Gemini 2.5 Pro | Gemini 2.5 Pro (3.1) | within_0_5_rate | 0.560 | 0.519 [0.461, 0.576] | -0.041 | yes | yes | checked |
 | `appD_avg_majority_baseline_risk` | – / Appendix D | baseline | – | – | majority_baseline_risk | 0.672 | – | – | – |  | derived from the dataset's counts, no model |

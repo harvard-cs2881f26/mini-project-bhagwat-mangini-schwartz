@@ -1,7 +1,7 @@
 """Metric formulas: the one home for them (docs/PLAN.md §9.2). Pure functions, no I/O.
 
 Choices and the alternatives considered: WORKLOG.md, "2026-10-12: Session 2, stats + plots (Noa)",
-"Statistics methods: PROPOSED (Noa to confirm)".
+"Statistics methods: DECIDED".
 - Accuracy CIs: Wilson score interval, 95%. It stays inside [0, 1] and behaves at 0/n and n/n.
 - Paired differences (two systems on the same items): percentile bootstrap over items, 10,000
   resamples, seed 0, so reruns give the same CI.
