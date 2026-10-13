@@ -164,7 +164,7 @@ Per item: the model's totals over this run divided by its replies. Refused and P
 | Prompt | decision_short_oneshot_local |
 | Thinking | min |
 | Reasoning logged | False |
-| Git commit | 85cc8b2024 |
+| Git commit | 350410d11e |
 | Scored | 2026-10-13 |
 | Config | [config.yaml](config.yaml) (sha256 0674d4bf5762) |
 

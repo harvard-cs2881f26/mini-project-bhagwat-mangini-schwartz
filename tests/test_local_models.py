@@ -482,3 +482,13 @@ def test_importing_the_remote_path_imports_neither_modal_nor_torch():
     env = {**os.environ, "PYTHONPATH": str(ROOT / "src")}
     out = subprocess.run([sys.executable, "-c", code], cwd=ROOT, capture_output=True, text=True, env=env)
     assert out.returncode == 0, out.stderr
+
+
+def test_generation_cap_comes_from_params_with_a_default():
+    from asimov.models.local_hf import MAX_NEW_TOKENS, check_max_new_tokens
+
+    assert check_max_new_tokens({}) == MAX_NEW_TOKENS
+    assert check_max_new_tokens({"max_new_tokens": 2048}) == 2048
+    for bad in (0, -5, "2048", True, 1.5):
+        with pytest.raises(ValueError, match="max_new_tokens"):
+            check_max_new_tokens({"max_new_tokens": bad})
