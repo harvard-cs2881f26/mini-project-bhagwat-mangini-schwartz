@@ -24,6 +24,7 @@ From saved replies only (`part2_same_size.yaml`); choices in WORKLOG 2026-10-14,
 | Qwen3.5-4B-Base option probabilities | Qwen-Base probs one-shot (txt29) | 319 | 0.809 [0.762, 0.848] | 0.539 [0.484, 0.593] | 0.514 [0.459, 0.568] | 0.357 [0.307, 0.411] | 0.555 [0.528, 0.582] | 0.0% | 0.225 | Modal compute_s | 4B | self-hosted, GPU time |
 | Qwen3.5-4B option probabilities | Qwen probs (txt28) | 319 | 0.571 [0.516, 0.624] | 0.389 [0.337, 0.443] | 0.458 [0.404, 0.513] | 0.445 [0.392, 0.500] | 0.466 [0.436, 0.496] | 0.0% | 0.275 | Modal compute_s | 4B | self-hosted, GPU time |
 | Qwen3.5-4B generate | Qwen generate (txt33) **Flag: 8.2% parse failures, above Noa's 2% line** | 319 | 0.771 [0.722, 0.814] | 0.618 [0.563, 0.669] | 0.596 [0.541, 0.648] | 0.580 [0.525, 0.633] | 0.641 [0.608, 0.675] | 8.2% | 16.771 | Modal compute_s | 4B | self-hosted, GPU time |
+| Qwen3.5-4B generate | Qwen generate few-shot (txt38) **Flag: EXPLORATORY few-shot format prompt (txt38); examples PROPOSED wording** | 319 | 0.708 [0.656, 0.756] | 0.639 [0.585, 0.690] | 0.649 [0.595, 0.699] | 0.542 [0.487, 0.596] | 0.635 [0.602, 0.668] | 0.0% | 6.269 | Modal compute_s | 4B | self-hosted, GPU time |
 | Reference: hosted decision models | Jev (txt4) | 319 | 0.821 [0.776, 0.859] | 0.527 [0.472, 0.581] | 0.495 [0.441, 0.550] | 0.480 [0.425, 0.534] | 0.581 [0.554, 0.607] | 0.0% | 0.150 | round trip | not published | $0.044 |
 | Reference: hosted decision models | luna Decisions (txt6) | 319 | 0.821 [0.776, 0.859] | 0.379 [0.328, 0.434] | 0.398 [0.346, 0.453] | 0.461 [0.407, 0.516] | 0.515 [0.487, 0.542] | 0.9% | 0.130 | round trip | not published | $0.094 |
 
@@ -42,6 +43,7 @@ From summary.json. Each row's subset differs (its own Q1 hits), so compare rows 
 | Qwen-Base probs one-shot | 258 | 0.601 | 0.508 | 0.388 |
 | Qwen probs | 182 | 0.549 | 0.434 | 0.467 |
 | Qwen generate | 246 | 0.703 | 0.614 | 0.622 |
+| Qwen generate few-shot | 226 | 0.712 | 0.659 | 0.584 |
 | Jev | 262 | 0.576 | 0.500 | 0.485 |
 | luna Decisions | 262 | 0.435 | 0.382 | 0.481 |
 

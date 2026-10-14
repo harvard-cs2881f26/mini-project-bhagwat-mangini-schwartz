@@ -42,13 +42,23 @@ class AnthropicClient:
         self.model = model
         self.client = anthropic.Anthropic()
 
-    def generate(self, parts: list[Part], thinking: Thinking = "min", log_reasoning: bool = False) -> ModelResponse:
+    def generate(self, parts: list[Part], thinking: Thinking = "min", log_reasoning: bool = False,
+                 system: str | None = None, thinking_budget: int | None = None) -> ModelResponse:
         """log_reasoning sends nothing new (no thinking parameter is sent); it keeps any thinking blocks."""
+        kwargs = {}
+        max_tokens = MAX_TOKENS
+        if system is not None:
+            kwargs["system"] = system
+        if thinking_budget is not None:
+            if isinstance(thinking_budget, bool) or not isinstance(thinking_budget, int) or thinking_budget < 1024:
+                raise ValueError("Claude thinking_budget must be an integer >= 1024")
+            kwargs["thinking"] = {"type": "enabled", "budget_tokens": thinking_budget}
+            max_tokens += thinking_budget
         with Timer() as t:
             r = self.client.messages.create(
                 model=self.model,
-                max_tokens=MAX_TOKENS,
-                messages=[{"role": "user", "content": to_content(parts)}],
+                max_tokens=max_tokens,
+                messages=[{"role": "user", "content": to_content(parts)}], **kwargs,
             )
         text = "".join(b.text for b in r.content if b.type == "text")
         return ModelResponse(

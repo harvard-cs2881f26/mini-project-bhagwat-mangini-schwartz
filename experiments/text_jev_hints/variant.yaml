@@ -1,0 +1,6 @@
+# Prompt variant with per-item hints from a saved run (src/asimov/bench/text.py, "hint variants").
+# EXPLORATORY; wording DECIDED (Noa, 2026-10-14: confirmed as proposed by Claude). Changing any field or the template
+# changes this variant's prompt_version, so old replies are never reused for a new wording.
+kind: hints            # the dataset's prompt, verbatim, then a blank line and the template
+source: {run: part2_jev, model: jev-latest}   # Jev, decision_short, independent
+template: template.txt

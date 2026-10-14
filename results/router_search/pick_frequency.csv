@@ -1,0 +1,83 @@
+cap_kind,cap,family,candidate,picks,share
+cost,0.1,d_cascade,OpenJev think 512 full -> Gemini 3.1 Flash-Lite [default] (lowest 10% by confidence),10,0.4
+cost,0.1,per_question_mix,"OpenJev think 512 full -> Gemini 3.1 Flash-Lite [min] (lowest 10% by confidence; per question, the better on training)",5,0.2
+cost,0.1,per_question_mix,"OpenJev think 512 full -> Gemini 3.1 Flash-Lite [default] (lowest 10% by confidence; per question, the better on training)",5,0.2
+cost,0.1,d_cascade,OpenJev think 512 full -> luna generate (lowest 10% by confidence),4,0.16
+cost,0.1,per_question_mix,"OpenJev think 512 full -> luna generate (lowest 40% by confidence; per question, the better on training)",1,0.04
+cost,0.25,d_cascade,OpenJev think 512 full -> GPT-5 Mini [default] (lowest 10% by confidence),8,0.32
+cost,0.25,per_question_mix,"jev-latest (part2_jev_full_cumulative) -> luna generate (lowest 40% by confidence; per question, the better on training)",8,0.32
+cost,0.25,d_cascade,OpenJev think 512 full -> Gemini 3 Flash [min] (lowest 10% by confidence),3,0.12
+cost,0.25,three_stage,OpenJev think 512 full -> GPT-5 Mini [min] (lowest 10%) -> GPT-5 [min] if they disagree (q1),3,0.12
+cost,0.25,per_question_mix,"jev-latest (part2_jev_full_cumulative) -> Gemini 3.1 Flash-Lite [default] (lowest 10% by confidence; per question, the better on training)",1,0.04
+cost,0.25,per_question_mix,"jev-latest (part2_jev_full_cumulative) -> luna generate (lowest 30% by confidence; per question, the better on training)",1,0.04
+cost,0.25,per_question_mix,"jev-latest (part2_jev_full_cumulative) -> luna generate (lowest 50% by confidence; per question, the better on training)",1,0.04
+cost,0.5,three_stage,jev-latest (part2_jev_full_cumulative) -> luna generate (lowest 30%) -> GPT-5 [min] if they disagree (q1),6,0.24
+cost,0.5,d_cascade,OpenJev think 512 full -> GPT-5 Mini [default] (lowest 20% by confidence),3,0.12
+cost,0.5,per_question_mix,"OpenJev think 512 full -> Gemini 3 Flash [min] (lowest 20% by confidence; per question, the better on training)",3,0.12
+cost,0.5,per_question_mix,"jev-latest (part2_jev_full_cumulative) -> GPT-5 Mini [min] (lowest 30% by confidence; per question, the better on training)",3,0.12
+cost,0.5,d_cascade,OpenJev think 512 full -> GPT-5 Mini [default] (lowest 10% by confidence),2,0.08
+cost,0.5,per_question_mix,"jev-latest (part2_jev_full_cumulative) -> GPT-5 Nano [default] (lowest 40% by confidence; per question, the better on training)",2,0.08
+cost,0.5,per_question_mix,"jev-latest (part2_jev_full_cumulative) -> Gemini 3.1 Flash-Lite [default] (lowest 30% by confidence; per question, the better on training)",2,0.08
+cost,0.5,d_cascade,jev-latest (part2_jev_full_cumulative) -> Gemini 3.1 Flash-Lite [default] (lowest 30% by confidence),1,0.04
+cost,0.5,three_stage,OpenJev think 512 full -> GPT-5 Mini [min] (lowest 10%) -> GPT-5 [default] if they disagree (q1),1,0.04
+cost,0.5,three_stage,jev-latest (part2_jev_full_cumulative) -> luna generate (lowest 40%) -> GPT-5 [min] if they disagree (q1),1,0.04
+cost,0.5,per_question_mix,"jev-latest (part2_jev_full_cumulative) -> Gemini 3.1 Flash-Lite [min] (lowest 50% by confidence; per question, the better on training)",1,0.04
+cost,1.0,agreement,luna Decisions letters + jev-latest (part2_jev_full_cumulative) agree (q1) else GPT-5 [min],8,0.32
+cost,1.0,per_question_mix,"jev-latest (part2_jev_full_cumulative) -> Gemini 3 Flash [min] (lowest 50% by confidence; per question, the better on training)",3,0.12
+cost,1.0,d_cascade,OpenJev think 512 full -> GPT-5 Mini [default] (lowest 40% by confidence),2,0.08
+cost,1.0,agreement,jev-latest (part2_jev_cumulative) + OpenJev think 512 full agree (q1) else GPT-5 [min],2,0.08
+cost,1.0,three_stage,jev-latest (part2_jev_full_cumulative) -> Gemini 3.1 Flash-Lite [min] (lowest 50%) -> GPT-5 [min] if they disagree (q1),2,0.08
+cost,1.0,three_stage,jev-latest (part2_jev_full_cumulative) -> luna generate (lowest 50%) -> GPT-5 [min] if they disagree (q1),2,0.08
+cost,1.0,per_question_mix,"OpenJev think 512 full -> Gemini 3 Flash [min] (lowest 40% by confidence; per question, the better on training)",2,0.08
+cost,1.0,d_cascade,OpenJev think 512 full -> GPT-5 Mini [default] (lowest 30% by confidence),1,0.04
+cost,1.0,d_cascade,jev-latest (part2_jev_full_cumulative) -> GPT-5 Mini [default] (lowest 40% by confidence),1,0.04
+cost,1.0,agreement,luna Decisions + jev-latest (part2_jev_full_cumulative) agree (q1) else GPT-5 [min],1,0.04
+cost,1.0,per_question_mix,"jev-latest (part2_jev_full_cumulative) -> GPT-5 Nano [default] (lowest 40% by confidence; per question, the better on training)",1,0.04
+cost,2.0,per_question_mix,"jev-latest (part2_jev_full_cumulative) -> GPT-5 [min] (lowest 50% by confidence; per question, the better on training)",9,0.36
+cost,2.0,per_question_mix,"jev-latest (part2_jev_full_cumulative) -> GPT-5 [min] (lowest 40% by confidence; per question, the better on training)",8,0.32
+cost,2.0,per_question_mix,"jev-latest (part2_jev_full_cumulative) -> Gemini 3 Flash [min] (lowest 80% by confidence; per question, the better on training)",2,0.08
+cost,2.0,d_cascade,OpenJev think 512 full -> GPT-5 Mini [default] (lowest 40% by confidence),1,0.04
+cost,2.0,three_stage,jev-latest (part2_jev_full_cumulative) -> Gemini 3.1 Flash-Lite [min] (lowest 50%) -> GPT-5 [min] if they disagree (any),1,0.04
+cost,2.0,three_stage,jev-latest (part2_jev_full_cumulative) -> Gemini 3.1 Flash-Lite [default] (lowest 50%) -> GPT-5 [min] if they disagree (any),1,0.04
+cost,2.0,per_question_mix,"OpenJev think 512 full -> Gemini 3 Flash [min] (lowest 80% by confidence; per question, the better on training)",1,0.04
+cost,2.0,per_question_mix,"jev-latest (part2_jev_full_cumulative) -> GPT-5 [min] (lowest 30% by confidence; per question, the better on training)",1,0.04
+cost,2.0,split_by_question,OpenJev think 512 full answers Q3; Gemini 3 Flash [min] the rest,1,0.04
+cost,4.0,per_question_mix,"jev-latest (part2_jev_full_cumulative) -> GPT-5 [min] (lowest 80% by confidence; per question, the better on training)",20,0.8
+cost,4.0,per_question_mix,"OpenJev think 512 full -> GPT-5 [min] (lowest 80% by confidence; per question, the better on training)",2,0.08
+cost,4.0,per_question_mix,"jev-latest (part2_jev_full_cumulative) -> GPT-5 [min] (lowest 50% by confidence; per question, the better on training)",2,0.08
+cost,4.0,per_question_mix,"jev-latest (part2_jev_full_cumulative) -> GPT-5 [min] (lowest 70% by confidence; per question, the better on training)",1,0.04
+cost,8.0,per_question_mix,"jev-latest (part2_jev_full_cumulative) -> GPT-5 [min] (lowest 80% by confidence; per question, the better on training)",20,0.8
+cost,8.0,per_question_mix,"OpenJev think 512 full -> GPT-5 [min] (lowest 80% by confidence; per question, the better on training)",2,0.08
+cost,8.0,per_question_mix,"jev-latest (part2_jev_full_cumulative) -> GPT-5 [min] (lowest 50% by confidence; per question, the better on training)",2,0.08
+cost,8.0,per_question_mix,"jev-latest (part2_jev_full_cumulative) -> GPT-5 [min] (lowest 70% by confidence; per question, the better on training)",1,0.04
+cost,16.0,per_question_mix,"jev-latest (part2_jev_full_cumulative) -> GPT-5 [min] (lowest 80% by confidence; per question, the better on training)",20,0.8
+cost,16.0,per_question_mix,"OpenJev think 512 full -> GPT-5 [min] (lowest 80% by confidence; per question, the better on training)",2,0.08
+cost,16.0,per_question_mix,"jev-latest (part2_jev_full_cumulative) -> GPT-5 [min] (lowest 50% by confidence; per question, the better on training)",2,0.08
+cost,16.0,per_question_mix,"jev-latest (part2_jev_full_cumulative) -> GPT-5 [min] (lowest 70% by confidence; per question, the better on training)",1,0.04
+cost,32.0,per_question_mix,"jev-latest (part2_jev_full_cumulative) -> GPT-5 [min] (lowest 80% by confidence; per question, the better on training)",20,0.8
+cost,32.0,per_question_mix,"OpenJev think 512 full -> GPT-5 [min] (lowest 80% by confidence; per question, the better on training)",2,0.08
+cost,32.0,per_question_mix,"jev-latest (part2_jev_full_cumulative) -> GPT-5 [min] (lowest 50% by confidence; per question, the better on training)",2,0.08
+cost,32.0,per_question_mix,"jev-latest (part2_jev_full_cumulative) -> GPT-5 [min] (lowest 70% by confidence; per question, the better on training)",1,0.04
+cost,inf,per_question_mix,"jev-latest (part2_jev_full_cumulative) -> GPT-5 [min] (lowest 80% by confidence; per question, the better on training)",20,0.8
+cost,inf,per_question_mix,"OpenJev think 512 full -> GPT-5 [min] (lowest 80% by confidence; per question, the better on training)",2,0.08
+cost,inf,per_question_mix,"jev-latest (part2_jev_full_cumulative) -> GPT-5 [min] (lowest 50% by confidence; per question, the better on training)",2,0.08
+cost,inf,per_question_mix,"jev-latest (part2_jev_full_cumulative) -> GPT-5 [min] (lowest 70% by confidence; per question, the better on training)",1,0.04
+latency,0.5,per_question_mix,"Jev full -> GPT-5 [min] (lowest 50% by confidence; per question, the better on training)",13,0.52
+latency,0.5,d_cascade,Jev full -> GPT-5 [min] (lowest 50% by confidence),5,0.2
+latency,0.5,d_cascade,Jev full -> Opus 4.5 [default] (lowest 50% by confidence),4,0.16
+latency,0.5,three_stage,Jev full -> luna generate (lowest 50%) -> Opus 4.5 [default] if they disagree (any),2,0.08
+latency,0.5,three_stage,Jev full -> Gemini 3.1 Flash-Lite [default] (lowest 50%) -> Opus 4.5 [default] if they disagree (any),1,0.04
+latency,1.0,per_question_mix,"jev-latest (part2_jev_full_cumulative) -> GPT-5 [min] (lowest 50% by confidence; per question, the better on training)",20,0.8
+latency,1.0,per_question_mix,"jev-latest (part2_jev_full_cumulative) -> GPT-5 [min] (lowest 40% by confidence; per question, the better on training)",4,0.16
+latency,1.0,three_stage,jev-latest (part2_jev_full_cumulative) -> GPT-5 Mini [default] (lowest 40%) -> Opus 4.5 [default] if they disagree (any),1,0.04
+latency,2.0,per_question_mix,"jev-latest (part2_jev_full_cumulative) -> GPT-5 [min] (lowest 50% by confidence; per question, the better on training)",23,0.92
+latency,2.0,three_stage,jev-latest (part2_jev_full_cumulative) -> GPT-5 Mini [default] (lowest 40%) -> Opus 4.5 [default] if they disagree (any),1,0.04
+latency,2.0,per_question_mix,"jev-latest (part2_jev_full_cumulative) -> GPT-5 [min] (lowest 40% by confidence; per question, the better on training)",1,0.04
+latency,4.0,per_question_mix,"jev-latest (part2_jev_full_cumulative) -> GPT-5 [min] (lowest 80% by confidence; per question, the better on training)",21,0.84
+latency,4.0,per_question_mix,"jev-latest (part2_jev_full_cumulative) -> GPT-5 [min] (lowest 50% by confidence; per question, the better on training)",2,0.08
+latency,4.0,per_question_mix,"jev-latest (part2_jev_full_cumulative) -> GPT-5 [min] (lowest 70% by confidence; per question, the better on training)",1,0.04
+latency,4.0,per_question_mix,"jev-latest (part2_jev_full_cumulative) -> GPT-5 [min] (lowest 90% by confidence; per question, the better on training)",1,0.04
+latency,8.0,per_question_mix,"jev-latest (part2_jev_full_cumulative) -> GPT-5 [min] (lowest 80% by confidence; per question, the better on training)",20,0.8
+latency,8.0,per_question_mix,"OpenJev think 512 full -> GPT-5 [min] (lowest 80% by confidence; per question, the better on training)",2,0.08
+latency,8.0,per_question_mix,"jev-latest (part2_jev_full_cumulative) -> GPT-5 [min] (lowest 50% by confidence; per question, the better on training)",2,0.08
+latency,8.0,per_question_mix,"jev-latest (part2_jev_full_cumulative) -> GPT-5 [min] (lowest 70% by confidence; per question, the better on training)",1,0.04

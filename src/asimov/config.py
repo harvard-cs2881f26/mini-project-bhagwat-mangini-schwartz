@@ -22,6 +22,9 @@ class ModelSpec(BaseModel):
     provider: Literal["anthropic", "openai", "gemini", "mock",  # asimov.models.get_client
                       "mock_decision", "systemone", "openai_decisions", "local_hf", "nli"]
     model: str
+    reasoning_effort: Literal["minimal", "low", "medium", "high"] | None = None
+    thinking_budget: StrictInt | None = Field(default=None, ge=1024)
+    request_interval_s: float = Field(default=0, ge=0, le=60)
     # Decision services (Part 2). base_url: the /v1/systemone service (Jev, Codiv, Kev on Modal);
     # key_env: the env var holding its key; params: extra request fields (e.g. {think: 512}) or
     # our own options ({option_order: reversed}). All three are part of the cache key when set.
@@ -32,6 +35,10 @@ class ModelSpec(BaseModel):
 
     @model_validator(mode="after")
     def systemone_needs_a_service(self) -> ModelSpec:
+        if self.reasoning_effort is not None and self.provider != "openai":
+            raise ValueError("reasoning_effort requires provider openai")
+        if self.thinking_budget is not None and self.provider != "anthropic":
+            raise ValueError("thinking_budget requires provider anthropic")
         extras = [k for k in ("base_url", "key_env") if getattr(self, k)]
         extras += ["params"] if self.params and self.provider not in PARAMS_PROVIDERS else []
         if self.provider != "systemone" and extras:
@@ -49,6 +56,8 @@ class RunConfig(BaseModel):
     benchmark: str
     prompt: str
     thinking: Thinking
+    variant: Literal["image", "image_rationale"] | None = None
+    message_roles: Literal["user", "system_user"] = "user"
     log_reasoning: StrictBool = False  # ask for reasoning/thought summaries (asimov.models.base); part of the cache key
     models: list[ModelSpec]
 
@@ -57,6 +66,14 @@ class RunConfig(BaseModel):
         """Local option-probability and NLI models render the request with the wording file's `local`
         section, which only `_local` prompts hash into their version (asimov.bench.text); local
         generation takes a text prompt."""
+        if self.variant is not None and self.benchmark not in ("image", "image_rationale"):
+            raise ValueError("variant applies only to image benchmarks")
+        if self.message_roles == "system_user" and (
+            self.benchmark not in ("image", "image_rationale")
+            or any(m.provider not in ("openai", "anthropic") for m in self.models)
+        ):
+            raise ValueError("system_user supports only OpenAI and Anthropic image requests")
+
         from asimov.bench.text import is_local_prompt, is_oneshot_prompt
 
         for m in self.models:

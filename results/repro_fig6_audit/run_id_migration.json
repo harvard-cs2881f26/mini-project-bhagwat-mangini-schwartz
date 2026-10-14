@@ -1,0 +1,173 @@
+{
+  "checked": [
+    {
+      "run": "repro_fig6",
+      "folder": "results/img0_repro_fig6",
+      "model": "claude-opus-4-1-20250805",
+      "n": 0,
+      "rates_unchanged": true,
+      "raw_cache_unchanged": true
+    },
+    {
+      "run": "repro_fig6",
+      "folder": "results/img0_repro_fig6",
+      "model": "gemini-2.5-pro",
+      "n": 0,
+      "rates_unchanged": true,
+      "raw_cache_unchanged": true
+    },
+    {
+      "run": "repro_fig6",
+      "folder": "results/img0_repro_fig6",
+      "model": "gemini-2.5-flash-lite",
+      "n": 0,
+      "rates_unchanged": true,
+      "raw_cache_unchanged": true
+    },
+    {
+      "run": "repro_fig6",
+      "folder": "results/img0_repro_fig6",
+      "model": "claude-sonnet-4-20250514",
+      "n": 0,
+      "rates_unchanged": true,
+      "raw_cache_unchanged": true
+    },
+    {
+      "run": "repro_fig6",
+      "folder": "results/img0_repro_fig6",
+      "model": "gemini-2.5-flash",
+      "n": 0,
+      "rates_unchanged": true,
+      "raw_cache_unchanged": true
+    },
+    {
+      "run": "repro_fig6",
+      "folder": "results/img0_repro_fig6",
+      "model": "gpt-5-mini",
+      "n": 164,
+      "rates_unchanged": true,
+      "raw_cache_unchanged": true
+    },
+    {
+      "run": "repro_fig6",
+      "folder": "results/img0_repro_fig6",
+      "model": "gpt-5-nano",
+      "n": 164,
+      "rates_unchanged": true,
+      "raw_cache_unchanged": true
+    },
+    {
+      "run": "repro_fig6",
+      "folder": "results/img0_repro_fig6",
+      "model": "gpt-5",
+      "n": 164,
+      "rates_unchanged": true,
+      "raw_cache_unchanged": true
+    },
+    {
+      "run": "repro_fig6_gemini_successors",
+      "folder": "results/img1_repro_fig6_gemini_successors",
+      "model": "claude-opus-4-5-20251101",
+      "n": 164,
+      "rates_unchanged": true,
+      "raw_cache_unchanged": true
+    },
+    {
+      "run": "repro_fig6_gemini_successors",
+      "folder": "results/img1_repro_fig6_gemini_successors",
+      "model": "gemini-3-flash-preview",
+      "n": 22,
+      "rates_unchanged": true,
+      "raw_cache_unchanged": true
+    },
+    {
+      "run": "repro_fig6_gemini_successors",
+      "folder": "results/img1_repro_fig6_gemini_successors",
+      "model": "gemini-3.1-pro-preview",
+      "n": 0,
+      "rates_unchanged": true,
+      "raw_cache_unchanged": true
+    },
+    {
+      "run": "repro_fig6_gemini_successors",
+      "folder": "results/img1_repro_fig6_gemini_successors",
+      "model": "claude-sonnet-4-5-20250929",
+      "n": 164,
+      "rates_unchanged": true,
+      "raw_cache_unchanged": true
+    },
+    {
+      "run": "repro_fig6_gemini_successors",
+      "folder": "results/img1_repro_fig6_gemini_successors",
+      "model": "gemini-3.1-flash-lite",
+      "n": 164,
+      "rates_unchanged": true,
+      "raw_cache_unchanged": true
+    },
+    {
+      "run": "repro_fig6_mini_system",
+      "folder": "results/img2_repro_fig6_mini_system",
+      "model": "gpt-5-mini",
+      "n": 164,
+      "rates_unchanged": true,
+      "raw_cache_unchanged": true
+    },
+    {
+      "run": "repro_fig6_default",
+      "folder": "results/img3_repro_fig6_default",
+      "model": "gpt-5-mini",
+      "n": 164,
+      "rates_unchanged": true,
+      "raw_cache_unchanged": true
+    },
+    {
+      "run": "repro_fig6_candidates",
+      "folder": "results/img4_repro_fig6_candidates",
+      "model": "claude-opus-4-1-20250805",
+      "n": 0,
+      "rates_unchanged": true,
+      "raw_cache_unchanged": true
+    },
+    {
+      "run": "repro_fig6_candidates",
+      "folder": "results/img4_repro_fig6_candidates",
+      "model": "claude-sonnet-4-20250514",
+      "n": 0,
+      "rates_unchanged": true,
+      "raw_cache_unchanged": true
+    },
+    {
+      "run": "repro_fig6_candidates",
+      "folder": "results/img4_repro_fig6_candidates",
+      "model": "gpt-5-mini",
+      "n": 164,
+      "rates_unchanged": true,
+      "raw_cache_unchanged": true
+    },
+    {
+      "run": "repro_fig6_candidates",
+      "folder": "results/img4_repro_fig6_candidates",
+      "model": "gpt-5",
+      "n": 164,
+      "rates_unchanged": true,
+      "raw_cache_unchanged": true
+    },
+    {
+      "run": "repro_fig6_candidate_successors",
+      "folder": "results/img5_repro_fig6_candidate_successors",
+      "model": "claude-opus-4-5-20251101",
+      "n": 164,
+      "rates_unchanged": true,
+      "raw_cache_unchanged": true
+    },
+    {
+      "run": "repro_fig6_candidate_successors",
+      "folder": "results/img5_repro_fig6_candidate_successors",
+      "model": "claude-sonnet-4-5-20250929",
+      "n": 164,
+      "rates_unchanged": true,
+      "raw_cache_unchanged": true
+    }
+  ],
+  "paid_calls": 0
+}

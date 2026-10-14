@@ -89,7 +89,10 @@ def test_replies_behind_each_summary_are_saved(run):
     for path, s in model_summaries(run):
         responses = path.parent / "responses.jsonl"
         rows = [json.loads(line) for line in responses.read_text().splitlines()] if responses.exists() else []
-        current = [r for r in rows if r["key"] == s["key"]]
+        request_keys = s.get("request_keys")
+        current = [r for r in rows if
+                   r["key"] == request_keys.get(r["id"].replace("constraints_", "image_", 1))
+                   ] if request_keys is not None else [r for r in rows if r["key"] == s["key"]]
         assert len({r["id"] for r in current}) >= s["n"], f"{responses}: fewer saved replies than n={s['n']}"
         for r in current:
             missing = REPLY_FIELDS - set(r)

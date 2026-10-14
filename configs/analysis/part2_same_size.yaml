@@ -19,8 +19,8 @@ rows:
   - {run: part2_qwen_gen_2048, model: qwen3.5-4b, label: "Qwen generate", group: "Qwen3.5-4B generate",
      flag: "8.2% parse failures, above Noa's 2% line"}
   # part2_qwen_gen (txt27, 1024-token cap) is left out: superseded by part2_qwen_gen_2048 (txt33).
-  # The few-shot generate row goes here once run `part2_qwen_gen_fewshot` (in progress on another branch) is on main:
-  # - {run: part2_qwen_gen_fewshot, model: qwen3.5-4b, label: "Qwen generate few-shot", group: "Qwen3.5-4B generate"}
+  - {run: part2_qwen_gen_fewshot, model: qwen3.5-4b, label: "Qwen generate few-shot", group: "Qwen3.5-4B generate",
+     flag: "EXPLORATORY few-shot format prompt (txt38); examples PROPOSED wording"}
   - {run: part2_jev, model: jev-latest, label: "Jev", group: "Reference: hosted decision models"}
   - {run: part2_luna_decide, model: gpt-6-luna, label: "luna Decisions", group: "Reference: hosted decision models"}
 contrasts:  # a minus b, paired on the same items; Holm runs over every question test below together

@@ -1,0 +1,6 @@
+For reference, a fast automated classifier gave the answers below for this scenario. They may be wrong.
+Q1: {latent_risk}
+Q2: {latent_severity}
+Q3: {effect}
+Q4: {activated_risk}
+Answer the questions as instructed above, in the same JSON format.

@@ -1,0 +1,11 @@
+# Exact Claude paper IDs returned 404 in candidate preflight; authorized 4.5 substitutes.
+# Budgets are candidate settings inferred from figure data, not recovered author requests.
+run: repro_fig6_candidate_successors
+benchmark: image
+prompt: image
+variant: image
+thinking: default
+message_roles: system_user
+models:
+  - {name: Claude Sonnet 4.5 (1024; substitute for Sonnet 4), provider: anthropic, model: claude-sonnet-4-5-20250929, thinking_budget: 1024}
+  - {name: Claude Opus 4.5 (4096; substitute for Opus 4.1), provider: anthropic, model: claude-opus-4-5-20251101, thinking_budget: 4096}

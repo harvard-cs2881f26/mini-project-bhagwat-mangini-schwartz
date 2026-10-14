@@ -30,7 +30,9 @@ class ModelResult:
     usage: dict[str, dict] = field(default_factory=dict)  # item id -> the reply's token usage (incl. Gemini thinking_tokens)
     probs: dict[str, dict] = field(default_factory=dict)  # item id -> question -> letter -> probability (decision models)
     item_latency: dict[str, float] = field(default_factory=dict)  # item id -> latency_s, for replies that have one
-    item_compute_s: dict[str, float] = field(default_factory=dict)  # item id -> raw.remote.compute_s (Modal rows only)
+    # item id -> raw.remote.compute_s, for replies made on Modal (models/remote.py): GPU time without the round trip
+    # and queue wait. Not used by the results pages, which keep latency_s; the router search reads it.
+    item_compute_s: dict[str, float] = field(default_factory=dict)
 
     @property
     def name(self) -> str:
@@ -65,10 +67,9 @@ def load_model(mdir: Path) -> ModelResult:
         usage[row["id"]] = row.get("usage") or {}
         if row.get("probs"):
             probs[row["id"]] = row["probs"]
-        raw = row.get("raw")
-        remote = raw.get("remote") if isinstance(raw, dict) else None
-        if remote and remote.get("compute_s") is not None:  # Modal GPU time, without the queue (WORKLOG "Modal latency")
-            item_compute_s[row["id"]] = float(remote["compute_s"])
+        compute_s = ((row.get("raw") or {}).get("remote") or {}).get("compute_s")
+        if compute_s is not None:
+            item_compute_s[row["id"]] = float(compute_s)
     served_models = tuple(sorted(served - {""}))
     return ModelResult(full, per_item, tuple(latencies), served_models, replies, usage, probs, item_latency, item_compute_s)
 
