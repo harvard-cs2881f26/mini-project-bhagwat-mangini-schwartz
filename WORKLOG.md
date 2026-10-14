@@ -1013,7 +1013,7 @@ were fixed in this session's plan and in Noa's message, not chosen from the 319-
   headline. B cannot lower cost in this simulation: the LLM's one call answers all 4 questions, so any
   split using it costs both calls. D is the accuracy-vs-cost result.
 
-### Rules for the simulation: PROPOSED (Claude; Noa to confirm)
+### Rules for the simulation: DECIDED (Noa, 2026-10-14: confirmed as proposed by Claude)
 - A question with no probabilities (e.g. luna's 3 Q1 refusals) gives its item confidence 0, so the item
   is among the first sent on. *Alternative:* drop the item (breaks "unanswered = wrong, never dropped").
 - At a fixed share, exactly round(share x n) items are sent on, lowest confidence first, with ties broken
@@ -1962,3 +1962,51 @@ min, log_reasoning true; only the prompt changed). Not pre-registered; not evide
 
 Jev alone: 0.581 mean of 4, $0.04/1k, p50 0.15 s. Per-question CIs: `results/prompt_experiments/tables.md`.
 Latency caveat: the variant runs ran concurrently (4 runs x 8 workers); repro_fig4 did not.
+
+## 2026-10-14: Part 2 analysis, confirmatory vs exploratory (index)
+
+Where each part lives, kept apart so the pre-registered result is never mixed with post-hoc search.
+Numbers only; interpretation is Noa's. Write-up: `results/part2_designs/writeup.md`.
+
+| Part | Status | Where | Choices |
+|---|---|---|---|
+| **Confirmatory:** D and B, pre-registered (4 decision models x GPT-5 / Mini) | Rebuilt on main 9a038cc, after #22 and #23: tables byte-identical (`cascade.py --check`) | `results/part2_designs/`, `figures/part2_designs/` | DECIDED (Noa), entry "2026-10-13: Part 2 design analysis, B and D"; simulation rules DECIDED (Noa, 2026-10-14: confirmed as proposed by Claude) |
+| Exploratory: cheaper LLM targets | merged (#19) | `results/part2_designs_exploratory/` | post-hoc (Noa, 2026-10-13) |
+| Exploratory: router search, 60,078 candidates, CV-selected | merged (#26) | `results/router_search/` | protocol DECIDED (Noa, 2026-10-14: confirmed as proposed by Claude); entry "Router search: rerun + extensions" |
+| Exploratory: prompt experiments, paid $3.01 under Noa's $5 cap | merged (#25) | `results/prompt_experiments/` | wording DECIDED (Noa, 2026-10-14: confirmed as proposed by Claude); entry "Part 2 prompt experiments" |
+| Exploratory: Qwen generate few-shot format prompt (txt38), Modal ~$1.38 | merged (#29) | `results/qwen_format_check/` | Noa chose the run; examples' wording PROPOSED |
+| Exploratory: same-size comparison, Qwen family vs decision models | merged (#28) | `results/part2_same_size/` | rows and contrasts PROPOSED (Claude) |
+
+- **Decided by Noa on 2026-10-14:**
+  - Build the exploratory search on the router-search branch. *Alternative:* extend `cascade.py` instead.
+  - Simulate parallel calls for free. *Alternative:* sequential calls only.
+  - Run the two prompt experiments with Jev + GPT-5 and GPT-5 Mini, wording drafted by Claude, under a
+    cap ($5 total, from the option text). *Alternatives:* GPT-5 only; Noa approving the wording before
+    the full runs.
+- **Still for Noa to confirm:**
+  - txt33's 8.2% parse failures (held for her review).
+
+## 2026-10-14: Part 2: open items for Noa, and Session 4 scope
+
+**Settled today:**
+- The six simulation rules ("Rules for the simulation") are **DECIDED (Noa, 2026-10-14, "confirm all")**,
+  together with the router-search protocol and the prompt-experiment wording. Nothing in a write-up
+  is still PROPOSED.
+- **DROPPED from Session 4** (Noa, 2026-10-14; relayed by the "Plan progress check" session):
+  - Brier/ECE tables and reliability plots. The functions stay in `stats.py`; no hypothesis or design
+    needs the tables. *Alternative:* report them for every decision model.
+  - The per-run `max_calls` cap. Every paid run is finished. *Alternative:* add it for future runs.
+
+**Still OPEN, for Noa: is txt33 (`part2_qwen_gen_2048`) reported or excluded?**
+- **The numbers:**
+  - 26/319 items unreadable (8.2%), above Noa's 2% line;
+  - 20 items: "E" on an A-D severity question (29 answers; every rationale says "No injury");
+  - 5 items: cut off at 2048 tokens;
+  - 1 item: wrong key name.
+- **Already decided:** Noa chose a few-shot format variant (`part2_qwen_gen_fewshot`, in progress, its
+  own run name). The status of txt33 itself is not decided yet.
+- **Alternatives:**
+  - (a) report txt33 with its flag, unreadable counted wrong;
+  - (b) exclude txt33 from the comparisons;
+  - (c) a scoring rule reading "E" on severity as A: 26 -> 6 unreadable (1.9%), 4 more answers correct;
+    applies to every model; not chosen so far.

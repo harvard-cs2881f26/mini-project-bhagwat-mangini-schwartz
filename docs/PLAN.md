@@ -24,7 +24,7 @@ session: Claude stops, shows the numbers, waits for a yes, and carries on.
 | Optional: Weave export (Noa's runs) | Claude, after Noa checks dataset terms | todo | |
 | Between 2 and 3: review, Part 2 scope, hypothesis | Noa (+ team) | Part 2 scope decided 2026-10-12; Part 1 review + hypothesis still to do | WORKLOG 2026-10-12 ("Part 2 approved") |
 | Session 3: build decision-model systems | Claude (Noa approves smoke spend) | done, merged (PRs [#9](https://github.com/gini007/mini-project-asimov-v2/pull/9), [#17](https://github.com/gini007/mini-project-asimov-v2/pull/17), [#18](https://github.com/gini007/mini-project-asimov-v2/pull/18), [#20](https://github.com/gini007/mini-project-asimov-v2/pull/20), [#21](https://github.com/gini007/mini-project-asimov-v2/pull/21), [#22](https://github.com/gini007/mini-project-asimov-v2/pull/22)) | clients: `/v1/systemone` (Jev, OpenJev, Laya, Kev), OpenAI Decisions, local Qwen3.5-4B(-Base) logprob/generate and NLI on Modal; question modes independent vs cumulative; 32 Part 2 runs x 319/319 (txt2-txt33), every run checked for bugs (WORKLOG 2026-10-13/14); API $0.42 total (full runs $0.131 + variants $0.066 + grid $0.221), Modal GPU ~$10 (estimate from run times; exact charge on the Modal dashboard); bugs fixed: tie-breaking, probability-sum tolerance, bf16 logit ties (fp32 head), Modal queue latency (use `raw.remote.compute_s`); held for Noa: Qwen generate txt33 8.2% parse failures; pytest 566 passed (full data); CI green |
-| Session 4: Part 2 runs + metrics | Claude (Noa approves spend) | in progress: design analysis B and D built (price table, `scripts/cascade.py`) | `configs/prices.yaml`, `results/part2_designs/`, `figures/part2_designs/` (4 decision models x GPT-5 / GPT-5 Mini, n = 319); choices DECIDED, simulation rules PROPOSED (WORKLOG 2026-10-13, "Part 2 design analysis"); pytest 420 passed, 9 skipped; `collect.py --check` and `cascade.py --check` pass; local rows, Brier/ECE, `max_calls` still to do |
+| Session 4: Part 2 runs + metrics | Claude (Noa approves spend) | done: verifier matches (3,774/3,774); PRs #25, #26, #28, #29 and #27 merged | **Confirmatory:** `results/part2_designs/` (rebuilt on main, unchanged), write-up `results/part2_designs/writeup.md`. **Exploratory:** router search (PR #26), prompt experiments $3.01 (PR #25). Verifier: `results/verify/part2/report.md`, 3,774 of 3,774 match (D/B tables 3,000; router-search single systems 730; 5 picks 44). Brier/ECE and `max_calls` DROPPED (§5). WORKLOG 2026-10-14 "Part 2 analysis, confirmatory vs exploratory" |
 | After 4: write-up + slides | Noa | todo | |
 
 ---
@@ -318,23 +318,36 @@ version. Profile local models: warm up, median of 3 passes on 50 items, record h
 
 ### Session 4: Part 2 runs + metrics
 
-Starts with the same `PART 2 APPROVED` check.
+Rewritten 2026-10-14 to record what was actually done. The original plan (call cap, full runs,
+Brier/ECE, reliability plots, contrast tables) is in git history.
 
-- Before any paid run, add a per-run call cap to the runner (`max_calls` in the config; PR for
-  Tyler) and a price table (`configs/prices.yaml`) so cost is reported in $, not only tokens
-  (§9.5). Both are still open. The price table must count Gemini `usage.thinking_tokens` as
-  output (WORKLOG 2026-10-12, "Cost method").
-- Full runs for every system that passed the smoke test. **Show projected cost and wait for a
-  yes** before the paid ones.
-- Add to `stats.py`: Brier, 10-bin ECE. Extend `plot.py`: accuracy vs p50 latency (log x, one
-  panel per question, Pareto frontier), reliability plots.
-- Tables: accuracy with CIs, paired comparisons for the chosen contrasts (McNemar + bootstrap,
-  Holm across them), latency p50/p95, $ per 319 items.
-- **Subagents:** `run-monitor` for long runs; `stats-verifier` again; optionally `skeptic`
-  (reads `HYPOTHESIS.md` and results, lists the 5 strongest threats). Noa decides what goes
-  in limitations.
-- **Done when:** verifier matches; figures and tables exist; Claude lists the numbers per
-  contrast, and stops.
+**What was done**
+- **Full runs:** folded into Session 3. Every Part 2 run (txt2-txt33) was run and merged there
+  (PRs #17, #18, #20, #21, #22).
+- **Price table:** `configs/prices.yaml`, dated, with Gemini thinking tokens billed as output
+  (PR #19). The results pages show $ for text runs.
+- **Confirmatory:** design D (route by confidence) and design B (split by question), pre-registered:
+  - 4 decision models x GPT-5 / GPT-5 Mini;
+  - `scripts/cascade.py`, `configs/analysis/part2_designs.yaml`, `results/part2_designs/` (PR #19);
+  - choices DECIDED in WORKLOG 2026-10-13, "Part 2 design analysis, B and D";
+  - write-up `results/part2_designs/writeup.md` (PR #27).
+- **Exploratory:**
+  - router search, cross-validated over items, all Part 2 runs (PR #26);
+  - cheaper LLM targets (PR #19);
+  - two paid prompt experiments feeding Jev's answers to GPT-5 / Mini, $3.01 (PR #25);
+  - Qwen generate few-shot format run and a same-size comparison (in progress).
+- **Cross-run write-up:** `docs/part2_writeup.md` (PR #24).
+- **Verifier:** `stats-verifier` on the Part 2 tables: 3,774 of 3,774 match, 0 mismatches
+  (`results/verify/part2/report.md`).
+
+**Dropped** (Noa, 2026-10-14)
+- **Brier/ECE tables and reliability plots:** the functions exist in `stats.py`, but no hypothesis or
+  design needs them.
+- **Per-run `max_calls` cap:** every paid run finished under projected cost with a person approving
+  it, so it no longer protects anything.
+
+- **Done when:** the verifier matches; PRs #25, #26 and #27 are merged by Noa. Done 2026-10-14
+  (also #28 same-size comparison, #29 Qwen few-shot).
 
 ### After Session 4: write-up + slides (Noa)
 
