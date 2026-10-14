@@ -20,13 +20,15 @@ import json
 import os
 import random
 import subprocess
+import threading
 import time
-from concurrent.futures import ThreadPoolExecutor, as_completed
+from concurrent.futures import FIRST_COMPLETED, ThreadPoolExecutor, wait
 from pathlib import Path
 
 import yaml
 
 from asimov.bench import Benchmark, get_benchmark
+from asimov.bench import image as image_bench
 from asimov.config import RunConfig
 from asimov.models import get_client
 from asimov.models.reply_info import cached_input_tokens, finish
@@ -35,6 +37,26 @@ from asimov.run_ids import run_dir
 ROOT = Path(__file__).resolve().parents[2]
 KEY_VARS = {"anthropic": "ANTHROPIC_API_KEY", "openai": "OPENAI_API_KEY", "gemini": "GEMINI_API_KEY",
             "openai_decisions": "OPENAI_API_KEY"}  # systemone models name theirs in the config (key_env)
+
+
+def minute_retry_delay(error: Exception) -> float | None:
+    """Honor Gemini's explicit per-minute retry hint; never retry daily/account limits."""
+    payload = getattr(error, "details", None)
+    if not isinstance(payload, dict):
+        return None
+    details = payload.get("error", {}).get("details", [])
+    violations = [v for d in details for v in d.get("violations", [])]
+    if not violations or not all("PerMinute" in v.get("quotaId", "") for v in violations):
+        return None
+    for detail in details:
+        if "RetryInfo" in detail.get("@type", ""):
+            try:
+                delay = float(detail["retryDelay"].removesuffix("s")) + 1
+            except (ValueError, TypeError, KeyError):
+                return None
+            return delay if 0 <= delay <= 60 else None
+    return None
+
 
 
 class ConfigChanged(RuntimeError):
@@ -64,6 +86,9 @@ def request_extra(spec: dict) -> str:
     """The parts of a model spec that change what is sent beyond the model id: which service
     (base_url) and extra params. "" for every LLM spec, so their keys are unchanged."""
     parts = [spec.get("base_url") or ""] + ([json.dumps(spec["params"], sort_keys=True)] if spec.get("params") else [])
+    native = {k: spec[k] for k in ("reasoning_effort", "thinking_budget") if spec.get(k) is not None}
+    if native:
+        parts.append(json.dumps(native, sort_keys=True))
     return "|".join(parts) if any(parts) else ""
 
 
@@ -128,7 +153,27 @@ def run_model(bench: Benchmark, spec: dict, cfg: dict, items, out_dir: Path, wor
     mdir = out_dir / model
     mdir.mkdir(parents=True, exist_ok=True)
     resp_path = mdir / "responses.jsonl"
-    saved = load_saved(resp_path, key)
+    image = bench.name in ("image", "image_rationale")
+    roles = cfg.get("message_roles", "user")
+    settings = {k: spec[k] for k in ("reasoning_effort", "thinking_budget") if spec.get(k) is not None}
+    if roles == "system_user" and (not image or provider not in ("openai", "anthropic")):
+        raise ValueError("system_user supports only OpenAI and Anthropic image requests")
+    if image:
+        fingerprint_settings = {**settings, **({"log_reasoning": True} if log_reasoning else {})}
+        keys = {
+            i.id: image_bench.request_key(i, provider, model, thinking, bench.name, roles, fingerprint_settings)
+            for i in items
+        }
+        saved = {}
+        if resp_path.exists():
+            for line in resp_path.read_text().splitlines():
+                row = json.loads(line)
+                ident = row["id"].replace("constraints_", "image_", 1)
+                if row["key"] == keys.get(ident):
+                    saved[ident] = row
+    else:
+        keys = {i.id: key for i in items}
+        saved = load_saved(resp_path, key)
     todo = [i for i in items if i.id not in saved]
     to_call = f"{len(todo)} to call" if call_models else "no calls"
     print(f"\n== {spec['name']} ({model}): {len(items)} items, {len(items) - len(todo)} saved, {to_call}")
@@ -138,56 +183,120 @@ def run_model(bench: Benchmark, spec: dict, cfg: dict, items, out_dir: Path, wor
         service = {k: spec[k] for k in ("base_url", "key_env", "params") if spec.get(k)}  # decision services only
         client = get_client(provider, model, **service)
 
+        interval = float(spec.get("request_interval_s", 0))
+        if not 0 <= interval <= 60:
+            raise ValueError("request_interval_s must be between 0 and 60")
+        pace_lock = threading.Lock()
+        last_start = 0.0
+
         def call(item):
-            return client.generate(bench.build_request(item, prompt), thinking=thinking, log_reasoning=log_reasoning)
+            nonlocal last_start
+            system_kwargs = {"log_reasoning": True} if log_reasoning else {}
+            if roles == "system_user":
+                system, parts = image_bench.build_system_request(item)
+                system_kwargs["system"] = system
+            else:
+                parts = bench.build_request(item, prompt)
+            for attempt in range(4):
+                with pace_lock:
+                    delay = max(0, interval - (time.monotonic() - last_start))
+                    if delay:
+                        time.sleep(delay)
+                    last_start = time.monotonic()
+                try:
+                    return item, client.generate(parts, thinking=thinking, **system_kwargs, **settings)
+                except Exception as error:
+                    delay = minute_retry_delay(error)
+                    if delay is None or attempt == 3:
+                        raise
+                    print(f"  {item.id}: per-minute rate limit; retry in {delay:.0f}s")
+                    time.sleep(delay)
 
         with ThreadPoolExecutor(max_workers=workers) as pool, open(resp_path, "a") as f:
-            futures = {pool.submit(call, i): i for i in todo}
-            for fut in as_completed(futures):
-                item = futures[fut]
-                try:
-                    r = fut.result()
-                except Exception as e:  # logged to errors.jsonl, never saved as a reply; rerun to retry
-                    errors += 1
-                    log_error(mdir / "errors.jsonl", item.id, key, e)
-                    print(f"  ERROR {type(e).__name__}: {str(e)[:200]}")
-                    continue
-                usage = {**r.usage, "cached_input_tokens": cached_input_tokens(provider, r.raw)}
-                row = {"id": item.id, "key": key, "provider": provider, "model": model,
-                       "served_model": r.model, "prompt": prompt, "thinking": thinking,
-                       "log_reasoning": log_reasoning, "text": r.text, "reasoning": r.reasoning,
-                       "usage": usage, "latency_s": round(r.latency_s, 2),
-                       "time": time.strftime("%Y-%m-%dT%H:%M:%S"), "raw": r.raw}
-                if r.probs:  # decision models only, so LLM rows stay exactly as before
-                    row["probs"] = r.probs
-                f.write(json.dumps(row) + "\n")
-                f.flush()
-                saved[item.id] = row
-                if show:
-                    print(f"  {item.id}  {r.latency_s:.1f}s  {r.usage}\n    reply: {r.text.strip()[:500]}")
+            pending_items = iter(todo)
+            futures = {}
+            quota_exhausted = False
+
+            def submit_next():
+                item = next(pending_items, None)
+                if item is not None:
+                    futures[pool.submit(call, item)] = item
+
+            for _ in range(workers):
+                submit_next()
+            while futures:
+                done, _ = wait(futures, return_when=FIRST_COMPLETED)
+                for fut in done:
+                    requested = futures.pop(fut)
+                    try:
+                        item, r = fut.result()
+                    except Exception as e:  # never saved; rerun to retry
+                        errors += 1
+                        message = str(e)
+                        for variable in KEY_VARS.values():
+                            secret = os.environ.get(variable)
+                            if secret:
+                                message = message.replace(secret, "[redacted]")
+                        log_error(mdir / "errors.jsonl", requested.id, keys[requested.id], e)
+                        print(f"  ERROR {requested.id} {type(e).__name__}: {message[:200]}")
+                        if any(marker in message for marker in ("RESOURCE_EXHAUSTED", "insufficient_quota")):
+                            quota_exhausted = True
+                            print("  Quota exhausted: stopping new calls for this model.")
+                        continue
+                    usage = {**r.usage, "cached_input_tokens": cached_input_tokens(provider, r.raw)}
+                    row = {"id": item.id, "key": keys[item.id], "provider": provider, "model": model,
+                           "served_model": r.model, "prompt": prompt, "thinking": thinking,
+                           "log_reasoning": log_reasoning, "message_roles": roles, "generation_settings": settings,
+                           "text": r.text, "reasoning": r.reasoning, "usage": usage,
+                           "latency_s": round(r.latency_s, 2), "time": time.strftime("%Y-%m-%dT%H:%M:%S"), "raw": r.raw}
+                    if r.probs:
+                        row["probs"] = r.probs
+                    f.write(json.dumps(row) + "\n")
+                    f.flush()
+                    saved[item.id] = row
+                    if show:
+                        print(f"  {item.id}  {r.latency_s:.1f}s  {r.usage}\n    reply: {r.text.strip()[:500]}")
+                    elif len(saved) % 20 == 0:
+                        print(f"  Saved {len(saved)}/{len(items)} replies")
+                if not quota_exhausted:
+                    for _ in done:
+                        submit_next()
 
     replies = {i.id: saved[i.id]["text"] for i in items if i.id in saved}
     if not replies:
-        empty = {"name": spec["name"], "model": model, **made, "key": key, "n": 0, "errors": errors}
+        empty = {"name": spec["name"], "model": model, **made, "key": key, "n": 0, "errors": errors,
+                 "provider": provider, "prompt": prompt, "thinking": thinking,
+                 "n_requested": len(items), "n_dataset": len(bench.load_items()), "n_missing": len(items)}
+        if image:
+            empty.update(bench.score(bench.load_answers(), {}))
+            empty["request_keys"] = {}
         (mdir / "summary.json").write_text(json.dumps(empty, indent=1))  # keeps the error count for --no-calls
         return empty
     s = bench.score(bench.load_answers(), replies)
     rows = [saved[i] for i in replies]
-    finishes = {r["id"]: finish(provider, r["raw"]) for r in rows}
+    finishes = {i: finish(provider, saved[i]["raw"]) for i in replies}
     per_item = {i: {**outcome, "finish": finishes[i]} for i, outcome in s.pop("per_item").items()}
     service = {k: spec[k] for k in ("base_url", "params") if spec.get(k)}  # decision services only
     summary = {"name": spec["name"], "provider": provider, "model": model, **service, "prompt": prompt,
                "thinking": thinking, "log_reasoning": log_reasoning, **made, "key": key, "errors": errors,
                **token_totals(provider, rows), **finish_rates(finishes),
                "n_with_reasoning": sum(bool(r.get("reasoning", "").strip()) for r in rows),
-               "n_reused": sum("reused_from" in r for r in rows), **s}  # copied by asimov.reuse
+               "n_reused": sum("reused_from" in r for r in rows),
+               "n_requested": len(items), "n_dataset": len(bench.load_items()), "n_missing": len(items) - len(replies),
+               **({"message_roles": roles, "generation_settings": settings,
+                   "request_keys": {i: keys[i] for i in replies}} if image else {}), **s}  # copied by asimov.reuse
     (mdir / "summary.json").write_text(json.dumps({**summary, "per_item": per_item}, indent=1))
     return summary
 
 
 def log_error(path: Path, item_id: str, key: str, e: Exception) -> None:
     """A failed call, for the record only: the cache never reads this file, so it's retried."""
-    row = {"id": item_id, "key": key, "error_type": type(e).__name__, "message": str(e)[:2000],
+    message = str(e)
+    for variable in KEY_VARS.values():
+        secret = os.environ.get(variable)
+        if secret:
+            message = message.replace(secret, "[redacted]")
+    row = {"id": item_id, "key": key, "error_type": type(e).__name__, "message": message[:2000],
            "time": time.strftime("%Y-%m-%dT%H:%M:%S%z")}
     with open(path, "a") as f:
         f.write(json.dumps(row) + "\n")
@@ -210,11 +319,17 @@ def finish_rates(finishes: dict[str, str]) -> dict:
 
 def run(cfg: dict, limit: int | None = None, only: list[str] | None = None,
         workers: int = 4, results_dir: Path | None = None,
-        config_path: Path | None = None, call_models: bool = True) -> list[dict]:
+        config_path: Path | None = None, call_models: bool = True, score_only: bool = False) -> list[dict]:
     """config_path: the YAML file cfg was read from; its exact text is kept as results/<id>_<run>/config.yaml."""
+    if score_only:
+        call_models = False
     RunConfig.model_validate(cfg)  # unknown or missing keys and unknown providers fail here, before anything runs
-    bench = get_benchmark(cfg["benchmark"])
+    bench = get_benchmark(cfg.get("variant") or cfg["benchmark"])
     bench.prompt_version(cfg["prompt"])  # an unknown prompt name fails before results/<id>_<run>/ is touched
+    if limit is not None and limit < 1:
+        raise ValueError("limit must be positive")
+    if workers < 1:
+        raise ValueError("workers must be positive")
     items = fixed_order(bench.load_items())[:limit]
     providers = [m["provider"] for m in cfg["models"]]
     out_dir = run_dir(results_dir or ROOT / "results", cfg["run"], cfg["benchmark"], providers)

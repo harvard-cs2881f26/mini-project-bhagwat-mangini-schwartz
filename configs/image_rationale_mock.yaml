@@ -1,0 +1,6 @@
+run: image_rationale_mock
+benchmark: image_rationale
+prompt: image_rationale
+thinking: min
+models:
+  - {name: Empty, provider: mock, model: mock-empty-points}

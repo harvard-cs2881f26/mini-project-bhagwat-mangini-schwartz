@@ -16,9 +16,9 @@ from __future__ import annotations
 
 import itertools
 import math
-from collections.abc import Callable, Sequence
+from collections.abc import Callable, Mapping, Sequence
 from dataclasses import dataclass
-from typing import Literal
+from typing import Literal, TypeVar
 
 import numpy as np
 from pydantic import BaseModel, ConfigDict, field_validator
@@ -28,6 +28,7 @@ from asimov.collect.load import ModelResult
 from asimov.prices import Price, call_cost
 from asimov.stats import bootstrap_mean_ci, paired_bootstrap_diff, wilson_ci
 
+K = TypeVar("K", str, int)  # an item key: an item id, or an index into a fixed item order
 MEAN = "mean"  # mean accuracy over the 4 questions, per item
 METRICS = (MEAN, *QUESTIONS)
 PER_THOUSAND = 1000
@@ -203,8 +204,14 @@ def perfect_router(first: System, escalate: System, metric: str) -> list[Point]:
     items sent, which the figures draw against $."""
     check_pair(first, escalate)
     gain = {i: item_score(escalate.items[i], metric) - item_score(a, metric) for i, a in first.items.items()}
-    order = sorted((i for i, g in gain.items() if g > 0), key=lambda i: (-gain[i], escalate.items[i].cost or 0.0, i))
+    order = gain_order(gain, {i: escalate.items[i].cost or 0.0 for i in gain})
     return [routed(first, escalate, set(order[:k]), None, (metric,)) for k in range(len(order) + 1)]
+
+
+def gain_order(gain: Mapping[K, float], llm_cost: Mapping[K, float]) -> list[K]:
+    """The perfect router's order: items where the LLM scores strictly higher, largest gain first, then the cheaper
+    LLM call, then item key."""
+    return sorted((i for i, g in gain.items() if g > 0), key=lambda i: (-gain[i], llm_cost[i], i))
 
 
 @dataclass(frozen=True)

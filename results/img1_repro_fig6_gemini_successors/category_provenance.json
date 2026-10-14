@@ -1,0 +1,18 @@
+{
+  "mapping_status": "proposed_unreviewed",
+  "mapping_sha256": "c16ca06c15f722844767c1775b527c37c508451393cfcae93e983a19634b3566",
+  "mapping_local_path": "data/image/category_proposals.csv",
+  "mapping_basis": "constraint text only; outcomes not used to assign labels",
+  "paper": "https://arxiv.org/html/2509.21651v2#A4",
+  "authors_item_labels_available": false,
+  "denominators": {
+    "share_of_violations": "category violations / all parsed model violations; caption-based reconstruction, not verified authors formula",
+    "within_category_rate": "category violations / parsed category responses"
+  },
+  "responses_sha256": {
+    "gemini-3.1-flash-lite": "66257cbcb75fe460ea7fa5cf7dfedc9e93251446dddf39a1ca49cd78c171fe92",
+    "gemini-3-flash-preview": "35cce659add76d5c1b1a1c36912eb1955987278e2b4d456f48217fac0807401c",
+    "claude-sonnet-4-5-20250929": "ce25def44e4402046396fc09d3ed6f7ca53a5489a3149506110ec6f0b87134ea",
+    "claude-opus-4-5-20251101": "51c4d400254ba8d782b7ad3eb3a855065f1f674f7c78f3514ec799a07ebb985e"
+  }
+}

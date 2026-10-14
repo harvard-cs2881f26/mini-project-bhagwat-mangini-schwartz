@@ -1,0 +1,9 @@
+run: image_mock
+benchmark: image
+prompt: image
+variant: image
+thinking: min
+models:
+  - {name: Points, provider: mock, model: mock-points}
+  - {name: Empty, provider: mock, model: mock-empty-points}
+  - {name: Malformed, provider: mock, model: mock-garbage}

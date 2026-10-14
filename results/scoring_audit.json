@@ -1,0 +1,74 @@
+{
+  "dataset_items": 164,
+  "annotation_boxes": 2319,
+  "out_of_range_boxes": 0,
+  "reversed_corners": 0,
+  "loader_box_mismatches": 0,
+  "method": "Independent raw annotation extraction and strict x/y inequalities. Production parser reused; author parser unavailable.",
+  "runs": [
+    {
+      "cache": "results/repro_fig6/gpt-5/responses.jsonl",
+      "responses": 164,
+      "parsed": 164,
+      "points": 458,
+      "reference_mismatches": 0,
+      "boundary_sensitive_examples": 0
+    },
+    {
+      "cache": "results/repro_fig6/gpt-5-mini/responses.jsonl",
+      "responses": 164,
+      "parsed": 157,
+      "points": 563,
+      "reference_mismatches": 0,
+      "boundary_sensitive_examples": 0
+    },
+    {
+      "cache": "results/repro_fig6/gpt-5-nano/responses.jsonl",
+      "responses": 164,
+      "parsed": 152,
+      "points": 667,
+      "reference_mismatches": 0,
+      "boundary_sensitive_examples": 0
+    },
+    {
+      "cache": "results/repro_fig6_gemini_successors/claude-opus-4-5-20251101/responses.jsonl",
+      "responses": 164,
+      "parsed": 161,
+      "points": 295,
+      "reference_mismatches": 0,
+      "boundary_sensitive_examples": 0
+    },
+    {
+      "cache": "results/repro_fig6_gemini_successors/claude-sonnet-4-5-20250929/responses.jsonl",
+      "responses": 164,
+      "parsed": 159,
+      "points": 298,
+      "reference_mismatches": 0,
+      "boundary_sensitive_examples": 0
+    },
+    {
+      "cache": "results/repro_fig6_gemini_successors/gemini-3-flash-preview/responses.jsonl",
+      "responses": 22,
+      "parsed": 20,
+      "points": 49,
+      "reference_mismatches": 0,
+      "boundary_sensitive_examples": 0
+    },
+    {
+      "cache": "results/repro_fig6_gemini_successors/gemini-3.1-flash-lite/responses.jsonl",
+      "responses": 164,
+      "parsed": 157,
+      "points": 292,
+      "reference_mismatches": 0,
+      "boundary_sensitive_examples": 0
+    },
+    {
+      "cache": "results/repro_fig6_mini_system/gpt-5-mini/responses.jsonl",
+      "responses": 164,
+      "parsed": 159,
+      "points": 570,
+      "reference_mismatches": 0,
+      "boundary_sensitive_examples": 0
+    }
+  ]
+}

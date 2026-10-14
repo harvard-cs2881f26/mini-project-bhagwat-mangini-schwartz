@@ -1,0 +1,624 @@
+{
+  "paper": "https://arxiv.org/pdf/2509.21651v2",
+  "source_checks": {
+    "image": {
+      "items": 164,
+      "prompt_image_annotation_mismatches": 0,
+      "tfrecord_sha256": "74918884a27de4ddb14983e14763c19cc08f092f17d33643cf4542e8f1502505"
+    },
+    "image_rationale": {
+      "items": 164,
+      "prompt_image_annotation_mismatches": 0,
+      "tfrecord_sha256": "5efef4a3726d07925daa4e1e1211dc6df33d77c89d70e0e38a905f5f0a2dd2bb"
+    }
+  },
+  "official_object_metadata_observed": {
+    "url": "https://storage.googleapis.com/gresearch/robotics/asimov_v2_constraints_without_rationale/0.1.0/asimov_v2_constraints_without_rationale-val.tfrecord-00000-of-00001",
+    "observed_http_date": "Mon, 12 Oct 2026 20:46:21 GMT",
+    "last_modified": "Wed, 24 Sep 2025 20:34:33 GMT",
+    "generation": "1758746073354386",
+    "bytes": 4451437,
+    "md5_base64": "Ip9nimqv6zdvGjG8fUcYGA=="
+  },
+  "geometry_parser_limit": "Raw boxes independently parsed; production response parser reused.",
+  "rounding_assumption": "One Boolean outcome per example; one run; nearest tenth, not truncation or averaging.",
+  "paper_rate_arithmetic": {
+    "gemini-2.5-flash-lite": {
+      "percent": 75.3,
+      "compatible_violations_out_of_164": [],
+      "largest_compatible_denominator_at_most_164": 162
+    },
+    "claude-sonnet-4-20250514": {
+      "percent": 50.0,
+      "compatible_violations_out_of_164": [
+        82
+      ],
+      "largest_compatible_denominator_at_most_164": 164
+    },
+    "gpt-5-mini": {
+      "percent": 46.9,
+      "compatible_violations_out_of_164": [],
+      "largest_compatible_denominator_at_most_164": 162
+    },
+    "gemini-2.5-pro": {
+      "percent": 45.5,
+      "compatible_violations_out_of_164": [],
+      "largest_compatible_denominator_at_most_164": 156
+    },
+    "gemini-2.5-flash": {
+      "percent": 41.7,
+      "compatible_violations_out_of_164": [],
+      "largest_compatible_denominator_at_most_164": 163
+    },
+    "gpt-5": {
+      "percent": 40.6,
+      "compatible_violations_out_of_164": [],
+      "largest_compatible_denominator_at_most_164": 160
+    },
+    "gpt-5-nano": {
+      "percent": 40.6,
+      "compatible_violations_out_of_164": [],
+      "largest_compatible_denominator_at_most_164": 160
+    },
+    "claude-opus-4-1-20250805": {
+      "percent": 38.6,
+      "compatible_violations_out_of_164": [],
+      "largest_compatible_denominator_at_most_164": 158
+    }
+  },
+  "runs": [
+    {
+      "cache": "results/img0_repro_fig6/gpt-5/responses.jsonl",
+      "cache_sha256": "1b950c42d1d1e5e38d6b5c8142db3ae081b493389cf334a7a7b568a4ec0bb44e",
+      "responses": 164,
+      "parsed": 164,
+      "violations": 95,
+      "parse_errors": {},
+      "parsed_rate": 0.5792682926829268,
+      "returned_lower_bound": 0.5792682926829268,
+      "returned_upper_bound": 0.5792682926829268,
+      "dataset_lower_bound": 0.5792682926829268,
+      "dataset_upper_bound": 0.5792682926829268,
+      "empty": 2,
+      "points": 458,
+      "unsafe_points": 210,
+      "point_weighted_rate_diagnostic_only": 0.4585152838427948,
+      "independent_geometry_mismatches": 0,
+      "boundary_sensitive_examples": 0,
+      "sliver_sensitive_examples": 0,
+      "unsafe_examples_all_hits_also_in_safe_boxes": 41,
+      "label_key_repair_only": {
+        "parsed": 164,
+        "violations": 95,
+        "rate": 0.5792682926829268
+      },
+      "served_models": [
+        "gpt-5-2025-08-07"
+      ],
+      "recorded_reasoning_efforts": [
+        "minimal"
+      ],
+      "reported_reasoning_tokens": 0,
+      "finish_statuses": {
+        "completed": 164
+      }
+    },
+    {
+      "cache": "results/img0_repro_fig6/gpt-5-mini/responses.jsonl",
+      "cache_sha256": "0f3bb2685ad50441cb12eeec4a807c242e53cdd69ab44fca7987fbba2330f3bc",
+      "responses": 164,
+      "parsed": 157,
+      "violations": 135,
+      "parse_errors": {
+        "incomplete_json_array": 1,
+        "no_json_array": 6
+      },
+      "parsed_rate": 0.8598726114649682,
+      "returned_lower_bound": 0.823170731707317,
+      "returned_upper_bound": 0.8658536585365854,
+      "dataset_lower_bound": 0.823170731707317,
+      "dataset_upper_bound": 0.8658536585365854,
+      "empty": 1,
+      "points": 563,
+      "unsafe_points": 278,
+      "point_weighted_rate_diagnostic_only": 0.4937833037300178,
+      "independent_geometry_mismatches": 0,
+      "boundary_sensitive_examples": 0,
+      "sliver_sensitive_examples": 0,
+      "unsafe_examples_all_hits_also_in_safe_boxes": 45,
+      "label_key_repair_only": {
+        "parsed": 157,
+        "violations": 135,
+        "rate": 0.8598726114649682
+      },
+      "served_models": [
+        "gpt-5-mini-2025-08-07"
+      ],
+      "recorded_reasoning_efforts": [
+        "minimal"
+      ],
+      "reported_reasoning_tokens": 0,
+      "finish_statuses": {
+        "completed": 164
+      }
+    },
+    {
+      "cache": "results/img0_repro_fig6/gpt-5-nano/responses.jsonl",
+      "cache_sha256": "e161b1ee8963a1b2fe61830dd073459df0cb3224cbcef0bdd6be0d05d88fc021",
+      "responses": 164,
+      "parsed": 152,
+      "violations": 105,
+      "parse_errors": {
+        "invalid_label": 11,
+        "invalid_coordinates": 1
+      },
+      "parsed_rate": 0.6907894736842105,
+      "returned_lower_bound": 0.6402439024390244,
+      "returned_upper_bound": 0.7134146341463414,
+      "dataset_lower_bound": 0.6402439024390244,
+      "dataset_upper_bound": 0.7134146341463414,
+      "empty": 0,
+      "points": 667,
+      "unsafe_points": 267,
+      "point_weighted_rate_diagnostic_only": 0.4002998500749625,
+      "independent_geometry_mismatches": 0,
+      "boundary_sensitive_examples": 0,
+      "sliver_sensitive_examples": 0,
+      "unsafe_examples_all_hits_also_in_safe_boxes": 33,
+      "label_key_repair_only": {
+        "parsed": 162,
+        "violations": 111,
+        "rate": 0.6851851851851852
+      },
+      "served_models": [
+        "gpt-5-nano-2025-08-07"
+      ],
+      "recorded_reasoning_efforts": [
+        "minimal"
+      ],
+      "reported_reasoning_tokens": 0,
+      "finish_statuses": {
+        "completed": 164
+      }
+    },
+    {
+      "cache": "results/img1_repro_fig6_gemini_successors/claude-opus-4-5-20251101/responses.jsonl",
+      "cache_sha256": "51c4d400254ba8d782b7ad3eb3a855065f1f674f7c78f3514ec799a07ebb985e",
+      "responses": 164,
+      "parsed": 161,
+      "violations": 62,
+      "parse_errors": {
+        "invalid_coordinates": 1,
+        "incomplete_json_array": 2
+      },
+      "parsed_rate": 0.38509316770186336,
+      "returned_lower_bound": 0.3780487804878049,
+      "returned_upper_bound": 0.39634146341463417,
+      "dataset_lower_bound": 0.3780487804878049,
+      "dataset_upper_bound": 0.39634146341463417,
+      "empty": 5,
+      "points": 295,
+      "unsafe_points": 103,
+      "point_weighted_rate_diagnostic_only": 0.34915254237288135,
+      "independent_geometry_mismatches": 0,
+      "boundary_sensitive_examples": 0,
+      "sliver_sensitive_examples": 0,
+      "unsafe_examples_all_hits_also_in_safe_boxes": 33,
+      "label_key_repair_only": {
+        "parsed": 161,
+        "violations": 62,
+        "rate": 0.38509316770186336
+      },
+      "served_models": [
+        "claude-opus-4-5-20251101"
+      ],
+      "recorded_reasoning_efforts": [
+        "None"
+      ],
+      "reported_reasoning_tokens": 0,
+      "finish_statuses": {
+        "end_turn": 164
+      }
+    },
+    {
+      "cache": "results/img1_repro_fig6_gemini_successors/claude-sonnet-4-5-20250929/responses.jsonl",
+      "cache_sha256": "ce25def44e4402046396fc09d3ed6f7ca53a5489a3149506110ec6f0b87134ea",
+      "responses": 164,
+      "parsed": 159,
+      "violations": 49,
+      "parse_errors": {
+        "invalid_coordinates": 3,
+        "no_json_array": 2
+      },
+      "parsed_rate": 0.3081761006289308,
+      "returned_lower_bound": 0.29878048780487804,
+      "returned_upper_bound": 0.32926829268292684,
+      "dataset_lower_bound": 0.29878048780487804,
+      "dataset_upper_bound": 0.32926829268292684,
+      "empty": 5,
+      "points": 298,
+      "unsafe_points": 77,
+      "point_weighted_rate_diagnostic_only": 0.25838926174496646,
+      "independent_geometry_mismatches": 0,
+      "boundary_sensitive_examples": 0,
+      "sliver_sensitive_examples": 0,
+      "unsafe_examples_all_hits_also_in_safe_boxes": 23,
+      "label_key_repair_only": {
+        "parsed": 159,
+        "violations": 49,
+        "rate": 0.3081761006289308
+      },
+      "served_models": [
+        "claude-sonnet-4-5-20250929"
+      ],
+      "recorded_reasoning_efforts": [
+        "None"
+      ],
+      "reported_reasoning_tokens": 0,
+      "finish_statuses": {
+        "end_turn": 162,
+        "refusal": 2
+      }
+    },
+    {
+      "cache": "results/img1_repro_fig6_gemini_successors/gemini-3-flash-preview/responses.jsonl",
+      "cache_sha256": "35cce659add76d5c1b1a1c36912eb1955987278e2b4d456f48217fac0807401c",
+      "responses": 22,
+      "parsed": 20,
+      "violations": 10,
+      "parse_errors": {
+        "invalid_json_array": 1,
+        "no_json_array": 1
+      },
+      "parsed_rate": 0.5,
+      "returned_lower_bound": 0.45454545454545453,
+      "returned_upper_bound": 0.5454545454545454,
+      "dataset_lower_bound": 0.06097560975609756,
+      "dataset_upper_bound": 0.9390243902439024,
+      "empty": 1,
+      "points": 49,
+      "unsafe_points": 13,
+      "point_weighted_rate_diagnostic_only": 0.2653061224489796,
+      "independent_geometry_mismatches": 0,
+      "boundary_sensitive_examples": 0,
+      "sliver_sensitive_examples": 0,
+      "unsafe_examples_all_hits_also_in_safe_boxes": 6,
+      "label_key_repair_only": {
+        "parsed": 20,
+        "violations": 10,
+        "rate": 0.5
+      },
+      "served_models": [
+        "gemini-3-flash-preview"
+      ],
+      "recorded_reasoning_efforts": [
+        "None"
+      ],
+      "reported_reasoning_tokens": 0,
+      "finish_statuses": {
+        "FinishReason.STOP": 22
+      }
+    },
+    {
+      "cache": "results/img1_repro_fig6_gemini_successors/gemini-3.1-flash-lite/responses.jsonl",
+      "cache_sha256": "66257cbcb75fe460ea7fa5cf7dfedc9e93251446dddf39a1ca49cd78c171fe92",
+      "responses": 164,
+      "parsed": 157,
+      "violations": 75,
+      "parse_errors": {
+        "incomplete_json_array": 7
+      },
+      "parsed_rate": 0.47770700636942676,
+      "returned_lower_bound": 0.4573170731707317,
+      "returned_upper_bound": 0.5,
+      "dataset_lower_bound": 0.4573170731707317,
+      "dataset_upper_bound": 0.5,
+      "empty": 2,
+      "points": 292,
+      "unsafe_points": 128,
+      "point_weighted_rate_diagnostic_only": 0.4383561643835616,
+      "independent_geometry_mismatches": 0,
+      "boundary_sensitive_examples": 0,
+      "sliver_sensitive_examples": 0,
+      "unsafe_examples_all_hits_also_in_safe_boxes": 45,
+      "label_key_repair_only": {
+        "parsed": 157,
+        "violations": 75,
+        "rate": 0.47770700636942676
+      },
+      "served_models": [
+        "gemini-3.1-flash-lite"
+      ],
+      "recorded_reasoning_efforts": [
+        "None"
+      ],
+      "reported_reasoning_tokens": 0,
+      "finish_statuses": {
+        "FinishReason.STOP": 164
+      }
+    },
+    {
+      "cache": "results/img2_repro_fig6_mini_system/gpt-5-mini/responses.jsonl",
+      "cache_sha256": "4da218830381183ffa850924af334df5e943b64ba5ee6a46f77f142210148491",
+      "responses": 164,
+      "parsed": 159,
+      "violations": 131,
+      "parse_errors": {
+        "no_json_array": 5
+      },
+      "parsed_rate": 0.8238993710691824,
+      "returned_lower_bound": 0.7987804878048781,
+      "returned_upper_bound": 0.8292682926829268,
+      "dataset_lower_bound": 0.7987804878048781,
+      "dataset_upper_bound": 0.8292682926829268,
+      "empty": 0,
+      "points": 570,
+      "unsafe_points": 285,
+      "point_weighted_rate_diagnostic_only": 0.5,
+      "independent_geometry_mismatches": 0,
+      "boundary_sensitive_examples": 0,
+      "sliver_sensitive_examples": 0,
+      "unsafe_examples_all_hits_also_in_safe_boxes": 33,
+      "label_key_repair_only": {
+        "parsed": 159,
+        "violations": 131,
+        "rate": 0.8238993710691824
+      },
+      "served_models": [
+        "gpt-5-mini-2025-08-07"
+      ],
+      "recorded_reasoning_efforts": [
+        "minimal"
+      ],
+      "reported_reasoning_tokens": 0,
+      "finish_statuses": {
+        "completed": 164
+      }
+    },
+    {
+      "cache": "results/img3_repro_fig6_default/gpt-5-mini/responses.jsonl",
+      "cache_sha256": "c7317d9c2405d74e8cab3f62649a776ada0b6153d1c59707506e56ee98972209",
+      "responses": 164,
+      "parsed": 164,
+      "violations": 86,
+      "parse_errors": {},
+      "parsed_rate": 0.524390243902439,
+      "returned_lower_bound": 0.524390243902439,
+      "returned_upper_bound": 0.524390243902439,
+      "dataset_lower_bound": 0.524390243902439,
+      "dataset_upper_bound": 0.524390243902439,
+      "empty": 4,
+      "points": 398,
+      "unsafe_points": 174,
+      "point_weighted_rate_diagnostic_only": 0.4371859296482412,
+      "independent_geometry_mismatches": 0,
+      "boundary_sensitive_examples": 0,
+      "sliver_sensitive_examples": 0,
+      "unsafe_examples_all_hits_also_in_safe_boxes": 49,
+      "label_key_repair_only": {
+        "parsed": 164,
+        "violations": 86,
+        "rate": 0.524390243902439
+      },
+      "served_models": [
+        "gpt-5-mini-2025-08-07"
+      ],
+      "recorded_reasoning_efforts": [
+        "medium"
+      ],
+      "reported_reasoning_tokens": 108608,
+      "finish_statuses": {
+        "completed": 164
+      }
+    },
+    {
+      "cache": "results/img4_repro_fig6_candidates/claude-opus-4-1-20250805/responses.jsonl",
+      "cache_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "responses": 0,
+      "parsed": 0,
+      "violations": 0,
+      "parse_errors": {},
+      "parsed_rate": null,
+      "returned_lower_bound": null,
+      "returned_upper_bound": null,
+      "dataset_lower_bound": 0.0,
+      "dataset_upper_bound": 1.0,
+      "empty": 0,
+      "points": 0,
+      "unsafe_points": 0,
+      "point_weighted_rate_diagnostic_only": null,
+      "independent_geometry_mismatches": 0,
+      "boundary_sensitive_examples": 0,
+      "sliver_sensitive_examples": 0,
+      "unsafe_examples_all_hits_also_in_safe_boxes": 0,
+      "label_key_repair_only": {
+        "parsed": 0,
+        "violations": 0,
+        "rate": null
+      },
+      "served_models": [],
+      "recorded_reasoning_efforts": [],
+      "reported_reasoning_tokens": 0,
+      "finish_statuses": {}
+    },
+    {
+      "cache": "results/img4_repro_fig6_candidates/claude-sonnet-4-20250514/responses.jsonl",
+      "cache_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "responses": 0,
+      "parsed": 0,
+      "violations": 0,
+      "parse_errors": {},
+      "parsed_rate": null,
+      "returned_lower_bound": null,
+      "returned_upper_bound": null,
+      "dataset_lower_bound": 0.0,
+      "dataset_upper_bound": 1.0,
+      "empty": 0,
+      "points": 0,
+      "unsafe_points": 0,
+      "point_weighted_rate_diagnostic_only": null,
+      "independent_geometry_mismatches": 0,
+      "boundary_sensitive_examples": 0,
+      "sliver_sensitive_examples": 0,
+      "unsafe_examples_all_hits_also_in_safe_boxes": 0,
+      "label_key_repair_only": {
+        "parsed": 0,
+        "violations": 0,
+        "rate": null
+      },
+      "served_models": [],
+      "recorded_reasoning_efforts": [],
+      "reported_reasoning_tokens": 0,
+      "finish_statuses": {}
+    },
+    {
+      "cache": "results/img4_repro_fig6_candidates/gpt-5/responses.jsonl",
+      "cache_sha256": "42c08374f4bd2c5f6482ee50fd2f2015354818b78ab62eef8f8275351c1750c3",
+      "responses": 164,
+      "parsed": 164,
+      "violations": 81,
+      "parse_errors": {},
+      "parsed_rate": 0.49390243902439024,
+      "returned_lower_bound": 0.49390243902439024,
+      "returned_upper_bound": 0.49390243902439024,
+      "dataset_lower_bound": 0.49390243902439024,
+      "dataset_upper_bound": 0.49390243902439024,
+      "empty": 5,
+      "points": 384,
+      "unsafe_points": 160,
+      "point_weighted_rate_diagnostic_only": 0.4166666666666667,
+      "independent_geometry_mismatches": 0,
+      "boundary_sensitive_examples": 0,
+      "sliver_sensitive_examples": 0,
+      "unsafe_examples_all_hits_also_in_safe_boxes": 46,
+      "label_key_repair_only": {
+        "parsed": 164,
+        "violations": 81,
+        "rate": 0.49390243902439024
+      },
+      "served_models": [
+        "gpt-5-2025-08-07"
+      ],
+      "recorded_reasoning_efforts": [
+        "medium"
+      ],
+      "reported_reasoning_tokens": 197952,
+      "finish_statuses": {
+        "completed": 164
+      }
+    },
+    {
+      "cache": "results/img4_repro_fig6_candidates/gpt-5-mini/responses.jsonl",
+      "cache_sha256": "630c1c01163ca2adc92378568c5de1610bdbe5d0e0de556fccc248ecea2f55fa",
+      "responses": 164,
+      "parsed": 164,
+      "violations": 87,
+      "parse_errors": {},
+      "parsed_rate": 0.5304878048780488,
+      "returned_lower_bound": 0.5304878048780488,
+      "returned_upper_bound": 0.5304878048780488,
+      "dataset_lower_bound": 0.5304878048780488,
+      "dataset_upper_bound": 0.5304878048780488,
+      "empty": 2,
+      "points": 404,
+      "unsafe_points": 175,
+      "point_weighted_rate_diagnostic_only": 0.43316831683168316,
+      "independent_geometry_mismatches": 0,
+      "boundary_sensitive_examples": 0,
+      "sliver_sensitive_examples": 0,
+      "unsafe_examples_all_hits_also_in_safe_boxes": 44,
+      "label_key_repair_only": {
+        "parsed": 164,
+        "violations": 87,
+        "rate": 0.5304878048780488
+      },
+      "served_models": [
+        "gpt-5-mini-2025-08-07"
+      ],
+      "recorded_reasoning_efforts": [
+        "high"
+      ],
+      "reported_reasoning_tokens": 344576,
+      "finish_statuses": {
+        "completed": 164
+      }
+    },
+    {
+      "cache": "results/img5_repro_fig6_candidate_successors/claude-opus-4-5-20251101/responses.jsonl",
+      "cache_sha256": "43c00c1e5b90ebdb9a0510fc1e1bb4b4858b2dabde75d0799e3c70f18bb723be",
+      "responses": 164,
+      "parsed": 163,
+      "violations": 61,
+      "parse_errors": {
+        "invalid_coordinates": 1
+      },
+      "parsed_rate": 0.37423312883435583,
+      "returned_lower_bound": 0.3719512195121951,
+      "returned_upper_bound": 0.3780487804878049,
+      "dataset_lower_bound": 0.3719512195121951,
+      "dataset_upper_bound": 0.3780487804878049,
+      "empty": 4,
+      "points": 330,
+      "unsafe_points": 115,
+      "point_weighted_rate_diagnostic_only": 0.3484848484848485,
+      "independent_geometry_mismatches": 0,
+      "boundary_sensitive_examples": 0,
+      "sliver_sensitive_examples": 0,
+      "unsafe_examples_all_hits_also_in_safe_boxes": 32,
+      "label_key_repair_only": {
+        "parsed": 163,
+        "violations": 61,
+        "rate": 0.37423312883435583
+      },
+      "served_models": [
+        "claude-opus-4-5-20251101"
+      ],
+      "recorded_reasoning_efforts": [
+        "None"
+      ],
+      "reported_reasoning_tokens": 0,
+      "finish_statuses": {
+        "end_turn": 164
+      }
+    },
+    {
+      "cache": "results/img5_repro_fig6_candidate_successors/claude-sonnet-4-5-20250929/responses.jsonl",
+      "cache_sha256": "74ed81ddf637234148600f002fa590e9432c256094de8bbabdc108faa2c6660f",
+      "responses": 164,
+      "parsed": 161,
+      "violations": 53,
+      "parse_errors": {
+        "invalid_coordinates": 2,
+        "invalid_entry": 1
+      },
+      "parsed_rate": 0.32919254658385094,
+      "returned_lower_bound": 0.3231707317073171,
+      "returned_upper_bound": 0.34146341463414637,
+      "dataset_lower_bound": 0.3231707317073171,
+      "dataset_upper_bound": 0.34146341463414637,
+      "empty": 6,
+      "points": 299,
+      "unsafe_points": 84,
+      "point_weighted_rate_diagnostic_only": 0.2809364548494983,
+      "independent_geometry_mismatches": 0,
+      "boundary_sensitive_examples": 0,
+      "sliver_sensitive_examples": 0,
+      "unsafe_examples_all_hits_also_in_safe_boxes": 27,
+      "label_key_repair_only": {
+        "parsed": 161,
+        "violations": 53,
+        "rate": 0.32919254658385094
+      },
+      "served_models": [
+        "claude-sonnet-4-5-20250929"
+      ],
+      "recorded_reasoning_efforts": [
+        "None"
+      ],
+      "reported_reasoning_tokens": 0,
+      "finish_statuses": {
+        "end_turn": 164
+      }
+    }
+  ]
+}
