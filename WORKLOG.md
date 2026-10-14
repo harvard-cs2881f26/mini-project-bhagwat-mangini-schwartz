@@ -1654,6 +1654,78 @@ injury the model picked.
   differ only in commit and scored date; `collect.py --check` and pytest pass. The new fields are
   in `summary.json` only; the results pages don't show them yet.
 
+## 2026-10-14: Same-size comparison: Qwen family vs decision models (exploratory)
+
+**EXPLORATORY.** Noa asked for it after the Part 2 results were seen; only contrasts (1) and (2) below were
+pre-registered (they are the pairs in "Qwen pairing for Part 2: DECIDED"). Numbers only, no interpretation. $0: saved
+replies only. Config `configs/analysis/part2_same_size.yaml` (`asimov.same_size.SameSizeConfig`, unknown keys fail);
+logic `src/asimov/same_size.py`; script `scripts/same_size.py` (`--check`); outputs `results/part2_same_size/`
+(tables.md, rows.csv, contrasts.csv) and `figures/part2_same_size/` (accuracy vs p50 latency, accuracy vs unreadable
+rate). Every output carries the EXPLORATORY label at the top.
+
+- **Rows: PROPOSED (Claude).** Kev-4B: txt8 short, txt12 short cumulative, txt30 full, txt31 letters, txt32 full
+  cumulative. Qwen3.5-4B-Base option probabilities: txt26 zero-shot, txt29 one-shot. Qwen3.5-4B option probabilities:
+  txt28. Qwen3.5-4B generate: txt33 (2048 cap), flagged "8.2% parse failures, above Noa's 2% line". References: Jev
+  (txt4), luna Decisions (txt6). Left out: txt27 (superseded by txt33). The few-shot generate run
+  (`part2_qwen_gen_fewshot`, another branch) is a commented line in the config, to add once it is on main; a configured
+  run that isn't under results/ stops the script. *Alternative considered:* the other ~4B systems on main (OpenJev
+  think 0/512, which is 26B with 4B active; Laya 0.4B), left out to keep the Qwen-family question narrow.
+- **Per-row numbers: PROPOSED (Claude).** Wilson CI per question, bootstrap CI over items for the mean of 4 (via
+  `asimov.cascade.accuracy`); Q1-matched Q2-Q4 accuracies, `n_q1_matched` and unreadable rate (`parse_failure_rate`)
+  copied from summary.json. The script stops if any row's per-question accuracy rebuilt from per_item differs from its
+  summary.json (all 11 match). Parameters from `configs/prices.yaml`: added `qwen3.5-4b` and `qwen3.5-4b-base` as
+  `self_hosted: Modal L40S, params_b: 4` (nominal size from the model name, as for `kev-latest`); Jev and luna have no
+  published size. $ per 1,000 items = logged tokens x prices for priced rows; "self-hosted, GPU time" otherwise. The
+  new entries carry no token price, so the results pages and `index.csv` are unchanged (`collect.py --check` passes).
+- **Latency sources: PROPOSED (Claude).** Modal `raw.remote.compute_s` when every item has it (Qwen rows: txt26, txt28,
+  txt29, txt33; WORKLOG "Modal latency"), else the recorded round trip `latency_s` (Kev, Jev, luna); for cumulative runs
+  (txt12, txt32) `latency_s` covers the 4 sequential calls together. `ModelResult` gains `item_compute_s`
+  (`collect/load.py`; no output changes). **Caveat for Noa:** Kev also runs on Modal, but its rows have no
+  `raw.remote`; its round trip includes the network from the laptop. Kev's own server-reported time
+  (`raw.latency_ms`, summed over calls) has p50 0.128 s (txt8), 0.153 (txt12), 0.092 (txt30), 0.060 (txt31),
+  0.154 (txt32), against round trip 0.39-1.46 s. *Alternative considered:* Kev's `latency_ms` (closer to compute_s,
+  but measured by Kev's server, not by us); round trip for every row (Qwen's round trips include Modal queueing for
+  txt33).
+- **Contrast family and Holm: PROPOSED (Claude), fixed in the config before computing the contrasts.** (1) Kev-4B txt8
+  vs Qwen-Base txt26 (decision training only; pre-registered); (2) Qwen probs txt28 vs Qwen generate txt33 (how the
+  answer is produced; pre-registered); (3) Qwen generate txt33 vs Kev-4B txt8; (4) Qwen generate txt33 vs Jev txt4;
+  (5) Kev-4B full txt30 vs Qwen-Base one-shot txt29 (the main Qwen-Base row by the letter-mass rule); (3)-(5)
+  exploratory. Per question: paired bootstrap difference, exact McNemar, Holm across all 20 question tests together;
+  mean of 4: paired bootstrap CI only (no p-value, so not in the Holm family). *Alternatives considered:* Holm within
+  the pre-registered pair only (smaller family, but then (3)-(5) would have no correction); a test on the mean of 4
+  (no exact paired test for a 0-1 average; the CI covers it).
+
+### Numbers (319 items each)
+
+| Row | Mean of 4 [95% CI] | Unreadable | Latency p50 (s), source | Params |
+|---|---|---|---|---|
+| Kev-4B short (txt8) | 0.457 [0.426, 0.488] | 0.0% | 0.390, round trip | 4B |
+| Kev-4B short cumulative (txt12) | 0.437 [0.406, 0.467] | 0.0% | 0.690, round trip (4 calls) | 4B |
+| Kev-4B full (txt30) | 0.556 [0.526, 0.585] | 0.0% | 0.460, round trip | 4B |
+| Kev-4B letters (txt31) | 0.455 [0.425, 0.487] | 0.0% | 0.400, round trip | 4B |
+| Kev-4B full cumulative (txt32) | 0.557 [0.524, 0.591] | 0.0% | 1.460, round trip (4 calls) | 4B |
+| Qwen-Base probs zero-shot (txt26) | 0.447 [0.418, 0.474] | 0.0% | 0.215, compute_s | 4B |
+| Qwen-Base probs one-shot (txt29) | 0.555 [0.528, 0.582] | 0.0% | 0.225, compute_s | 4B |
+| Qwen probs (txt28) | 0.466 [0.436, 0.496] | 0.0% | 0.275, compute_s | 4B |
+| Qwen generate (txt33), flagged | 0.641 [0.608, 0.675] | 8.2% | 16.8, compute_s | 4B |
+| Jev (txt4) | 0.581 [0.554, 0.607] | 0.0% | 0.150, round trip | not published |
+| luna Decisions (txt6) | 0.515 [0.487, 0.542] | 0.9% | 0.130, round trip | not published |
+
+| Contrast (a - b) | Mean of 4 diff [95% CI] | Questions with Holm p < 0.05 (diff) |
+|---|---|---|
+| (1) Kev-4B short - Qwen-Base zero-shot | +0.010 [-0.016, +0.038] | Q1 -0.254, Q3 +0.226, Q4 +0.094 |
+| (2) Qwen probs - Qwen generate | -0.176 [-0.213, -0.139] | Q1 -0.201, Q2 -0.229, Q3 -0.138, Q4 -0.135 |
+| (3) Qwen generate - Kev-4B short | +0.184 [+0.149, +0.220] | Q1 +0.342, Q2 +0.235, Q4 +0.150 |
+| (4) Qwen generate - Jev | +0.060 [+0.027, +0.096] | Q4 +0.100 |
+| (5) Kev-4B full - Qwen-Base one-shot | +0.001 [-0.027, +0.028] | Q1 -0.229, Q3 +0.132 |
+
+Per-question CIs, discordant counts and p-values: `results/part2_same_size/tables.md`. Qwen generate's 8.2% unreadable
+items count as wrong in every number above.
+
+- **Update (2026-10-14, after PR #29 merged):** the few-shot Qwen generate row (txt38, `part2_qwen_gen_fewshot`) is
+  now in the table, flagged EXPLORATORY with its examples' wording PROPOSED. The Modal compute-time loader field is the
+  one from PR #26 (`ModelResult.item_compute_s`); this PR's own copy was dropped when merging, so there is one home.
+
 ## 2026-10-14: Qwen generate, few-shot format prompt (exploratory)
 
 EXPLORATORY: the request no longer uses the paper's prompt word for word. Numbers only.
