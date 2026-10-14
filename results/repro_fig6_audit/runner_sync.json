@@ -1,0 +1,54 @@
+{
+  "upstream_commit": "247a8d0",
+  "after_integration_cleanup": true,
+  "checks": [
+    {
+      "cache": "results/repro_fig6/gpt-5/responses.jsonl",
+      "responses_reused": 164,
+      "rates_unchanged": true,
+      "cache_unchanged": true
+    },
+    {
+      "cache": "results/repro_fig6/gpt-5-mini/responses.jsonl",
+      "responses_reused": 164,
+      "rates_unchanged": true,
+      "cache_unchanged": true
+    },
+    {
+      "cache": "results/repro_fig6/gpt-5-nano/responses.jsonl",
+      "responses_reused": 164,
+      "rates_unchanged": true,
+      "cache_unchanged": true
+    },
+    {
+      "cache": "results/repro_fig6_gemini_successors/claude-opus-4-5-20251101/responses.jsonl",
+      "responses_reused": 164,
+      "rates_unchanged": true,
+      "cache_unchanged": true
+    },
+    {
+      "cache": "results/repro_fig6_gemini_successors/claude-sonnet-4-5-20250929/responses.jsonl",
+      "responses_reused": 164,
+      "rates_unchanged": true,
+      "cache_unchanged": true
+    },
+    {
+      "cache": "results/repro_fig6_gemini_successors/gemini-3-flash-preview/responses.jsonl",
+      "responses_reused": 22,
+      "rates_unchanged": true,
+      "cache_unchanged": true
+    },
+    {
+      "cache": "results/repro_fig6_gemini_successors/gemini-3.1-flash-lite/responses.jsonl",
+      "responses_reused": 164,
+      "rates_unchanged": true,
+      "cache_unchanged": true
+    },
+    {
+      "cache": "results/repro_fig6_mini_system/gpt-5-mini/responses.jsonl",
+      "responses_reused": 164,
+      "rates_unchanged": true,
+      "cache_unchanged": true
+    }
+  ]
+}

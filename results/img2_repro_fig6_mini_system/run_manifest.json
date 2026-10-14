@@ -1,0 +1,32 @@
+{
+  "created_utc": "2026-10-12T17:51:49.221181+00:00",
+  "model": "gpt-5-mini",
+  "served_model_versions": [
+    "gpt-5-mini-2025-08-07"
+  ],
+  "message_roles": "system_user",
+  "split": "Exact prompt prefix through <CONSTRAINTS END> is system content; remaining text and original JPEG are user content. No text removed, added or rewritten.",
+  "thinking": "minimal",
+  "reported_reasoning_tokens": 0,
+  "completion_statuses": {
+    "completed": 164
+  },
+  "other_generation_parameters": "Inherited baseline: temperature default 1.0, high image detail, max output 8192",
+  "scoring": "Unchanged literal any violating box strict interior; same parser and denominator policy",
+  "dataset_sha256": "6c7ef77183d2b02cc035f2f8de53ce35f66bbdfc29d1e333c788b213474cb407",
+  "baseline_responses_sha256": "0f3bb2685ad50441cb12eeec4a807c242e53cdd69ab44fca7987fbba2330f3bc",
+  "responses_sha256": "4da218830381183ffa850924af334df5e943b64ba5ee6a46f77f142210148491",
+  "source_sha256": {
+    "configs/repro_fig6_mini_system.yaml": "6bfb60720ae9023900e0530a242c5fd818f5c71a02f04d905723c0768a366809",
+    "src/asimov/bench/image.py": "b0916496582e96bbc3b6f100a7303ac70ce156baf6473a94d7f20effc7f28dd8",
+    "src/asimov/runner.py": "55b89fb2c4e99f6a645eaaf5e3ddbbd0c74729bf641196ce40206d06ef1d3ffb",
+    "src/asimov/models/openai_client.py": "6db7813b194ba7d9796e8cc38dc43cd13719b3039ef1dddc1d02604890308399"
+  },
+  "verification": {
+    "tests_passed": 57,
+    "tests_skipped": 5,
+    "all_164_text_image_preservation_checks": "passed",
+    "baseline_response_hash_unchanged": true
+  },
+  "limitation": "One stochastic run per wiring; not a verified authors harness or repeated-trial causal estimate."
+}

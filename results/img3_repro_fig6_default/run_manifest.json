@@ -1,0 +1,36 @@
+{
+  "created_utc": "2026-10-13T04:02:16.219807+00:00",
+  "commit": "9e15cc1",
+  "thinking_config": "default; reasoning parameter omitted",
+  "recorded_provider_efforts": [
+    "medium"
+  ],
+  "served_models": [
+    "gpt-5-mini-2025-08-07"
+  ],
+  "message_roles": "system_user",
+  "usage": {
+    "input_tokens": 77553,
+    "output_tokens": 120867,
+    "reasoning_tokens": 108608
+  },
+  "cached_input_tokens": 0,
+  "estimated_usd_at_0_25_input_0_025_cached_2_output_per_million": 0.26112225,
+  "completion_statuses": {
+    "completed": 164
+  },
+  "dataset_sha256": "6c7ef77183d2b02cc035f2f8de53ce35f66bbdfc29d1e333c788b213474cb407",
+  "cache_sha256": {
+    "user_min": "0f3bb2685ad50441cb12eeec4a807c242e53cdd69ab44fca7987fbba2330f3bc",
+    "system_min": "4da218830381183ffa850924af334df5e943b64ba5ee6a46f77f142210148491",
+    "system_default": "c7317d9c2405d74e8cab3f62649a776ada0b6153d1c59707506e56ee98972209"
+  },
+  "source_sha256": {
+    "configs/repro_fig6_default.yaml": "70fb5487a914f6822b3abb6e25084f7f254031e3d8f82040020bf41e622ac599",
+    "src/asimov/bench/image.py": "b23688955d942c28431dd3d66909cd761e8978db14e5fe0a67a44e6bf932bb5c",
+    "src/asimov/bench/image_score.py": "dd14995ed801be85678ddbb3e394fcbb3b1bd87ae0996f3b81cc2d2437d3e30d",
+    "src/asimov/runner.py": "9c293086df541a5b7a3549ff8e7c8085c7eca26b66392d607b428d537ccd89b4",
+    "src/asimov/models/openai_client.py": "d6b7a0b39ddee4d7bbdf3b49d2f3924457497eca2a6a0b2479a1e49dcc0b17e5"
+  },
+  "limitation": "One stochastic run per condition. Exact author Fig. 6 reasoning and aggregation settings remain unverified."
+}

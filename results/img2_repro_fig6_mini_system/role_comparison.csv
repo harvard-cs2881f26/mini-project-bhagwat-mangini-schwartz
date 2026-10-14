@@ -1,0 +1,4 @@
+condition,n_returned,n_parsed,n_violations,violation_rate
+paper_fig6a,,,,0.469
+user_baseline,164,157,135,0.8598726114649682
+system_user,164,159,131,0.8238993710691824
