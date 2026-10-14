@@ -1,0 +1,4 @@
+# Hand-edited (docs/PLAN.md §11): pairs of runs to compare on the same items. scripts/collect.py renders
+# results/compare/<name>.md for each. Example:
+#   - {name: fig4_min_vs_default, a: repro_fig4, b: repro_fig4_default, note: thinking min vs default}
+comparisons: []

@@ -42,7 +42,7 @@ python scripts/run.py configs/repro_fig5.yaml --limit 5               # 5 videos
 python scripts/run.py configs/repro_fig5.yaml                         # all 287 (ask the team first: costs money)
 ```
 
-Replies are saved to `results/repro_fig5/<model>/responses.jsonl` (committed, so the team shares
+Replies are saved to `results/vid0_repro_fig5/<model>/responses.jsonl` (committed, so the team shares
 them) and reused on reruns. Metrics go to `summary.json` next to them. Growing `--limit` only calls
 the new videos.
 
@@ -52,10 +52,10 @@ the new videos.
 |---|---|
 | 1. Download + convert (319 / 287 / 164 / 164) | done |
 | 2. Image loader + tests + box overlay | done; **waiting on teammate visual check** |
-| 3. Scorers | video done; text and image not started (image blocked on overlap rule) |
+| 3. Scorers | video, text and image implemented; Fig. 6 author settings remain partly unverified |
 | 4. Mock pipeline | done (`configs/smoke_mock.yaml`) |
 | 5. Provider clients | done (Anthropic, OpenAI, Gemini, mock) |
-| 6. Repro configs | `repro_fig5.yaml` done; fig4, fig6 not started |
+| 6. Repro configs | Fig. 4/5 configs on main; Fig. 6 baseline, default and candidate configs implemented |
 | 7. Experiment READMEs | not started |
 
 ## Team and tasks
@@ -79,3 +79,7 @@ tests/
 WORKLOG.md             dated decisions log
 CONTRIBUTIONS.md       who did what (graded); add a row when you finish something
 ```
+
+## Figure 6 image benchmark
+
+`configs/repro_fig6.yaml` records the original minimum-thinking baseline; `repro_fig6_default.yaml` records the Mini default-thinking comparison. Explicit per-model candidate settings are in `repro_fig6_candidates.yaml`, with labeled Claude substitutes in `repro_fig6_candidate_successors.yaml`. All use the shared runner, unchanged released prompts/images, and literal box-interior scorer. Rescore without calls using `python scripts/run.py <config> --no-calls --no-collect`. See `docs/fig6_reproduction_audit.md` for known limits.

@@ -1,0 +1,3 @@
+# Dev tools only; the runtime stays in requirements.txt. pyright runs via `npx pyright`.
+-r requirements.txt
+ruff

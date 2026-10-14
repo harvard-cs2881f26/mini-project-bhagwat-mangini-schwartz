@@ -1,0 +1,19 @@
+# EXPLORATORY, post-hoc: NOT pre-registered. Chosen 2026-10-13 (Noa) after the Part 2 results were seen, to answer
+# "how cheap can the LLM side be". Not evidence for H1 or H2. The pre-registered analysis is part2_designs.yaml.
+# Same `first` models, confidence rule, fixed_fractions and split_headline as part2_designs.yaml; only `escalation`
+# differs. Read by scripts/cascade.py --config configs/analysis/part2_designs_exploratory.yaml, checked by
+# asimov.cascade.DesignConfig (unknown keys fail). Outputs: results/part2_designs_exploratory/,
+# figures/part2_designs_exploratory/. WORKLOG 2026-10-13, "Exploratory: cheaper LLM targets".
+label: "EXPLORATORY, post-hoc: escalation targets chosen after the Part 2 results were seen (not pre-registered)"
+escalation:                                         # cheaper LLM targets; each is paired with every `first`
+  - {run: part2_luna_gen, model: gpt-6-luna}        # luna generate, verbatim prompt
+  - {run: repro_fig4, model: gemini-3.1-flash-lite} # Gemini Flash-Lite, thinking min
+  - {run: repro_fig4_default, model: gpt-5}         # GPT-5, thinking default
+first:                                              # decision models that answer first (as in part2_designs.yaml)
+  - {run: part2_jev, model: jev-latest}               # Jev
+  - {run: part2_luna_decide, model: gpt-6-luna}       # luna Decisions
+  - {run: part2_codiv, model: openjev-latest}         # OpenJev think 0
+  - {run: part2_kev, model: kev-latest}               # Kev-4B
+confidence: min_top_probability                     # lowest top-option probability over the item's 4 questions
+fixed_fractions: [0.25, 0.5, 0.75]                  # D's table: share of items sent to the LLM
+split_headline: [latent_risk]                       # B's split: decision model for Q1, the LLM for Q2-Q4

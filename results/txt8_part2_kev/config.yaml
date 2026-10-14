@@ -1,0 +1,12 @@
+# Part 2: Kev-4B (jaredpalmer/kev-4b@v1.0 = Qwen3.5-4B-Base + LoRA + pointer head), self-deployed on
+# Modal (L40S) from Kev's kev_serve.py; key in KEV_API_KEY. Kev applies its own fitted temperature
+# (2.41) to the probabilities: argmax unchanged, calibration not comparable to an untouched model.
+# Pairs with qwen_base_logprob (same base weights, no decision training).
+# Question mode: change prompt to decision_short_cumulative (new run name).
+run: part2_kev
+benchmark: text
+prompt: decision_short
+thinking: min
+models:
+  - {name: Kev-4B, provider: systemone, model: kev-latest, base_url: "https://nschwartz--kev-api.modal.run",
+     key_env: KEV_API_KEY}

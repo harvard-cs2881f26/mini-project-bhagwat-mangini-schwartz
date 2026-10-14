@@ -1,0 +1,8 @@
+# Part 2: gpt-6-luna generating the paper's verbatim prompt through the Responses API, at its lowest
+# reasoning effort ("none"; models/openai_client.min_effort). Pairs with part2_luna_decide.
+run: part2_luna_gen
+benchmark: text
+prompt: text_verbatim
+thinking: min
+models:
+  - {name: gpt-6-luna (generate), provider: openai, model: gpt-6-luna}

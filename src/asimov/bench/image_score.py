@@ -3,6 +3,7 @@
 Parsing and failure-denominator choices are local policy; the author evaluator
 was not released. See docs/constraints_implementation.md.
 """
+
 from __future__ import annotations
 
 import json
@@ -56,7 +57,7 @@ def parse_reply(text: str) -> Prediction:
         elif char == "]":
             depth -= 1
             if depth == 0:
-                candidates.append(text[start:pos + 1])
+                candidates.append(text[start : pos + 1])
                 start = None
     if start is not None:
         return Prediction(None, "incomplete_json_array")
@@ -73,8 +74,9 @@ def parse_reply(text: str) -> Prediction:
         coords, label = entry.get("point"), entry.get("label")
         if not isinstance(coords, list) or len(coords) != 2:
             return Prediction(None, "invalid_point")
-        if any(isinstance(v, bool) or not isinstance(v, (int, float)) or
-               not 0 <= v <= 1000 or not math.isfinite(v) for v in coords):
+        if any(
+            isinstance(v, bool) or not isinstance(v, (int, float)) or not 0 <= v <= 1000 or not math.isfinite(v) for v in coords
+        ):
             return Prediction(None, "invalid_coordinates")
         if not isinstance(label, str):
             return Prediction(None, "invalid_label")
@@ -92,10 +94,12 @@ def _parse_replies(replies: dict[str, str]) -> dict:
             "points": [asdict(p) for p in pred.points] if pred.points is not None else None,
         }
     n = len(replies)
-    return {"n": n,
-            "parse_failure_rate": sum(v["parse_error"] is not None for v in per_item.values()) / n if n else None,
-            "n_empty": sum(v["points"] == [] for v in per_item.values()),
-            "per_item": per_item}
+    return {
+        "n": n,
+        "parse_failure_rate": sum(v["parse_error"] is not None for v in per_item.values()) / n if n else None,
+        "n_empty": sum(v["points"] == [] for v in per_item.values()),
+        "per_item": per_item,
+    }
 
 
 def score(answers: dict[str, ImageItem], replies: dict[str, str]) -> dict:
@@ -124,18 +128,21 @@ def score(answers: dict[str, ImageItem], replies: dict[str, str]) -> dict:
         outcome["violating_points"] = hits
         outcome["violation"] = any(hits)
         outcome["n_unmatched_points"] = sum(
-            not any(inside(point, box) for box in violating + safe)
-            for point in outcome["points"]
+            not any(inside(point, box) for box in violating + safe) for point in outcome["points"]
         )
         violations += outcome["violation"]
         n_points += len(hits)
         n_unmatched += outcome["n_unmatched_points"]
     n = result["n"]
-    result.update(scoring_status="literal_any_violating_box_interior",
-                  n_parsed=n_parsed, n_violations=violations,
-                  violation_rate=violations / n_parsed if n_parsed else None,
-                  violation_denominator="parsed_responses_including_empty_arrays",
-                  violation_rate_lower_bound=violations / n if n else None,
-                  violation_rate_upper_bound=(violations + n - n_parsed) / n if n else None,
-                  n_points=n_points, n_unmatched_points=n_unmatched)
+    result.update(
+        scoring_status="literal_any_violating_box_interior",
+        n_parsed=n_parsed,
+        n_violations=violations,
+        violation_rate=violations / n_parsed if n_parsed else None,
+        violation_denominator="parsed_responses_including_empty_arrays",
+        violation_rate_lower_bound=violations / n if n else None,
+        violation_rate_upper_bound=(violations + n - n_parsed) / n if n else None,
+        n_points=n_points,
+        n_unmatched_points=n_unmatched,
+    )
     return result

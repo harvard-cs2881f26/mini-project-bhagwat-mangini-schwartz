@@ -1,0 +1,34 @@
+# run name -> run ID. Maintained by the runner and scripts/collect.py, which add every new run: don't edit by hand.
+# An ID is the benchmark prefix plus a number; it is never changed or reused, even after a run is deleted.
+# Each run's folder is results/<id>_<run>/.
+repro_fig4: txt0
+repro_fig5: vid0
+repro_fig4_default: txt1
+part2_codiv: txt2
+part2_openjev_think512: txt3
+part2_jev: txt4
+part2_jev_reversed: txt5
+part2_luna_decide: txt6
+part2_luna_gen: txt7
+part2_kev: txt8
+part2_jev_cumulative: txt9
+part2_jev_full: txt10
+part2_jev_letters: txt11
+part2_kev_cumulative: txt12
+part2_openjev_cumulative: txt13
+part2_openjev_full: txt14
+part2_jev_full_cumulative: txt15
+part2_luna_decide_full: txt16
+part2_luna_decide_cumulative: txt17
+part2_luna_decide_full_cumulative: txt18
+part2_luna_decide_letters: txt19
+part2_openjev_full_cumulative: txt20
+part2_laya_full: txt21
+part2_laya_cumulative: txt22
+part2_openjev_think512_full: txt23
+part2_openjev_think512_cumulative: txt24
+part2_nli: txt25
+part2_qwen_base_logprob: txt26
+part2_qwen_gen: txt27
+part2_qwen_logprob: txt28
+part2_qwen_base_logprob_oneshot: txt29

@@ -22,5 +22,11 @@ jobs:
       - run: pip install -r requirements.txt
       - name: Unit and end-to-end tests
         run: python -m pytest -rs
+      # Before the mock runs, so nothing rebuilds the pages first. If it fails: run
+      # `python scripts/collect.py` and commit the updated results/ pages (docs/PLAN.md §11).
+      - name: Results pages are up to date (collect.py --check)
+        run: python scripts/collect.py --check
       - name: Mock run through the CLI (free, no keys)
         run: python scripts/run.py configs/smoke_mock.yaml
+      - name: Mock run of the text benchmark (free, no keys)
+        run: python scripts/run.py configs/smoke_mock_text.yaml

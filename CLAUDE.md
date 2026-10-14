@@ -31,12 +31,11 @@ scope and owners. Point out the conflict instead of silently picking one.
 
 ## Hard rules
 
-- **Do not write the experiments or the analysis.** The course penalizes AI-generated work
-  the students can't explain. Build tools (loaders, scorers, clients, runners, plots). Leave
-  hypotheses, methods, conclusions and slide text to the owners. When asked for analysis,
-  give the numbers and point out what they show, but don't write the interpretation.
 - **Ask before any run that costs money**, other than a `--limit N` dry run.
 - **Cache every API response.** Reruns must be free. Never cache errors.
+- **Results only come from `scripts/run.py`**, never from a notebook or a one-off script, so every
+  run records how it was made. `tests/test_results_schema.py` checks committed results on CI. Older
+  results can be brought up to date for free with `scripts/run.py <config> --no-calls`.
 - **Log finished work in CONTRIBUTIONS.md** under the person it was done for, with an honest
   "AI assistance" entry saying what the AI did. Don't fill in someone's AI-assistance cell
   for work you didn't see; mark it for them to fill in.
@@ -61,6 +60,36 @@ python -m pytest                       # fast, no network, no API calls; uses da
 python scripts/draw_boxes.py [ids...]  # overlay constraint boxes -> results/box_check/
 ```
 
+### Running an eval
+
+Every benchmark runs through `scripts/run.py`, which records the same information for each run.
+API keys go in `.env` (copy `.env.example`).
+
+1. Write a config in `configs/` (fields are checked by `asimov/config.py`; unknown keys fail):
+   ```yaml
+   run: repro_fig6          # folder results/<id>_<run>/, e.g. img0_repro_fig6; any new setting needs a new run name
+   benchmark: image         # a registered benchmark: text, video, ... (see "Adding a benchmark")
+   prompt: <prompt name>
+   thinking: min            # min | default
+   log_reasoning: false     # optional; true saves reasoning summaries (never scored)
+   models:
+     - {name: GPT-5, provider: openai, model: gpt-5}
+   ```
+2. `python scripts/run.py <config> --limit 5` first: it prints each reply. Check them and work out
+   the cost before any full run (ask before spending, per the hard rules).
+3. Full run: the same command without `--limit`. Run it once more to retry errors; cached replies
+   are free, and failed calls are listed in `results/<id>_<run>/<model>/errors.jsonl`.
+4. After a scoring change: `python scripts/run.py <config> --no-calls` rescores the saved replies
+   (free, no keys needed).
+5. Commit `results/<id>_<run>/`: `config.yaml`, each model's `responses.jsonl` and `summary.json`.
+   `tests/test_results_schema.py` checks them on CI.
+
+Reusing a run name with a different config stops the run (`ConfigChanged`); comment-only edits
+are fine. A run's folder is `results/<id>_<run>/` (e.g. `results/txt0_repro_fig4/`): on its first run
+a new run name gets the next ID for its benchmark in `results/run_ids.yaml` (`asimov/run_ids.py`),
+and a legacy `results/<run>/` folder is renamed. Everywhere else (configs, summaries, the cache) the
+run name stays the plain one. `--models <name or id>` runs a subset of the config's models.
+
 ## Layout
 
 ```
@@ -76,8 +105,14 @@ src/asimov/bench/parts.py     TextPart / ImagePart: provider-neutral request par
 src/asimov/bench/parse.py     shared: pull the JSON object out of a model reply
 src/asimov/bench/<bench>.py   build_request + BENCHMARK; scorer in <bench>_score.py
 src/asimov/models/            one client per provider + mock; get_client(provider, model)
+src/asimov/models/reply_info.py  how a reply ended (complete/truncated/refused), cached tokens
 src/asimov/runner.py          benchmark-agnostic: cache, calls, errors, scoring via the registry
-configs/*.yaml                run, benchmark, prompt, thinking, models
+src/asimov/run_ids.py         run IDs (results/run_ids.yaml) and each run's folder, results/<id>_<run>/
+src/asimov/config.py          run config schema (pydantic; unknown keys fail)
+src/asimov/prices.py          configs/prices.yaml loader + cost of a call (Gemini thinking billed as output)
+src/asimov/cascade.py         Part 2 designs D (route by confidence) and B (split by question), pure
+scripts/cascade.py            configs/analysis/<name>.yaml -> results/<name>/ tables + figures/<name>/ (no calls)
+configs/*.yaml                run, benchmark, prompt, thinking, log_reasoning (optional), models
 tests/                        unit tests for our code (not model evals)
 data/README.md                schemas with real examples, read before touching a loader
 ```
@@ -104,6 +139,54 @@ Planned: `scripts/plot.py`, `experiments/*/README.md`.
   timestamp. How the metrics treat these is **OPEN**.
 - The two Image variants (`image`, `image_rationale`) are identical except for one sentence at
   the end of the prompt.
+
+## Scoring conventions (all benchmarks)
+
+The paper doesn't say how it parsed replies, so these are ours (WORKLOG 2026-10-12).
+**Status:** decided for text (Noa). For video (Tyler) and image (Riddhi) they are a proposal:
+the owner decides whether their scorer adopts each rule, and logs that choice in WORKLOG. Most of
+them already match the video rules (WORKLOG 2026-10-10 and 2026-10-11). A scorer that deviates
+says so in its docstring.
+
+- **Send the prompt as the paper gives it.** No structured-output settings, no wrappers. Format
+  problems are measured, not prevented. Variants go in `experiments/` under their own run name.
+- **Read the answer object with `bench/parse.json_object`:** the last top-level `{...}`, nested
+  parts included. Code fences, prose around the JSON and single quotes are fine. A repeated key
+  keeps its first value (the answer comes before its rationale); count those reads.
+- **Broken JSON doesn't cost the answers either.** If the object won't load (e.g. an unescaped quote
+  in a rationale), read the `"key": "value"` pairs from the text (`bench/parse.loose_pairs`) and
+  count those reads (a `loose_json` status and rate). Nothing is sent back to the model.
+- **Key-name slips don't cost an answer when the target is clear:**
+  `bench/parse.locate_keys`. The exact key wins; otherwise one near-miss key per target is used,
+  under the benchmark's own rule (e.g. "the key contains `severity`"); two competing near keys
+  leave it unread. Count near-miss reads (a `near_key` status and rate) so slips stay visible.
+- **An option's text instead of its letter counts as that letter** when it matches one of the
+  item's own options (text: "No realistic injury possible" -> E), counted as `option_text`.
+- **Unanswered = wrong, never dropped.** Report the parse-failure rate for every model, and why
+  each answer couldn't be read (missing key, invalid value, no JSON). Each owner sets when a high
+  parse-failure rate stops their run for review; for text (Noa) it's above 2% for any model.
+- **Refusals, safety blocks and cut-off replies are never excluded.** Each reply is flagged with
+  how it ended, independently of whether its answers could be read:
+  - `refusal_rate`: the model refused, or the provider blocked the prompt or reply for safety;
+  - `truncation_rate`: the reply was cut off by the output-token limit;
+  - per item, `finish` is `complete`, `refused` or `truncated` (read from the provider's
+    response by `models/reply_info.py`, added in PR #4).
+
+  A blocked or refused reply usually has no answer, so it is wrong and also a parse failure. A
+  truncated reply may still have readable answers, which are scored as usual. To break down parse
+  failures, cross `finish` with the per-item parse result rather than adding the rates.
+- **Never change a scoring rule silently.** Log it in WORKLOG with the alternative, then rescore
+  saved replies for free (`scripts/run.py <config> --no-calls`, added in PR #4), and say what changed.
+
+## Write-ups
+
+- Each run's report includes `results/<run folder>/writeup.md` (e.g. `results/txt0_repro_fig4/writeup.md`),
+  which is hand-maintained: `collect.py` never writes it. After editing it, rerun
+  `python scripts/collect.py`.
+- Structure: `### Summary` (verdict first), `### Comparison with the paper` (claim by claim, with our
+  numbers, CIs and the paper's values), `### Key takeaways` (numbered), `### Caveats`.
+- No authorship or "drafted by" note in the write-up. Check every number against the run's pages
+  before writing it.
 
 ## Style
 

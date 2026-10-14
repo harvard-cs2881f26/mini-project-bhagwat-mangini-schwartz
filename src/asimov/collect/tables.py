@@ -1,0 +1,169 @@
+"""results/index.csv (one row per run x model) and results/per_item.csv (run x model x item x question)."""
+
+from __future__ import annotations
+
+import csv
+import io
+from dataclasses import dataclass
+
+import numpy as np
+
+from asimov.claims import is_stand_in
+from asimov.collect.load import ModelResult, RunData
+from asimov.collect.metrics import item_rows
+from asimov.collect.run_ids import RunLabel
+from asimov.prices import Price, call_cost
+
+LEADING = (
+    "run",
+    "run_id",
+    "description",
+    "benchmark",
+    "name",
+    "provider",
+    "model",
+    "served_model",
+    "stand_in",
+    "prompt",
+    "thinking",
+    "log_reasoning",
+    "key",
+    "n",
+    "errors",
+    "config_path",
+    "config_sha256",
+    "git_commit",
+    "git_dirty",
+    "scored_at",
+    "input_tokens",
+    "output_tokens",
+    "cached_input_tokens",
+    "latency_p50_s",
+    "latency_p95_s",
+    "cost_usd",
+)
+PER_ITEM_COLUMNS = (
+    "run",
+    "run_id",
+    "benchmark",
+    "model",
+    "item",
+    "question",
+    "pred",
+    "gold",
+    "correct",
+    "status",
+    "parse_ok",
+    "finish",
+)
+LATENCY_DIGITS = 3  # rounded so index.csv is the same on every machine
+COST_DIGITS = 6
+PRICED_BENCHMARKS = ("text",)  # video (Tyler) and image (Riddhi) costs are their owners' to add
+CSV_DIGITS = 6  # every float in a CSV, so collect.py --check gives the same bytes on every machine and numpy version
+
+
+def cost_usd(model: ModelResult, prices: dict) -> float | None:
+    """$ from logged tokens x configs/prices.yaml (asimov.prices.call_cost); None when the model has no $ price.
+    Summary totals, plus thinking tokens summed from the saved replies (summaries leave them out)."""
+    entry = prices.get(model.summary.get("model"))
+    if not entry:
+        return None
+    s = model.summary
+    thinking = sum(u.get("thinking_tokens") or 0 for u in model.usage.values())
+    totals = {k: s.get(k) for k in ("input_tokens", "output_tokens", "cached_input_tokens")} | {"thinking_tokens": thinking}
+    cost = call_cost(totals, Price.model_validate(entry))
+    return None if cost is None else round(cost, COST_DIGITS)
+
+
+def index_row(run: RunData, model: ModelResult, prices: dict, labels: dict[str, RunLabel]) -> dict:
+    s = model.summary
+    lat = np.asarray(model.latencies, dtype=float)
+    p50, p95 = (round(float(np.percentile(lat, q)), LATENCY_DIGITS) for q in (50, 95)) if len(lat) else (None, None)
+    made = {
+        "run": run.name,
+        "run_id": labels[run.name].id,
+        "description": labels[run.name].description,
+        "benchmark": run.benchmark,
+        "served_model": ";".join(model.served_models),
+        "stand_in": is_stand_in(s["name"]),
+        "latency_p50_s": p50,
+        "latency_p95_s": p95,
+        "cost_usd": cost_usd(model, prices) if run.benchmark in PRICED_BENCHMARKS else None,
+    }
+    return {**s, **made}
+
+
+def per_item(values: dict, key: str) -> float | None:
+    """A run total (tokens, $) divided by the model's replies `n`; None when either is missing. Takes a summary
+    or an index row (which holds the summary's keys)."""
+    total, n = values.get(key), values.get("n")
+    return None if total is None or not n else total / n
+
+
+@dataclass(frozen=True)
+class SpeedRow:
+    """One model's cost and speed, as the run page's "Cost and speed" table shows it (from its index row)."""
+
+    name: str
+    input_per_item: float | None
+    output_per_item: float | None
+    latency_p50_s: float | None
+    latency_p95_s: float | None
+    cost_per_item: float | None  # $; None until configs/prices.yaml has the model
+    cost: float | None  # $ for all its replies in the run
+
+
+def speed_row(row: dict) -> SpeedRow:
+    return SpeedRow(
+        row["name"],
+        per_item(row, "input_tokens"),
+        per_item(row, "output_tokens"),
+        row.get("latency_p50_s"),
+        row.get("latency_p95_s"),
+        per_item(row, "cost_usd"),
+        row.get("cost_usd"),
+    )
+
+
+def index_rows(runs: list[RunData], prices: dict, labels: dict[str, RunLabel]) -> list[dict]:
+    return [index_row(run, m, prices, labels) for run in runs for m in run.models]
+
+
+def per_item_rows(runs: list[RunData], labels: dict[str, RunLabel]) -> list[dict]:
+    rows = []
+    for run in runs:
+        for m in run.models:
+            for item_id in sorted(m.per_item):
+                outcome = m.per_item[item_id]
+                for r in item_rows(run.benchmark, outcome):
+                    rows.append(
+                        {
+                            "run": run.name,
+                            "run_id": labels[run.name].id,
+                            "benchmark": run.benchmark,
+                            "model": m.summary["model"],
+                            "item": item_id,
+                            **r,
+                            "parse_ok": outcome.get("parse_ok"),
+                            "finish": outcome.get("finish"),
+                        }
+                    )
+    return rows
+
+
+def cell(v) -> str:
+    if v is None:
+        return ""
+    return str(round(v, CSV_DIGITS) + 0.0) if isinstance(v, float) else str(v)  # + 0.0 turns -0.0 into 0.0
+
+
+def to_csv(rows: list[dict], leading: tuple[str, ...]) -> str:
+    """CSV with `leading` columns first, then every other key sorted; missing values are empty."""
+    extra = sorted({k for r in rows for k in r} - set(leading))
+    columns = [c for c in leading if any(c in r for r in rows) or not rows] + extra
+    out = io.StringIO()
+    writer = csv.writer(out, lineterminator="\n")
+    writer.writerow(columns)
+    for r in rows:
+        writer.writerow([cell(r.get(c)) for c in columns])
+    return out.getvalue()

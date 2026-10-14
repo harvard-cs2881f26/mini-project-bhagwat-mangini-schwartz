@@ -9,7 +9,7 @@ from __future__ import annotations
 from google import genai
 from google.genai import types
 
-from asimov.bench.parts import ImagePart, Part, TextPart
+from asimov.bench.parts import Part, TextPart
 from asimov.models.base import ModelResponse, Thinking, Timer
 
 MAX_OUTPUT_TOKENS = 8192  # includes thinking tokens
@@ -34,17 +34,21 @@ def min_thinking(model: str) -> types.ThinkingConfig:
 
 class GeminiClient:
     provider = "gemini"
+    request_settings = frozenset({"thinking", "log_reasoning"})  # both change the thinking config sent
 
     def __init__(self, model: str):
         self.model = model
         self.client = genai.Client()
 
-    def generate(self, parts: list[Part], thinking: Thinking = "min") -> ModelResponse:
+    def generate(self, parts: list[Part], thinking: Thinking = "min", log_reasoning: bool = False) -> ModelResponse:
         # AFC is the SDK's tool-calling loop; we send no tools, and disabling it silences its warning
         cfg = {"max_output_tokens": MAX_OUTPUT_TOKENS,
                "automatic_function_calling": types.AutomaticFunctionCallingConfig(disable=True)}
-        if thinking == "min":
-            cfg["thinking_config"] = min_thinking(self.model)
+        thinking_config = min_thinking(self.model) if thinking == "min" else None
+        if log_reasoning:  # thought summaries; r.text leaves thought parts out
+            thinking_config = (thinking_config or types.ThinkingConfig()).model_copy(update={"include_thoughts": True})
+        if thinking_config is not None:
+            cfg["thinking_config"] = thinking_config
         with Timer() as t:
             r = self.client.models.generate_content(
                 model=self.model, contents=to_contents(parts), config=types.GenerateContentConfig(**cfg)
@@ -58,7 +62,14 @@ class GeminiClient:
                    "finish_reason": str(r.candidates[0].finish_reason) if r.candidates else None},
             latency_s=t.seconds,
             raw=r.model_dump(mode="json", exclude_none=True),
+            reasoning=thought_text(r) if log_reasoning else "",
         )
+
+
+def thought_text(r) -> str:
+    """Text of the parts marked as thoughts (include_thoughts=True)."""
+    parts = (r.candidates[0].content.parts or []) if r.candidates and r.candidates[0].content else []
+    return "\n\n".join(p.text for p in parts if p.thought and p.text)
 
 
 def list_model_ids() -> list[str]:

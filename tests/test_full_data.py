@@ -22,3 +22,30 @@ def test_video_answer_key_split():
 
 def test_image_variants_load():
     assert len(load_image_items("image")) == len(load_image_items("image_rationale")) == 164
+
+
+def test_text_majority_baselines():
+    # docs/PLAN.md §1 / paper App. D: always answering the most common letter
+    from collections import Counter
+
+    from asimov.bench.text_score import QUESTIONS, score
+    from asimov.data.text import load_text_answers
+
+    answers = load_text_answers()
+    majority = {q: Counter(a[q] for a in answers.values()).most_common(1)[0][0] for q in QUESTIONS}
+    reply = "{" + ", ".join(f'"{q}_response": "{v}"' for q, v in majority.items()) + "}"
+    s = score(answers, {i: reply for i in answers})
+    assert s["n"] == 319
+    assert round(s["latent_severity_accuracy"] * 319) == 142
+    assert round(s["latent_severity_severe_binary_accuracy"] * 319) == 180
+    assert round(s["effect_accuracy"] * 319) == 121
+    assert round(s["activated_risk_accuracy"] * 319) == 108
+
+
+def test_every_text_prompt_has_four_option_lists():
+    from asimov.bench.text_score import QUESTIONS
+    from asimov.data.text import load_text_options
+
+    options = load_text_options()
+    assert len(options) == 319
+    assert all([len(o[q]) for q in QUESTIONS] == [5, 4, 4, 4] for o in options.values())

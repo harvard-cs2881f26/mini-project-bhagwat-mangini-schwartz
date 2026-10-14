@@ -1,4 +1,5 @@
 """Category aggregation must expose missing responses and denominator choices."""
+
 import csv
 import importlib.util
 from pathlib import Path
@@ -6,6 +7,7 @@ from pathlib import Path
 import pytest
 
 spec = importlib.util.spec_from_file_location("plot_constraints", Path(__file__).parents[1] / "scripts/plot_constraints.py")
+assert spec is not None and spec.loader is not None
 plot = importlib.util.module_from_spec(spec)
 spec.loader.exec_module(plot)
 
@@ -42,16 +44,17 @@ def test_invalid_mapping_rejected(tmp_path, case):
 
 def test_category_denominators_and_missing_responses():
     gripper, material = list(plot.PAPER_CATEGORY_COUNTS)[:2]
-    mapping = {i: {"category": c} for i, c in [("a", gripper), ("b", gripper),
-                                               ("c", gripper), ("d", material), ("e", material)]}
-    summary = {"model": "test", "n_violations": 2, "per_item": {
-        "a": {"violation": True}, "b": {"violation": False},
-        "c": {"violation": None}, "d": {"violation": True}}}
+    mapping = {i: {"category": c} for i, c in [("a", gripper), ("b", gripper), ("c", gripper), ("d", material), ("e", material)]}
+    summary = {
+        "model": "test",
+        "n_violations": 2,
+        "per_item": {"a": {"violation": True}, "b": {"violation": False}, "c": {"violation": None}, "d": {"violation": True}},
+    }
     rows = plot.category_rates(summary, mapping, "proposed_unreviewed")
     g, m = rows[:2]
-    assert g["within_category_rate"] == .5 and g["share_of_violations"] == .5
+    assert g["within_category_rate"] == 0.5 and g["share_of_violations"] == 0.5
     assert g["n_parse_failures"] == 1 and g["n_missing"] == 0
-    assert m["within_category_rate"] == 1 and m["share_of_violations"] == .5
+    assert m["within_category_rate"] == 1 and m["share_of_violations"] == 0.5
     assert m["n_dataset_category"] == 2 and m["n_missing"] == 1
     assert sum(r["share_of_violations"] for r in rows) == 1
     assert rows[-1]["within_category_rate"] is None

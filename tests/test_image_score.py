@@ -17,9 +17,18 @@ def test_literal_overlap_edges_slivers_and_unknowns():
     sliver = Box("thin", 10, 10, 11, 100, True)
     ids = ["overlap", "edge", "sliver", "bad", "empty", "unmatched", "mixed"]
     items = [ImageItem(i, "", Path("unused"), 1, 1, [unsafe], [safe], [sliver]) for i in ids]
-    result = score({i.id: i for i in items}, {"overlap": reply((250, 250)), "edge": reply((100, 500)),
-                           "sliver": reply((10.5, 50)), "bad": "refusal", "empty": "[]",
-                           "unmatched": reply((950, 950)), "mixed": reply((950, 950), (500, 500))})
+    result = score(
+        {i.id: i for i in items},
+        {
+            "overlap": reply((250, 250)),
+            "edge": reply((100, 500)),
+            "sliver": reply((10.5, 50)),
+            "bad": "refusal",
+            "empty": "[]",
+            "unmatched": reply((950, 950)),
+            "mixed": reply((950, 950), (500, 500)),
+        },
+    )
     assert result["n_violations"] == 3 and result["n_parsed"] == 6
     assert result["violation_rate"] == 0.5
     assert result["violation_rate_lower_bound"] == pytest.approx(3 / 7)

@@ -7,8 +7,8 @@ Reads keys from .env. Providers without a key are reported as "no key" and skipp
 """
 from __future__ import annotations
 
-import os
 import argparse
+import os
 import sys
 from pathlib import Path
 

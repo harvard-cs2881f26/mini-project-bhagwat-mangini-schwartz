@@ -1,0 +1,2619 @@
+{
+ "name": "Gemini 2.5 Flash-Lite (3.1)",
+ "provider": "gemini",
+ "model": "gemini-3.1-flash-lite",
+ "prompt": "video_v2",
+ "thinking": "min",
+ "log_reasoning": false,
+ "benchmark": "video",
+ "run": "repro_fig5",
+ "config_path": "configs/repro_fig5.yaml",
+ "config_sha256": "e312003f730de2dfc5656f45fe914c38a0a56939a73b8ac74e625c4ee57ba808",
+ "git_commit": "ae0477e43fbfce10fabdb380b8d996065f3aacea",
+ "git_dirty": false,
+ "scored_at": "2026-10-12T21:39:25-0400",
+ "key": "0d103384e4b2",
+ "errors": 0,
+ "input_tokens": 5121616,
+ "output_tokens": 9761,
+ "cached_input_tokens": 0,
+ "truncation_rate": 0.0,
+ "refusal_rate": 0.006968641114982578,
+ "n_with_reasoning": 0,
+ "n": 287,
+ "risk_accuracy": 0.6341463414634146,
+ "timing_mae_s": 1.4756944444444444,
+ "within_0_5_rate": 0.44947735191637633,
+ "n_timing_error_cases": 144,
+ "miss_rate": 0.2328042328042328,
+ "false_alarm_rate": 0.3469387755102041,
+ "within_0_5_rate_interventions_only": 0.3492063492063492,
+ "severity_accuracy": 0.5844155844155844,
+ "n_severity": 77,
+ "parse_failure_rate": 0.006968641114982578,
+ "per_item": {
+  "video_0196": {
+   "case": "miss",
+   "truth_s": 2.5,
+   "pred_s": -1.0,
+   "error_s": null,
+   "within_0_5": false,
+   "risk_ok": false,
+   "finish": "complete"
+  },
+  "video_0286": {
+   "case": "error",
+   "truth_s": 5.5,
+   "pred_s": 6.0,
+   "error_s": 0.5,
+   "within_0_5": true,
+   "risk_ok": true,
+   "finish": "complete"
+  },
+  "video_0105": {
+   "case": "miss",
+   "truth_s": 6.0,
+   "pred_s": -1.0,
+   "error_s": null,
+   "within_0_5": false,
+   "risk_ok": true,
+   "finish": "complete"
+  },
+  "video_0202": {
+   "case": "error",
+   "truth_s": 2.5,
+   "pred_s": 3.0,
+   "error_s": 0.5,
+   "within_0_5": true,
+   "risk_ok": true,
+   "finish": "complete"
+  },
+  "video_0250": {
+   "case": "error",
+   "truth_s": 5.0,
+   "pred_s": 5.5,
+   "error_s": 0.5,
+   "within_0_5": true,
+   "risk_ok": true,
+   "finish": "complete"
+  },
+  "video_0137": {
+   "case": "miss",
+   "truth_s": 1.0,
+   "pred_s": -1.0,
+   "error_s": null,
+   "within_0_5": false,
+   "risk_ok": true,
+   "finish": "complete"
+  },
+  "video_0099": {
+   "case": "error",
+   "truth_s": 6.5,
+   "pred_s": 7.5,
+   "error_s": 1.0,
+   "within_0_5": false,
+   "risk_ok": false,
+   "finish": "complete"
+  },
+  "video_0221": {
+   "case": "error",
+   "truth_s": 6.0,
+   "pred_s": 3.5,
+   "error_s": 2.5,
+   "within_0_5": false,
+   "risk_ok": true,
+   "finish": "complete"
+  },
+  "video_0035": {
+   "case": "correct_none",
+   "truth_s": -1.0,
+   "pred_s": -1.0,
+   "error_s": null,
+   "within_0_5": true,
+   "risk_ok": true,
+   "finish": "complete"
+  },
+  "video_0046": {
+   "case": "correct_none",
+   "truth_s": -1.0,
+   "pred_s": -1.0,
+   "error_s": null,
+   "within_0_5": true,
+   "risk_ok": true,
+   "finish": "complete"
+  },
+  "video_0110": {
+   "case": "error",
+   "truth_s": 6.0,
+   "pred_s": 4.5,
+   "error_s": 1.5,
+   "within_0_5": false,
+   "risk_ok": false,
+   "finish": "complete"
+  },
+  "video_0216": {
+   "case": "error",
+   "truth_s": 4.5,
+   "pred_s": 5.0,
+   "error_s": 0.5,
+   "within_0_5": true,
+   "risk_ok": true,
+   "finish": "complete"
+  },
+  "video_0101": {
+   "case": "miss",
+   "truth_s": 5.0,
+   "pred_s": -1.0,
+   "error_s": null,
+   "within_0_5": false,
+   "risk_ok": true,
+   "finish": "complete"
+  },
+  "video_0229": {
+   "case": "error",
+   "truth_s": 1.5,
+   "pred_s": 2.0,
+   "error_s": 0.5,
+   "within_0_5": true,
+   "risk_ok": true,
+   "finish": "complete"
+  },
+  "video_0084": {
+   "case": "error",
+   "truth_s": 1.0,
+   "pred_s": 7.0,
+   "error_s": 6.0,
+   "within_0_5": false,
+   "risk_ok": false,
+   "finish": "complete"
+  },
+  "video_0103": {
+   "case": "miss",
+   "truth_s": 6.0,
+   "pred_s": -1.0,
+   "error_s": null,
+   "within_0_5": false,
+   "risk_ok": true,
+   "finish": "complete"
+  },
+  "video_0220": {
+   "case": "miss",
+   "truth_s": 5.5,
+   "pred_s": -1.0,
+   "error_s": null,
+   "within_0_5": false,
+   "risk_ok": false,
+   "finish": "complete"
+  },
+  "video_0243": {
+   "case": "error",
+   "truth_s": 6.5,
+   "pred_s": 6.5,
+   "error_s": 0.0,
+   "within_0_5": true,
+   "risk_ok": true,
+   "finish": "complete"
+  },
+  "video_0163": {
+   "case": "miss",
+   "truth_s": 5.5,
+   "pred_s": -1.0,
+   "error_s": null,
+   "within_0_5": false,
+   "risk_ok": true,
+   "finish": "complete"
+  },
+  "video_0281": {
+   "case": "miss",
+   "truth_s": 5.0,
+   "pred_s": -1.0,
+   "error_s": null,
+   "within_0_5": false,
+   "risk_ok": false,
+   "finish": "complete"
+  },
+  "video_0092": {
+   "case": "correct_none",
+   "truth_s": -1.0,
+   "pred_s": -1.0,
+   "error_s": null,
+   "within_0_5": true,
+   "risk_ok": true,
+   "finish": "complete"
+  },
+  "video_0042": {
+   "case": "miss",
+   "truth_s": 3.0,
+   "pred_s": -1.0,
+   "error_s": null,
+   "within_0_5": false,
+   "risk_ok": true,
+   "finish": "complete"
+  },
+  "video_0214": {
+   "case": "error",
+   "truth_s": 1.5,
+   "pred_s": 2.5,
+   "error_s": 1.0,
+   "within_0_5": false,
+   "risk_ok": true,
+   "finish": "complete"
+  },
+  "video_0199": {
+   "case": "miss",
+   "truth_s": 4.5,
+   "pred_s": -1.0,
+   "error_s": null,
+   "within_0_5": false,
+   "risk_ok": false,
+   "finish": "complete"
+  },
+  "video_0118": {
+   "case": "error",
+   "truth_s": 5.0,
+   "pred_s": 4.5,
+   "error_s": 0.5,
+   "within_0_5": true,
+   "risk_ok": false,
+   "finish": "complete"
+  },
+  "video_0272": {
+   "case": "error",
+   "truth_s": 4.5,
+   "pred_s": 3.5,
+   "error_s": 1.0,
+   "within_0_5": false,
+   "risk_ok": true,
+   "finish": "complete"
+  },
+  "video_0013": {
+   "case": "error",
+   "truth_s": 8.0,
+   "pred_s": 0.0,
+   "error_s": 8.0,
+   "within_0_5": false,
+   "risk_ok": false,
+   "finish": "complete"
+  },
+  "video_0263": {
+   "case": "error",
+   "truth_s": 4.0,
+   "pred_s": 5.0,
+   "error_s": 1.0,
+   "within_0_5": false,
+   "risk_ok": true,
+   "finish": "complete"
+  },
+  "video_0223": {
+   "case": "error",
+   "truth_s": 3.5,
+   "pred_s": 3.5,
+   "error_s": 0.0,
+   "within_0_5": true,
+   "risk_ok": true,
+   "finish": "complete"
+  },
+  "video_0080": {
+   "case": "correct_none",
+   "truth_s": -1.0,
+   "pred_s": -1.0,
+   "error_s": null,
+   "within_0_5": true,
+   "risk_ok": true,
+   "finish": "complete"
+  },
+  "video_0068": {
+   "case": "correct_none",
+   "truth_s": -1.0,
+   "pred_s": -1.0,
+   "error_s": null,
+   "within_0_5": true,
+   "risk_ok": true,
+   "finish": "complete"
+  },
+  "video_0119": {
+   "case": "false_alarm",
+   "truth_s": -1.0,
+   "pred_s": 7.0,
+   "error_s": null,
+   "within_0_5": false,
+   "risk_ok": false,
+   "finish": "complete"
+  },
+  "video_0167": {
+   "case": "error",
+   "truth_s": 1.0,
+   "pred_s": 6.5,
+   "error_s": 5.5,
+   "within_0_5": false,
+   "risk_ok": false,
+   "finish": "complete"
+  },
+  "video_0014": {
+   "case": "correct_none",
+   "truth_s": -1.0,
+   "pred_s": -1.0,
+   "error_s": null,
+   "within_0_5": true,
+   "risk_ok": true,
+   "finish": "complete"
+  },
+  "video_0213": {
+   "case": "error",
+   "truth_s": 6.0,
+   "pred_s": 7.0,
+   "error_s": 1.0,
+   "within_0_5": false,
+   "risk_ok": true,
+   "finish": "complete"
+  },
+  "video_0063": {
+   "case": "correct_none",
+   "truth_s": -1.0,
+   "pred_s": -1.0,
+   "error_s": null,
+   "within_0_5": true,
+   "risk_ok": true,
+   "finish": "complete"
+  },
+  "video_0153": {
+   "case": "false_alarm",
+   "truth_s": -1.0,
+   "pred_s": 7.0,
+   "error_s": null,
+   "within_0_5": false,
+   "risk_ok": false,
+   "finish": "complete"
+  },
+  "video_0166": {
+   "case": "error",
+   "truth_s": 7.0,
+   "pred_s": 3.5,
+   "error_s": 3.5,
+   "within_0_5": false,
+   "risk_ok": false,
+   "finish": "complete"
+  },
+  "video_0259": {
+   "case": "error",
+   "truth_s": 5.5,
+   "pred_s": 5.5,
+   "error_s": 0.0,
+   "within_0_5": true,
+   "risk_ok": true,
+   "finish": "complete"
+  },
+  "video_0240": {
+   "case": "error",
+   "truth_s": 4.0,
+   "pred_s": 3.0,
+   "error_s": 1.0,
+   "within_0_5": false,
+   "risk_ok": true,
+   "finish": "complete"
+  },
+  "video_0097": {
+   "case": "false_alarm",
+   "truth_s": -1.0,
+   "pred_s": 2.0,
+   "error_s": null,
+   "within_0_5": false,
+   "risk_ok": false,
+   "finish": "complete"
+  },
+  "video_0041": {
+   "case": "error",
+   "truth_s": 0.5,
+   "pred_s": 5.5,
+   "error_s": 5.0,
+   "within_0_5": false,
+   "risk_ok": false,
+   "finish": "complete"
+  },
+  "video_0146": {
+   "case": "miss",
+   "truth_s": 2.0,
+   "pred_s": -1.0,
+   "error_s": null,
+   "within_0_5": false,
+   "risk_ok": true,
+   "finish": "complete"
+  },
+  "video_0024": {
+   "case": "error",
+   "truth_s": 3.0,
+   "pred_s": 3.5,
+   "error_s": 0.5,
+   "within_0_5": true,
+   "risk_ok": false,
+   "finish": "complete"
+  },
+  "video_0185": {
+   "case": "correct_none",
+   "truth_s": -1.0,
+   "pred_s": -1.0,
+   "error_s": null,
+   "within_0_5": true,
+   "risk_ok": true,
+   "finish": "complete"
+  },
+  "video_0057": {
+   "case": "miss",
+   "truth_s": 3.0,
+   "pred_s": -1.0,
+   "error_s": null,
+   "within_0_5": false,
+   "risk_ok": true,
+   "finish": "complete"
+  },
+  "video_0088": {
+   "case": "false_alarm",
+   "truth_s": -1.0,
+   "pred_s": 7.5,
+   "error_s": null,
+   "within_0_5": false,
+   "risk_ok": false,
+   "finish": "complete"
+  },
+  "video_0040": {
+   "case": "false_alarm",
+   "truth_s": -1.0,
+   "pred_s": 1.5,
+   "error_s": null,
+   "within_0_5": false,
+   "risk_ok": false,
+   "finish": "complete"
+  },
+  "video_0142": {
+   "case": "error",
+   "truth_s": 1.0,
+   "pred_s": 0.5,
+   "error_s": 0.5,
+   "within_0_5": true,
+   "risk_ok": false,
+   "finish": "complete"
+  },
+  "video_0053": {
+   "case": "correct_none",
+   "truth_s": -1.0,
+   "pred_s": -1.0,
+   "error_s": null,
+   "within_0_5": true,
+   "risk_ok": true,
+   "finish": "complete"
+  },
+  "video_0195": {
+   "case": "error",
+   "truth_s": 5.5,
+   "pred_s": 7.0,
+   "error_s": 1.5,
+   "within_0_5": false,
+   "risk_ok": true,
+   "finish": "complete"
+  },
+  "video_0176": {
+   "case": "error",
+   "truth_s": 8.0,
+   "pred_s": 0.5,
+   "error_s": 7.5,
+   "within_0_5": false,
+   "risk_ok": false,
+   "finish": "complete"
+  },
+  "video_0165": {
+   "case": "false_alarm",
+   "truth_s": -1.0,
+   "pred_s": 3.0,
+   "error_s": null,
+   "within_0_5": false,
+   "risk_ok": false,
+   "finish": "complete"
+  },
+  "video_0269": {
+   "case": "error",
+   "truth_s": 4.5,
+   "pred_s": 5.0,
+   "error_s": 0.5,
+   "within_0_5": true,
+   "risk_ok": true,
+   "finish": "complete"
+  },
+  "video_0245": {
+   "case": "error",
+   "truth_s": 4.5,
+   "pred_s": 4.5,
+   "error_s": 0.0,
+   "within_0_5": true,
+   "risk_ok": true,
+   "finish": "complete"
+  },
+  "video_0135": {
+   "case": "correct_none",
+   "truth_s": -1.0,
+   "pred_s": -1.0,
+   "error_s": null,
+   "within_0_5": true,
+   "risk_ok": true,
+   "finish": "complete"
+  },
+  "video_0078": {
+   "case": "correct_none",
+   "truth_s": -1.0,
+   "pred_s": -1.0,
+   "error_s": null,
+   "within_0_5": true,
+   "risk_ok": true,
+   "finish": "complete"
+  },
+  "video_0108": {
+   "case": "correct_none",
+   "truth_s": -1.0,
+   "pred_s": -1.0,
+   "error_s": null,
+   "within_0_5": true,
+   "risk_ok": true,
+   "finish": "complete"
+  },
+  "video_0277": {
+   "case": "error",
+   "truth_s": 6.5,
+   "pred_s": 7.0,
+   "error_s": 0.5,
+   "within_0_5": true,
+   "risk_ok": true,
+   "finish": "complete"
+  },
+  "video_0034": {
+   "case": "correct_none",
+   "truth_s": -1.0,
+   "pred_s": -1.0,
+   "error_s": null,
+   "within_0_5": true,
+   "risk_ok": true,
+   "finish": "complete"
+  },
+  "video_0164": {
+   "case": "error",
+   "truth_s": 5.0,
+   "pred_s": 0.5,
+   "error_s": 4.5,
+   "within_0_5": false,
+   "risk_ok": false,
+   "finish": "complete"
+  },
+  "video_0189": {
+   "case": "miss",
+   "truth_s": 7.0,
+   "pred_s": -1.0,
+   "error_s": null,
+   "within_0_5": false,
+   "risk_ok": true,
+   "finish": "complete"
+  },
+  "video_0087": {
+   "case": "correct_none",
+   "truth_s": -1.0,
+   "pred_s": -1.0,
+   "error_s": null,
+   "within_0_5": true,
+   "risk_ok": true,
+   "finish": "complete"
+  },
+  "video_0010": {
+   "case": "error",
+   "truth_s": 4.0,
+   "pred_s": 3.0,
+   "error_s": 1.0,
+   "within_0_5": false,
+   "risk_ok": false,
+   "finish": "complete"
+  },
+  "video_0058": {
+   "case": "correct_none",
+   "truth_s": -1.0,
+   "pred_s": -1.0,
+   "error_s": null,
+   "within_0_5": true,
+   "risk_ok": true,
+   "finish": "complete"
+  },
+  "video_0192": {
+   "case": "error",
+   "truth_s": 1.0,
+   "pred_s": 4.5,
+   "error_s": 3.5,
+   "within_0_5": false,
+   "risk_ok": false,
+   "finish": "complete"
+  },
+  "video_0019": {
+   "case": "correct_none",
+   "truth_s": -1.0,
+   "pred_s": -1.0,
+   "error_s": null,
+   "within_0_5": true,
+   "risk_ok": true,
+   "finish": "complete"
+  },
+  "video_0112": {
+   "case": "false_alarm",
+   "truth_s": -1.0,
+   "pred_s": 5.0,
+   "error_s": null,
+   "within_0_5": false,
+   "risk_ok": false,
+   "finish": "complete"
+  },
+  "video_0127": {
+   "case": "correct_none",
+   "truth_s": -1.0,
+   "pred_s": -1.0,
+   "error_s": null,
+   "within_0_5": true,
+   "risk_ok": true,
+   "finish": "complete"
+  },
+  "video_0090": {
+   "case": "false_alarm",
+   "truth_s": -1.0,
+   "pred_s": 0.0,
+   "error_s": null,
+   "within_0_5": false,
+   "risk_ok": false,
+   "finish": "complete"
+  },
+  "video_0039": {
+   "case": "correct_none",
+   "truth_s": -1.0,
+   "pred_s": -1.0,
+   "error_s": null,
+   "within_0_5": true,
+   "risk_ok": true,
+   "finish": "complete"
+  },
+  "video_0065": {
+   "case": "error",
+   "truth_s": 2.0,
+   "pred_s": 0.0,
+   "error_s": 2.0,
+   "within_0_5": false,
+   "risk_ok": false,
+   "finish": "complete"
+  },
+  "video_0230": {
+   "case": "miss",
+   "truth_s": 3.5,
+   "pred_s": -1.0,
+   "error_s": null,
+   "within_0_5": false,
+   "risk_ok": false,
+   "finish": "complete"
+  },
+  "video_0131": {
+   "case": "correct_none",
+   "truth_s": -1.0,
+   "pred_s": -1.0,
+   "error_s": null,
+   "within_0_5": true,
+   "risk_ok": true,
+   "finish": "complete"
+  },
+  "video_0001": {
+   "case": "error",
+   "truth_s": 5.0,
+   "pred_s": 5.0,
+   "error_s": 0.0,
+   "within_0_5": true,
+   "risk_ok": false,
+   "finish": "complete"
+  },
+  "video_0182": {
+   "case": "false_alarm",
+   "truth_s": -1.0,
+   "pred_s": 7.5,
+   "error_s": null,
+   "within_0_5": false,
+   "risk_ok": false,
+   "finish": "complete"
+  },
+  "video_0212": {
+   "case": "error",
+   "truth_s": 4.0,
+   "pred_s": 4.5,
+   "error_s": 0.5,
+   "within_0_5": true,
+   "risk_ok": true,
+   "finish": "complete"
+  },
+  "video_0096": {
+   "case": "false_alarm",
+   "truth_s": -1.0,
+   "pred_s": 0.0,
+   "error_s": null,
+   "within_0_5": false,
+   "risk_ok": false,
+   "finish": "complete"
+  },
+  "video_0122": {
+   "case": "correct_none",
+   "truth_s": -1.0,
+   "pred_s": -1.0,
+   "error_s": null,
+   "within_0_5": true,
+   "risk_ok": true,
+   "finish": "complete"
+  },
+  "video_0032": {
+   "case": "miss",
+   "truth_s": 5.0,
+   "pred_s": -1.0,
+   "error_s": null,
+   "within_0_5": false,
+   "risk_ok": true,
+   "finish": "complete"
+  },
+  "video_0067": {
+   "case": "miss",
+   "truth_s": 3.0,
+   "pred_s": -1.0,
+   "error_s": null,
+   "within_0_5": false,
+   "risk_ok": true,
+   "finish": "complete"
+  },
+  "video_0194": {
+   "case": "error",
+   "truth_s": 6.5,
+   "pred_s": 7.0,
+   "error_s": 0.5,
+   "within_0_5": true,
+   "risk_ok": true,
+   "finish": "complete"
+  },
+  "video_0264": {
+   "case": "error",
+   "truth_s": 1.5,
+   "pred_s": 1.0,
+   "error_s": 0.5,
+   "within_0_5": true,
+   "risk_ok": true,
+   "finish": "complete"
+  },
+  "video_0177": {
+   "case": "correct_none",
+   "truth_s": -1.0,
+   "pred_s": -1.0,
+   "error_s": null,
+   "within_0_5": true,
+   "risk_ok": true,
+   "finish": "complete"
+  },
+  "video_0242": {
+   "case": "error",
+   "truth_s": 5.0,
+   "pred_s": 7.0,
+   "error_s": 2.0,
+   "within_0_5": false,
+   "risk_ok": true,
+   "finish": "complete"
+  },
+  "video_0120": {
+   "case": "miss",
+   "truth_s": 3.0,
+   "pred_s": -1.0,
+   "error_s": null,
+   "within_0_5": false,
+   "risk_ok": true,
+   "finish": "complete"
+  },
+  "video_0116": {
+   "case": "error",
+   "truth_s": 7.0,
+   "pred_s": 7.0,
+   "error_s": 0.0,
+   "within_0_5": true,
+   "risk_ok": false,
+   "finish": "complete"
+  },
+  "video_0260": {
+   "case": "error",
+   "truth_s": 5.0,
+   "pred_s": 4.5,
+   "error_s": 0.5,
+   "within_0_5": true,
+   "risk_ok": true,
+   "finish": "complete"
+  },
+  "video_0072": {
+   "case": "correct_none",
+   "truth_s": -1.0,
+   "pred_s": -1.0,
+   "error_s": null,
+   "within_0_5": true,
+   "risk_ok": true,
+   "finish": "complete"
+  },
+  "video_0170": {
+   "case": "error",
+   "truth_s": 6.5,
+   "pred_s": 7.0,
+   "error_s": 0.5,
+   "within_0_5": true,
+   "risk_ok": false,
+   "finish": "complete"
+  },
+  "video_0045": {
+   "case": "error",
+   "truth_s": 2.0,
+   "pred_s": 1.0,
+   "error_s": 1.0,
+   "within_0_5": false,
+   "risk_ok": false,
+   "finish": "complete"
+  },
+  "video_0227": {
+   "case": "error",
+   "truth_s": 5.5,
+   "pred_s": 6.5,
+   "error_s": 1.0,
+   "within_0_5": false,
+   "risk_ok": true,
+   "finish": "complete"
+  },
+  "video_0143": {
+   "case": "false_alarm",
+   "truth_s": -1.0,
+   "pred_s": 2.5,
+   "error_s": null,
+   "within_0_5": false,
+   "risk_ok": false,
+   "finish": "complete"
+  },
+  "video_0267": {
+   "case": "error",
+   "truth_s": 5.5,
+   "pred_s": 0.5,
+   "error_s": 5.0,
+   "within_0_5": false,
+   "risk_ok": true,
+   "finish": "complete"
+  },
+  "video_0089": {
+   "case": "miss",
+   "truth_s": 4.0,
+   "pred_s": -1.0,
+   "error_s": null,
+   "within_0_5": false,
+   "risk_ok": true,
+   "finish": "complete"
+  },
+  "video_0276": {
+   "case": "error",
+   "truth_s": 3.0,
+   "pred_s": 3.5,
+   "error_s": 0.5,
+   "within_0_5": true,
+   "risk_ok": true,
+   "finish": "complete"
+  },
+  "video_0076": {
+   "case": "correct_none",
+   "truth_s": -1.0,
+   "pred_s": -1.0,
+   "error_s": null,
+   "within_0_5": true,
+   "risk_ok": true,
+   "finish": "complete"
+  },
+  "video_0270": {
+   "case": "error",
+   "truth_s": 2.5,
+   "pred_s": 4.5,
+   "error_s": 2.0,
+   "within_0_5": false,
+   "risk_ok": true,
+   "finish": "complete"
+  },
+  "video_0059": {
+   "case": "unparsed",
+   "truth_s": -1.0,
+   "pred_s": null,
+   "error_s": null,
+   "within_0_5": false,
+   "risk_ok": false,
+   "finish": "refused"
+  },
+  "video_0064": {
+   "case": "false_alarm",
+   "truth_s": -1.0,
+   "pred_s": 0.0,
+   "error_s": null,
+   "within_0_5": false,
+   "risk_ok": false,
+   "finish": "complete"
+  },
+  "video_0117": {
+   "case": "false_alarm",
+   "truth_s": -1.0,
+   "pred_s": 6.0,
+   "error_s": null,
+   "within_0_5": false,
+   "risk_ok": false,
+   "finish": "complete"
+  },
+  "video_0247": {
+   "case": "error",
+   "truth_s": 4.5,
+   "pred_s": 5.0,
+   "error_s": 0.5,
+   "within_0_5": true,
+   "risk_ok": true,
+   "finish": "complete"
+  },
+  "video_0265": {
+   "case": "error",
+   "truth_s": 5.0,
+   "pred_s": 5.5,
+   "error_s": 0.5,
+   "within_0_5": true,
+   "risk_ok": true,
+   "finish": "complete"
+  },
+  "video_0044": {
+   "case": "miss",
+   "truth_s": 6.0,
+   "pred_s": -1.0,
+   "error_s": null,
+   "within_0_5": false,
+   "risk_ok": true,
+   "finish": "complete"
+  },
+  "video_0179": {
+   "case": "correct_none",
+   "truth_s": -1.0,
+   "pred_s": -1.0,
+   "error_s": null,
+   "within_0_5": true,
+   "risk_ok": true,
+   "finish": "complete"
+  },
+  "video_0082": {
+   "case": "error",
+   "truth_s": 6.5,
+   "pred_s": 3.0,
+   "error_s": 3.5,
+   "within_0_5": false,
+   "risk_ok": false,
+   "finish": "complete"
+  },
+  "video_0129": {
+   "case": "error",
+   "truth_s": 5.5,
+   "pred_s": 5.0,
+   "error_s": 0.5,
+   "within_0_5": true,
+   "risk_ok": false,
+   "finish": "complete"
+  },
+  "video_0028": {
+   "case": "error",
+   "truth_s": 5.0,
+   "pred_s": 5.0,
+   "error_s": 0.0,
+   "within_0_5": true,
+   "risk_ok": false,
+   "finish": "complete"
+  },
+  "video_0188": {
+   "case": "error",
+   "truth_s": 4.0,
+   "pred_s": 3.5,
+   "error_s": 0.5,
+   "within_0_5": true,
+   "risk_ok": false,
+   "finish": "complete"
+  },
+  "video_0210": {
+   "case": "error",
+   "truth_s": 1.5,
+   "pred_s": 7.0,
+   "error_s": 5.5,
+   "within_0_5": false,
+   "risk_ok": true,
+   "finish": "complete"
+  },
+  "video_0106": {
+   "case": "correct_none",
+   "truth_s": -1.0,
+   "pred_s": -1.0,
+   "error_s": null,
+   "within_0_5": true,
+   "risk_ok": true,
+   "finish": "complete"
+  },
+  "video_0012": {
+   "case": "error",
+   "truth_s": 1.5,
+   "pred_s": 6.5,
+   "error_s": 5.0,
+   "within_0_5": false,
+   "risk_ok": false,
+   "finish": "complete"
+  },
+  "video_0079": {
+   "case": "miss",
+   "truth_s": 2.5,
+   "pred_s": -1.0,
+   "error_s": null,
+   "within_0_5": false,
+   "risk_ok": true,
+   "finish": "complete"
+  },
+  "video_0054": {
+   "case": "correct_none",
+   "truth_s": -1.0,
+   "pred_s": -1.0,
+   "error_s": null,
+   "within_0_5": true,
+   "risk_ok": true,
+   "finish": "complete"
+  },
+  "video_0151": {
+   "case": "error",
+   "truth_s": 4.0,
+   "pred_s": 3.5,
+   "error_s": 0.5,
+   "within_0_5": true,
+   "risk_ok": false,
+   "finish": "complete"
+  },
+  "video_0002": {
+   "case": "error",
+   "truth_s": 8.0,
+   "pred_s": 7.5,
+   "error_s": 0.5,
+   "within_0_5": true,
+   "risk_ok": false,
+   "finish": "complete"
+  },
+  "video_0086": {
+   "case": "correct_none",
+   "truth_s": -1.0,
+   "pred_s": -1.0,
+   "error_s": null,
+   "within_0_5": true,
+   "risk_ok": true,
+   "finish": "complete"
+  },
+  "video_0007": {
+   "case": "miss",
+   "truth_s": 2.0,
+   "pred_s": -1.0,
+   "error_s": null,
+   "within_0_5": false,
+   "risk_ok": true,
+   "finish": "complete"
+  },
+  "video_0246": {
+   "case": "error",
+   "truth_s": 4.5,
+   "pred_s": 5.0,
+   "error_s": 0.5,
+   "within_0_5": true,
+   "risk_ok": true,
+   "finish": "complete"
+  },
+  "video_0093": {
+   "case": "correct_none",
+   "truth_s": -1.0,
+   "pred_s": -1.0,
+   "error_s": null,
+   "within_0_5": true,
+   "risk_ok": true,
+   "finish": "complete"
+  },
+  "video_0026": {
+   "case": "correct_none",
+   "truth_s": -1.0,
+   "pred_s": -1.0,
+   "error_s": null,
+   "within_0_5": true,
+   "risk_ok": true,
+   "finish": "complete"
+  },
+  "video_0193": {
+   "case": "error",
+   "truth_s": 2.5,
+   "pred_s": 3.0,
+   "error_s": 0.5,
+   "within_0_5": true,
+   "risk_ok": true,
+   "finish": "complete"
+  },
+  "video_0273": {
+   "case": "error",
+   "truth_s": 3.5,
+   "pred_s": 4.5,
+   "error_s": 1.0,
+   "within_0_5": false,
+   "risk_ok": true,
+   "finish": "complete"
+  },
+  "video_0162": {
+   "case": "error",
+   "truth_s": 4.0,
+   "pred_s": 4.5,
+   "error_s": 0.5,
+   "within_0_5": true,
+   "risk_ok": false,
+   "finish": "complete"
+  },
+  "video_0283": {
+   "case": "error",
+   "truth_s": 5.5,
+   "pred_s": 7.0,
+   "error_s": 1.5,
+   "within_0_5": false,
+   "risk_ok": true,
+   "finish": "complete"
+  },
+  "video_0157": {
+   "case": "correct_none",
+   "truth_s": -1.0,
+   "pred_s": -1.0,
+   "error_s": null,
+   "within_0_5": true,
+   "risk_ok": true,
+   "finish": "complete"
+  },
+  "video_0123": {
+   "case": "correct_none",
+   "truth_s": -1.0,
+   "pred_s": -1.0,
+   "error_s": null,
+   "within_0_5": true,
+   "risk_ok": true,
+   "finish": "complete"
+  },
+  "video_0049": {
+   "case": "error",
+   "truth_s": 4.0,
+   "pred_s": 2.5,
+   "error_s": 1.5,
+   "within_0_5": false,
+   "risk_ok": false,
+   "finish": "complete"
+  },
+  "video_0005": {
+   "case": "correct_none",
+   "truth_s": -1.0,
+   "pred_s": -1.0,
+   "error_s": null,
+   "within_0_5": true,
+   "risk_ok": true,
+   "finish": "complete"
+  },
+  "video_0178": {
+   "case": "correct_none",
+   "truth_s": -1.0,
+   "pred_s": -1.0,
+   "error_s": null,
+   "within_0_5": true,
+   "risk_ok": true,
+   "finish": "complete"
+  },
+  "video_0159": {
+   "case": "false_alarm",
+   "truth_s": -1.0,
+   "pred_s": 6.0,
+   "error_s": null,
+   "within_0_5": false,
+   "risk_ok": false,
+   "finish": "complete"
+  },
+  "video_0094": {
+   "case": "error",
+   "truth_s": 6.5,
+   "pred_s": 7.5,
+   "error_s": 1.0,
+   "within_0_5": false,
+   "risk_ok": false,
+   "finish": "complete"
+  },
+  "video_0198": {
+   "case": "error",
+   "truth_s": 4.5,
+   "pred_s": 2.5,
+   "error_s": 2.0,
+   "within_0_5": false,
+   "risk_ok": true,
+   "finish": "complete"
+  },
+  "video_0175": {
+   "case": "correct_none",
+   "truth_s": -1.0,
+   "pred_s": -1.0,
+   "error_s": null,
+   "within_0_5": true,
+   "risk_ok": true,
+   "finish": "complete"
+  },
+  "video_0030": {
+   "case": "error",
+   "truth_s": 4.0,
+   "pred_s": 4.5,
+   "error_s": 0.5,
+   "within_0_5": true,
+   "risk_ok": false,
+   "finish": "complete"
+  },
+  "video_0203": {
+   "case": "error",
+   "truth_s": 5.0,
+   "pred_s": 7.0,
+   "error_s": 2.0,
+   "within_0_5": false,
+   "risk_ok": true,
+   "finish": "complete"
+  },
+  "video_0209": {
+   "case": "error",
+   "truth_s": 3.5,
+   "pred_s": 5.0,
+   "error_s": 1.5,
+   "within_0_5": false,
+   "risk_ok": true,
+   "finish": "complete"
+  },
+  "video_0006": {
+   "case": "error",
+   "truth_s": 2.5,
+   "pred_s": 3.0,
+   "error_s": 0.5,
+   "within_0_5": true,
+   "risk_ok": false,
+   "finish": "complete"
+  },
+  "video_0018": {
+   "case": "error",
+   "truth_s": 3.5,
+   "pred_s": 7.5,
+   "error_s": 4.0,
+   "within_0_5": false,
+   "risk_ok": false,
+   "finish": "complete"
+  },
+  "video_0136": {
+   "case": "correct_none",
+   "truth_s": -1.0,
+   "pred_s": -1.0,
+   "error_s": null,
+   "within_0_5": true,
+   "risk_ok": true,
+   "finish": "complete"
+  },
+  "video_0011": {
+   "case": "error",
+   "truth_s": 6.0,
+   "pred_s": 6.5,
+   "error_s": 0.5,
+   "within_0_5": true,
+   "risk_ok": false,
+   "finish": "complete"
+  },
+  "video_0149": {
+   "case": "error",
+   "truth_s": 6.0,
+   "pred_s": 7.5,
+   "error_s": 1.5,
+   "within_0_5": false,
+   "risk_ok": false,
+   "finish": "complete"
+  },
+  "video_0266": {
+   "case": "error",
+   "truth_s": 5.5,
+   "pred_s": 6.5,
+   "error_s": 1.0,
+   "within_0_5": false,
+   "risk_ok": true,
+   "finish": "complete"
+  },
+  "video_0025": {
+   "case": "correct_none",
+   "truth_s": -1.0,
+   "pred_s": -1.0,
+   "error_s": null,
+   "within_0_5": true,
+   "risk_ok": true,
+   "finish": "complete"
+  },
+  "video_0015": {
+   "case": "error",
+   "truth_s": 1.0,
+   "pred_s": 3.0,
+   "error_s": 2.0,
+   "within_0_5": false,
+   "risk_ok": false,
+   "finish": "complete"
+  },
+  "video_0109": {
+   "case": "error",
+   "truth_s": 6.0,
+   "pred_s": 3.0,
+   "error_s": 3.0,
+   "within_0_5": false,
+   "risk_ok": false,
+   "finish": "complete"
+  },
+  "video_0279": {
+   "case": "error",
+   "truth_s": 5.5,
+   "pred_s": 6.5,
+   "error_s": 1.0,
+   "within_0_5": false,
+   "risk_ok": true,
+   "finish": "complete"
+  },
+  "video_0043": {
+   "case": "correct_none",
+   "truth_s": -1.0,
+   "pred_s": -1.0,
+   "error_s": null,
+   "within_0_5": true,
+   "risk_ok": true,
+   "finish": "complete"
+  },
+  "video_0095": {
+   "case": "correct_none",
+   "truth_s": -1.0,
+   "pred_s": -1.0,
+   "error_s": null,
+   "within_0_5": true,
+   "risk_ok": true,
+   "finish": "complete"
+  },
+  "video_0257": {
+   "case": "error",
+   "truth_s": 5.5,
+   "pred_s": 6.5,
+   "error_s": 1.0,
+   "within_0_5": false,
+   "risk_ok": true,
+   "finish": "complete"
+  },
+  "video_0268": {
+   "case": "error",
+   "truth_s": 6.5,
+   "pred_s": 7.0,
+   "error_s": 0.5,
+   "within_0_5": true,
+   "risk_ok": true,
+   "finish": "complete"
+  },
+  "video_0069": {
+   "case": "correct_none",
+   "truth_s": -1.0,
+   "pred_s": -1.0,
+   "error_s": null,
+   "within_0_5": true,
+   "risk_ok": true,
+   "finish": "complete"
+  },
+  "video_0004": {
+   "case": "miss",
+   "truth_s": 3.0,
+   "pred_s": -1.0,
+   "error_s": null,
+   "within_0_5": false,
+   "risk_ok": true,
+   "finish": "complete"
+  },
+  "video_0251": {
+   "case": "error",
+   "truth_s": 6.0,
+   "pred_s": 7.0,
+   "error_s": 1.0,
+   "within_0_5": false,
+   "risk_ok": true,
+   "finish": "complete"
+  },
+  "video_0190": {
+   "case": "miss",
+   "truth_s": 6.0,
+   "pred_s": -1.0,
+   "error_s": null,
+   "within_0_5": false,
+   "risk_ok": true,
+   "finish": "complete"
+  },
+  "video_0280": {
+   "case": "miss",
+   "truth_s": 5.5,
+   "pred_s": -1.0,
+   "error_s": null,
+   "within_0_5": false,
+   "risk_ok": false,
+   "finish": "complete"
+  },
+  "video_0233": {
+   "case": "error",
+   "truth_s": 1.5,
+   "pred_s": 2.5,
+   "error_s": 1.0,
+   "within_0_5": false,
+   "risk_ok": true,
+   "finish": "complete"
+  },
+  "video_0124": {
+   "case": "error",
+   "truth_s": 4.5,
+   "pred_s": 5.5,
+   "error_s": 1.0,
+   "within_0_5": false,
+   "risk_ok": false,
+   "finish": "complete"
+  },
+  "video_0029": {
+   "case": "miss",
+   "truth_s": 7.0,
+   "pred_s": -1.0,
+   "error_s": null,
+   "within_0_5": false,
+   "risk_ok": true,
+   "finish": "complete"
+  },
+  "video_0187": {
+   "case": "miss",
+   "truth_s": 5.0,
+   "pred_s": -1.0,
+   "error_s": null,
+   "within_0_5": false,
+   "risk_ok": true,
+   "finish": "complete"
+  },
+  "video_0232": {
+   "case": "error",
+   "truth_s": 5.5,
+   "pred_s": 6.0,
+   "error_s": 0.5,
+   "within_0_5": true,
+   "risk_ok": true,
+   "finish": "complete"
+  },
+  "video_0021": {
+   "case": "error",
+   "truth_s": 7.0,
+   "pred_s": 5.5,
+   "error_s": 1.5,
+   "within_0_5": false,
+   "risk_ok": false,
+   "finish": "complete"
+  },
+  "video_0091": {
+   "case": "correct_none",
+   "truth_s": -1.0,
+   "pred_s": -1.0,
+   "error_s": null,
+   "within_0_5": true,
+   "risk_ok": true,
+   "finish": "complete"
+  },
+  "video_0238": {
+   "case": "error",
+   "truth_s": 6.5,
+   "pred_s": 7.0,
+   "error_s": 0.5,
+   "within_0_5": true,
+   "risk_ok": true,
+   "finish": "complete"
+  },
+  "video_0115": {
+   "case": "false_alarm",
+   "truth_s": -1.0,
+   "pred_s": 5.5,
+   "error_s": null,
+   "within_0_5": false,
+   "risk_ok": false,
+   "finish": "complete"
+  },
+  "video_0172": {
+   "case": "false_alarm",
+   "truth_s": -1.0,
+   "pred_s": 4.0,
+   "error_s": null,
+   "within_0_5": false,
+   "risk_ok": false,
+   "finish": "complete"
+  },
+  "video_0148": {
+   "case": "correct_none",
+   "truth_s": -1.0,
+   "pred_s": -1.0,
+   "error_s": null,
+   "within_0_5": true,
+   "risk_ok": true,
+   "finish": "complete"
+  },
+  "video_0107": {
+   "case": "miss",
+   "truth_s": 5.0,
+   "pred_s": -1.0,
+   "error_s": null,
+   "within_0_5": false,
+   "risk_ok": true,
+   "finish": "complete"
+  },
+  "video_0201": {
+   "case": "error",
+   "truth_s": 0.5,
+   "pred_s": 0.0,
+   "error_s": 0.5,
+   "within_0_5": true,
+   "risk_ok": true,
+   "finish": "complete"
+  },
+  "video_0055": {
+   "case": "false_alarm",
+   "truth_s": -1.0,
+   "pred_s": 6.5,
+   "error_s": null,
+   "within_0_5": false,
+   "risk_ok": false,
+   "finish": "complete"
+  },
+  "video_0060": {
+   "case": "error",
+   "truth_s": 4.0,
+   "pred_s": 6.5,
+   "error_s": 2.5,
+   "within_0_5": false,
+   "risk_ok": false,
+   "finish": "complete"
+  },
+  "video_0256": {
+   "case": "error",
+   "truth_s": 5.0,
+   "pred_s": 6.0,
+   "error_s": 1.0,
+   "within_0_5": false,
+   "risk_ok": true,
+   "finish": "complete"
+  },
+  "video_0070": {
+   "case": "correct_none",
+   "truth_s": -1.0,
+   "pred_s": -1.0,
+   "error_s": null,
+   "within_0_5": true,
+   "risk_ok": true,
+   "finish": "complete"
+  },
+  "video_0134": {
+   "case": "error",
+   "truth_s": 2.0,
+   "pred_s": 3.5,
+   "error_s": 1.5,
+   "within_0_5": false,
+   "risk_ok": false,
+   "finish": "complete"
+  },
+  "video_0100": {
+   "case": "miss",
+   "truth_s": 5.0,
+   "pred_s": -1.0,
+   "error_s": null,
+   "within_0_5": false,
+   "risk_ok": true,
+   "finish": "complete"
+  },
+  "video_0174": {
+   "case": "false_alarm",
+   "truth_s": -1.0,
+   "pred_s": 6.5,
+   "error_s": null,
+   "within_0_5": false,
+   "risk_ok": false,
+   "finish": "complete"
+  },
+  "video_0254": {
+   "case": "unparsed",
+   "truth_s": 4.5,
+   "pred_s": null,
+   "error_s": null,
+   "within_0_5": false,
+   "risk_ok": false,
+   "finish": "refused"
+  },
+  "video_0218": {
+   "case": "error",
+   "truth_s": 1.5,
+   "pred_s": 7.0,
+   "error_s": 5.5,
+   "within_0_5": false,
+   "risk_ok": true,
+   "finish": "complete"
+  },
+  "video_0009": {
+   "case": "error",
+   "truth_s": 4.0,
+   "pred_s": 7.0,
+   "error_s": 3.0,
+   "within_0_5": false,
+   "risk_ok": false,
+   "finish": "complete"
+  },
+  "video_0038": {
+   "case": "correct_none",
+   "truth_s": -1.0,
+   "pred_s": -1.0,
+   "error_s": null,
+   "within_0_5": true,
+   "risk_ok": true,
+   "finish": "complete"
+  },
+  "video_0033": {
+   "case": "correct_none",
+   "truth_s": -1.0,
+   "pred_s": -1.0,
+   "error_s": null,
+   "within_0_5": true,
+   "risk_ok": true,
+   "finish": "complete"
+  },
+  "video_0173": {
+   "case": "correct_none",
+   "truth_s": -1.0,
+   "pred_s": -1.0,
+   "error_s": null,
+   "within_0_5": true,
+   "risk_ok": true,
+   "finish": "complete"
+  },
+  "video_0022": {
+   "case": "error",
+   "truth_s": 3.0,
+   "pred_s": 4.5,
+   "error_s": 1.5,
+   "within_0_5": false,
+   "risk_ok": false,
+   "finish": "complete"
+  },
+  "video_0017": {
+   "case": "miss",
+   "truth_s": 2.0,
+   "pred_s": -1.0,
+   "error_s": null,
+   "within_0_5": false,
+   "risk_ok": true,
+   "finish": "complete"
+  },
+  "video_0121": {
+   "case": "error",
+   "truth_s": 7.0,
+   "pred_s": 6.5,
+   "error_s": 0.5,
+   "within_0_5": true,
+   "risk_ok": false,
+   "finish": "complete"
+  },
+  "video_0066": {
+   "case": "miss",
+   "truth_s": 3.0,
+   "pred_s": -1.0,
+   "error_s": null,
+   "within_0_5": false,
+   "risk_ok": true,
+   "finish": "complete"
+  },
+  "video_0168": {
+   "case": "false_alarm",
+   "truth_s": -1.0,
+   "pred_s": 3.5,
+   "error_s": null,
+   "within_0_5": false,
+   "risk_ok": false,
+   "finish": "complete"
+  },
+  "video_0239": {
+   "case": "error",
+   "truth_s": 2.5,
+   "pred_s": 4.5,
+   "error_s": 2.0,
+   "within_0_5": false,
+   "risk_ok": true,
+   "finish": "complete"
+  },
+  "video_0008": {
+   "case": "miss",
+   "truth_s": 5.5,
+   "pred_s": -1.0,
+   "error_s": null,
+   "within_0_5": false,
+   "risk_ok": true,
+   "finish": "complete"
+  },
+  "video_0191": {
+   "case": "correct_none",
+   "truth_s": -1.0,
+   "pred_s": -1.0,
+   "error_s": null,
+   "within_0_5": true,
+   "risk_ok": true,
+   "finish": "complete"
+  },
+  "video_0228": {
+   "case": "error",
+   "truth_s": 1.5,
+   "pred_s": 7.0,
+   "error_s": 5.5,
+   "within_0_5": false,
+   "risk_ok": true,
+   "finish": "complete"
+  },
+  "video_0047": {
+   "case": "error",
+   "truth_s": 4.0,
+   "pred_s": 3.5,
+   "error_s": 0.5,
+   "within_0_5": true,
+   "risk_ok": false,
+   "finish": "complete"
+  },
+  "video_0237": {
+   "case": "error",
+   "truth_s": 1.0,
+   "pred_s": 3.0,
+   "error_s": 2.0,
+   "within_0_5": false,
+   "risk_ok": true,
+   "finish": "complete"
+  },
+  "video_0225": {
+   "case": "error",
+   "truth_s": 5.0,
+   "pred_s": 7.0,
+   "error_s": 2.0,
+   "within_0_5": false,
+   "risk_ok": true,
+   "finish": "complete"
+  },
+  "video_0147": {
+   "case": "miss",
+   "truth_s": 8.0,
+   "pred_s": -1.0,
+   "error_s": null,
+   "within_0_5": false,
+   "risk_ok": true,
+   "finish": "complete"
+  },
+  "video_0217": {
+   "case": "error",
+   "truth_s": 4.0,
+   "pred_s": 6.5,
+   "error_s": 2.5,
+   "within_0_5": false,
+   "risk_ok": true,
+   "finish": "complete"
+  },
+  "video_0098": {
+   "case": "correct_none",
+   "truth_s": -1.0,
+   "pred_s": -1.0,
+   "error_s": null,
+   "within_0_5": true,
+   "risk_ok": true,
+   "finish": "complete"
+  },
+  "video_0152": {
+   "case": "error",
+   "truth_s": 6.0,
+   "pred_s": 3.0,
+   "error_s": 3.0,
+   "within_0_5": false,
+   "risk_ok": false,
+   "finish": "complete"
+  },
+  "video_0219": {
+   "case": "error",
+   "truth_s": 2.5,
+   "pred_s": 2.5,
+   "error_s": 0.0,
+   "within_0_5": true,
+   "risk_ok": true,
+   "finish": "complete"
+  },
+  "video_0113": {
+   "case": "false_alarm",
+   "truth_s": -1.0,
+   "pred_s": 7.0,
+   "error_s": null,
+   "within_0_5": false,
+   "risk_ok": false,
+   "finish": "complete"
+  },
+  "video_0073": {
+   "case": "false_alarm",
+   "truth_s": -1.0,
+   "pred_s": 2.5,
+   "error_s": null,
+   "within_0_5": false,
+   "risk_ok": false,
+   "finish": "complete"
+  },
+  "video_0150": {
+   "case": "correct_none",
+   "truth_s": -1.0,
+   "pred_s": -1.0,
+   "error_s": null,
+   "within_0_5": true,
+   "risk_ok": true,
+   "finish": "complete"
+  },
+  "video_0208": {
+   "case": "error",
+   "truth_s": 6.0,
+   "pred_s": 6.5,
+   "error_s": 0.5,
+   "within_0_5": true,
+   "risk_ok": true,
+   "finish": "complete"
+  },
+  "video_0154": {
+   "case": "error",
+   "truth_s": 5.0,
+   "pred_s": 3.5,
+   "error_s": 1.5,
+   "within_0_5": false,
+   "risk_ok": false,
+   "finish": "complete"
+  },
+  "video_0204": {
+   "case": "error",
+   "truth_s": 5.5,
+   "pred_s": 6.5,
+   "error_s": 1.0,
+   "within_0_5": false,
+   "risk_ok": true,
+   "finish": "complete"
+  },
+  "video_0052": {
+   "case": "correct_none",
+   "truth_s": -1.0,
+   "pred_s": -1.0,
+   "error_s": null,
+   "within_0_5": true,
+   "risk_ok": true,
+   "finish": "complete"
+  },
+  "video_0138": {
+   "case": "miss",
+   "truth_s": 6.0,
+   "pred_s": -1.0,
+   "error_s": null,
+   "within_0_5": false,
+   "risk_ok": true,
+   "finish": "complete"
+  },
+  "video_0253": {
+   "case": "error",
+   "truth_s": 4.5,
+   "pred_s": 4.5,
+   "error_s": 0.0,
+   "within_0_5": true,
+   "risk_ok": true,
+   "finish": "complete"
+  },
+  "video_0252": {
+   "case": "error",
+   "truth_s": 2.5,
+   "pred_s": 2.0,
+   "error_s": 0.5,
+   "within_0_5": true,
+   "risk_ok": true,
+   "finish": "complete"
+  },
+  "video_0255": {
+   "case": "error",
+   "truth_s": 6.0,
+   "pred_s": 6.5,
+   "error_s": 0.5,
+   "within_0_5": true,
+   "risk_ok": true,
+   "finish": "complete"
+  },
+  "video_0231": {
+   "case": "error",
+   "truth_s": 4.0,
+   "pred_s": 4.0,
+   "error_s": 0.0,
+   "within_0_5": true,
+   "risk_ok": true,
+   "finish": "complete"
+  },
+  "video_0074": {
+   "case": "error",
+   "truth_s": 6.0,
+   "pred_s": 5.5,
+   "error_s": 0.5,
+   "within_0_5": true,
+   "risk_ok": false,
+   "finish": "complete"
+  },
+  "video_0141": {
+   "case": "false_alarm",
+   "truth_s": -1.0,
+   "pred_s": 3.0,
+   "error_s": null,
+   "within_0_5": false,
+   "risk_ok": false,
+   "finish": "complete"
+  },
+  "video_0077": {
+   "case": "false_alarm",
+   "truth_s": -1.0,
+   "pred_s": 2.5,
+   "error_s": null,
+   "within_0_5": false,
+   "risk_ok": false,
+   "finish": "complete"
+  },
+  "video_0027": {
+   "case": "false_alarm",
+   "truth_s": -1.0,
+   "pred_s": 7.5,
+   "error_s": null,
+   "within_0_5": false,
+   "risk_ok": false,
+   "finish": "complete"
+  },
+  "video_0125": {
+   "case": "false_alarm",
+   "truth_s": -1.0,
+   "pred_s": 3.5,
+   "error_s": null,
+   "within_0_5": false,
+   "risk_ok": false,
+   "finish": "complete"
+  },
+  "video_0130": {
+   "case": "correct_none",
+   "truth_s": -1.0,
+   "pred_s": -1.0,
+   "error_s": null,
+   "within_0_5": true,
+   "risk_ok": true,
+   "finish": "complete"
+  },
+  "video_0081": {
+   "case": "correct_none",
+   "truth_s": -1.0,
+   "pred_s": -1.0,
+   "error_s": null,
+   "within_0_5": true,
+   "risk_ok": true,
+   "finish": "complete"
+  },
+  "video_0284": {
+   "case": "error",
+   "truth_s": 5.5,
+   "pred_s": 7.0,
+   "error_s": 1.5,
+   "within_0_5": false,
+   "risk_ok": true,
+   "finish": "complete"
+  },
+  "video_0249": {
+   "case": "error",
+   "truth_s": 5.5,
+   "pred_s": 6.0,
+   "error_s": 0.5,
+   "within_0_5": true,
+   "risk_ok": true,
+   "finish": "complete"
+  },
+  "video_0114": {
+   "case": "miss",
+   "truth_s": 6.0,
+   "pred_s": -1.0,
+   "error_s": null,
+   "within_0_5": false,
+   "risk_ok": true,
+   "finish": "complete"
+  },
+  "video_0139": {
+   "case": "correct_none",
+   "truth_s": -1.0,
+   "pred_s": -1.0,
+   "error_s": null,
+   "within_0_5": true,
+   "risk_ok": true,
+   "finish": "complete"
+  },
+  "video_0224": {
+   "case": "miss",
+   "truth_s": 4.5,
+   "pred_s": -1.0,
+   "error_s": null,
+   "within_0_5": false,
+   "risk_ok": false,
+   "finish": "complete"
+  },
+  "video_0036": {
+   "case": "error",
+   "truth_s": 3.0,
+   "pred_s": 7.0,
+   "error_s": 4.0,
+   "within_0_5": false,
+   "risk_ok": false,
+   "finish": "complete"
+  },
+  "video_0205": {
+   "case": "error",
+   "truth_s": 4.0,
+   "pred_s": 5.5,
+   "error_s": 1.5,
+   "within_0_5": false,
+   "risk_ok": true,
+   "finish": "complete"
+  },
+  "video_0061": {
+   "case": "correct_none",
+   "truth_s": -1.0,
+   "pred_s": -1.0,
+   "error_s": null,
+   "within_0_5": true,
+   "risk_ok": true,
+   "finish": "complete"
+  },
+  "video_0056": {
+   "case": "correct_none",
+   "truth_s": -1.0,
+   "pred_s": -1.0,
+   "error_s": null,
+   "within_0_5": true,
+   "risk_ok": true,
+   "finish": "complete"
+  },
+  "video_0145": {
+   "case": "miss",
+   "truth_s": 4.0,
+   "pred_s": -1.0,
+   "error_s": null,
+   "within_0_5": false,
+   "risk_ok": true,
+   "finish": "complete"
+  },
+  "video_0271": {
+   "case": "error",
+   "truth_s": 0.5,
+   "pred_s": 1.5,
+   "error_s": 1.0,
+   "within_0_5": false,
+   "risk_ok": true,
+   "finish": "complete"
+  },
+  "video_0016": {
+   "case": "miss",
+   "truth_s": 6.0,
+   "pred_s": -1.0,
+   "error_s": null,
+   "within_0_5": false,
+   "risk_ok": true,
+   "finish": "complete"
+  },
+  "video_0236": {
+   "case": "miss",
+   "truth_s": 3.0,
+   "pred_s": -1.0,
+   "error_s": null,
+   "within_0_5": false,
+   "risk_ok": false,
+   "finish": "complete"
+  },
+  "video_0180": {
+   "case": "false_alarm",
+   "truth_s": -1.0,
+   "pred_s": 7.5,
+   "error_s": null,
+   "within_0_5": false,
+   "risk_ok": false,
+   "finish": "complete"
+  },
+  "video_0083": {
+   "case": "false_alarm",
+   "truth_s": -1.0,
+   "pred_s": 3.0,
+   "error_s": null,
+   "within_0_5": false,
+   "risk_ok": false,
+   "finish": "complete"
+  },
+  "video_0186": {
+   "case": "miss",
+   "truth_s": 8.0,
+   "pred_s": -1.0,
+   "error_s": null,
+   "within_0_5": false,
+   "risk_ok": true,
+   "finish": "complete"
+  },
+  "video_0062": {
+   "case": "error",
+   "truth_s": 1.5,
+   "pred_s": 7.0,
+   "error_s": 5.5,
+   "within_0_5": false,
+   "risk_ok": false,
+   "finish": "complete"
+  },
+  "video_0085": {
+   "case": "correct_none",
+   "truth_s": -1.0,
+   "pred_s": -1.0,
+   "error_s": null,
+   "within_0_5": true,
+   "risk_ok": true,
+   "finish": "complete"
+  },
+  "video_0282": {
+   "case": "error",
+   "truth_s": 6.5,
+   "pred_s": 7.0,
+   "error_s": 0.5,
+   "within_0_5": true,
+   "risk_ok": true,
+   "finish": "complete"
+  },
+  "video_0275": {
+   "case": "error",
+   "truth_s": 5.0,
+   "pred_s": 5.5,
+   "error_s": 0.5,
+   "within_0_5": true,
+   "risk_ok": true,
+   "finish": "complete"
+  },
+  "video_0126": {
+   "case": "error",
+   "truth_s": 7.5,
+   "pred_s": 5.5,
+   "error_s": 2.0,
+   "within_0_5": false,
+   "risk_ok": false,
+   "finish": "complete"
+  },
+  "video_0156": {
+   "case": "correct_none",
+   "truth_s": -1.0,
+   "pred_s": -1.0,
+   "error_s": null,
+   "within_0_5": true,
+   "risk_ok": true,
+   "finish": "complete"
+  },
+  "video_0000": {
+   "case": "miss",
+   "truth_s": 1.0,
+   "pred_s": -1.0,
+   "error_s": null,
+   "within_0_5": false,
+   "risk_ok": true,
+   "finish": "complete"
+  },
+  "video_0160": {
+   "case": "error",
+   "truth_s": 3.5,
+   "pred_s": 2.5,
+   "error_s": 1.0,
+   "within_0_5": false,
+   "risk_ok": false,
+   "finish": "complete"
+  },
+  "video_0171": {
+   "case": "miss",
+   "truth_s": 1.0,
+   "pred_s": -1.0,
+   "error_s": null,
+   "within_0_5": false,
+   "risk_ok": true,
+   "finish": "complete"
+  },
+  "video_0200": {
+   "case": "error",
+   "truth_s": 1.0,
+   "pred_s": 1.0,
+   "error_s": 0.0,
+   "within_0_5": true,
+   "risk_ok": true,
+   "finish": "complete"
+  },
+  "video_0211": {
+   "case": "error",
+   "truth_s": 3.5,
+   "pred_s": 4.5,
+   "error_s": 1.0,
+   "within_0_5": false,
+   "risk_ok": true,
+   "finish": "complete"
+  },
+  "video_0262": {
+   "case": "error",
+   "truth_s": 6.5,
+   "pred_s": 7.0,
+   "error_s": 0.5,
+   "within_0_5": true,
+   "risk_ok": true,
+   "finish": "complete"
+  },
+  "video_0102": {
+   "case": "miss",
+   "truth_s": 7.0,
+   "pred_s": -1.0,
+   "error_s": null,
+   "within_0_5": false,
+   "risk_ok": true,
+   "finish": "complete"
+  },
+  "video_0285": {
+   "case": "error",
+   "truth_s": 7.5,
+   "pred_s": 7.5,
+   "error_s": 0.0,
+   "within_0_5": true,
+   "risk_ok": true,
+   "finish": "complete"
+  },
+  "video_0184": {
+   "case": "error",
+   "truth_s": 3.5,
+   "pred_s": 3.5,
+   "error_s": 0.0,
+   "within_0_5": true,
+   "risk_ok": false,
+   "finish": "complete"
+  },
+  "video_0023": {
+   "case": "error",
+   "truth_s": 4.5,
+   "pred_s": 3.5,
+   "error_s": 1.0,
+   "within_0_5": false,
+   "risk_ok": false,
+   "finish": "complete"
+  },
+  "video_0003": {
+   "case": "correct_none",
+   "truth_s": -1.0,
+   "pred_s": -1.0,
+   "error_s": null,
+   "within_0_5": true,
+   "risk_ok": true,
+   "finish": "complete"
+  },
+  "video_0234": {
+   "case": "error",
+   "truth_s": 2.5,
+   "pred_s": 2.5,
+   "error_s": 0.0,
+   "within_0_5": true,
+   "risk_ok": true,
+   "finish": "complete"
+  },
+  "video_0140": {
+   "case": "false_alarm",
+   "truth_s": -1.0,
+   "pred_s": 6.5,
+   "error_s": null,
+   "within_0_5": false,
+   "risk_ok": false,
+   "finish": "complete"
+  },
+  "video_0235": {
+   "case": "error",
+   "truth_s": 1.0,
+   "pred_s": 6.5,
+   "error_s": 5.5,
+   "within_0_5": false,
+   "risk_ok": true,
+   "finish": "complete"
+  },
+  "video_0206": {
+   "case": "error",
+   "truth_s": 4.5,
+   "pred_s": 4.5,
+   "error_s": 0.0,
+   "within_0_5": true,
+   "risk_ok": true,
+   "finish": "complete"
+  },
+  "video_0031": {
+   "case": "false_alarm",
+   "truth_s": -1.0,
+   "pred_s": 0.5,
+   "error_s": null,
+   "within_0_5": false,
+   "risk_ok": false,
+   "finish": "complete"
+  },
+  "video_0133": {
+   "case": "error",
+   "truth_s": 3.0,
+   "pred_s": 3.5,
+   "error_s": 0.5,
+   "within_0_5": true,
+   "risk_ok": false,
+   "finish": "complete"
+  },
+  "video_0226": {
+   "case": "miss",
+   "truth_s": 6.5,
+   "pred_s": -1.0,
+   "error_s": null,
+   "within_0_5": false,
+   "risk_ok": false,
+   "finish": "complete"
+  },
+  "video_0278": {
+   "case": "error",
+   "truth_s": 6.0,
+   "pred_s": 6.5,
+   "error_s": 0.5,
+   "within_0_5": true,
+   "risk_ok": true,
+   "finish": "complete"
+  },
+  "video_0104": {
+   "case": "error",
+   "truth_s": 5.0,
+   "pred_s": 5.5,
+   "error_s": 0.5,
+   "within_0_5": true,
+   "risk_ok": false,
+   "finish": "complete"
+  },
+  "video_0161": {
+   "case": "error",
+   "truth_s": 3.5,
+   "pred_s": 3.5,
+   "error_s": 0.0,
+   "within_0_5": true,
+   "risk_ok": false,
+   "finish": "complete"
+  },
+  "video_0222": {
+   "case": "error",
+   "truth_s": 5.0,
+   "pred_s": 5.5,
+   "error_s": 0.5,
+   "within_0_5": true,
+   "risk_ok": true,
+   "finish": "complete"
+  },
+  "video_0181": {
+   "case": "correct_none",
+   "truth_s": -1.0,
+   "pred_s": -1.0,
+   "error_s": null,
+   "within_0_5": true,
+   "risk_ok": true,
+   "finish": "complete"
+  },
+  "video_0051": {
+   "case": "false_alarm",
+   "truth_s": -1.0,
+   "pred_s": 7.0,
+   "error_s": null,
+   "within_0_5": false,
+   "risk_ok": false,
+   "finish": "complete"
+  },
+  "video_0241": {
+   "case": "error",
+   "truth_s": 4.0,
+   "pred_s": 6.5,
+   "error_s": 2.5,
+   "within_0_5": false,
+   "risk_ok": true,
+   "finish": "complete"
+  },
+  "video_0169": {
+   "case": "false_alarm",
+   "truth_s": -1.0,
+   "pred_s": 7.0,
+   "error_s": null,
+   "within_0_5": false,
+   "risk_ok": false,
+   "finish": "complete"
+  },
+  "video_0037": {
+   "case": "correct_none",
+   "truth_s": -1.0,
+   "pred_s": -1.0,
+   "error_s": null,
+   "within_0_5": true,
+   "risk_ok": true,
+   "finish": "complete"
+  },
+  "video_0050": {
+   "case": "correct_none",
+   "truth_s": -1.0,
+   "pred_s": -1.0,
+   "error_s": null,
+   "within_0_5": true,
+   "risk_ok": true,
+   "finish": "complete"
+  },
+  "video_0158": {
+   "case": "error",
+   "truth_s": 3.0,
+   "pred_s": 6.5,
+   "error_s": 3.5,
+   "within_0_5": false,
+   "risk_ok": false,
+   "finish": "complete"
+  },
+  "video_0075": {
+   "case": "false_alarm",
+   "truth_s": -1.0,
+   "pred_s": 2.5,
+   "error_s": null,
+   "within_0_5": false,
+   "risk_ok": false,
+   "finish": "complete"
+  },
+  "video_0128": {
+   "case": "correct_none",
+   "truth_s": -1.0,
+   "pred_s": -1.0,
+   "error_s": null,
+   "within_0_5": true,
+   "risk_ok": true,
+   "finish": "complete"
+  },
+  "video_0048": {
+   "case": "false_alarm",
+   "truth_s": -1.0,
+   "pred_s": 3.0,
+   "error_s": null,
+   "within_0_5": false,
+   "risk_ok": false,
+   "finish": "complete"
+  },
+  "video_0274": {
+   "case": "error",
+   "truth_s": 2.5,
+   "pred_s": 2.5,
+   "error_s": 0.0,
+   "within_0_5": true,
+   "risk_ok": true,
+   "finish": "complete"
+  },
+  "video_0144": {
+   "case": "error",
+   "truth_s": 4.0,
+   "pred_s": 1.0,
+   "error_s": 3.0,
+   "within_0_5": false,
+   "risk_ok": false,
+   "finish": "complete"
+  },
+  "video_0071": {
+   "case": "correct_none",
+   "truth_s": -1.0,
+   "pred_s": -1.0,
+   "error_s": null,
+   "within_0_5": true,
+   "risk_ok": true,
+   "finish": "complete"
+  },
+  "video_0258": {
+   "case": "error",
+   "truth_s": 4.5,
+   "pred_s": 5.0,
+   "error_s": 0.5,
+   "within_0_5": true,
+   "risk_ok": true,
+   "finish": "complete"
+  },
+  "video_0111": {
+   "case": "error",
+   "truth_s": 3.5,
+   "pred_s": 3.0,
+   "error_s": 0.5,
+   "within_0_5": true,
+   "risk_ok": false,
+   "finish": "complete"
+  },
+  "video_0183": {
+   "case": "error",
+   "truth_s": 4.0,
+   "pred_s": 7.0,
+   "error_s": 3.0,
+   "within_0_5": false,
+   "risk_ok": false,
+   "finish": "complete"
+  },
+  "video_0244": {
+   "case": "error",
+   "truth_s": 3.5,
+   "pred_s": 4.5,
+   "error_s": 1.0,
+   "within_0_5": false,
+   "risk_ok": true,
+   "finish": "complete"
+  },
+  "video_0155": {
+   "case": "miss",
+   "truth_s": 5.0,
+   "pred_s": -1.0,
+   "error_s": null,
+   "within_0_5": false,
+   "risk_ok": true,
+   "finish": "complete"
+  },
+  "video_0207": {
+   "case": "error",
+   "truth_s": 3.5,
+   "pred_s": 5.0,
+   "error_s": 1.5,
+   "within_0_5": false,
+   "risk_ok": true,
+   "finish": "complete"
+  },
+  "video_0248": {
+   "case": "error",
+   "truth_s": 6.0,
+   "pred_s": 6.5,
+   "error_s": 0.5,
+   "within_0_5": true,
+   "risk_ok": true,
+   "finish": "complete"
+  },
+  "video_0261": {
+   "case": "error",
+   "truth_s": 3.5,
+   "pred_s": 5.0,
+   "error_s": 1.5,
+   "within_0_5": false,
+   "risk_ok": true,
+   "finish": "complete"
+  },
+  "video_0132": {
+   "case": "correct_none",
+   "truth_s": -1.0,
+   "pred_s": -1.0,
+   "error_s": null,
+   "within_0_5": true,
+   "risk_ok": true,
+   "finish": "complete"
+  },
+  "video_0020": {
+   "case": "false_alarm",
+   "truth_s": -1.0,
+   "pred_s": 7.0,
+   "error_s": null,
+   "within_0_5": false,
+   "risk_ok": false,
+   "finish": "complete"
+  },
+  "video_0215": {
+   "case": "error",
+   "truth_s": 4.0,
+   "pred_s": 5.0,
+   "error_s": 1.0,
+   "within_0_5": false,
+   "risk_ok": true,
+   "finish": "complete"
+  },
+  "video_0197": {
+   "case": "error",
+   "truth_s": 2.5,
+   "pred_s": 1.5,
+   "error_s": 1.0,
+   "within_0_5": false,
+   "risk_ok": true,
+   "finish": "complete"
+  }
+ }
+}
