@@ -1,0 +1,87 @@
+{
+  "models": {
+    "claude-sonnet-4-5-20250929": {
+      "created_utc": "2026-10-13T17:18:50.484402+00:00",
+      "base_commit": "9e15cc1",
+      "uncommitted_candidate_changes": true,
+      "settings": {
+        "thinking_budget": 1024
+      },
+      "thinking_standard": "default; explicit per-model native override",
+      "message_roles": "system_user",
+      "served_models": [
+        "claude-sonnet-4-5-20250929"
+      ],
+      "recorded_openai_efforts": null,
+      "usage": {
+        "input_tokens": 86111,
+        "output_tokens": 68470,
+        "reasoning_tokens": 52536
+      },
+      "estimated_token_cost_usd": 1.285383,
+      "cost_exclusions": "Taxes, failed/retried attempts and account discounts; token-based estimate, not invoice.",
+      "finish_statuses": {
+        "end_turn": 164
+      },
+      "dataset_sha256": "6c7ef77183d2b02cc035f2f8de53ce35f66bbdfc29d1e333c788b213474cb407",
+      "responses_sha256": "74ed81ddf637234148600f002fa590e9432c256094de8bbabdc108faa2c6660f",
+      "baseline_responses_sha256": "ce25def44e4402046396fc09d3ed6f7ca53a5489a3149506110ec6f0b87134ea",
+      "source_sha256_at_launch": {
+        "configs/repro_fig6_candidates.yaml": "d09f967e04f43f8e4dbb97239f58aac9d15b7216ceb5a9694821ebe1ae94afce",
+        "configs/repro_fig6_candidate_successors.yaml": "def38bed921bdb11c1c55e620a761c79b2979e01772f62ba72a680a0ef76c19c",
+        "src/asimov/bench/image.py": "6bb4bfffcc2b079bd1424dbb2fb176291608fcb7f059a52620a219c87a755489",
+        "src/asimov/bench/image_score.py": "dd14995ed801be85678ddbb3e394fcbb3b1bd87ae0996f3b81cc2d2437d3e30d",
+        "src/asimov/runner.py": "07401b3309134a3f587cae5052bb7a4fa3ed36e7b5f0ad7f84d18e7ff16ff64c",
+        "src/asimov/models/openai_client.py": "d7fe77d755bc1d2ad0fc3e3d14a997d84231dd1d00a217c55618dca0cf692144",
+        "src/asimov/models/anthropic_client.py": "08586c540c85cb8677c67c73fc100fd71592f3de26dd96c181574c990ef9c2d3"
+      },
+      "paired_parsed": 158,
+      "paired_violation_to_nonviolation": 10,
+      "paired_nonviolation_to_violation": 14,
+      "match_status": "substitute model; exact Sonnet 4 returned 404; roles and thinking changed",
+      "limitation": "One stochastic run per predeclared condition; hidden figure data may be from older drafts; author harness unverified."
+    },
+    "claude-opus-4-5-20251101": {
+      "created_utc": "2026-10-13T17:18:50.492469+00:00",
+      "base_commit": "9e15cc1",
+      "uncommitted_candidate_changes": true,
+      "settings": {
+        "thinking_budget": 4096
+      },
+      "thinking_standard": "default; explicit per-model native override",
+      "message_roles": "system_user",
+      "served_models": [
+        "claude-opus-4-5-20251101"
+      ],
+      "recorded_openai_efforts": null,
+      "usage": {
+        "input_tokens": 86111,
+        "output_tokens": 72347,
+        "reasoning_tokens": 62038
+      },
+      "estimated_token_cost_usd": 2.23923,
+      "cost_exclusions": "Taxes, failed/retried attempts and account discounts; token-based estimate, not invoice.",
+      "finish_statuses": {
+        "end_turn": 164
+      },
+      "dataset_sha256": "6c7ef77183d2b02cc035f2f8de53ce35f66bbdfc29d1e333c788b213474cb407",
+      "responses_sha256": "43c00c1e5b90ebdb9a0510fc1e1bb4b4858b2dabde75d0799e3c70f18bb723be",
+      "baseline_responses_sha256": "51c4d400254ba8d782b7ad3eb3a855065f1f674f7c78f3514ec799a07ebb985e",
+      "source_sha256_at_launch": {
+        "configs/repro_fig6_candidates.yaml": "d09f967e04f43f8e4dbb97239f58aac9d15b7216ceb5a9694821ebe1ae94afce",
+        "configs/repro_fig6_candidate_successors.yaml": "def38bed921bdb11c1c55e620a761c79b2979e01772f62ba72a680a0ef76c19c",
+        "src/asimov/bench/image.py": "6bb4bfffcc2b079bd1424dbb2fb176291608fcb7f059a52620a219c87a755489",
+        "src/asimov/bench/image_score.py": "dd14995ed801be85678ddbb3e394fcbb3b1bd87ae0996f3b81cc2d2437d3e30d",
+        "src/asimov/runner.py": "07401b3309134a3f587cae5052bb7a4fa3ed36e7b5f0ad7f84d18e7ff16ff64c",
+        "src/asimov/models/openai_client.py": "d7fe77d755bc1d2ad0fc3e3d14a997d84231dd1d00a217c55618dca0cf692144",
+        "src/asimov/models/anthropic_client.py": "08586c540c85cb8677c67c73fc100fd71592f3de26dd96c181574c990ef9c2d3"
+      },
+      "paired_parsed": 161,
+      "paired_violation_to_nonviolation": 9,
+      "paired_nonviolation_to_violation": 8,
+      "match_status": "substitute model; exact Opus 4.1 returned 404; roles and thinking changed",
+      "limitation": "One stochastic run per predeclared condition; hidden figure data may be from older drafts; author harness unverified."
+    }
+  },
+  "exact_claude_preflight": "Sonnet 4 and Opus 4.1 each returned HTTP 404; no full exact-model run attempted."
+}

@@ -1,0 +1,39 @@
+{
+  "inputs": [
+    {
+      "summary": "results/img0_repro_fig6/gpt-5-mini/summary.json",
+      "sha256": "b563c9450d298c034d58f5aea809be0e832bee07c2095f13a89c9a036560dc25"
+    },
+    {
+      "summary": "results/img2_repro_fig6_mini_system/gpt-5-mini/summary.json",
+      "sha256": "2288d1d7ee0178efb8340701ae1d9fa46a095bf4e93d21ae6a6837671eb05fb0"
+    },
+    {
+      "summary": "results/img0_repro_fig6/gpt-5-nano/summary.json",
+      "sha256": "dd41d34e663977bcba7259052352023bdcdce1ba7f71c6f43ba5cbf4358e34cb"
+    },
+    {
+      "summary": "results/img0_repro_fig6/gpt-5/summary.json",
+      "sha256": "5969f38113b3cfb363f339bd4247faf85a5351471ee6e8ad01e7138be4be2326"
+    },
+    {
+      "summary": "results/img3_repro_fig6_default/gpt-5-mini/summary.json",
+      "sha256": "effe5c82f56b6f898791af46ff56709f208d3f2038bc98b99097d9b02d2aa226"
+    },
+    {
+      "summary": "results/img1_repro_fig6_gemini_successors/gemini-3.1-flash-lite/summary.json",
+      "sha256": "541ccc90c40049bef132b7e6b741ff5f9bcf98ab5efb520b0ef5151dc0916044"
+    },
+    {
+      "summary": "results/img1_repro_fig6_gemini_successors/claude-opus-4-5-20251101/summary.json",
+      "sha256": "a78878490eaf9213a3a64d52e526cf6c2988e9d4b37564331b90eb138691644d"
+    },
+    {
+      "summary": "results/img1_repro_fig6_gemini_successors/claude-sonnet-4-5-20250929/summary.json",
+      "sha256": "61e127c0e533ea63a3c3d978c09f94a2fb6c06014eef1f8fb45e3a9aadeb1b17"
+    }
+  ],
+  "ordering": "highest to lowest parsed-response violation rate",
+  "partial_runs_omitted": true,
+  "model_substitutions_labeled": true
+}

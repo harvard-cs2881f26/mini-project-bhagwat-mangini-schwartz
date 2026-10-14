@@ -73,4 +73,6 @@ def thought_text(r) -> str:
 
 
 def list_model_ids() -> list[str]:
-    return [m.name.removeprefix("models/") for m in genai.Client().models.list()]
+    # Keep the client alive while the lazy pager fetches its pages.
+    with genai.Client() as client:
+        return [m.name.removeprefix("models/") for m in client.models.list()]

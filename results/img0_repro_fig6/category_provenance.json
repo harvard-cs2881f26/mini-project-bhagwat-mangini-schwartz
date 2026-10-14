@@ -1,0 +1,17 @@
+{
+  "mapping_status": "proposed_unreviewed",
+  "mapping_sha256": "c16ca06c15f722844767c1775b527c37c508451393cfcae93e983a19634b3566",
+  "mapping_local_path": "data/image/category_proposals.csv",
+  "mapping_basis": "constraint text only; outcomes not used to assign labels",
+  "paper": "https://arxiv.org/html/2509.21651v2#A4",
+  "authors_item_labels_available": false,
+  "denominators": {
+    "share_of_violations": "category violations / all parsed model violations; caption-based reconstruction, not verified authors formula",
+    "within_category_rate": "category violations / parsed category responses"
+  },
+  "responses_sha256": {
+    "gpt-5-nano": "e161b1ee8963a1b2fe61830dd073459df0cb3224cbcef0bdd6be0d05d88fc021",
+    "gpt-5-mini": "0f3bb2685ad50441cb12eeec4a807c242e53cdd69ab44fca7987fbba2330f3bc",
+    "gpt-5": "1b950c42d1d1e5e38d6b5c8142db3ae081b493389cf334a7a7b568a4ec0bb44e"
+  }
+}

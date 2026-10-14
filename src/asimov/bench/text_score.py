@@ -211,12 +211,24 @@ def score(answers: dict[str, dict[str, str]], replies: dict[str, str], options: 
     return {**metrics, "per_item": per_item}
 
 
-def score_item(text: str, gold: dict[str, str], item_options: dict | None = None) -> dict:
-    """Per question: pred/gold/correct; plus parse status, rationale presence and parse_ok for the reply."""
+def read_reply(text: str) -> tuple[dict | None, bool]:
+    """A reply's answer object (None if there is none) and whether it was read loosely from broken JSON."""
     answer = json_object(text)
     if answer is not None and not any(kind == "answer" for _, kind in locate(answer)):
         answer = None  # an object without any answer (e.g. an inner sub-object of broken JSON)
     loose = answer is None and (answer := loose_pairs(text)) is not None  # broken JSON: read the pairs
+    return answer, loose
+
+
+def reply_letters(text: str, item_options: dict | None = None) -> dict[str, str | None]:
+    """One letter (or None if unanswered) per question, from a raw reply, read exactly as score_item reads it."""
+    answer, _ = read_reply(text)
+    return parse_letters(answer, item_options) if answer is not None else dict.fromkeys(QUESTIONS)
+
+
+def score_item(text: str, gold: dict[str, str], item_options: dict | None = None) -> dict:
+    """Per question: pred/gold/correct; plus parse status, rationale presence and parse_ok for the reply."""
+    answer, loose = read_reply(text)
     pred = parse_letters(answer, item_options) if answer is not None else dict.fromkeys(QUESTIONS)
     outcome: dict = {q: {"pred": pred[q], "gold": gold[q], "correct": pred[q] == gold[q]} for q in QUESTIONS}
     status = {q: parse_status(answer, q, item_options) for q in QUESTIONS}

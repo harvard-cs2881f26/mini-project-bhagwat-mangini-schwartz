@@ -19,8 +19,16 @@ A trailing `_local` (e.g. decision_short_local) marks the same request for a loc
 that section is hashed into the `_local` versions only, so the hosted versions never move.
 `_oneshot_local` (e.g. decision_short_oneshot_local) adds one made-up, answered example per question
 before the real one, from the wording file's `oneshot` section (hashed into those versions only).
-A name is a decision prompt only if parse_decision_prompt accepts it; every other name is a text
-prompt (verbatim or a suffix variant).
+Hint variants (Part 2 prompt experiments, EXPLORATORY; WORKLOG 2026-10-14) are text prompts named by a folder
+`experiments/<name>/` holding `variant.yaml`: a saved run and model whose picks go into each item's request,
+read from that run's replies under its summary's key with the text scorer's own reading (`reply_letters`), and a
+template. Kind `hints` sends the verbatim prompt, a blank line, then the template filled with the picks as
+"<letter>. <the paper's option text>"; kind `q2_q4` sends the verbatim prompt without Q1 and Q1's JSON keys, the
+template (filled with the Q1 pick's option text) taking Q1's place. Their version hashes the variant file, the
+template and the source run's key.
+
+A name is a decision prompt only if parse_decision_prompt accepts it; a hint variant if its folder has a
+variant.yaml; every other name is a text prompt (verbatim or a suffix variant).
 """
 
 from __future__ import annotations
@@ -30,13 +38,14 @@ import json
 import re
 from functools import cache
 from pathlib import Path
-from typing import NamedTuple
+from typing import Literal, NamedTuple
 
 import yaml
+from pydantic import BaseModel, ConfigDict
 
 from asimov.bench import Benchmark
 from asimov.bench.parts import MODES, DecisionExample, DecisionPart, DecisionQuestion, Mode, Part, TextPart
-from asimov.bench.text_score import score
+from asimov.bench.text_score import QUESTIONS, reply_letters, score
 from asimov.data.text import (
     ParsedPrompt,
     Question,
@@ -44,14 +53,23 @@ from asimov.data.text import (
     load_text_answers,
     load_text_items,
     load_text_options,
+    parse_options,
     parse_prompt,
 )
+from asimov.run_ids import folder_name, read_ids
 
 DATASET_VERSION = "asimov_v2_injuries/0.1.0"
 PROMPT_NAME = "text_verbatim"  # the dataset's prompt, unchanged (the reproduction)
 LETTER_ONLY = "text_letter_only"  # + "write only the option letter" (experiments/text_letter_only)
 TEXT_PROMPTS = (PROMPT_NAME, LETTER_ONLY)
 EXPERIMENTS = Path(__file__).resolve().parents[3] / "experiments"
+RESULTS = EXPERIMENTS.parent / "results"
+VARIANT_FILE = "variant.yaml"  # marks experiments/<name>/ as a hint variant
+HINT_PROMPTS = tuple(sorted(p.parent.name for p in EXPERIMENTS.glob(f"*/{VARIANT_FILE}")))
+NO_HINT = "no answer"  # shown for a question the source model left unanswered
+# Q1's keys in the dataset's JSON format line (the same on all 319 prompts), removed by kind q2_q4
+Q1_JSON_KEYS = "'latent_risk_response': latent_risk_response, 'latent_risk_rationale': latent_risk_rationale,\n "
+Q2_START = re.compile(r"^Q2 \(", re.M)
 # decision_<wording>[_letters][_<mode>]: wording = the paper's full text per question or the short text
 # in the wording file; option values are short names (e.g. "severe") unless `_letters` (A-E); mode
 # `_cumulative` passes the model's own earlier picks to later questions (none = independent, non-cumulative);
@@ -85,7 +103,7 @@ def parse_decision_prompt(name: str) -> DecisionPrompt:
 DECISION_PROMPTS = tuple(decision_prompt_name(w, letters, mode) for mode in MODES for w in WORDINGS for letters in (False, True))
 LOCAL_DECISION_PROMPTS = tuple(p + LOCAL for p in DECISION_PROMPTS)
 ONESHOT_PROMPTS = tuple(p + ONESHOT for p in DECISION_PROMPTS)
-PROMPTS = (*TEXT_PROMPTS, *DECISION_PROMPTS, *LOCAL_DECISION_PROMPTS, *ONESHOT_PROMPTS)
+PROMPTS = (*TEXT_PROMPTS, *HINT_PROMPTS, *DECISION_PROMPTS, *LOCAL_DECISION_PROMPTS, *ONESHOT_PROMPTS)
 WORDING = Path(__file__).resolve().parents[1] / "prompts" / "decision_questions.yaml"
 # Sections of the wording file a decision request uses; their content (not the file's bytes, so
 # comments don't count) is hashed into prompt_version. `context` only matters to cumulative, `local`
@@ -117,9 +135,98 @@ def is_oneshot_prompt(prompt_name: str) -> bool:
     return bool(m and m[4])
 
 
+class HintSource(BaseModel):
+    model_config = ConfigDict(extra="forbid", frozen=True)
+
+    run: str  # the saved run's name (config `run`), never a folder name
+    model: str  # the model id in that run's config
+
+
+class VariantFile(BaseModel):
+    """experiments/<name>/variant.yaml (unknown keys fail)."""
+
+    model_config = ConfigDict(extra="forbid", frozen=True)
+
+    kind: Literal["hints", "q2_q4"]
+    source: HintSource
+    template: str  # file name in the variant's folder
+
+
+class Variant(NamedTuple):
+    name: str
+    kind: str
+    source: HintSource
+    template: str  # the template's text
+
+
+@cache
+def variant(prompt_name: str) -> Variant | None:
+    """The hint variant named prompt_name, or None if experiments/<name>/variant.yaml doesn't exist."""
+    path = EXPERIMENTS / prompt_name / VARIANT_FILE
+    if not path.is_file():
+        return None
+    spec = VariantFile.model_validate(yaml.safe_load(path.read_text()))
+    return Variant(prompt_name, spec.kind, spec.source, (path.parent / spec.template).read_text().strip())
+
+
+def is_hint_variant(prompt_name: str) -> bool:
+    return variant(prompt_name) is not None
+
+
+@cache
+def saved_replies(source: HintSource) -> tuple[str, dict[str, str]]:
+    """(cache key, item id -> reply text) of a saved run's model: only replies under its summary's key."""
+    ids = read_ids(RESULTS)
+    if source.run not in ids:
+        raise ValueError(f"hint source run {source.run!r} has no folder under results/ (results/run_ids.yaml)")
+    mdir = RESULTS / folder_name(ids[source.run], source.run) / source.model
+    key = json.loads((mdir / "summary.json").read_text())["key"]
+    rows = [json.loads(line) for line in (mdir / "responses.jsonl").read_text().splitlines() if line.strip()]
+    return key, {r["id"]: r["text"] for r in rows if r["key"] == key}
+
+
+def item_hints(item: TextItem, source: HintSource) -> dict[str, str | None]:
+    """The source model's letter per question for this item (None = unanswered), read as the scorer reads it."""
+    _, replies = saved_replies(source)
+    if item.id not in replies:
+        raise ValueError(f"{source.run}/{source.model} has no saved reply for {item.id}; rerun that config first")
+    return reply_letters(replies[item.id], parse_options(item.prompt))
+
+
+def without_q1(prompt: str, statement: str) -> str:
+    """The verbatim prompt with the Q1 block replaced by `statement` and Q1's keys cut from the JSON format.
+    Q2-Q4, the scenario, the instruction and the rest of the format stay verbatim."""
+    parse_prompt(prompt)  # fails loudly if the prompt isn't the dataset's template
+    q2 = list(Q2_START.finditer(prompt))
+    if prompt.count("Q1.") != 1 or len(q2) != 1 or prompt.count(Q1_JSON_KEYS) != 1:
+        raise ValueError("prompt doesn't have exactly one Q1 block, one Q2 heading and one Q1 JSON entry")
+    start, end = prompt.index("Q1."), q2[0].start()
+    return (prompt[:start] + statement + "\n\n" + prompt[end:]).replace(Q1_JSON_KEYS, "")
+
+
+def hint_request(item: TextItem, v: Variant) -> str:
+    letters, options = item_hints(item, v.source), parse_options(item.prompt)
+    if v.kind == "hints":
+        shown = {q: NO_HINT if (x := letters[q]) is None else f"{x}. {options[q][x]}" for q in QUESTIONS}
+        return item.prompt + "\n\n" + v.template.format(**shown)
+    q1 = letters[QUESTIONS[0]]
+    injury = NO_HINT if q1 is None else options[QUESTIONS[0]][q1]
+    return without_q1(item.prompt, v.template.format(**{QUESTIONS[0]: injury}))
+
+
+def variant_version(v: Variant) -> str:
+    key, _ = saved_replies(v.source)
+    spec = {"kind": v.kind, "source": v.source.model_dump(), "template": v.template, "source_key": key}
+    digest = hashlib.sha256(json.dumps(spec, sort_keys=True).encode()).hexdigest()[:12]
+    return f"{DATASET_VERSION}|{v.name}|{digest}"
+
+
 def prompt_version(prompt_name: str) -> str:
     """Everything our code adds beyond the item: the dataset version and prompt name, plus any added
-    text (prompt variants) or, for decision prompts, a hash of the wording sections the request uses."""
+    text (prompt variants), a hash of a hint variant's spec, template and source key, or, for decision
+    prompts, a hash of the wording sections the request uses."""
+    if (v := variant(prompt_name)) is not None:
+        return variant_version(v)
     if is_decision_prompt(prompt_name):
         sections = REQUEST_SECTIONS
         if parse_decision_prompt(prompt_name).mode != "independent":
@@ -164,11 +271,16 @@ def decision_request(parsed: ParsedPrompt, prompt_name: str) -> DecisionPart:
         values = option_values(q, prompt_name)
         if len(set(values)) != len(values):
             raise ValueError(f"{q.key}: option values aren't unique: {values}")
-        questions.append(DecisionQuestion(
-            id=q.key, instructions=q.text if prompt.wording == "full" else w["short"][q.key],
-            options=tuple(zip(values, q.options.values(), strict=True)), letters=tuple(q.options),
-            context=w["context"].get(q.key, ""),
-            example=example(q.key, tuple(q.options.values())) if is_oneshot_prompt(prompt_name) else None))
+        questions.append(
+            DecisionQuestion(
+                id=q.key,
+                instructions=q.text if prompt.wording == "full" else w["short"][q.key],
+                options=tuple(zip(values, q.options.values(), strict=True)),
+                letters=tuple(q.options),
+                context=w["context"].get(q.key, ""),
+                example=example(q.key, tuple(q.options.values())) if is_oneshot_prompt(prompt_name) else None,
+            )
+        )
     return DecisionPart(state=state, questions=tuple(questions), mode=prompt.mode)
 
 
@@ -184,6 +296,8 @@ def example(question: str, options: tuple[str, ...]) -> DecisionExample:
 def build_request(item: TextItem, prompt_name: str = PROMPT_NAME) -> list[Part]:
     if is_decision_prompt(prompt_name):
         return [decision_request(parse_prompt(item.prompt), prompt_name)]
+    if (v := variant(prompt_name)) is not None:
+        return [TextPart(hint_request(item, v))]
     added = suffix(prompt_name)  # rejects unknown names
     return [TextPart(item.prompt + (f"\n\n{added}" if added else ""))]
 

@@ -22,7 +22,7 @@ def min_effort(model: str) -> str:
     return MIN_EFFORT.get(model, "minimal")
 
 
-def to_input(parts: list[Part]) -> list[dict]:
+def to_input(parts: list[Part], system: str | None = None) -> list[dict]:
     content = []
     for p in parts:
         if isinstance(p, TextPart):
@@ -30,7 +30,10 @@ def to_input(parts: list[Part]) -> list[dict]:
         else:
             b64 = base64.standard_b64encode(p.data).decode()
             content.append({"type": "input_image", "image_url": f"data:{p.media_type};base64,{b64}", "detail": "high"})
-    return [{"role": "user", "content": content}]
+    messages = [{"role": "user", "content": content}]
+    if system is not None:
+        messages.insert(0, {"role": "system", "content": system})
+    return messages
 
 
 class OpenAIClient:
@@ -41,13 +44,17 @@ class OpenAIClient:
         self.model = model
         self.client = openai.OpenAI()
 
-    def generate(self, parts: list[Part], thinking: Thinking = "min", log_reasoning: bool = False) -> ModelResponse:
-        reasoning = {"effort": min_effort(self.model)} if thinking == "min" else {}
+    def generate(self, parts: list[Part], thinking: Thinking = "min", log_reasoning: bool = False,
+                 system: str | None = None, reasoning_effort: str | None = None) -> ModelResponse:
+        if reasoning_effort is not None and reasoning_effort not in ("minimal", "low", "medium", "high"):
+            raise ValueError(f"Unsupported GPT-5 reasoning effort: {reasoning_effort}")
+        reasoning = ({"effort": reasoning_effort} if reasoning_effort is not None
+                     else ({"effort": min_effort(self.model)} if thinking == "min" else {}))
         reasoning |= {"summary": "auto"} if log_reasoning else {}
         kwargs = {"reasoning": reasoning} if reasoning else {}
         with Timer() as t:
             r = self.client.responses.create(
-                model=self.model, input=to_input(parts), max_output_tokens=MAX_OUTPUT_TOKENS, **kwargs
+                model=self.model, input=to_input(parts, system), max_output_tokens=MAX_OUTPUT_TOKENS, **kwargs
             )
         u = r.usage
         return ModelResponse(

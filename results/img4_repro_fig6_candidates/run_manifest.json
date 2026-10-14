@@ -1,0 +1,91 @@
+{
+  "models": {
+    "gpt-5-mini": {
+      "created_utc": "2026-10-13T17:18:50.450135+00:00",
+      "base_commit": "9e15cc1",
+      "uncommitted_candidate_changes": true,
+      "settings": {
+        "reasoning_effort": "high"
+      },
+      "thinking_standard": "default; explicit per-model native override",
+      "message_roles": "system_user",
+      "served_models": [
+        "gpt-5-mini-2025-08-07"
+      ],
+      "recorded_openai_efforts": [
+        "high"
+      ],
+      "usage": {
+        "input_tokens": 77553,
+        "output_tokens": 356806,
+        "reasoning_tokens": 344576
+      },
+      "estimated_token_cost_usd": 0.73300025,
+      "cost_exclusions": "Taxes, failed/retried attempts and account discounts; token-based estimate, not invoice.",
+      "finish_statuses": {
+        "completed": 164
+      },
+      "dataset_sha256": "6c7ef77183d2b02cc035f2f8de53ce35f66bbdfc29d1e333c788b213474cb407",
+      "responses_sha256": "630c1c01163ca2adc92378568c5de1610bdbe5d0e0de556fccc248ecea2f55fa",
+      "baseline_responses_sha256": "c7317d9c2405d74e8cab3f62649a776ada0b6153d1c59707506e56ee98972209",
+      "source_sha256_at_launch": {
+        "configs/repro_fig6_candidates.yaml": "d09f967e04f43f8e4dbb97239f58aac9d15b7216ceb5a9694821ebe1ae94afce",
+        "configs/repro_fig6_candidate_successors.yaml": "def38bed921bdb11c1c55e620a761c79b2979e01772f62ba72a680a0ef76c19c",
+        "src/asimov/bench/image.py": "6bb4bfffcc2b079bd1424dbb2fb176291608fcb7f059a52620a219c87a755489",
+        "src/asimov/bench/image_score.py": "dd14995ed801be85678ddbb3e394fcbb3b1bd87ae0996f3b81cc2d2437d3e30d",
+        "src/asimov/runner.py": "07401b3309134a3f587cae5052bb7a4fa3ed36e7b5f0ad7f84d18e7ff16ff64c",
+        "src/asimov/models/openai_client.py": "d7fe77d755bc1d2ad0fc3e3d14a997d84231dd1d00a217c55618dca0cf692144",
+        "src/asimov/models/anthropic_client.py": "08586c540c85cb8677c67c73fc100fd71592f3de26dd96c181574c990ef9c2d3"
+      },
+      "paired_parsed": 164,
+      "paired_violation_to_nonviolation": 12,
+      "paired_nonviolation_to_violation": 13,
+      "match_status": "same model family; candidate effort; same roles as default baseline",
+      "limitation": "One stochastic run per predeclared condition; hidden figure data may be from older drafts; author harness unverified."
+    },
+    "gpt-5": {
+      "created_utc": "2026-10-13T17:18:50.473305+00:00",
+      "base_commit": "9e15cc1",
+      "uncommitted_candidate_changes": true,
+      "settings": {
+        "reasoning_effort": "medium"
+      },
+      "thinking_standard": "default; explicit per-model native override",
+      "message_roles": "system_user",
+      "served_models": [
+        "gpt-5-2025-08-07"
+      ],
+      "recorded_openai_efforts": [
+        "medium"
+      ],
+      "usage": {
+        "input_tokens": 82837,
+        "output_tokens": 211363,
+        "reasoning_tokens": 197952
+      },
+      "estimated_token_cost_usd": 2.21717625,
+      "cost_exclusions": "Taxes, failed/retried attempts and account discounts; token-based estimate, not invoice.",
+      "finish_statuses": {
+        "completed": 164
+      },
+      "dataset_sha256": "6c7ef77183d2b02cc035f2f8de53ce35f66bbdfc29d1e333c788b213474cb407",
+      "responses_sha256": "42c08374f4bd2c5f6482ee50fd2f2015354818b78ab62eef8f8275351c1750c3",
+      "baseline_responses_sha256": "1b950c42d1d1e5e38d6b5c8142db3ae081b493389cf334a7a7b568a4ec0bb44e",
+      "source_sha256_at_launch": {
+        "configs/repro_fig6_candidates.yaml": "d09f967e04f43f8e4dbb97239f58aac9d15b7216ceb5a9694821ebe1ae94afce",
+        "configs/repro_fig6_candidate_successors.yaml": "def38bed921bdb11c1c55e620a761c79b2979e01772f62ba72a680a0ef76c19c",
+        "src/asimov/bench/image.py": "6bb4bfffcc2b079bd1424dbb2fb176291608fcb7f059a52620a219c87a755489",
+        "src/asimov/bench/image_score.py": "dd14995ed801be85678ddbb3e394fcbb3b1bd87ae0996f3b81cc2d2437d3e30d",
+        "src/asimov/runner.py": "07401b3309134a3f587cae5052bb7a4fa3ed36e7b5f0ad7f84d18e7ff16ff64c",
+        "src/asimov/models/openai_client.py": "d7fe77d755bc1d2ad0fc3e3d14a997d84231dd1d00a217c55618dca0cf692144",
+        "src/asimov/models/anthropic_client.py": "08586c540c85cb8677c67c73fc100fd71592f3de26dd96c181574c990ef9c2d3"
+      },
+      "paired_parsed": 164,
+      "paired_violation_to_nonviolation": 29,
+      "paired_nonviolation_to_violation": 15,
+      "match_status": "same model family; no exact Fig. 7 row matches Fig. 6a; roles and effort changed",
+      "limitation": "One stochastic run per predeclared condition; hidden figure data may be from older drafts; author harness unverified."
+    }
+  },
+  "exact_claude_preflight": "Sonnet 4 and Opus 4.1 each returned HTTP 404; no full exact-model run attempted."
+}

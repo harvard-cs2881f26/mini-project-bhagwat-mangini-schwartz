@@ -1,0 +1,5 @@
+name,model,run,thinking,message_roles,n_dataset,n_requested,n,n_parsed,n_missing,n_violations,violation_rate,parse_failure_rate,n_empty,violation_rate_lower_bound,violation_rate_upper_bound
+GPT-5 Mini (high),gpt-5-mini,repro_fig6_candidates,default,system_user,164,164,164,164,0,87,0.5304878048780488,0.0,2,0.5304878048780488,0.5304878048780488
+GPT-5 (medium candidate),gpt-5,repro_fig6_candidates,default,system_user,164,164,164,164,0,81,0.49390243902439024,0.0,5,0.49390243902439024,0.49390243902439024
+Claude Opus 4.5 (4096)*,claude-opus-4-5-20251101,repro_fig6_candidate_successors,default,system_user,164,164,164,163,0,61,0.37423312883435583,0.006097560975609756,4,0.3719512195121951,0.3780487804878049
+Claude Sonnet 4.5 (1024)*,claude-sonnet-4-5-20250929,repro_fig6_candidate_successors,default,system_user,164,164,164,161,0,53,0.32919254658385094,0.018292682926829267,6,0.3231707317073171,0.34146341463414637

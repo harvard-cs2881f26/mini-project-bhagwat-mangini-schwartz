@@ -1,0 +1,12 @@
+approx,ci_hi,ci_lo,claim,diff,figure,kind,metric,model_paper,models_ours,ours,paper,paper_in_ci,stand_in,status
+False,,,fig6a_gemini_2_5_flash_lite_violation_rate,,6a,value,violation_rate,Gemini 2.5 Flash-Lite,,,0.753,,False,model not in this run
+False,,,fig6a_claude_sonnet_4_violation_rate,,6a,value,violation_rate,Claude Sonnet 4,Claude Sonnet 4 (1024 candidate),,0.5,,True,metric not in our summary
+False,0.605295,0.454285,fig6a_gpt_5_mini_violation_rate,0.061488,6a,value,violation_rate,GPT 5 Mini,GPT-5 Mini (high candidate),0.530488,0.469,True,True,checked
+False,,,fig6a_gemini_2_5_pro_violation_rate,,6a,value,violation_rate,Gemini 2.5 Pro,,,0.455,,False,model not in this run
+False,,,fig6a_gemini_2_5_flash_violation_rate,,6a,value,violation_rate,Gemini 2.5 Flash,,,0.417,,False,model not in this run
+False,0.569679,0.418405,fig6a_gpt_5_violation_rate,0.087902,6a,value,violation_rate,GPT 5,GPT-5 (medium candidate),0.493902,0.406,False,True,checked
+False,,,fig6a_gpt_nano_violation_rate,,6a,value,violation_rate,GPT Nano,,,0.406,,False,model not in this run
+False,,,fig6a_claude_opus_4_1_violation_rate,,6a,value,violation_rate,Claude Opus 4.1,Claude Opus 4.1 (4096 candidate),,0.386,,True,metric not in our summary
+False,,,sec3_avg_violation_rate_max,-0.219512,,max,violation_rate,,Claude Sonnet 4 (1024 candidate);GPT-5 Mini (high candidate);GPT-5 (medium candidate);Claude Opus 4.1 (4096 candidate),0.530488,0.75,,True,only 2 of 8 models in this run
+False,,,sec3_avg_violation_rate_min,0.107902,,min,violation_rate,,Claude Sonnet 4 (1024 candidate);GPT-5 Mini (high candidate);GPT-5 (medium candidate);Claude Opus 4.1 (4096 candidate),0.493902,0.386,,True,only 2 of 8 models in this run
+False,,,sec1_avg_violation_rate_floor,,,bound,violation_rate,,,,0.3,,False,"a bound, not a point value"
