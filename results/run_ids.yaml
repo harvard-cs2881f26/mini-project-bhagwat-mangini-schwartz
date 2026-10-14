@@ -43,3 +43,4 @@ part2_gpt5_jev_hints: txt34
 part2_gpt5_q2q4_jev: txt35
 part2_gpt5mini_jev_hints: txt36
 part2_gpt5mini_q2q4_jev: txt37
+part2_qwen_gen_fewshot: txt38

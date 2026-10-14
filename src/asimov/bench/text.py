@@ -5,8 +5,9 @@ options and the JSON output format, so one call answers one item. Nothing is add
 no item ID, no wrapper, no system prompt.
 
 Prompt variants (not for the reproduction) add text after the prompt, kept in
-`experiments/<name>/suffix.txt`; the added text is part of `prompt_version`, so their replies
-never mix with the verbatim prompt's.
+`experiments/<name>/suffix.txt`, and/or before it, kept in `experiments/<name>/prefix.txt` (each
+optional, joined to the prompt by a blank line); the added text is part of `prompt_version`, so
+their replies never mix with the verbatim prompt's.
 
 Decision prompts (Part 2) send one DecisionPart instead: the item's scenario and instruction as
 the state, and its four questions with the paper's options, worded from
@@ -61,7 +62,8 @@ from asimov.run_ids import folder_name, read_ids
 DATASET_VERSION = "asimov_v2_injuries/0.1.0"
 PROMPT_NAME = "text_verbatim"  # the dataset's prompt, unchanged (the reproduction)
 LETTER_ONLY = "text_letter_only"  # + "write only the option letter" (experiments/text_letter_only)
-TEXT_PROMPTS = (PROMPT_NAME, LETTER_ONLY)
+FEWSHOT_FORMAT = "text_fewshot_format"  # worked examples before, format rules after (EXPLORATORY)
+TEXT_PROMPTS = (PROMPT_NAME, LETTER_ONLY, FEWSHOT_FORMAT)
 EXPERIMENTS = Path(__file__).resolve().parents[3] / "experiments"
 RESULTS = EXPERIMENTS.parent / "results"
 VARIANT_FILE = "variant.yaml"  # marks experiments/<name>/ as a hint variant
@@ -111,11 +113,22 @@ WORDING = Path(__file__).resolve().parents[1] / "prompts" / "decision_questions.
 REQUEST_SECTIONS = ("state", "short", "names")
 
 
-def suffix(prompt_name: str) -> str:
-    """Text added after the dataset's prompt: none for the verbatim prompt."""
+def added_text(prompt_name: str, where: str) -> str:
+    """experiments/<prompt>/<where>.txt, stripped, or "" if the variant has none (or is the verbatim prompt)."""
     if prompt_name not in TEXT_PROMPTS:
         raise ValueError(f"unknown text prompt {prompt_name!r}; choose from {PROMPTS}")
-    return "" if prompt_name == PROMPT_NAME else (EXPERIMENTS / prompt_name / "suffix.txt").read_text().strip()
+    path = EXPERIMENTS / prompt_name / f"{where}.txt"
+    return "" if prompt_name == PROMPT_NAME or not path.exists() else path.read_text().strip()
+
+
+def suffix(prompt_name: str) -> str:
+    """Text added after the dataset's prompt: none for the verbatim prompt."""
+    return added_text(prompt_name, "suffix")
+
+
+def prefix(prompt_name: str) -> str:
+    """Text added before the dataset's prompt: none for the verbatim prompt."""
+    return added_text(prompt_name, "prefix")
 
 
 def is_decision_prompt(prompt_name: str) -> bool:
@@ -237,8 +250,8 @@ def prompt_version(prompt_name: str) -> str:
             sections = (*sections, "oneshot")
         used = json.dumps({k: wording()[k] for k in sections}, sort_keys=True)
         return f"{DATASET_VERSION}|{prompt_name}|{hashlib.sha256(used.encode()).hexdigest()[:12]}"
-    added = suffix(prompt_name)  # rejects unknown names
-    return f"{DATASET_VERSION}|{prompt_name}" + (f"|{added}" if added else "")
+    added, before = suffix(prompt_name), prefix(prompt_name)  # rejects unknown names
+    return f"{DATASET_VERSION}|{prompt_name}" + (f"|{added}" if added else "") + (f"|prefix:{before}" if before else "")
 
 
 @cache
@@ -298,8 +311,8 @@ def build_request(item: TextItem, prompt_name: str = PROMPT_NAME) -> list[Part]:
         return [decision_request(parse_prompt(item.prompt), prompt_name)]
     if (v := variant(prompt_name)) is not None:
         return [TextPart(hint_request(item, v))]
-    added = suffix(prompt_name)  # rejects unknown names
-    return [TextPart(item.prompt + (f"\n\n{added}" if added else ""))]
+    added, before = suffix(prompt_name), prefix(prompt_name)  # rejects unknown names
+    return [TextPart((f"{before}\n\n" if before else "") + item.prompt + (f"\n\n{added}" if added else ""))]
 
 
 def score_text(answers: dict, replies: dict[str, str]) -> dict:
