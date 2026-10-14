@@ -231,8 +231,8 @@ Per item: the model's totals over this run divided by its replies. Refused and P
 | Prompt | text_verbatim |
 | Thinking | min |
 | Reasoning logged | True |
-| Git commit | d687d53800 |
-| Scored | 2026-10-12 |
+| Git commit | 350410d11e |
+| Scored | 2026-10-13 |
 | Config | [config.yaml](config.yaml) (sha256 055fc2c1420b) |
 
 ## Models
