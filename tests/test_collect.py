@@ -283,6 +283,17 @@ def test_rows_without_latency_are_skipped(results):
     assert len(m.replies) == 4  # the row still counts for served model and reply text
 
 
+def test_modal_compute_time_is_kept_apart_from_the_round_trip(results):
+    path = results / "text_run" / "gpt-5" / "responses.jsonl"
+    rows = [json.loads(line) for line in path.read_text().splitlines()]
+    rows[0]["raw"] = {"remote": {"backend": "modal", "compute_s": 0.25}}
+    path.write_text("".join(json.dumps(r) + "\n" for r in rows))
+    m = load_model(path.parent)
+    assert m.item_compute_s == {rows[0]["id"]: 0.25}  # only rows that ran on Modal
+    assert m.item_latency[rows[0]["id"]] == rows[0]["latency_s"]  # the round trip is unchanged
+    assert 0.25 not in m.latencies
+
+
 def test_check_flags_orphaned_generated_files(results, tmp_path):
     claims_path = tmp_path / "claims.yaml"
     claims_path.write_text(yaml.safe_dump(empty_claims().model_dump()))

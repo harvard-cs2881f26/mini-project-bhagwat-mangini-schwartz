@@ -1,0 +1,97 @@
+set,axis,point,hi,lo,mean_of_4,x
+held_out,cost,"$0.1 per 1,000",0.75768,0.697806,0.727586,0.073069
+held_out,cost,"$1 per 1,000",0.759091,0.706422,0.732602,0.820678
+held_out,cost,"$2 per 1,000",0.786368,0.732445,0.759248,1.686372
+held_out,cost,"$4 per 1,000",0.807837,0.751567,0.779781,3.097453
+in_sample,cost,"OpenJev think 512 full -> Qwen3.5-4B generate 2048 (lowest 10% by confidence; per question, the better on training)",,,0.72884,0.0
+in_sample,cost,"OpenJev think 512 full -> luna generate (lowest 10% by confidence; per question, the better on training)",,,0.735893,0.023291
+in_sample,cost,OpenJev think 512 full -> Gemini 3.1 Flash-Lite [default] (lowest 10% by confidence),,,0.739028,0.082053
+in_sample,cost,OpenJev think 512 full -> luna generate (lowest 10%) -> GPT-5 [min] if they disagree (q1),,,0.740596,0.159568
+in_sample,cost,"jev-latest (part2_jev_full_cumulative) -> luna generate (lowest 40% by confidence; per question, the better on training)",,,0.742947,0.202776
+in_sample,cost,OpenJev think 512 full -> GPT-5 Mini [default] (lowest 10% by confidence),,,0.745298,0.235842
+in_sample,cost,OpenJev think 512 full -> GPT-5 Mini [min] (lowest 10%) -> GPT-5 [min] if they disagree (q1),,,0.746082,0.244734
+in_sample,cost,"jev-latest (part2_jev_full_cumulative) -> Gemini 3.1 Flash-Lite [default] (lowest 30% by confidence; per question, the better on training)",,,0.748433,0.355429
+in_sample,cost,jev-latest (part2_jev_full_cumulative) -> luna generate (lowest 30%) -> GPT-5 [min] if they disagree (q1),,,0.749216,0.476332
+in_sample,cost,jev-latest (part2_jev_full_cumulative) -> luna generate (lowest 40%) -> GPT-5 [min] if they disagree (q1),,,0.753135,0.528192
+in_sample,cost,"jev-latest (part2_jev_full_cumulative) -> Gemini 3 Flash [min] (lowest 30% by confidence; per question, the better on training)",,,0.755486,0.612874
+in_sample,cost,"OpenJev think 512 full -> Gemini 3 Flash [min] (lowest 40% by confidence; per question, the better on training)",,,0.75627,0.674828
+in_sample,cost,"jev-latest (part2_jev_full_cumulative) -> Gemini 3 Flash [min] (lowest 40% by confidence; per question, the better on training)",,,0.758621,0.717614
+in_sample,cost,luna Decisions + jev-latest (part2_jev_full_cumulative) agree (q1) else GPT-5 [min],,,0.759404,0.917573
+in_sample,cost,luna Decisions letters + jev-latest (part2_jev_full_cumulative) agree (q1) else GPT-5 [min],,,0.762539,0.922847
+in_sample,cost,"jev-latest (part2_jev_full_cumulative) -> GPT-5 [min] (lowest 30% by confidence; per question, the better on training)",,,0.768809,1.279517
+in_sample,cost,"jev-latest (part2_jev_full_cumulative) -> Gemini 3 Flash [min] (lowest 80% by confidence; per question, the better on training)",,,0.769592,1.427595
+in_sample,cost,"jev-latest (part2_jev_full_cumulative) -> GPT-5 [min] (lowest 40% by confidence; per question, the better on training)",,,0.772727,1.522923
+in_sample,cost,"jev-latest (part2_jev_full_cumulative) -> GPT-5 [min] (lowest 50% by confidence; per question, the better on training)",,,0.778213,2.08565
+in_sample,cost,"jev-latest (part2_jev_full_cumulative) -> GPT-5 [min] (lowest 70% by confidence; per question, the better on training)",,,0.782132,2.873628
+in_sample,cost,"jev-latest (part2_jev_full_cumulative) -> GPT-5 [min] (lowest 80% by confidence; per question, the better on training)",,,0.78605,3.201708
+held_out,latency,p50 ≤ 0.5 s,0.744984,0.691066,0.718025,0.248
+held_out,latency,p50 ≤ 1 s,0.802038,0.745925,0.773824,0.816
+held_out,latency,p50 ≤ 2 s,0.803918,0.747802,0.775549,0.844
+held_out,latency,p50 ≤ 4 s,0.810188,0.753762,0.782132,3.79
+in_sample,latency,luna Decisions full,,,0.565831,0.12
+in_sample,latency,luna Decisions full -> luna generate (lowest 10%) -> GPT-5 [min] if they disagree (q1),,,0.588558,0.13
+in_sample,latency,luna Decisions full -> GPT-5 [min] (lowest 20% by confidence),,,0.606583,0.14
+in_sample,latency,Jev full,,,0.659091,0.15
+in_sample,latency,"Jev full -> GPT-5 [min] (lowest 20% by confidence; per question, the better on training)",,,0.689655,0.16
+in_sample,latency,"Jev full -> GPT-5 [min] (lowest 30% by confidence; per question, the better on training)",,,0.701411,0.17
+in_sample,latency,Jev full -> Opus 4.5 [default] (lowest 40% by confidence),,,0.718652,0.2
+in_sample,latency,"Jev full -> GPT-5 [min] (lowest 50% by confidence; per question, the better on training)",,,0.731191,0.4
+in_sample,latency,Qwen3.5-4B-Base logprob one-shot + gpt-6-luna (part2_luna_decide_full_cumulative) agree (q1) else GPT-5 [min],,,0.734326,0.54
+in_sample,latency,gpt-6-luna (part2_luna_decide_full_cumulative) -> GPT-5 Nano [min] (lowest 30%) -> GPT-5 [min] if they disagree (any),,,0.73511,0.57
+in_sample,latency,gpt-6-luna (part2_luna_decide_full_cumulative) -> Gemini 3 Flash [min] (lowest 40% by confidence),,,0.735893,0.64
+in_sample,latency,luna Decisions + jev-latest (part2_jev_full_cumulative) agree (q1) else GPT-5 [min],,,0.759404,0.71
+in_sample,latency,luna Decisions letters + jev-latest (part2_jev_full_cumulative) agree (q1) else GPT-5 [min],,,0.762539,0.72
+in_sample,latency,"jev-latest (part2_jev_full_cumulative) -> GPT-5 [min] (lowest 30% by confidence; per question, the better on training)",,,0.768809,0.73
+in_sample,latency,"jev-latest (part2_jev_full_cumulative) -> GPT-5 [min] (lowest 40% by confidence; per question, the better on training)",,,0.772727,0.74
+in_sample,latency,"jev-latest (part2_jev_full_cumulative) -> GPT-5 [min] (lowest 50% by confidence; per question, the better on training)",,,0.778213,0.92
+in_sample,latency,"jev-latest (part2_jev_full_cumulative) || GPT-5 [min] in parallel; GPT-5 [min]'s answers on the lowest 80% by confidence (per question, the better on training)",,,0.78605,3.29
+bound,cost,OpenJev think 512 full -> Qwen3.5-4B generate 2048 (68 items sent),,,0.804859,0.0
+bound,cost,OpenJev think 512 full -> luna generate (65 items sent),,,0.805643,0.046919
+bound,cost,OpenJev think 512 full -> luna generate (66 items sent),,,0.806426,0.047672
+bound,cost,OpenJev think 512 full -> luna generate (67 items sent),,,0.80721,0.048428
+bound,cost,OpenJev think 512 full -> luna generate (68 items sent),,,0.807994,0.049186
+bound,cost,OpenJev think 512 full -> luna generate (69 items sent),,,0.808777,0.049946
+bound,cost,OpenJev think 512 full -> luna generate (70 items sent),,,0.809561,0.050718
+bound,cost,OpenJev think 512 full -> luna generate (71 items sent),,,0.810345,0.051509
+bound,cost,OpenJev think 512 full -> Gemini 3.1 Flash-Lite [default] (67 items sent),,,0.811129,0.166277
+bound,cost,OpenJev think 512 full -> Gemini 3.1 Flash-Lite [default] (68 items sent),,,0.811912,0.168917
+bound,cost,OpenJev think 512 full -> Gemini 3.1 Flash-Lite [default] (69 items sent),,,0.812696,0.171582
+bound,cost,OpenJev think 512 full -> Gemini 3.1 Flash-Lite [default] (70 items sent),,,0.81348,0.174266
+bound,cost,OpenJev think 512 full -> Gemini 3.1 Flash-Lite [default] (71 items sent),,,0.814263,0.176954
+bound,cost,OpenJev think 512 full -> Gemini 3.1 Flash-Lite [default] (72 items sent),,,0.815047,0.179649
+bound,cost,OpenJev think 512 full -> Gemini 3.1 Flash-Lite [default] (73 items sent),,,0.815831,0.182389
+bound,cost,OpenJev think 512 full -> Gemini 3.1 Flash-Lite [default] (74 items sent),,,0.816614,0.185189
+bound,cost,OpenJev think 512 full -> GPT-5 Mini [min] (72 items sent),,,0.817398,0.234375
+bound,cost,OpenJev think 512 full -> GPT-5 Mini [min] (73 items sent),,,0.818182,0.238013
+bound,cost,OpenJev think 512 full -> GPT-5 Mini [min] (74 items sent),,,0.818966,0.241674
+bound,cost,OpenJev think 512 full -> GPT-5 Mini [min] (75 items sent),,,0.819749,0.245347
+bound,cost,OpenJev think 512 full -> GPT-5 Mini [min] (76 items sent),,,0.820533,0.249149
+bound,cost,OpenJev think 512 full -> Gemini 3 Flash [min] (71 items sent),,,0.821317,0.368683
+bound,cost,OpenJev think 512 full -> Gemini 3 Flash [min] (72 items sent),,,0.8221,0.37408
+bound,cost,OpenJev think 512 full -> Gemini 3 Flash [min] (73 items sent),,,0.822884,0.379483
+bound,cost,OpenJev think 512 full -> Gemini 3 Flash [min] (74 items sent),,,0.823668,0.384915
+bound,cost,OpenJev think 512 full -> Gemini 3 Flash [min] (75 items sent),,,0.824451,0.390353
+bound,cost,OpenJev think 512 full -> Gemini 3 Flash [min] (76 items sent),,,0.825235,0.39581
+bound,cost,OpenJev think 512 full -> Gemini 3 Flash [min] (77 items sent),,,0.826019,0.40129
+bound,cost,OpenJev think 512 full -> Gemini 3 Flash [min] (78 items sent),,,0.826803,0.406799
+bound,cost,OpenJev think 512 full -> Gemini 3 Flash [min] (79 items sent),,,0.827586,0.412321
+bound,cost,OpenJev think 512 full -> Gemini 3 Flash [min] (80 items sent),,,0.82837,0.417893
+bound,cost,OpenJev think 512 full -> Gemini 3 Flash [min] (81 items sent),,,0.829154,0.423522
+bound,cost,OpenJev think 512 full -> Gemini 3 Flash [min] (82 items sent),,,0.829937,0.429179
+bound,cost,OpenJev think 512 full -> Gemini 3 Flash [min] (83 items sent),,,0.830721,0.434908
+bound,cost,OpenJev think 512 full -> Gemini 3 Flash [min] (84 items sent),,,0.831505,0.44073
+bound,cost,OpenJev think 512 full -> Gemini 3 Flash [min] (85 items sent),,,0.832288,0.446621
+bound,cost,OpenJev think 512 full -> Gemini 3 Flash [min] (86 items sent),,,0.833072,0.452513
+bound,cost,OpenJev think 512 full -> Gemini 3 Flash [min] (87 items sent),,,0.833856,0.45873
+bound,cost,OpenJev think 512 full -> GPT-5 [min] (86 items sent),,,0.834639,1.058726
+bound,cost,OpenJev think 512 full -> GPT-5 [min] (87 items sent),,,0.835423,1.071591
+bound,cost,OpenJev think 512 full -> GPT-5 [min] (88 items sent),,,0.836207,1.084479
+bound,cost,OpenJev think 512 full -> GPT-5 [min] (89 items sent),,,0.836991,1.097441
+bound,cost,OpenJev think 512 full -> GPT-5 [min] (90 items sent),,,0.837774,1.110462
+bound,cost,OpenJev think 512 full -> GPT-5 [min] (91 items sent),,,0.838558,1.123515
+bound,cost,OpenJev think 512 full -> GPT-5 [min] (92 items sent),,,0.839342,1.136579
+bound,cost,OpenJev think 512 full -> GPT-5 [min] (93 items sent),,,0.840125,1.149855
+bound,cost,OpenJev think 512 full -> GPT-5 [min] (94 items sent),,,0.840909,1.16364
+bound,cost,OpenJev think 512 full -> GPT-5 [min] (95 items sent),,,0.841693,1.177535
+bound,cost,OpenJev think 512 full -> Opus 4.5 [default] (94 items sent),,,0.842476,5.072602
+bound,cost,OpenJev think 512 full -> Opus 4.5 [default] (95 items sent),,,0.84326,5.132633
