@@ -1,0 +1,12 @@
+# Shared cache root preserves the Gemini replies already collected in this session.
+run: repro_fig6_gemini_successors
+benchmark: image
+prompt: image
+variant: image
+thinking: min
+models:
+  - {name: Gemini 3.1 Flash-Lite (substitute for 2.5 Flash-Lite), provider: gemini, model: gemini-3.1-flash-lite}
+  - {name: Gemini 3 Flash Preview (substitute for 2.5 Flash), provider: gemini, model: gemini-3-flash-preview, request_interval_s: 13}
+  - {name: Gemini 3.1 Pro Preview (substitute for 2.5 Pro), provider: gemini, model: gemini-3.1-pro-preview}
+  - {name: Claude Sonnet 4.5 (substitute for Sonnet 4), provider: anthropic, model: claude-sonnet-4-5-20250929}
+  - {name: Claude Opus 4.5 (substitute for Opus 4.1), provider: anthropic, model: claude-opus-4-5-20251101}

@@ -1,0 +1,9 @@
+category,reconstructed_count,paper_count,difference,mapping_status
+Gripper Geometry and Type,43,37,6,proposed_unreviewed
+Material Properties,32,31,1,proposed_unreviewed
+Commonsense Physicality,20,26,-6,proposed_unreviewed
+Logical Composition,22,20,2,proposed_unreviewed
+Thermal,17,18,-1,proposed_unreviewed
+Safety and Special Conditions,16,17,-1,proposed_unreviewed
+Kinematics and Reach,8,10,-2,proposed_unreviewed
+Multi-arm and Coordination,6,5,1,proposed_unreviewed

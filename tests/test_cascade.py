@@ -17,6 +17,7 @@ from asimov.cascade import (
     at_fraction,
     cascade_curve,
     check_pair,
+    gain_order,
     item_confidence,
     perfect_router,
     split_table,
@@ -292,3 +293,9 @@ def test_figure_names_keep_dots_in_model_ids(tree):
     assert cascade_script.main(args(tree)) == 0
     names = {p.name for p in (tree["figures"] / "designs").iterdir()}
     assert names == {"cascade_dec-1_to_gemini-3.1-flash-lite.png", "cascade_dec-1_to_gemini-3.1-flash-lite.pdf"}
+
+
+def test_gain_order_keeps_strict_gains_largest_first_then_cheaper_then_id():
+    gain = {"i1": 0.0, "i2": 0.5, "i3": 0.5, "i4": 1.0, "i5": -0.25, "i6": 0.5}
+    cost = {"i1": 0.0, "i2": 0.02, "i3": 0.01, "i4": 0.05, "i5": 0.0, "i6": 0.01}
+    assert gain_order(gain, cost) == ["i4", "i3", "i6", "i2"]

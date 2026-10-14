@@ -8,7 +8,8 @@ Decisions (see WORKLOG.md):
 - Corners are sorted with min/max, so a box drawn bottom-right -> top-left still works.
 - Coordinates are clipped to [0, 1000].
 - A box is degenerate if either side is < MIN_SIDE (on the 0-1000 scale). Degenerate boxes
-  are dropped from scoring but kept on the item in `dropped` so they can be counted.
+  are separated into `dropped` for descriptive tooling. The Fig. 6 scorer restores
+  every violating box, including these slivers.
 """
 from __future__ import annotations
 
@@ -145,3 +146,23 @@ def load_image_items(variant: str = "image", data_dir: Path = DATA_DIR) -> list[
             )
         )
     return items
+
+
+@dataclass(frozen=True)
+class ImageInput:
+    """Request inputs only; annotation boxes stay in the scorer's answer key."""
+    id: str
+    prompt: str
+    image_path: Path
+    width: int
+    height: int
+
+
+def load_image_inputs(variant: str = "image", data_dir: Path = DATA_DIR) -> list[ImageInput]:
+    return [ImageInput(r["id"], r["prompt"], data_dir / variant / r["image"],
+                       r["width"], r["height"]) for r in read_rows(variant, data_dir)]
+
+
+def load_image_answers(variant: str = "image", data_dir: Path = DATA_DIR) -> dict[str, ImageItem]:
+    """Annotations for the scorer; excluded from request inputs."""
+    return {i.id: i for i in load_image_items(variant, data_dir)}

@@ -46,7 +46,7 @@ def main() -> None:
     ap.add_argument("--limit", type=int)
     ap.add_argument("--models", nargs="+")
     ap.add_argument("--workers", type=int, default=4)
-    ap.add_argument("--no-calls", action="store_true")
+    ap.add_argument("--no-calls", "--score-only", dest="no_calls", action="store_true")
     ap.add_argument("--no-collect", action="store_true")
     args = ap.parse_args()
     load_dotenv(ROOT / ".env")
@@ -62,7 +62,8 @@ def main() -> None:
             continue
         cells = " ".join(f"{fmt(r[key], pct):>{len(label) + 1}s}" for label, key, pct in cols)
         print(f"{r['name']:28s} {r['n']:4d} {cells} {r['errors']:6d}")
-    print(f"\nSaved under {run_dir(ROOT / 'results', cfg['run'], cfg['benchmark']).relative_to(ROOT)}/")
+    result_path = run_dir(ROOT / "results", cfg["run"], cfg["benchmark"], [m["provider"] for m in cfg["models"]])
+    print(f"\nSaved under {result_path.relative_to(ROOT)}/")
     if not args.no_collect and any(m["provider"] not in SKIP_PROVIDERS for m in cfg["models"]):
         collect.main([])  # results pages stay in step with the replies (docs/PLAN.md §11)
         plot.main([])  # and so do the figures the run pages link

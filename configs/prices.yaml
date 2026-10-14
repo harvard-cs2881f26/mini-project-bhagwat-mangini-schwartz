@@ -13,6 +13,7 @@ sources:
   typesafe: https://docs.typesafe.ai (Jev; output tokens not billed)
   codiv: https://codiv.ai (free tier, docs/apis/systemone.md §2)
   kev: docs/apis/systemone.md §2 (self-deployed on Modal; GPU time, no token price)
+  local: our Modal app (asimov.models.modal_app; NLI and Qwen3.5-4B rows); GPU time, no token price
 models:
   gpt-5-nano:                 {input_per_mtok: 0.05, output_per_mtok: 0.40}
   gpt-5-mini:                 {input_per_mtok: 0.25, output_per_mtok: 2.00}
@@ -27,3 +28,6 @@ models:
   openjev-latest:             {free_tier: true, params_b: 26, active_params_b: 4}  # DiffusionGemma 26B-A4B, on Codiv
   laya-1.0:                   {free_tier: true, params_b: 0.421}  # ModernBERT-large encoder, on Codiv
   kev-latest:                 {self_hosted: Modal L40S, params_b: 4}  # Qwen3.5-4B-Base + LoRA + pointer head
+  deberta-v3-large-zeroshot-v2.0: {self_hosted: Modal L40S, params_b: 0.435}  # NLI zero-shot; 435.1M params (Hugging Face model page)
+  qwen3.5-4b-base:            {self_hosted: Modal L40S, params_b: 4}  # Qwen/Qwen3.5-4B-Base
+  qwen3.5-4b:                 {self_hosted: Modal L40S, params_b: 4}  # Qwen/Qwen3.5-4B
