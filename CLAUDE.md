@@ -130,8 +130,9 @@ Planned: `scripts/plot.py`, `experiments/*/README.md`.
   `to_yx1000` converts between them. Never convert anywhere else.
 - Several raters boxed each object, so one object has about 5 boxes. Labels are free text
   and sometimes contradict the box's class. Score on geometry only.
-- 43% of safe objects sit inside a violating box (e.g. sushi inside a violating bowl). The
-  overlap rule is **OPEN** in WORKLOG. Don't hard-code one.
+- Safe and violating boxes can overlap. Fig. 3 defines violation as any point in the
+  strict interior of a violating box; the image scorer uses all released boxes, with no
+  safe override. Author-specific annotation preprocessing remains unverified (WORKLOG).
 - **The video data has no eval prompt** (`prompt == "00:00.000"`), and the injury-type letters
   have no option text. Both must come from the paper appendix. Every video is 16 frames at 2 fps.
 - Video `last_intervention_timestamp_seconds` is -1 for 98 items. 95 "No" items still have a

@@ -1,6 +1,3 @@
-# run name -> run ID. Maintained by the runner and scripts/collect.py, which add every new run: don't edit by hand.
-# An ID is the benchmark prefix plus a number; it is never changed or reused, even after a run is deleted.
-# Each run's folder is results/<id>_<run>/.
 repro_fig4: txt0
 repro_fig5: vid0
 repro_fig4_default: txt1
@@ -32,6 +29,12 @@ part2_qwen_base_logprob: txt26
 part2_qwen_gen: txt27
 part2_qwen_logprob: txt28
 part2_qwen_base_logprob_oneshot: txt29
+repro_fig6: img0
+repro_fig6_gemini_successors: img1
+repro_fig6_mini_system: img2
+repro_fig6_default: img3
+repro_fig6_candidates: img4
+repro_fig6_candidate_successors: img5
 part2_kev_full: txt30
 part2_kev_letters: txt31
 part2_kev_full_cumulative: txt32

@@ -1,0 +1,13 @@
+# Predeclared candidate settings inferred from figure data; not verified author settings.
+# GPT-5 medium is the closest reported Fig. 7 row, but does not match Fig. 6a's 40.6%.
+run: repro_fig6_candidates
+benchmark: image
+prompt: image
+variant: image
+thinking: default
+message_roles: system_user
+models:
+  - {name: GPT-5 Mini (high candidate), provider: openai, model: gpt-5-mini, reasoning_effort: high}
+  - {name: GPT-5 (medium candidate), provider: openai, model: gpt-5, reasoning_effort: medium}
+  - {name: Claude Sonnet 4 (1024 candidate), provider: anthropic, model: claude-sonnet-4-20250514, thinking_budget: 1024}
+  - {name: Claude Opus 4.1 (4096 candidate), provider: anthropic, model: claude-opus-4-1-20250805, thinking_budget: 4096}

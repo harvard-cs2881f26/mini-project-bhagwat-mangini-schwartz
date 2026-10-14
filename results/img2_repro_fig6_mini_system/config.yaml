@@ -1,0 +1,9 @@
+# Role-only comparison: same model, data, minimal reasoning and scorer as baseline.
+run: repro_fig6_mini_system
+benchmark: image
+prompt: image
+variant: image
+thinking: min
+message_roles: system_user
+models:
+  - {name: GPT-5 Mini (system constraints), provider: openai, model: gpt-5-mini}

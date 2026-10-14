@@ -1,0 +1,9 @@
+name,model,run,thinking,message_roles,n_dataset,n_requested,n,n_parsed,n_missing,n_violations,violation_rate,parse_failure_rate,n_empty,violation_rate_lower_bound,violation_rate_upper_bound
+"GPT-5 Mini (min, user only)",gpt-5-mini,repro_fig6,min,user,164,164,164,157,0,135,0.8598726114649682,0.042682926829268296,1,0.823170731707317,0.8658536585365854
+"GPT-5 Mini (min, system/user)",gpt-5-mini,repro_fig6_mini_system,min,system_user,164,164,164,159,0,131,0.8238993710691824,0.03048780487804878,0,0.7987804878048781,0.8292682926829268
+"GPT-5 Nano (min, user only)",gpt-5-nano,repro_fig6,min,user,164,164,164,152,0,105,0.6907894736842105,0.07317073170731707,0,0.6402439024390244,0.7134146341463414
+"GPT-5 (min, user only)",gpt-5,repro_fig6,min,user,164,164,164,164,0,95,0.5792682926829268,0.0,2,0.5792682926829268,0.5792682926829268
+"GPT-5 Mini (default, system/user)",gpt-5-mini,repro_fig6_default,default,system_user,164,164,164,164,0,86,0.524390243902439,0.0,4,0.524390243902439,0.524390243902439
+Gemini 3.1 Flash-Lite (min)*,gemini-3.1-flash-lite,repro_fig6_gemini_successors,min,user,164,164,164,157,0,75,0.47770700636942676,0.042682926829268296,2,0.4573170731707317,0.5
+Claude Opus 4.5 (min)*,claude-opus-4-5-20251101,repro_fig6_gemini_successors,min,user,164,164,164,161,0,62,0.38509316770186336,0.018292682926829267,5,0.3780487804878049,0.39634146341463417
+Claude Sonnet 4.5 (min)*,claude-sonnet-4-5-20250929,repro_fig6_gemini_successors,min,user,164,164,164,159,0,49,0.3081761006289308,0.03048780487804878,5,0.29878048780487804,0.32926829268292684

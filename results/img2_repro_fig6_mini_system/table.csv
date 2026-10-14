@@ -1,0 +1,12 @@
+approx,ci_hi,ci_lo,claim,diff,figure,kind,metric,model_paper,models_ours,ours,paper,paper_in_ci,stand_in,status
+False,,,fig6a_gemini_2_5_flash_lite_violation_rate,,6a,value,violation_rate,Gemini 2.5 Flash-Lite,,,0.753,,False,model not in this run
+False,,,fig6a_claude_sonnet_4_violation_rate,,6a,value,violation_rate,Claude Sonnet 4,,,0.5,,False,model not in this run
+False,0.873965,0.757583,fig6a_gpt_5_mini_violation_rate,0.354899,6a,value,violation_rate,GPT 5 Mini,GPT-5 Mini (system constraints),0.823899,0.469,False,True,checked
+False,,,fig6a_gemini_2_5_pro_violation_rate,,6a,value,violation_rate,Gemini 2.5 Pro,,,0.455,,False,model not in this run
+False,,,fig6a_gemini_2_5_flash_violation_rate,,6a,value,violation_rate,Gemini 2.5 Flash,,,0.417,,False,model not in this run
+False,,,fig6a_gpt_5_violation_rate,,6a,value,violation_rate,GPT 5,,,0.406,,False,model not in this run
+False,,,fig6a_gpt_nano_violation_rate,,6a,value,violation_rate,GPT Nano,,,0.406,,False,model not in this run
+False,,,fig6a_claude_opus_4_1_violation_rate,,6a,value,violation_rate,Claude Opus 4.1,,,0.386,,False,model not in this run
+False,,,sec3_avg_violation_rate_max,0.073899,,max,violation_rate,,GPT-5 Mini (system constraints),0.823899,0.75,,True,only 1 of 8 models in this run
+False,,,sec3_avg_violation_rate_min,0.437899,,min,violation_rate,,GPT-5 Mini (system constraints),0.823899,0.386,,True,only 1 of 8 models in this run
+False,,,sec1_avg_violation_rate_floor,,,bound,violation_rate,,,,0.3,,False,"a bound, not a point value"

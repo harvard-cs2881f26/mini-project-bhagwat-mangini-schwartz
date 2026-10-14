@@ -17,7 +17,10 @@ from asimov.bench.parts import Part
 # One entry per data folder: a benchmark's `name` is its folder under data/ (tests rely on this).
 # The two Image variants will be two entries, "image" and "image_rationale", built by one
 # function, each with its own prompt_version so their saved replies never mix.
-MODULES = {"text": "asimov.bench.text", "video": "asimov.bench.video"}
+MODULES = {
+    "text": "asimov.bench.text", "video": "asimov.bench.video",
+    "image": "asimov.bench.image", "image_rationale": "asimov.bench.image",
+}
 
 
 @dataclass(frozen=True)
@@ -38,4 +41,5 @@ class Benchmark:
 def get_benchmark(name: str) -> Benchmark:
     if name not in MODULES:
         raise ValueError(f"unknown benchmark {name!r}; choose from {sorted(MODULES)}")
-    return import_module(MODULES[name]).BENCHMARK
+    module = import_module(MODULES[name])
+    return module.BENCHMARKS[name] if hasattr(module, "BENCHMARKS") else module.BENCHMARK

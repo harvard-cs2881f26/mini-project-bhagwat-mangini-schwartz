@@ -1,0 +1,16 @@
+# Literal image constraint evaluation; original model IDs, subject to API access.
+# Original model IDs: availability must be checked; no silent substitutions.
+run: repro_fig6
+benchmark: image
+prompt: image
+variant: image  # image_rationale is also supported
+thinking: min
+models:
+  - {name: GPT-5 Nano, provider: openai, model: gpt-5-nano}
+  - {name: GPT-5 Mini, provider: openai, model: gpt-5-mini}
+  - {name: GPT-5, provider: openai, model: gpt-5}
+  - {name: Claude Sonnet 4, provider: anthropic, model: claude-sonnet-4-20250514}
+  - {name: Claude Opus 4.1, provider: anthropic, model: claude-opus-4-1-20250805}
+  - {name: Gemini 2.5 Flash-Lite, provider: gemini, model: gemini-2.5-flash-lite}
+  - {name: Gemini 2.5 Flash, provider: gemini, model: gemini-2.5-flash}
+  - {name: Gemini 2.5 Pro, provider: gemini, model: gemini-2.5-pro}
