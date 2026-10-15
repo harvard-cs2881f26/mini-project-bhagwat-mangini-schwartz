@@ -2010,3 +2010,31 @@ Numbers only; interpretation is Noa's. Write-up: `results/part2_designs/writeup.
   - (b) exclude txt33 from the comparisons;
   - (c) a scoring rule reading "E" on severity as A: 26 -> 6 unreadable (1.9%), 4 more answers correct;
     applies to every model; not chosen so far.
+
+## 2026-10-15: Fig. 4 (text) with the newest API models, default thinking
+
+- **DECIDED (Noa): run the biggest and smallest newest model of each provider at `thinking: default`.**
+  Anthropic: `claude-fable-5-1`, `claude-haiku-5-5`; OpenAI: `gpt-6-astra`, `gpt-6-luna`; Google:
+  `gemini-4-argon`, `gemini-3.5-flash-lite`. *Alternatives:* all ten newest models (~$43), top 2 per
+  family (~$39), swap Fable for Opus 5.5 (~$18). Not run: `claude-opus-5-5`, `claude-sonnet-5-5`,
+  `gpt-6.1-sol`, `gemini-3.8-flash` (5-item dry runs only, removed from the run).
+- **Why default thinking, not min:** `claude-opus-5-5` and `claude-sonnet-5-5` cannot turn thinking off,
+  and the new OpenAI and Gemini flagships reject `minimal` (lowest is `low`). Default is the one level
+  every model accepts, and the 8 older models' default replies already exist.
+- **Older models reused, not re-called:** `configs/repro_fig4_newest_default.yaml` has the same prompt and
+  settings as `repro_fig4_default`; `scripts/reuse_replies.py` copied 314 or 319 replies per older model.
+- **Fix:** `src/asimov/reuse.py` read `results/<run>/` (plain names), so it copied nothing for runs in
+  `<id>_<run>/` folders. It now resolves folders with `run_ids.run_dir`.
+- **Mistake, logged:** the first 5-item dry run called the 8 older models before the reuse step (a few cents).
+- **Cost:** new models ~$27 (Fable 16.93, Astra 7.67, Argon 1.88, 3.5 Flash-Lite 0.38, Haiku 0.23, Luna 0.11).
+  Prices are in `configs/prices.yaml` (checked 2026-10-15). Gemini 4 Argon and 3.8 Flash have promotional
+  prices that double on 2026-12-01 and 2027-01-01.
+- **Gemini thinking tokens** were not in the logged usage (`thinking_tokens` empty), so Gemini cost may be low.
+- **Result:** newer did not clearly beat older. Average accuracy: Argon .763, Gemini 3 Flash .761, Fable .750,
+  Opus 4.5 .745, Astra .741. Differences among the top are inside the noise (~±5 pp at 95%).
+- **Severity calibration:** Fable's severe false negatives (29/139) are mostly D answered as C (28);
+  Opus 4.5 and the Gemini models have few false negatives because they over-rate (more false positives).
+  Report false negatives and false positives together.
+- **Config note:** the run first included four more models; its saved `config.yaml` was replaced by the
+  trimmed config (settings and prompt unchanged) before the full run, because `ConfigChanged` otherwise stops it.
+
