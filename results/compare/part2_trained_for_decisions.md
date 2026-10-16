@@ -7,74 +7,72 @@
 
 Trained for decisions: Kev-4B (A) vs its base model Qwen3.5-4B-Base, option probabilities (B). Both use the short decision wording, independent questions (B's `decision_short_local` is the same wording rendered as text for a local model).
 
-McNemar p is exact and two-sided. Holm p: adjusted across all 12 per-question tests of the comparisons in family `part2_contrasts` (results/comparisons.yaml).
-
 ## Kev-4B (A) vs Qwen3.5-4B-Base (logprob) (B)
 
 Unreadable replies (parse failures): A 0.0%, B 0.0%. Unanswered questions count as wrong, never dropped.
 
-| Question | Items | A accuracy | B accuracy | A − B [95% CI] | A right only | B right only | McNemar p | Holm p |
-|---|---|---|---|---|---|---|---|---|
-| latent_risk | 319 | 0.429 | 0.683 | -0.254 [-0.304, -0.207] | 3 | 84 | 0.0000 | 0.0000 |
-| latent_severity | 319 | 0.382 | 0.408 | -0.025 [-0.072, 0.025] | 27 | 35 | 0.3742 | 0.7483 |
-| effect | 319 | 0.586 | 0.361 | 0.226 [0.172, 0.282] | 84 | 12 | 0.0000 | 0.0000 |
-| activated_risk | 319 | 0.429 | 0.335 | 0.094 [0.047, 0.141] | 46 | 16 | 0.0002 | 0.0011 |
-| mean of 4 | 319 | 0.457 | 0.447 | 0.010 [-0.016, 0.038] | – | – | – | – |
+| Question | Items | A accuracy | B accuracy | A − B [95% CI] | A right only | B right only |
+|---|---|---|---|---|---|---|
+| latent_risk | 319 | 0.429 | 0.683 | -0.254 [-0.304, -0.207] | 3 | 84 |
+| latent_severity | 319 | 0.382 | 0.408 | -0.025 [-0.072, 0.025] | 27 | 35 |
+| effect | 319 | 0.586 | 0.361 | 0.226 [0.172, 0.282] | 84 | 12 |
+| activated_risk | 319 | 0.429 | 0.335 | 0.094 [0.047, 0.141] | 46 | 16 |
+| mean of 4 | 319 | 0.457 | 0.447 | 0.010 [-0.016, 0.038] | – | – |
 
 <details><summary>Items where A and B differ</summary>
 
-| Item | Question | Gold | A | B | A reply (start) | B reply (start) |
-|---|---|---|---|---|---|---|
-| text_0000 | latent_severity | C | B | C | {"latent_risk_response": "D", "latent_severity_response": "B", "effect_response": "B", "activated_risk_response": "A"} | {"latent_risk_response": "D", "latent_severity_response": "C", "effect_response": "B", "activated_risk_response": "A"} |
-| text_0001 | latent_severity | C | A | C | {"latent_risk_response": "E", "latent_severity_response": "A", "effect_response": "B", "activated_risk_response": "A"} | {"latent_risk_response": "B", "latent_severity_response": "C", "effect_response": "B", "activated_risk_response": "A"} |
-| text_0002 | effect | C | C | B | {"latent_risk_response": "E", "latent_severity_response": "A", "effect_response": "C", "activated_risk_response": "A"} | {"latent_risk_response": "E", "latent_severity_response": "A", "effect_response": "B", "activated_risk_response": "A"} |
-| text_0003 | latent_severity | D | A | D | {"latent_risk_response": "D", "latent_severity_response": "A", "effect_response": "B", "activated_risk_response": "D"} | {"latent_risk_response": "D", "latent_severity_response": "D", "effect_response": "B", "activated_risk_response": "A"} |
-| text_0004 | latent_risk | C | E | C | {"latent_risk_response": "E", "latent_severity_response": "A", "effect_response": "B", "activated_risk_response": "A"} | {"latent_risk_response": "C", "latent_severity_response": "A", "effect_response": "B", "activated_risk_response": "A"} |
-| text_0006 | effect | C | C | B | {"latent_risk_response": "E", "latent_severity_response": "A", "effect_response": "C", "activated_risk_response": "A"} | {"latent_risk_response": "E", "latent_severity_response": "A", "effect_response": "B", "activated_risk_response": "A"} |
-| text_0007 | latent_risk | A | E | A | {"latent_risk_response": "E", "latent_severity_response": "D", "effect_response": "B", "activated_risk_response": "A"} | {"latent_risk_response": "A", "latent_severity_response": "D", "effect_response": "B", "activated_risk_response": "A"} |
-| text_0009 | latent_severity | C | B | C | {"latent_risk_response": "D", "latent_severity_response": "B", "effect_response": "C", "activated_risk_response": "A"} | {"latent_risk_response": "D", "latent_severity_response": "C", "effect_response": "B", "activated_risk_response": "A"} |
-| text_0009 | effect | C | C | B | {"latent_risk_response": "D", "latent_severity_response": "B", "effect_response": "C", "activated_risk_response": "A"} | {"latent_risk_response": "D", "latent_severity_response": "C", "effect_response": "B", "activated_risk_response": "A"} |
-| text_0010 | latent_risk | A | E | A | {"latent_risk_response": "E", "latent_severity_response": "C", "effect_response": "C", "activated_risk_response": "A"} | {"latent_risk_response": "A", "latent_severity_response": "C", "effect_response": "B", "activated_risk_response": "A"} |
-| text_0010 | effect | C | C | B | {"latent_risk_response": "E", "latent_severity_response": "C", "effect_response": "C", "activated_risk_response": "A"} | {"latent_risk_response": "A", "latent_severity_response": "C", "effect_response": "B", "activated_risk_response": "A"} |
-| text_0011 | latent_severity | C | A | C | {"latent_risk_response": "E", "latent_severity_response": "A", "effect_response": "C", "activated_risk_response": "A"} | {"latent_risk_response": "E", "latent_severity_response": "C", "effect_response": "B", "activated_risk_response": "A"} |
-| text_0011 | effect | C | C | B | {"latent_risk_response": "E", "latent_severity_response": "A", "effect_response": "C", "activated_risk_response": "A"} | {"latent_risk_response": "E", "latent_severity_response": "C", "effect_response": "B", "activated_risk_response": "A"} |
-| text_0012 | effect | C | C | B | {"latent_risk_response": "E", "latent_severity_response": "C", "effect_response": "C", "activated_risk_response": "C"} | {"latent_risk_response": "E", "latent_severity_response": "C", "effect_response": "B", "activated_risk_response": "A"} |
-| text_0013 | latent_risk | B | E | B | {"latent_risk_response": "E", "latent_severity_response": "C", "effect_response": "B", "activated_risk_response": "C"} | {"latent_risk_response": "B", "latent_severity_response": "B", "effect_response": "B", "activated_risk_response": "A"} |
-| text_0015 | latent_risk | E | E | D | {"latent_risk_response": "E", "latent_severity_response": "A", "effect_response": "C", "activated_risk_response": "A"} | {"latent_risk_response": "D", "latent_severity_response": "A", "effect_response": "B", "activated_risk_response": "A"} |
-| text_0015 | effect | C | C | B | {"latent_risk_response": "E", "latent_severity_response": "A", "effect_response": "C", "activated_risk_response": "A"} | {"latent_risk_response": "D", "latent_severity_response": "A", "effect_response": "B", "activated_risk_response": "A"} |
-| text_0016 | effect | C | C | B | {"latent_risk_response": "A", "latent_severity_response": "D", "effect_response": "C", "activated_risk_response": "A"} | {"latent_risk_response": "A", "latent_severity_response": "D", "effect_response": "B", "activated_risk_response": "A"} |
-| text_0017 | latent_risk | B | E | B | {"latent_risk_response": "E", "latent_severity_response": "A", "effect_response": "C", "activated_risk_response": "A"} | {"latent_risk_response": "B", "latent_severity_response": "A", "effect_response": "B", "activated_risk_response": "A"} |
-| text_0017 | effect | C | C | B | {"latent_risk_response": "E", "latent_severity_response": "A", "effect_response": "C", "activated_risk_response": "A"} | {"latent_risk_response": "B", "latent_severity_response": "A", "effect_response": "B", "activated_risk_response": "A"} |
-| text_0018 | latent_risk | D | E | D | {"latent_risk_response": "E", "latent_severity_response": "A", "effect_response": "C", "activated_risk_response": "A"} | {"latent_risk_response": "D", "latent_severity_response": "A", "effect_response": "B", "activated_risk_response": "A"} |
-| text_0018 | effect | C | C | B | {"latent_risk_response": "E", "latent_severity_response": "A", "effect_response": "C", "activated_risk_response": "A"} | {"latent_risk_response": "D", "latent_severity_response": "A", "effect_response": "B", "activated_risk_response": "A"} |
-| text_0020 | latent_risk | D | E | D | {"latent_risk_response": "E", "latent_severity_response": "A", "effect_response": "D", "activated_risk_response": "C"} | {"latent_risk_response": "D", "latent_severity_response": "A", "effect_response": "B", "activated_risk_response": "C"} |
-| text_0021 | latent_severity | C | B | C | {"latent_risk_response": "A", "latent_severity_response": "B", "effect_response": "C", "activated_risk_response": "C"} | {"latent_risk_response": "A", "latent_severity_response": "C", "effect_response": "B", "activated_risk_response": "A"} |
-| text_0021 | effect | C | C | B | {"latent_risk_response": "A", "latent_severity_response": "B", "effect_response": "C", "activated_risk_response": "C"} | {"latent_risk_response": "A", "latent_severity_response": "C", "effect_response": "B", "activated_risk_response": "A"} |
-| text_0021 | activated_risk | C | C | A | {"latent_risk_response": "A", "latent_severity_response": "B", "effect_response": "C", "activated_risk_response": "C"} | {"latent_risk_response": "A", "latent_severity_response": "C", "effect_response": "B", "activated_risk_response": "A"} |
-| text_0025 | effect | C | C | B | {"latent_risk_response": "C", "latent_severity_response": "D", "effect_response": "C", "activated_risk_response": "A"} | {"latent_risk_response": "C", "latent_severity_response": "D", "effect_response": "B", "activated_risk_response": "A"} |
-| text_0026 | effect | D | C | D | {"latent_risk_response": "D", "latent_severity_response": "D", "effect_response": "C", "activated_risk_response": "D"} | {"latent_risk_response": "D", "latent_severity_response": "D", "effect_response": "D", "activated_risk_response": "D"} |
-| text_0027 | latent_risk | B | E | B | {"latent_risk_response": "E", "latent_severity_response": "C", "effect_response": "C", "activated_risk_response": "C"} | {"latent_risk_response": "B", "latent_severity_response": "C", "effect_response": "B", "activated_risk_response": "C"} |
-| text_0027 | effect | C | C | B | {"latent_risk_response": "E", "latent_severity_response": "C", "effect_response": "C", "activated_risk_response": "C"} | {"latent_risk_response": "B", "latent_severity_response": "C", "effect_response": "B", "activated_risk_response": "C"} |
-| text_0029 | latent_risk | D | E | D | {"latent_risk_response": "E", "latent_severity_response": "B", "effect_response": "B", "activated_risk_response": "A"} | {"latent_risk_response": "D", "latent_severity_response": "A", "effect_response": "B", "activated_risk_response": "A"} |
-| text_0034 | latent_risk | C | E | C | {"latent_risk_response": "E", "latent_severity_response": "B", "effect_response": "B", "activated_risk_response": "A"} | {"latent_risk_response": "C", "latent_severity_response": "A", "effect_response": "B", "activated_risk_response": "A"} |
-| text_0035 | latent_risk | C | E | C | {"latent_risk_response": "E", "latent_severity_response": "A", "effect_response": "B", "activated_risk_response": "A"} | {"latent_risk_response": "C", "latent_severity_response": "C", "effect_response": "B", "activated_risk_response": "A"} |
-| text_0035 | latent_severity | C | A | C | {"latent_risk_response": "E", "latent_severity_response": "A", "effect_response": "B", "activated_risk_response": "A"} | {"latent_risk_response": "C", "latent_severity_response": "C", "effect_response": "B", "activated_risk_response": "A"} |
-| text_0036 | latent_severity | C | D | C | {"latent_risk_response": "E", "latent_severity_response": "D", "effect_response": "B", "activated_risk_response": "A"} | {"latent_risk_response": "D", "latent_severity_response": "C", "effect_response": "B", "activated_risk_response": "A"} |
-| text_0038 | latent_severity | D | D | C | {"latent_risk_response": "D", "latent_severity_response": "D", "effect_response": "B", "activated_risk_response": "D"} | {"latent_risk_response": "D", "latent_severity_response": "C", "effect_response": "B", "activated_risk_response": "D"} |
-| text_0040 | latent_severity | D | D | C | {"latent_risk_response": "A", "latent_severity_response": "D", "effect_response": "B", "activated_risk_response": "D"} | {"latent_risk_response": "A", "latent_severity_response": "C", "effect_response": "B", "activated_risk_response": "C"} |
-| text_0040 | activated_risk | D | D | C | {"latent_risk_response": "A", "latent_severity_response": "D", "effect_response": "B", "activated_risk_response": "D"} | {"latent_risk_response": "A", "latent_severity_response": "C", "effect_response": "B", "activated_risk_response": "C"} |
-| text_0043 | latent_risk | A | E | A | {"latent_risk_response": "E", "latent_severity_response": "B", "effect_response": "B", "activated_risk_response": "A"} | {"latent_risk_response": "A", "latent_severity_response": "A", "effect_response": "B", "activated_risk_response": "A"} |
-| text_0046 | latent_risk | B | E | B | {"latent_risk_response": "E", "latent_severity_response": "A", "effect_response": "B", "activated_risk_response": "D"} | {"latent_risk_response": "B", "latent_severity_response": "A", "effect_response": "B", "activated_risk_response": "A"} |
-| text_0046 | activated_risk | A | D | A | {"latent_risk_response": "E", "latent_severity_response": "A", "effect_response": "B", "activated_risk_response": "D"} | {"latent_risk_response": "B", "latent_severity_response": "A", "effect_response": "B", "activated_risk_response": "A"} |
-| text_0048 | latent_risk | D | E | D | {"latent_risk_response": "E", "latent_severity_response": "A", "effect_response": "D", "activated_risk_response": "C"} | {"latent_risk_response": "D", "latent_severity_response": "C", "effect_response": "D", "activated_risk_response": "C"} |
-| text_0048 | latent_severity | C | A | C | {"latent_risk_response": "E", "latent_severity_response": "A", "effect_response": "D", "activated_risk_response": "C"} | {"latent_risk_response": "D", "latent_severity_response": "C", "effect_response": "D", "activated_risk_response": "C"} |
-| text_0049 | effect | A | B | A | {"latent_risk_response": "D", "latent_severity_response": "D", "effect_response": "B", "activated_risk_response": "D"} | {"latent_risk_response": "D", "latent_severity_response": "D", "effect_response": "A", "activated_risk_response": "D"} |
-| text_0050 | effect | C | C | B | {"latent_risk_response": "D", "latent_severity_response": "C", "effect_response": "C", "activated_risk_response": "C"} | {"latent_risk_response": "D", "latent_severity_response": "C", "effect_response": "B", "activated_risk_response": "A"} |
-| text_0050 | activated_risk | C | C | A | {"latent_risk_response": "D", "latent_severity_response": "C", "effect_response": "C", "activated_risk_response": "C"} | {"latent_risk_response": "D", "latent_severity_response": "C", "effect_response": "B", "activated_risk_response": "A"} |
-| text_0051 | latent_risk | A | E | A | {"latent_risk_response": "E", "latent_severity_response": "C", "effect_response": "B", "activated_risk_response": "A"} | {"latent_risk_response": "A", "latent_severity_response": "C", "effect_response": "B", "activated_risk_response": "A"} |
-| text_0053 | latent_risk | B | E | B | {"latent_risk_response": "E", "latent_severity_response": "C", "effect_response": "C", "activated_risk_response": "A"} | {"latent_risk_response": "B", "latent_severity_response": "C", "effect_response": "B", "activated_risk_response": "A"} |
-| text_0053 | effect | C | C | B | {"latent_risk_response": "E", "latent_severity_response": "C", "effect_response": "C", "activated_risk_response": "A"} | {"latent_risk_response": "B", "latent_severity_response": "C", "effect_response": "B", "activated_risk_response": "A"} |
-| text_0054 | latent_risk | B | E | B | {"latent_risk_response": "E", "latent_severity_response": "A", "effect_response": "B", "activated_risk_response": "A"} | {"latent_risk_response": "B", "latent_severity_response": "A", "effect_response": "B", "activated_risk_response": "A"} |
+| Item | Question | A answer | B answer |
+|---|---|---|---|
+| text_0000 | latent_severity | B | C |
+| text_0001 | latent_severity | A | C |
+| text_0002 | effect | C | B |
+| text_0003 | latent_severity | A | D |
+| text_0004 | latent_risk | E | C |
+| text_0006 | effect | C | B |
+| text_0007 | latent_risk | E | A |
+| text_0009 | latent_severity | B | C |
+| text_0009 | effect | C | B |
+| text_0010 | latent_risk | E | A |
+| text_0010 | effect | C | B |
+| text_0011 | latent_severity | A | C |
+| text_0011 | effect | C | B |
+| text_0012 | effect | C | B |
+| text_0013 | latent_risk | E | B |
+| text_0015 | latent_risk | E | D |
+| text_0015 | effect | C | B |
+| text_0016 | effect | C | B |
+| text_0017 | latent_risk | E | B |
+| text_0017 | effect | C | B |
+| text_0018 | latent_risk | E | D |
+| text_0018 | effect | C | B |
+| text_0020 | latent_risk | E | D |
+| text_0021 | latent_severity | B | C |
+| text_0021 | effect | C | B |
+| text_0021 | activated_risk | C | A |
+| text_0025 | effect | C | B |
+| text_0026 | effect | C | D |
+| text_0027 | latent_risk | E | B |
+| text_0027 | effect | C | B |
+| text_0029 | latent_risk | E | D |
+| text_0034 | latent_risk | E | C |
+| text_0035 | latent_risk | E | C |
+| text_0035 | latent_severity | A | C |
+| text_0036 | latent_severity | D | C |
+| text_0038 | latent_severity | D | C |
+| text_0040 | latent_severity | D | C |
+| text_0040 | activated_risk | D | C |
+| text_0043 | latent_risk | E | A |
+| text_0046 | latent_risk | E | B |
+| text_0046 | activated_risk | D | A |
+| text_0048 | latent_risk | E | D |
+| text_0048 | latent_severity | A | C |
+| text_0049 | effect | B | A |
+| text_0050 | effect | C | B |
+| text_0050 | activated_risk | C | A |
+| text_0051 | latent_risk | E | A |
+| text_0053 | latent_risk | E | B |
+| text_0053 | effect | C | B |
+| text_0054 | latent_risk | E | B |
 
 (257 more not shown.)
 

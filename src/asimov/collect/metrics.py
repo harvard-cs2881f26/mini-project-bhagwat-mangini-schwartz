@@ -11,7 +11,7 @@ from dataclasses import dataclass
 
 from asimov.bench.text_score import QUESTIONS, SEVERITY_QUESTIONS
 from asimov.collect.load import ModelResult
-from asimov.stats import bootstrap_mean_ci, holm, mcnemar_exact, paired_bootstrap_diff, wilson_ci
+from asimov.stats import bootstrap_mean_ci, mcnemar_exact, paired_bootstrap_diff, wilson_ci
 
 # benchmark -> reported metric -> summary key holding its denominator, or None for a per-item mean.
 # Image is provisional until its scorer exists (Riddhi).
@@ -151,16 +151,3 @@ def paired_mean(a: dict[str, dict[str, bool]], b: dict[str, dict[str, bool]]) ->
     vb = [sum(b[q][i] for q in questions) / len(questions) for i in common]
     diff, lo, hi = paired_bootstrap_diff(va, vb)
     return PairedMean(len(common), sum(va) / len(va), sum(vb) / len(vb), diff, lo, hi)
-
-
-def holm_by_family(
-    raw: dict[str, dict[tuple[str, str], float]], family: dict[str, str | None]
-) -> dict[str, dict[tuple[str, str], float]]:
-    """comparison -> (model, question) -> raw p, to the Holm-adjusted p across every test of the comparisons that share
-    a family (stats.holm). A comparison with no family gets an empty dict: raw p only."""
-    out: dict[str, dict[tuple[str, str], float]] = {name: {} for name in raw}
-    for fam in {f for f in family.values() if f}:
-        keys = [(name, k) for name in raw if family.get(name) == fam for k in raw[name]]
-        for (name, k), adj in zip(keys, holm([raw[name][k] for name, k in keys]), strict=True):
-            out[name][k] = adj
-    return out

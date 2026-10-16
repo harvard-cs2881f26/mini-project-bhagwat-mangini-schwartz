@@ -16,7 +16,6 @@ from asimov.claims import Claims
 from asimov.collect.build import build
 from asimov.collect.checks import ACTION_QUESTIONS, LATENT_QUESTIONS
 from asimov.collect.load import ModelResult, RunData, load_model, load_results
-from asimov.collect.metrics import holm_by_family
 from asimov.collect.pages import (
     FIGURE_SUBHEADINGS,
     FIGURE_VERSION_NOTES,
@@ -30,7 +29,6 @@ from asimov.collect.run_ids import assign_ids, describe
 from asimov.collect.severity import mean_abs_gap
 from asimov.collect.tables import CSV_DIGITS, to_csv
 from asimov.run_ids import PREFIXES, next_number, parse_ids
-from asimov.stats import holm
 
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT / "scripts"))
@@ -181,7 +179,7 @@ def test_comparison_page(results, claims, tmp_path):
     comparisons = [{"name": "a_vs_b", "a": "text_run", "b": "text_run_b"}]
     files = build(load_results(results), claims, {}, {}, comparisons)
     page = files["compare/a_vs_b.md"]
-    assert "McNemar" in page and "<details>" in page
+    assert "A − B [95% CI]" in page and "<details>" in page
 
 
 def test_cli_writes_then_check_passes_then_fails_after_edit(results, tmp_path):
@@ -782,16 +780,7 @@ def test_severity_score_is_named_in_plain_words_on_the_pages(results, claims):
         assert "multiple-choice severity questions answered with the exact right level" in page
 
 
-# ---- comparison pages: accuracies, mean row, model mapping, Holm families ------------------------
-
-
-def test_holm_by_family_adjusts_across_each_family_only():
-    raw = {"c1": {("m", "q1"): 0.01, ("m", "q2"): 0.04}, "c2": {("m", "q1"): 0.03}, "c3": {("m", "q1"): 0.02}}
-    adjusted = holm_by_family(raw, {"c1": "f", "c2": "f", "c3": None})
-    expected = holm([0.01, 0.04, 0.03])
-    assert adjusted["c1"] == {("m", "q1"): expected[0], ("m", "q2"): expected[1]}
-    assert adjusted["c2"] == {("m", "q1"): expected[2]}
-    assert adjusted["c3"] == {}  # no family: raw p only
+# ---- comparison pages: accuracies, mean row, model mapping, answers only ------------------------
 
 
 def comparison_files(results: Path, comparisons: list[dict]) -> dict[str, str]:
@@ -802,23 +791,15 @@ def comparison_files(results: Path, comparisons: list[dict]) -> dict[str, str]:
 def test_comparison_page_shows_both_accuracies_and_the_mean_row(results):
     page = comparison_files(results, [{"name": "a_vs_b", "a": "text_run", "b": "text_run_b"}])["compare/a_vs_b.md"]
     gpt5 = page[page.index("## GPT-5\n") : page.index("## GPT-5 Nano")]
-    assert "| latent_risk | 4 | 1.000 | 0.000 | 1.000 [1.000, 1.000] | 4 | 0 | 0.1250 |" in gpt5
-    assert "| mean of 4 | 4 | 0.750 | 0.000 | 0.750 [0.750, 0.750] | – | – | – |" in gpt5
-    assert "Holm" not in page  # no family: raw p only
+    assert "| latent_risk | 4 | 1.000 | 0.000 | 1.000 [1.000, 1.000] | 4 | 0 |\n" in gpt5
+    assert "| mean of 4 | 4 | 0.750 | 0.000 | 0.750 [0.750, 0.750] | – | – |\n" in gpt5
+    assert "McNemar" not in page and "Holm" not in page  # plain accuracy only (Noa, 2026-10-15)
 
 
-def test_comparison_family_gets_holm_p_across_its_comparisons(results):
-    comps = [
-        {"name": "a_vs_b", "a": "text_run", "b": "text_run_b", "family": "f"},
-        {"name": "b_vs_a", "a": "text_run_b", "b": "text_run", "family": "f"},
-    ]
-    page = comparison_files(results, comps)["compare/a_vs_b.md"]
-    # 2 comparisons x 2 models x 4 questions
-    assert "Holm p" in page and "family `f`" in page and "all 16 per-question tests" in page
-    row = next(line for line in page.splitlines() if line.startswith("| latent_risk"))
-    raw, adjusted = (float(c) for c in row.split("|")[-3:-1])
-    # GPT-5: 3 questions with 4 of 4 discordant (p 0.125) per comparison, 6 in all; the other 10 tests have p 1
-    assert raw == 0.125 and adjusted == pytest.approx(min(1.0, 16 * 0.125))
+def test_comparison_disagreements_show_answers_without_reply_text(results):
+    page = comparison_files(results, [{"name": "a_vs_b", "a": "text_run", "b": "text_run_b"}])["compare/a_vs_b.md"]
+    assert "| Item | Question | A answer | B answer |" in page
+    assert "reply t" not in page  # the fixture's reply text never reaches the page (docs/PLAN.md §11)
 
 
 def test_comparison_models_maps_different_model_ids(results):
@@ -832,7 +813,7 @@ def test_comparison_models_unknown_id_and_unknown_key_fail(results):
     with pytest.raises(ValueError, match="no model"):
         comparison_files(results, [{"name": "x", "a": "text_run", "b": "text_run_b", "models": {"gpt-5": "nope"}}])
     with pytest.raises(ValueError, match="unknown key"):
-        build(load_results(results), empty_claims(), {}, {}, [{"name": "x", "a": "text_run", "b": "text_run", "famly": "f"}])
+        build(load_results(results), empty_claims(), {}, {}, [{"name": "x", "a": "text_run", "b": "text_run", "family": "f"}])
 
 
 def test_comparison_page_flags_parse_failures_above_the_review_line(results):

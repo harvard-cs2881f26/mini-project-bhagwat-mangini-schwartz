@@ -11,7 +11,6 @@ import yaml
 from asimov.claims import Claims
 from asimov.collect import pages
 from asimov.collect.load import RunData
-from asimov.collect.metrics import holm_by_family
 from asimov.collect.run_ids import RunLabel, assign_ids, run_labels
 from asimov.collect.tables import LEADING, PER_ITEM_COLUMNS, index_rows, per_item_rows, to_csv
 
@@ -25,9 +24,9 @@ COMPARISONS_DEFAULT = """\
 #   - {name: fig4_min_vs_default, a: repro_fig4, b: repro_fig4_default, note: thinking min vs default}
 comparisons: []
 """
-# Keys of one comparison. Optional: note (shown on the page); family (Holm across every per-question McNemar test of
-# the comparisons sharing it; none = raw p only); models (A's model id -> B's, when the ids differ; default: same id).
-COMPARISON_KEYS = {"name", "a", "b", "note", "family", "models"}
+# Keys of one comparison. Optional: note (shown on the page); models (A's model id -> B's, when the ids differ;
+# default: the same id).
+COMPARISON_KEYS = {"name", "a", "b", "note", "models"}
 
 
 def default_headline(runs: list[RunData]) -> dict:
@@ -71,9 +70,9 @@ def build(
 
 
 def comparison_pages(runs: list[RunData], comparisons: list[dict], labels: dict[str, RunLabel]) -> dict[str, str]:
-    """results/compare/<name>.md per comparison; Holm across the per-question tests of each `family`."""
+    """results/compare/<name>.md per comparison."""
     by_name = {r.name: r for r in runs}
-    computed = {}
+    files = {}
     for comp in comparisons:
         unknown = set(comp) - COMPARISON_KEYS
         if unknown:
@@ -84,18 +83,6 @@ def comparison_pages(runs: list[RunData], comparisons: list[dict], labels: dict[
         if a is None or b is None:
             missing = [x for x in (comp["a"], comp["b"]) if x not in by_name]
             raise ValueError(f"comparison {comp['name']!r}: no results for run(s) {missing}; fix results/comparisons.yaml")
-        computed[comp["name"]] = (comp, a, b, pages.model_comparisons(a, b, comp.get("models")))
-    raw = {
-        name: {(mc.a.summary["model"], q): p.p for mc in mcs for q, p in mc.tests.items()}
-        for name, (_, _, _, mcs) in computed.items()
-    }
-    family = {name: comp.get("family") for name, (comp, *_) in computed.items()}
-    adjusted = holm_by_family(raw, family)
-    sizes = {f: sum(len(raw[n]) for n in raw if family[n] == f) for f in set(family.values()) if f}
-    files = {}
-    for name, (comp, a, b, mcs) in computed.items():
-        fam = family[name]
-        files[f"compare/{name}.md"] = pages.comparison_page(
-            name, a, b, comp.get("note") or "", labels, mcs, fam, sizes.get(fam, 0) if fam else 0, adjusted[name]
-        )
+        mcs = pages.model_comparisons(a, b, comp.get("models"))
+        files[f"compare/{comp['name']}.md"] = pages.comparison_page(comp["name"], a, b, comp.get("note") or "", labels, mcs)
     return files
