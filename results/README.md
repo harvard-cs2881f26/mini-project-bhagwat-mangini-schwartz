@@ -49,6 +49,7 @@ No run yet.
 
 | Run ID | Run | Description | Benchmark | Date | Models | Thinking | Prompt | Commit | Cost $ | Note |
 |---|---|---|---|---|---|---|---|---|---|---|
+| `txt39` | [`repro_fig4_newest_default`](txt39_repro_fig4_newest_default/README.md) | Text benchmark, using the paper's prompt sent unchanged (text_verbatim), with thinking set to default (each provider decides how much to reason), on 14 models. Reasoning summaries are saved. | text | 2026-10-15 | 14 | default | text_verbatim | ff6e62a | 51.20 |  |
 | `img2` | [`repro_fig6_mini_system`](img2_repro_fig6_mini_system/README.md) | Image benchmark, using the image prompt, with thinking set to min (the lowest reasoning each provider allows), on 1 model. | image | 2026-10-13 | 1 | min | image | 68bf1cf | – |  |
 | `img1` | [`repro_fig6_gemini_successors`](img1_repro_fig6_gemini_successors/README.md) | Image benchmark, using the image prompt, with thinking set to min (the lowest reasoning each provider allows), on 5 models. | image | 2026-10-13 | 5 | min | image | 68bf1cf | – |  |
 | `img3` | [`repro_fig6_default`](img3_repro_fig6_default/README.md) | Image benchmark, using the image prompt, with thinking set to default (each provider decides how much to reason), on 1 model. | image | 2026-10-13 | 1 | default | image | 68bf1cf | – |  |

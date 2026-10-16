@@ -20,6 +20,7 @@ from pathlib import Path
 from asimov.bench import get_benchmark
 from asimov.config import RunConfig
 from asimov.models import request_settings
+from asimov.run_ids import run_dir
 from asimov.runner import ROOT, load_saved, request_extra, run_key
 
 SETTINGS = ("thinking", "log_reasoning")  # config settings a client may or may not send
@@ -67,8 +68,8 @@ def reuse(src: dict, dst: dict, only: list[str] | None = None, results_dir: Path
         version = bench.prompt_version(dst["prompt"])
         src_key = run_key(model, version, src["thinking"], src.get("log_reasoning", False), extra=src_extra)
         dst_key = run_key(model, version, dst["thinking"], dst.get("log_reasoning", False), extra=dst_extra)
-        src_path = results / src["run"] / model / "responses.jsonl"
-        dst_path = results / dst["run"] / model / "responses.jsonl"
+        src_path = run_dir(results, src["run"], src["benchmark"], {m["provider"] for m in src["models"]}) / model / "responses.jsonl"
+        dst_path = run_dir(results, dst["run"], dst["benchmark"], {m["provider"] for m in dst["models"]}) / model / "responses.jsonl"
         rows = [json.loads(line) for line in src_path.read_text().splitlines()] if src_path.exists() else []
         new = copy_rows(rows, src_key, dst_key, src["run"], already=set(load_saved(dst_path, dst_key)))
         dst_path.parent.mkdir(parents=True, exist_ok=True)
