@@ -23,7 +23,17 @@ from asimov.collect.checks import (
 )
 from asimov.collect.insights import comparison_insight, extra_insight, speed_insight
 from asimov.collect.load import ModelResult, RunData
-from asimov.collect.metrics import DENOMINATORS, Estimate, correct_by_question, estimate, item_rows, paired
+from asimov.collect.metrics import (
+    DENOMINATORS,
+    Estimate,
+    Paired,
+    PairedMean,
+    correct_by_question,
+    estimate,
+    item_rows,
+    paired,
+    paired_mean,
+)
 from asimov.collect.run_ids import RunLabel, settings, thinking_twins
 from asimov.collect.severity import EXACT_LEVEL, SeverityRow, paper_gaps, severity_row
 from asimov.collect.tables import speed_row
@@ -36,6 +46,7 @@ RUN_PAGE_COMMIT_CHARS = 10  # git commit shown on a run page
 SUMMARY_COMMIT_CHARS = 7  # git commit shown in the summary's "All runs" table
 CONFIG_SHA_CHARS = 12  # config.yaml sha256 shown on a run page
 P_DIGITS = 4  # decimals for McNemar and Holm p-values
+PARSE_REVIEW_LINE = 0.02  # text: a parse-failure rate above this stops the run for review (CLAUDE.md, Noa)
 # figure -> (benchmark, metrics in its table, figure files); fig6 waits for the image scorer
 FIGURES = {
     "fig4": ("text", tuple(f"{q}_accuracy" for q in QUESTIONS), ("fig4a", "fig4b")),
@@ -767,7 +778,63 @@ def disagreements(a: ModelResult, b: ModelResult, benchmark: str) -> str:
     return table(["Item", "Question", "Gold", "A", "B", "A reply (start)", "B reply (start)"], shown) + more
 
 
-def comparison_page(name: str, a: RunData, b: RunData, note: str, labels: dict[str, RunLabel]) -> str:
+@dataclass(frozen=True)
+class ModelComparison:
+    a: ModelResult
+    b: ModelResult
+    tests: dict[str, Paired]  # question -> A vs B on the items both scored
+    mean: PairedMean | None  # mean over questions per item, when there are several
+
+
+def model_comparisons(a: RunData, b: RunData, models: dict[str, str] | None = None) -> list[ModelComparison]:
+    """A's models paired with B's: the same model id, or `models` (A's model id -> B's) when given. Empty when the
+    benchmarks differ."""
+    if a.benchmark != b.benchmark:
+        return []
+    a_models, b_models = ({m.summary["model"]: m for m in r.models} for r in (a, b))
+    if models:
+        missing = [x for x in models if x not in a_models] + [y for y in models.values() if y not in b_models]
+        if missing:
+            raise ValueError(f"comparison {a.name} vs {b.name}: no model {missing} in the runs; fix results/comparisons.yaml")
+        pairs = [(a_models[x], b_models[y]) for x, y in models.items()]
+    else:
+        pairs = [(m, b_models[k]) for k, m in a_models.items() if k in b_models]
+    out = []
+    for ma, mb in pairs:
+        qa, qb = correct_by_question(ma, a.benchmark), correct_by_question(mb, b.benchmark)
+        tests = {q: p for q in qa if (p := paired(qa[q], qb.get(q, {})))}
+        out.append(ModelComparison(ma, mb, tests, paired_mean(qa, qb)))
+    return out
+
+
+def parse_failure_lines(benchmark: str, a: ModelResult, b: ModelResult) -> list[str]:
+    """Each side's unreadable-reply rate, flagged above the text review line (CLAUDE.md: 2% for any model)."""
+    rates = {side: m.summary.get("parse_failure_rate") for side, m in (("A", a), ("B", b))}
+    if all(r is None for r in rates.values()):
+        return []
+    shown = ", ".join(f"{side} {'–' if r is None else f'{r:.1%}'}" for side, r in rates.items())
+    lines = [f"Unreadable replies (parse failures): {shown}. Unanswered questions count as wrong, never dropped."]
+    if benchmark == "text":
+        lines += [
+            f"**Flag:** {side}'s parse-failure rate ({r:.1%}) is above the {PARSE_REVIEW_LINE:.0%} review line."
+            for side, r in rates.items()
+            if r is not None and r > PARSE_REVIEW_LINE
+        ]
+    return lines
+
+
+def comparison_page(
+    name: str,
+    a: RunData,
+    b: RunData,
+    note: str,
+    labels: dict[str, RunLabel],
+    comparisons: list[ModelComparison],
+    family: str | None = None,
+    family_size: int = 0,
+    holm_p: dict[tuple[str, str], float] | None = None,
+) -> str:
+    """`holm_p`: (A's model id, question) -> Holm-adjusted p across `family` (family_size tests in all)."""
     link_a, link_b = (f"`{labels[r.name].id}` [`{r.name}`](../{r.folder}/README.md)" for r in (a, b))
     parts = [
         GENERATED,
@@ -778,24 +845,27 @@ def comparison_page(name: str, a: RunData, b: RunData, note: str, labels: dict[s
         parts.append(note)
     if a.benchmark != b.benchmark:
         return "\n\n".join([*parts, f"Not comparable: benchmarks differ ({a.benchmark} vs {b.benchmark})."]) + "\n"
-    b_models = {m.summary["model"]: m for m in b.models}
-    for ma in a.models:
-        mb = b_models.get(ma.summary["model"])
-        if mb is None:
-            continue
-        qa, qb = correct_by_question(ma, a.benchmark), correct_by_question(mb, b.benchmark)
-        rows = []
-        for q in qa:
-            p = paired(qa[q], qb.get(q, {}))
-            if p:
-                rows.append(
-                    [q, str(p.n), f"{num(p.diff)} [{num(p.lo)}, {num(p.hi)}]", str(p.a_only), str(p.b_only), num(p.p, P_DIGITS)]
-                )
+    if family:
         parts.append(
-            f"## {ma.name}\n\n"
-            + table(["Question", "Items", "A − B accuracy [95% CI]", "A right only", "B right only", "McNemar p"], rows)
+            f"McNemar p is exact and two-sided. Holm p: adjusted across all {family_size} per-question tests of the "
+            f"comparisons in family `{family}` (results/comparisons.yaml)."
         )
+    header = ["Question", "Items", "A accuracy", "B accuracy", "A − B [95% CI]", "A right only", "B right only", "McNemar p"]
+    header += ["Holm p"] if family else []
+    for mc in comparisons:
+        model_id = mc.a.summary["model"]
+        rows = []
+        for q, p in mc.tests.items():
+            row = [q, str(p.n), num(p.a_acc), num(p.b_acc), f"{num(p.diff)} [{num(p.lo)}, {num(p.hi)}]"]
+            row += [str(p.a_only), str(p.b_only), num(p.p, P_DIGITS)]
+            rows.append(row + ([num((holm_p or {}).get((model_id, q)), P_DIGITS)] if family else []))
+        if mc.mean:
+            m = mc.mean
+            row = [f"mean of {len(mc.tests)}", str(m.n), num(m.a_acc), num(m.b_acc), f"{num(m.diff)} [{num(m.lo)}, {num(m.hi)}]"]
+            rows.append(row + ["–"] * (len(header) - len(row)))
+        title = mc.a.name if mc.a.name == mc.b.name else f"{mc.a.name} (A) vs {mc.b.name} (B)"
+        parts.append("\n\n".join([f"## {title}", *parse_failure_lines(a.benchmark, mc.a, mc.b), table(header, rows)]))
         parts.append(
-            f"<details><summary>Items where A and B differ</summary>\n\n{disagreements(ma, mb, a.benchmark)}\n\n</details>"
+            f"<details><summary>Items where A and B differ</summary>\n\n{disagreements(mc.a, mc.b, a.benchmark)}\n\n</details>"
         )
     return "\n\n".join(parts) + "\n"

@@ -1,4 +1,45 @@
 # Hand-edited (docs/PLAN.md §11): pairs of runs to compare on the same items. scripts/collect.py renders
 # results/compare/<name>.md for each. Example:
 #   - {name: fig4_min_vs_default, a: repro_fig4, b: repro_fig4_default, note: thinking min vs default}
-comparisons: []
+# Optional keys: family (Holm across every per-question McNemar test of the comparisons sharing it), models (A's model
+# id -> B's, when the ids differ). WORKLOG "2026-10-15: Paired comparisons (plan's contrasts + thinking)": DECIDED
+# (Noa, 2026-10-15): the plan's three Part 2 contrasts (docs/PLAN.md §4 step 2) plus thinking min vs default.
+# Pre-registered runs only (short wording, independent questions), never the best grid cell.
+comparisons:
+  - name: part2_interface_small
+    a: part2_qwen_gen_2048
+    b: part2_qwen_logprob
+    family: part2_contrasts
+    note: >-
+      Interface, small model: Qwen3.5-4B generating a reply to the paper's verbatim prompt (A) vs the same weights'
+      option probabilities on the short decision wording, independent questions (B).
+      **Wording differs by design:** the interface (generate vs option probabilities) is what is compared.
+      A is txt33 (2,048-token cap), which replaced the pre-registered txt27 (1,024 cap) per Noa's 2026-10-14 decision
+      (WORKLOG "Part 2 follow-ups"). **A's parse-failure rate is 8.2%, above the 2% review line;** its unreadable
+      answers count as wrong, never dropped.
+  - name: part2_interface_frontier
+    a: part2_luna_gen
+    b: part2_luna_decide
+    family: part2_contrasts
+    note: >-
+      Interface, frontier model: gpt-6-luna generating a reply to the paper's verbatim prompt via the Responses API
+      (A) vs the Decisions API on the short decision wording, independent questions (B).
+      **Wording differs by design:** the interface (generate vs Decisions) is what is compared.
+  - name: part2_trained_for_decisions
+    a: part2_kev
+    b: part2_qwen_base_logprob
+    family: part2_contrasts
+    models: {kev-latest: qwen3.5-4b-base}
+    note: >-
+      Trained for decisions: Kev-4B (A) vs its base model Qwen3.5-4B-Base, option probabilities (B). Both use the
+      short decision wording, independent questions (B's `decision_short_local` is the same wording rendered as text
+      for a local model).
+  - name: fig4_thinking_min_vs_default
+    a: repro_fig4
+    b: repro_fig4_default
+    family: part1_thinking
+    note: >-
+      Thinking min (A) vs default (B), per LLM, Fig. 4 (text), the paper's verbatim prompt. Own Holm family (Part 1
+      thinking): every model x question test on this page. Our Claude client sends the same request for min and
+      default, so 314 of each Claude model's 319 default replies are reused from repro_fig4 (WORKLOG 2026-10-12,
+      "Fig. 4 with thinking: default"); their 8 tests are still in the family.

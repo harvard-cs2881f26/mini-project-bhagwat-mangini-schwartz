@@ -11,7 +11,7 @@ from dataclasses import dataclass
 
 from asimov.bench.text_score import QUESTIONS, SEVERITY_QUESTIONS
 from asimov.collect.load import ModelResult
-from asimov.stats import bootstrap_mean_ci, mcnemar_exact, paired_bootstrap_diff, wilson_ci
+from asimov.stats import bootstrap_mean_ci, holm, mcnemar_exact, paired_bootstrap_diff, wilson_ci
 
 # benchmark -> reported metric -> summary key holding its denominator, or None for a per-item mean.
 # Image is provisional until its scorer exists (Riddhi).
@@ -112,6 +112,8 @@ class Paired:
     a_only: int  # items a got right and b wrong
     b_only: int
     p: float  # exact McNemar
+    a_acc: float  # mean(a) on the common items
+    b_acc: float
 
 
 def paired(a: dict[str, bool], b: dict[str, bool]) -> Paired | None:
@@ -123,4 +125,42 @@ def paired(a: dict[str, bool], b: dict[str, bool]) -> Paired | None:
     diff, lo, hi = paired_bootstrap_diff(va, vb)
     a_only = sum(x and not y for x, y in zip(va, vb, strict=True))
     b_only = sum(y and not x for x, y in zip(va, vb, strict=True))
-    return Paired(len(common), diff, lo, hi, a_only, b_only, mcnemar_exact(a_only, b_only))
+    return Paired(len(common), diff, lo, hi, a_only, b_only, mcnemar_exact(a_only, b_only), sum(va) / len(va), sum(vb) / len(vb))
+
+
+@dataclass(frozen=True)
+class PairedMean:
+    n: int
+    a_acc: float  # per item, mean correct over the questions; then averaged over items
+    b_acc: float
+    diff: float
+    lo: float
+    hi: float
+
+
+def paired_mean(a: dict[str, dict[str, bool]], b: dict[str, dict[str, bool]]) -> PairedMean | None:
+    """Mean over questions per item, a vs b, on the items both scored on every question (paired bootstrap CI, no
+    test: there is no exact paired test for a 0-1 average). None for fewer than two questions in common."""
+    questions = sorted(a.keys() & b.keys())
+    if len(questions) < 2:
+        return None
+    common = sorted(set.intersection(*(set(a[q]) & set(b[q]) for q in questions)))
+    if not common:
+        return None
+    va = [sum(a[q][i] for q in questions) / len(questions) for i in common]
+    vb = [sum(b[q][i] for q in questions) / len(questions) for i in common]
+    diff, lo, hi = paired_bootstrap_diff(va, vb)
+    return PairedMean(len(common), sum(va) / len(va), sum(vb) / len(vb), diff, lo, hi)
+
+
+def holm_by_family(
+    raw: dict[str, dict[tuple[str, str], float]], family: dict[str, str | None]
+) -> dict[str, dict[tuple[str, str], float]]:
+    """comparison -> (model, question) -> raw p, to the Holm-adjusted p across every test of the comparisons that share
+    a family (stats.holm). A comparison with no family gets an empty dict: raw p only."""
+    out: dict[str, dict[tuple[str, str], float]] = {name: {} for name in raw}
+    for fam in {f for f in family.values() if f}:
+        keys = [(name, k) for name in raw if family.get(name) == fam for k in raw[name]]
+        for (name, k), adj in zip(keys, holm([raw[name][k] for name, k in keys]), strict=True):
+            out[name][k] = adj
+    return out
