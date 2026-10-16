@@ -12,6 +12,7 @@ from dataclasses import dataclass
 
 from asimov.bench.text_score import QUESTIONS, SEVERITY_QUESTIONS
 from asimov.claims import Claims, Headline, is_stand_in, paper_value
+from asimov.collect.calibration import QUESTION_TITLES, Calibration, calibrations
 from asimov.collect.checks import (
     ACTION_QUESTIONS,
     LATENT_QUESTIONS,
@@ -479,6 +480,53 @@ def severity_section(run: RunData, claims: Claims) -> str:
     return "\n\n".join(parts)
 
 
+CALIBRATION_HEADER = [
+    "Model",
+    "Question",
+    "Answers with a probability",
+    "Mean confidence",
+    "Accuracy on those",
+    "Brier (0 is perfect)",
+    "ECE (0 is perfect)",
+    "Confidence minus accuracy",
+]
+CALIBRATION_INTRO = (
+    "Decision models return a probability for every option. This table asks whether those probabilities are "
+    "honest: a model's **confidence** in an answer is the probability it put on the option it gave, and the "
+    "answer is right or wrong against the key.\n\n"
+    "- **Brier**: the mean squared gap between confidence and the 0/1 outcome, over the answers; 0 is perfect.\n"
+    "- **ECE** (expected calibration error): answers are grouped into 10 equal-width confidence bins; in each "
+    "bin the share actually right is compared with the mean confidence, and the gaps are averaged, weighted by "
+    "bin size. 0 is perfect.\n"
+    "- **Confidence minus accuracy**: above 0 the model is overconfident on average, below 0 underconfident.\n\n"
+    "Answers with no probability (a refused question, or one that couldn't be read) are left out and shown by "
+    "the smaller count. Probabilities are taken as the service returns them; a service that scales its own "
+    "probabilities (Kev, fitted temperature, WORKLOG 2026-10-13) isn't comparable to one that doesn't. LLM rows "
+    "save no probabilities, so they don't appear. Rule: WORKLOG 2026-10-15, \"Calibration of the decision models\"."
+)
+
+
+def calibration_cells(model: str, c: Calibration) -> list[str]:
+    return [
+        model,
+        QUESTION_TITLES[c.question],
+        out_of(c.n, c.n_total),
+        num(c.confidence),
+        num(c.accuracy),
+        num(c.brier),
+        num(c.ece),
+        "–" if c.gap is None else f"{c.gap:+.3f}",
+    ]
+
+
+def calibration_section(run: RunData) -> str | None:
+    """Text runs: Brier and ECE per question for every model that saved probabilities; None when none did."""
+    rows = [calibration_cells(m.name, c) for m in run.models for c in calibrations(m)]
+    if not rows:
+        return None
+    return "\n\n".join(["## Calibration of the option probabilities", CALIBRATION_INTRO, table(CALIBRATION_HEADER, rows)])
+
+
 def files_section(run: RunData) -> str:
     rows = [
         [m.name, f"[responses.jsonl]({m.summary['model']}/responses.jsonl)", f"[summary.json]({m.summary['model']}/summary.json)"]
@@ -512,9 +560,10 @@ def run_page(
         models_section(run, index),
         metrics_section(run),
         *([severity_section(run, claims)] if run.benchmark == "text" else []),
+        *([calibration_section(run)] if run.benchmark == "text" else []),
         files_section(run),
     ]
-    return "\n\n".join(parts) + "\n"
+    return "\n\n".join(p for p in parts if p is not None) + "\n"
 
 
 # ---- paper check ----------------------------------------------------------------------------

@@ -213,6 +213,23 @@ How close each scoring comes to the paper's Fig 4a severity values (mean absolut
 |---|---|---|---|---|---|
 | OpenJev (think 0) | 0.451 | 0.781 | 0.463 (50 / 108) | 58 / 108 (0.537) | 12 / 211 (0.057) |
 
+## Calibration of the option probabilities
+
+Decision models return a probability for every option. This table asks whether those probabilities are honest: a model's **confidence** in an answer is the probability it put on the option it gave, and the answer is right or wrong against the key.
+
+- **Brier**: the mean squared gap between confidence and the 0/1 outcome, over the answers; 0 is perfect.
+- **ECE** (expected calibration error): answers are grouped into 10 equal-width confidence bins; in each bin the share actually right is compared with the mean confidence, and the gaps are averaged, weighted by bin size. 0 is perfect.
+- **Confidence minus accuracy**: above 0 the model is overconfident on average, below 0 underconfident.
+
+Answers with no probability (a refused question, or one that couldn't be read) are left out and shown by the smaller count. Probabilities are taken as the service returns them; a service that scales its own probabilities (Kev, fitted temperature, WORKLOG 2026-10-13) isn't comparable to one that doesn't. LLM rows save no probabilities, so they don't appear. Rule: WORKLOG 2026-10-15, "Calibration of the decision models".
+
+| Model | Question | Answers with a probability | Mean confidence | Accuracy on those | Brier (0 is perfect) | ECE (0 is perfect) | Confidence minus accuracy |
+|---|---|---|---|---|---|---|---|
+| OpenJev (think 0) | Q1 latent risk type | 319 / 319 | 0.861 | 0.784 | 0.118 | 0.077 | +0.077 |
+| OpenJev (think 0) | Q2 latent severity | 319 / 319 | 0.814 | 0.671 | 0.218 | 0.144 | +0.144 |
+| OpenJev (think 0) | Q3 action effect | 319 / 319 | 0.809 | 0.683 | 0.213 | 0.138 | +0.125 |
+| OpenJev (think 0) | Q4 activated risk | 319 / 319 | 0.709 | 0.451 | 0.283 | 0.258 | +0.258 |
+
 ## Files
 
 | Model | Replies | Summary |

@@ -213,6 +213,23 @@ How close each scoring comes to the paper's Fig 4a severity values (mean absolut
 |---|---|---|---|---|---|
 | Kev-4B | 0.511 | 0.824 | 0.639 (69 / 108) | 39 / 108 (0.361) | 17 / 211 (0.081) |
 
+## Calibration of the option probabilities
+
+Decision models return a probability for every option. This table asks whether those probabilities are honest: a model's **confidence** in an answer is the probability it put on the option it gave, and the answer is right or wrong against the key.
+
+- **Brier**: the mean squared gap between confidence and the 0/1 outcome, over the answers; 0 is perfect.
+- **ECE** (expected calibration error): answers are grouped into 10 equal-width confidence bins; in each bin the share actually right is compared with the mean confidence, and the gaps are averaged, weighted by bin size. 0 is perfect.
+- **Confidence minus accuracy**: above 0 the model is overconfident on average, below 0 underconfident.
+
+Answers with no probability (a refused question, or one that couldn't be read) are left out and shown by the smaller count. Probabilities are taken as the service returns them; a service that scales its own probabilities (Kev, fitted temperature, WORKLOG 2026-10-13) isn't comparable to one that doesn't. LLM rows save no probabilities, so they don't appear. Rule: WORKLOG 2026-10-15, "Calibration of the decision models".
+
+| Model | Question | Answers with a probability | Mean confidence | Accuracy on those | Brier (0 is perfect) | ECE (0 is perfect) | Confidence minus accuracy |
+|---|---|---|---|---|---|---|---|
+| Kev-4B | Q1 latent risk type | 319 / 319 | 0.665 | 0.580 | 0.228 | 0.104 | +0.085 |
+| Kev-4B | Q2 latent severity | 319 / 319 | 0.611 | 0.539 | 0.208 | 0.074 | +0.072 |
+| Kev-4B | Q3 action effect | 319 / 319 | 0.683 | 0.599 | 0.242 | 0.095 | +0.085 |
+| Kev-4B | Q4 activated risk | 319 / 319 | 0.513 | 0.511 | 0.246 | 0.066 | +0.002 |
+
 ## Files
 
 | Model | Replies | Summary |
