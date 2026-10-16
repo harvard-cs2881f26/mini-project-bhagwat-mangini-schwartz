@@ -502,7 +502,7 @@ CALIBRATION_INTRO = (
     "Answers with no probability (a refused question, or one that couldn't be read) are left out and shown by "
     "the smaller count. Probabilities are taken as the service returns them; a service that scales its own "
     "probabilities (Kev, fitted temperature, WORKLOG 2026-10-13) isn't comparable to one that doesn't. LLM rows "
-    "save no probabilities, so they don't appear. Rule: WORKLOG 2026-10-15, \"Calibration of the decision models\"."
+    'save no probabilities, so they don\'t appear. Rule: WORKLOG 2026-10-15, "Calibration of the decision models".'
 )
 
 
