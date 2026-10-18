@@ -1,0 +1,16 @@
+# EXPLORATORY (not the paper's prompt word for word). Noa's decision, 2026-10-14: rerun
+# part2_qwen_gen_2048 (txt33) with a few-shot format prompt, to cut its 8.2% unreadable replies
+# (20 items answering "E" on the A-D severity questions, 5 cut off at 2048 tokens, 1 wrong key).
+# Prompt text_fewshot_format (experiments/text_fewshot_format/): 3 made-up worked examples before
+# the dataset's verbatim prompt, then one rules sentence after it; wording PROPOSED by Claude.
+# Only change from part2_qwen_gen_2048: the prompt (same model, max_new_tokens 2048, Modal L40S).
+# Part 2: Qwen3.5-4B (post-trained), local (free), generating an answer: chat template, thinking off,
+# greedy decoding, at most max_new_tokens (models/local_hf.py); scored by the unchanged Fig 4 scorer.
+# Runs on a Modal L40S (backend: modal; models/modal_app.py, deploy it first), same code as locally.
+run: part2_qwen_gen_fewshot
+benchmark: text
+prompt: text_fewshot_format
+thinking: min  # required by the schema; thinking is always off for local models
+models:
+  - {name: Qwen3.5-4B (generate), provider: local_hf, model: qwen3.5-4b,
+     params: {repo: Qwen/Qwen3.5-4B, revision: 851bf6e806efd8d0a36b00ddf55e13ccb7b8cd0a, mode: generate, template: chat, backend: modal, max_new_tokens: 2048}}

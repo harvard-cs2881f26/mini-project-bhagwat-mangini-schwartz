@@ -1,0 +1,24 @@
+# Fig. 4 (text) with the newest API models added to the repro_fig4_default set. Owner: Noa.
+# Same prompt and settings as configs/repro_fig4_default.yaml, so the 8 older models are cache hits.
+run: repro_fig4_newest_default
+benchmark: text
+prompt: text_verbatim   # the dataset's prompt, unchanged (src/asimov/bench/text.py)
+thinking: default       # the provider decides (no reasoning parameter sent)
+log_reasoning: true     # save reasoning/thought summaries in each reply's `reasoning` field (never scored)
+models:
+  # --- already run in repro_fig4_default (cached, free) ---
+  - {name: GPT-5 Nano,            provider: openai,    model: gpt-5-nano}
+  - {name: GPT-5 Mini,            provider: openai,    model: gpt-5-mini}
+  - {name: GPT-5,                 provider: openai,    model: gpt-5}
+  - {name: Claude Sonnet 4 (4.5), provider: anthropic, model: claude-sonnet-4-5-20250929}  # stand-in
+  - {name: Claude Opus 4.1 (4.5), provider: anthropic, model: claude-opus-4-5-20251101}    # stand-in
+  - {name: Gemini 2.5 Flash-Lite (3.1), provider: gemini, model: gemini-3.1-flash-lite}    # stand-in
+  - {name: Gemini 2.5 Flash (3),        provider: gemini, model: gemini-3-flash-preview}   # stand-in
+  - {name: Gemini 2.5 Pro (3.1),        provider: gemini, model: gemini-3.1-pro-preview}   # stand-in
+  # --- newest on each provider's API (new, paid) ---
+  - {name: Claude Haiku 5.5,  provider: anthropic, model: claude-haiku-5-5}
+  - {name: Claude Fable 5.1,  provider: anthropic, model: claude-fable-5-1}
+  - {name: GPT-6 Luna,        provider: openai,    model: gpt-6-luna}
+  - {name: GPT-6 Astra,       provider: openai,    model: gpt-6-astra}
+  - {name: Gemini 3.5 Flash-Lite, provider: gemini, model: gemini-3.5-flash-lite}
+  - {name: Gemini 4 Argon,        provider: gemini, model: gemini-4-argon}

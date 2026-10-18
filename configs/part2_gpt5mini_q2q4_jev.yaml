@@ -1,0 +1,11 @@
+# EXPLORATORY Part 2 prompt experiment; wording DECIDED (Noa, 2026-10-14: confirmed as proposed by Claude); Noa approved running
+# under a $5 cap. repro_fig4's GPT-5 Mini settings with only the prompt changed: the paper's prompt without Q1,
+# Jev's Q1 pick given (experiments/text_q2_q4_jev). Q1 scores as unanswered here (expected); the composed
+# system is scored by scripts/prompt_experiments.py. WORKLOG 2026-10-14, "Part 2 prompt experiments".
+run: part2_gpt5mini_q2q4_jev
+benchmark: text
+prompt: text_q2_q4_jev
+thinking: min
+log_reasoning: true
+models:
+  - {name: GPT-5 Mini, provider: openai, model: gpt-5-mini}

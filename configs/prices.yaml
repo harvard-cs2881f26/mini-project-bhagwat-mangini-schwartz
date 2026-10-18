@@ -13,6 +13,7 @@ sources:
   typesafe: https://docs.typesafe.ai (Jev; output tokens not billed)
   codiv: https://codiv.ai (free tier, docs/apis/systemone.md §2)
   kev: docs/apis/systemone.md §2 (self-deployed on Modal; GPU time, no token price)
+  local: our Modal app (asimov.models.modal_app; NLI and Qwen3.5-4B rows); GPU time, no token price
 models:
   gpt-5-nano:                 {input_per_mtok: 0.05, output_per_mtok: 0.40}
   gpt-5-mini:                 {input_per_mtok: 0.25, output_per_mtok: 2.00}
@@ -23,7 +24,19 @@ models:
   gemini-3-flash-preview:     {input_per_mtok: 0.50, output_per_mtok: 3.00, thinking_as_output: true}
   gemini-3.1-pro-preview:     {input_per_mtok: 2.00, output_per_mtok: 12.00, thinking_as_output: true}
   gpt-6-luna:                 {input_per_mtok: 0.10, output_per_mtok: 0.50}  # Decisions bills input only and reports 0 output
+  claude-haiku-5-5:           {input_per_mtok: 0.10, output_per_mtok: 0.50}   # <=100K-token prompts; 0.50/2.50 above (claude.com/pricing, 2026-10-15)
+  claude-sonnet-5-5:          {input_per_mtok: 2.00, output_per_mtok: 10.00}
+  claude-opus-5-5:            {input_per_mtok: 4.00, output_per_mtok: 20.00}
+  claude-fable-5-1:           {input_per_mtok: 10.00, output_per_mtok: 50.00}
+  gpt-6.1-sol:                {input_per_mtok: 2.00, output_per_mtok: 10.00}   # <=272K input (developers.openai.com/api/docs/pricing, 2026-10-15)
+  gpt-6-astra:                {input_per_mtok: 10.00, output_per_mtok: 50.00}
+  gemini-3.5-flash-lite:      {input_per_mtok: 0.30, output_per_mtok: 2.50, thinking_as_output: true}
+  gemini-3.8-flash:           {input_per_mtok: 0.75, output_per_mtok: 3.75, thinking_as_output: true}  # promo through 2026-12-31; 1.50/7.50 from 2027-01-01
+  gemini-4-argon:             {input_per_mtok: 2.00, output_per_mtok: 10.00, thinking_as_output: true}  # promo through 2026-11-30; 4.00/20.00 from 2026-12-01
   jev-latest:                 {input_per_mtok: 0.042, output_per_mtok: 0.0}
   openjev-latest:             {free_tier: true, params_b: 26, active_params_b: 4}  # DiffusionGemma 26B-A4B, on Codiv
   laya-1.0:                   {free_tier: true, params_b: 0.421}  # ModernBERT-large encoder, on Codiv
   kev-latest:                 {self_hosted: Modal L40S, params_b: 4}  # Qwen3.5-4B-Base + LoRA + pointer head
+  deberta-v3-large-zeroshot-v2.0: {self_hosted: Modal L40S, params_b: 0.435}  # NLI zero-shot; 435.1M params (Hugging Face model page)
+  qwen3.5-4b-base:            {self_hosted: Modal L40S, params_b: 4}  # Qwen/Qwen3.5-4B-Base
+  qwen3.5-4b:                 {self_hosted: Modal L40S, params_b: 4}  # Qwen/Qwen3.5-4B

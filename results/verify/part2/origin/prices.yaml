@@ -1,0 +1,33 @@
+# List prices, USD per 1M tokens: the one home for prices (docs/PLAN.md §9.2). Read by asimov.prices.
+# Keyed by model id (the `model` in each config and summary). Cost = logged tokens x these prices, never hand-typed.
+# How tokens are billed (WORKLOG 2026-10-12, "Cost method"):
+#   - Gemini bills thinking tokens as output, but saves them apart from output_tokens: thinking_as_output.
+#   - OpenAI's output_tokens already include reasoning tokens, so nothing is added.
+#   - free_tier: no charge on the plan we used. self_hosted: our own GPU (no token price; report latency + params).
+# params_b / active_params_b: parameters in billions, where the model's docs state them.
+checked: 2026-10-12
+sources:
+  openai: https://openai.com/api/pricing/ (GPT-5 family; gpt-6-luna on Responses and Decisions)
+  anthropic: https://www.anthropic.com/pricing#api
+  gemini: https://ai.google.dev/gemini-api/docs/pricing
+  typesafe: https://docs.typesafe.ai (Jev; output tokens not billed)
+  codiv: https://codiv.ai (free tier, docs/apis/systemone.md §2)
+  kev: docs/apis/systemone.md §2 (self-deployed on Modal; GPU time, no token price)
+  local: our Modal app (asimov.models.modal_app; NLI and Qwen3.5-4B rows); GPU time, no token price
+models:
+  gpt-5-nano:                 {input_per_mtok: 0.05, output_per_mtok: 0.40}
+  gpt-5-mini:                 {input_per_mtok: 0.25, output_per_mtok: 2.00}
+  gpt-5:                      {input_per_mtok: 1.25, output_per_mtok: 10.00}
+  claude-sonnet-4-5-20250929: {input_per_mtok: 3.00, output_per_mtok: 15.00}
+  claude-opus-4-5-20251101:   {input_per_mtok: 5.00, output_per_mtok: 25.00}
+  gemini-3.1-flash-lite:      {input_per_mtok: 0.25, output_per_mtok: 1.50, thinking_as_output: true}
+  gemini-3-flash-preview:     {input_per_mtok: 0.50, output_per_mtok: 3.00, thinking_as_output: true}
+  gemini-3.1-pro-preview:     {input_per_mtok: 2.00, output_per_mtok: 12.00, thinking_as_output: true}
+  gpt-6-luna:                 {input_per_mtok: 0.10, output_per_mtok: 0.50}  # Decisions bills input only and reports 0 output
+  jev-latest:                 {input_per_mtok: 0.042, output_per_mtok: 0.0}
+  openjev-latest:             {free_tier: true, params_b: 26, active_params_b: 4}  # DiffusionGemma 26B-A4B, on Codiv
+  laya-1.0:                   {free_tier: true, params_b: 0.421}  # ModernBERT-large encoder, on Codiv
+  kev-latest:                 {self_hosted: Modal L40S, params_b: 4}  # Qwen3.5-4B-Base + LoRA + pointer head
+  deberta-v3-large-zeroshot-v2.0: {self_hosted: Modal L40S, params_b: 0.435}  # NLI zero-shot; 435.1M params (Hugging Face model page)
+  qwen3.5-4b-base:            {self_hosted: Modal L40S, params_b: 4}  # Qwen/Qwen3.5-4B-Base
+  qwen3.5-4b:                 {self_hosted: Modal L40S, params_b: 4}  # Qwen/Qwen3.5-4B

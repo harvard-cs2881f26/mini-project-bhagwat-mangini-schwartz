@@ -43,3 +43,10 @@ part2_kev_letters: txt31
 part2_kev_full_cumulative: txt32
 part2_qwen_gen_2048: txt33
 repro_fig6_default_remaining: img6
+part2_gpt5_jev_hints: txt34
+part2_gpt5_q2q4_jev: txt35
+part2_gpt5mini_jev_hints: txt36
+part2_gpt5mini_q2q4_jev: txt37
+part2_qwen_gen_fewshot: txt38
+repro_fig4_newest_default: txt39
+repro_fig5_newest_default: vid1

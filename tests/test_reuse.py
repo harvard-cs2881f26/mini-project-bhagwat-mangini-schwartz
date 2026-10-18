@@ -115,7 +115,10 @@ def test_identical_decision_service_is_reused_under_its_own_key(tmp_path):
 
     src_key = saved_jev_replies(tmp_path, JEV)
     assert reuse(JEV_RUN, {**JEV_RUN, "run": "same"}, results_dir=tmp_path) == {"jev-latest": 2}
-    rows = [json.loads(line) for line in open(tmp_path / "same" / "jev-latest" / "responses.jsonl")]
+    from asimov.run_ids import run_dir
+
+    dst_dir = run_dir(tmp_path, "same", "text", {m["provider"] for m in JEV_RUN["models"]})
+    rows = [json.loads(line) for line in open(dst_dir / "jev-latest" / "responses.jsonl")]
     version = get_benchmark("text").prompt_version("decision_short")
     assert {r["key"] for r in rows} == {run_key("jev-latest", version, "min", extra=request_extra(JEV))}
     assert all(r["reused_from"] == {"run": "jev", "key": src_key} for r in rows)
