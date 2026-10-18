@@ -1,0 +1,20 @@
+# Decision classifiers on the video benchmark (Fig. 5 extension, live robot monitor framing). Owner: Tyler.
+# Same words as the LLM runs (src/asimov/prompts/video_v2.txt): decision_video_v2 sends the prompt's state,
+# the 16 labelled frames and its three questions as typed choice questions; replies score with the
+# unchanged video scorer, so results compare directly with repro_fig5 / repro_fig5_newest_default.
+# How each service gets the frames (checked 2026-10-18, WORKLOG):
+#   luna  16 full-size frames, detail high, each after its label (as the LLM runs)
+#   Jev   16 frames shrunk to 498x280 (16 full-size frames exceed its token limit), inline after labels
+#   Clef  4 tiles of 2x2 frames (Workers AI takes at most 4 images), timestamps drawn on each frame
+# Not included: OpenJev on Codiv (its images don't reach the model, so it would be text-only).
+run: video_decisions
+benchmark: video
+prompt: decision_video_v2
+thinking: min  # required by the schema; decision services have no thinking setting
+models:
+  - {name: Jev,  provider: systemone, model: jev-latest, base_url: "https://api.typesafe.ai", key_env: TYPESAFE_API_KEY,
+     params: {image_width: 498, image_height: 280}}
+  - {name: Clef, provider: cloudflare, model: clef}
+  - {name: gpt-6-luna (Decisions), provider: openai_decisions, model: gpt-6-luna}
+  # Optional: Clef-flash (9B). On one clip it barely used the images; add it if the first three look useful.
+  # - {name: Clef-flash, provider: cloudflare, model: clef-flash}

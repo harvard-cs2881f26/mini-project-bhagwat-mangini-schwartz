@@ -48,3 +48,6 @@ part2_gpt5mini_jev_hints: txt36
 part2_gpt5mini_q2q4_jev: txt37
 part2_qwen_gen_fewshot: txt38
 repro_fig4_newest_default: txt39
+repro_fig5_newest_default: vid1
+video_decisions: vid2
+video_dec_defs: vid3

@@ -1,0 +1,8 @@
+# Experiment 2: most likely injury first (29 NEISS types from the paper's Fig. 11), then the 3 questions (Jev only; experiments/video_decision_variants/variants.yaml). Owner: Tyler. Compare with video_decisions (vid2).
+run: video_dec_injury
+benchmark: video
+prompt: decision_video_v2_injury
+thinking: min  # required by the schema; not used
+models:
+  - {name: Jev, provider: systemone, model: jev-latest, base_url: "https://api.typesafe.ai", key_env: TYPESAFE_API_KEY,
+     params: {image_width: 498, image_height: 280}}

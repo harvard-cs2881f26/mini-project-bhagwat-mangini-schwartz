@@ -20,7 +20,7 @@ class ModelSpec(BaseModel):
 
     name: str  # label in tables and figures, e.g. "Claude Opus 4.1 (4.5)" for a stand-in
     provider: Literal["anthropic", "openai", "gemini", "mock",  # asimov.models.get_client
-                      "mock_decision", "systemone", "openai_decisions", "local_hf", "nli"]
+                      "mock_decision", "systemone", "openai_decisions", "cloudflare", "local_hf", "nli"]
     model: str
     reasoning_effort: Literal["minimal", "low", "medium", "high"] | None = None
     thinking_budget: StrictInt | None = Field(default=None, ge=1024)

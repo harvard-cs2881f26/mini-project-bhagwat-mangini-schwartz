@@ -12,8 +12,9 @@ from typing import Literal
 
 # independent (non-cumulative): one call, every question answered in isolation (main runs)
 # cumulative: one call per question, each with the model's own picks for every earlier question
-Mode = Literal["independent", "cumulative"]
-MODES: tuple[Mode, ...] = ("independent", "cumulative")
+# staged: two calls, the first question alone, then the others together seeing its pick (video injury-first)
+Mode = Literal["independent", "cumulative", "staged"]
+MODES: tuple[Mode, ...] = ("independent", "cumulative")  # the text benchmark's modes; video's injury-first variant uses "staged"
 
 
 @dataclass(frozen=True)
@@ -38,6 +39,9 @@ class DecisionQuestion:
     context: str = ""
     # one-shot prompts only (local base model): a made-up worked example shown before this question
     example: DecisionExample | None = None
+    # the key of this question's answer in the reply; "" = the text benchmark's `<id>_response`.
+    # Video uses the LLM reply's own keys (e.g. "risk_of_physical_injury"), so the video scorer reads both alike.
+    reply_key: str = ""
 
 
 @dataclass(frozen=True)
@@ -51,10 +55,22 @@ class DecisionExample:
 
 
 @dataclass(frozen=True)
+class Frame:
+    """One labelled image in a decision request (video): sent after the state, each after its label."""
+
+    label: str  # e.g. "t = 1.5 s"
+    data: bytes  # JPEG bytes, as stored; a client that must shrink or tile them does so itself
+    media_type: str = "image/jpeg"
+
+
+@dataclass(frozen=True)
 class DecisionPart:
     state: str
     questions: tuple[DecisionQuestion, ...]
     mode: Mode = "independent"
+    # video: the frames, in order, after `state`; then `lead`, the text that follows them in the prompt
+    frames: tuple[Frame, ...] = ()
+    lead: str = ""
 
 
 Part = TextPart | ImagePart | DecisionPart

@@ -39,6 +39,9 @@ def client_class(provider: str):
     if provider == "openai_decisions":
         from asimov.models.openai_decisions import OpenAIDecisionsClient
         return OpenAIDecisionsClient
+    if provider == "cloudflare":
+        from asimov.models.cloudflare_clef import CloudflareClefClient
+        return CloudflareClefClient
     if provider == "mock_decision":
         from asimov.models.mock import MockDecisionClient
         return MockDecisionClient

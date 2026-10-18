@@ -22,7 +22,7 @@ answer key; an unanswered question adds no line. Cumulative raw = {"mode", "call
 from __future__ import annotations
 
 import json
-from dataclasses import dataclass, field
+from dataclasses import dataclass, field, replace
 from typing import Protocol
 
 from asimov.bench.parts import DecisionPart, DecisionQuestion, Part
@@ -70,10 +70,15 @@ def argmax(dist: dict[str, float]) -> str:
     return max(dist, key=lambda k: dist[k])
 
 
-def reply_text(probs: Probs, picks: dict[str, str | None] | None = None) -> str:
-    """The 4-letter reply; `picks` (from `pick`) override the plain argmax where given."""
-    picks = picks or {}
-    return json.dumps({response_key(q): picks.get(q) or argmax(dist) for q, dist in probs.items() if dist})
+def reply_text(probs: Probs, picks: dict[str, str | None] | None = None, keys: dict[str, str] | None = None) -> str:
+    """The reply JSON, one answer per question; `picks` (from `pick`) override the plain argmax where given.
+    `keys`: question id -> reply key, for questions with their own (DecisionQuestion.reply_key)."""
+    picks, keys = picks or {}, keys or {}
+    return json.dumps({keys.get(q) or response_key(q): picks.get(q) or argmax(dist) for q, dist in probs.items() if dist})
+
+
+def reply_keys(part: DecisionPart) -> dict[str, str]:
+    return {q.id: q.reply_key for q in part.questions if q.reply_key}
 
 
 def pick(by_letter: dict[str, float] | None, sent_order: list[str], chosen: str | None) -> str | None:
@@ -106,7 +111,7 @@ def to_letters(part: DecisionPart, by_value: Probs) -> Probs:
 def decision_reply(part: DecisionPart, by_value: Probs) -> tuple[str, Probs]:
     """Client probabilities by option value -> (reply text, probabilities by letter)."""
     probs = to_letters(part, by_value)
-    return reply_text(probs), probs
+    return reply_text(probs, keys=reply_keys(part)), probs
 
 
 def steps(part: DecisionPart) -> list[tuple[DecisionQuestion, ...]]:
@@ -114,6 +119,8 @@ def steps(part: DecisionPart) -> list[tuple[DecisionQuestion, ...]]:
     qs = part.questions
     if part.mode == "cumulative":
         return [(q,) for q in qs]
+    if part.mode == "staged":  # the first question alone, then the rest together seeing its pick
+        return [qs[:1], qs[1:]]
     return [qs]
 
 
@@ -149,7 +156,7 @@ def generate_decision(client: DecisionClient, parts: list[Part]) -> ModelRespons
     lines: list[str] = []
     with Timer() as t:
         for questions in steps(part):
-            sub = part if part.mode == "independent" else DecisionPart("\n".join([part.state, *lines]), questions)
+            sub = part if part.mode == "independent" else replace(part, state="\n".join([part.state, *lines]), questions=questions)
             decided = client.decide(sub)
             step = to_letters(sub, decided.by_value)
             step_picks = picks_for(questions, step, decided.chosen)
@@ -164,5 +171,5 @@ def generate_decision(client: DecisionClient, parts: list[Part]) -> ModelRespons
         raw = {"mode": part.mode, "calls": [c.raw for c in calls]}
         usage = {k: total([c.usage.get(k) for c in calls]) for k in ("input_tokens", "output_tokens")}
     return ModelResponse(
-        text=reply_text(probs, picks), model=calls[0].model, usage=usage, latency_s=t.seconds, raw=raw, probs=probs
+        text=reply_text(probs, picks, reply_keys(part)), model=calls[0].model, usage=usage, latency_s=t.seconds, raw=raw, probs=probs
     )

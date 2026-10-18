@@ -2038,3 +2038,68 @@ Numbers only; interpretation is Noa's. Write-up: `results/part2_designs/writeup.
 - **Config note:** the run first included four more models; its saved `config.yaml` was replaced by the
   trimmed config (settings and prompt unchanged) before the full run, because `ConfigChanged` otherwise stops it.
 
+
+## 2026-10-18: Video (Fig. 5) with decision classifiers, live robot monitor framing
+
+Extension (Tyler): can a decision classifier flag danger in a clip fast and accurately enough for a robot
+watching at 2 fps (a 500 ms budget per frame)? Run `video_decisions` (vid2), compared with `repro_fig5`
+(vid0) and `repro_fig5_newest_default` (vid1). Same metrics as the LLM runs.
+
+- **DECIDED (Tyler): same words as the LLM prompt.** `decision_video_v2` reads `video_v2.txt`: the text
+  before {FRAMES} is the state, the 16 labelled frames follow, then "Answer three questions about the
+  human subject in the video."; each Qn. paragraph, verbatim, is a `choice` question's instructions. Only
+  the "Respond with only this JSON object" block is dropped. Options use the prompt's own words: Yes/No;
+  No/Mild/Moderate/Severe Harm; -1 or one of the 16 frame times. *Alternative considered:* shorter
+  question text (the Part 2 text runs scored far lower with short wording); a "neutral" prompt with no
+  safety framing (shelved: its answers don't map onto the answer key without a new scoring rule).
+- **DECIDED (Tyler): the timing answer is the most likely option**, as for every other question; a
+  monitor has to commit to one time. *Alternative considered:* the probability-weighted mean time.
+- **Unchanged scorer.** Answers come back under the LLM reply's keys (`DecisionQuestion.reply_key`), so
+  `video_score` reads them like any LLM reply: same parse rules, metrics and timing grid.
+- **DECIDED (Tyler): latency from serial calls** (`--workers 1`), the live-monitor setting; parallel calls
+  queue at the provider (Jev: 0.5 s alone, up to 1.7 s with 4 workers in the trial). The LLM runs used
+  4 workers, so their latency may be somewhat inflated by comparison. *Alternative:* 4 workers, as the LLM runs.
+- **How each service gets the frames (checked on one clip, video_0195, before wiring):**
+  - luna (OpenAI Decisions): 16 full-size frames, detail high, each after its label, as the LLM runs.
+  - Jev: 16 frames at 1280x720 give `max_tokens_exceeded`; shrunk to 498x280 (its minimum height is
+    280 px). With frames P(risk) 0.51, without 0.02: it uses them.
+  - Clef (Cloudflare Workers AI, 27B): at most 4 images per request, so 4 tiles of 2x2 frames (640x360
+    each, timestamps drawn on). With frames P(risk) 0.31, without 0.02. Handicap: each frame has a
+    quarter of the original area.
+  - Clef-flash (9B, Cloudflare): tokens rise with frames but P(risk) barely moves (0.10 -> 0.06). Left out
+    for now (optional row in the config).
+  - OpenJev and Clef-flash on Codiv: accepted, but 16 frames add ~70 input tokens and answers barely
+    change vs no images: the images don't reach the model. Excluded (would be a text-only run).
+  - Correction: `docs/apis/systemone.md` said Jev is text-only; Jev's docs list image input (experimental).
+- **luna blocked (for now):** OpenAI Decisions with any image returned 429 `credit_balance_exhausted` while
+  text-only calls passed; a new key helped briefly. Cause: the org balance was being used up by the
+  concurrent vid1 run (GPT-6 Astra, ~$0.19/clip). luna joins once the balance is topped up.
+- **OPEN (Tyler): other classifiers considered**, from a web search: Llama Guard 4 and ShieldGemma 2 are
+  content-moderation guards (no severity or timing), not run; JEV-27B, Strands Decider, Laya, Kev and
+  ai_decide take no images (or it isn't documented).
+- **Trial (5 clips, `--limit 5`):** 0 errors, 0 parse failures. Jev ~6,850 input tokens per clip, Clef ~4,430.
+- **Cost estimate (287 clips):** Jev ~$0.08, Clef ~$0.30, luna ~$0.60. Clef price: $0.24 per M input
+  (Workers AI model page); clef-flash's is unlisted (clef's used, UNVERIFIED).
+
+### Jev variants: definitions, injury first, frames vs detail (EXPLORATORY, 2026-10-18)
+
+- **DECIDED (Tyler): three cheap Jev-only experiments**, then the others only if one helps. Spec and wording:
+  `experiments/video_decision_variants/`. Threshold tuning was checked first on saved probabilities
+  (5-fold CV, cut-off chosen on 4/5): Jev 64% -> 64% balanced, luna 54% -> 63%, Clef (191 clips) 61% -> 64%;
+  all near 64%, so the gain has to come from the inputs, not the cut-off.
+- **1. Definitions: our own (DECIDED, Tyler).** The paper names the levels (Fig. 1 "minor / moderate / severe";
+  video appendix "Severe / Moderate / Mild") and the risk question (Fig. 3) but defines neither. *Alternatives:*
+  drop it; NEISS coding-manual disposition categories (verbatim, but not the paper's).
+- **2. Injury first (DECIDED, Tyler).** Question: the paper's Fig. 1 "Which of these injuries is most likely?";
+  options: the 29 diagnoses of Fig. 11 verbatim, "Submersion/Drowing" corrected to "Drowning" (Tyler);
+  "No realistic injury possible" listed first with our description, plus one sentence of ours saying to pick it
+  when nothing is likely to injure the person (Tyler's concern: a long list pushing the model to always name an
+  injury). Two calls per clip ("staged" mode), not four. *Alternative:* one call per question (cumulative).
+- **3. Frames vs detail (DECIDED, Tyler).** 3a: 16 frames at 640x360; 3b: 8 frames (1 per second) at 896x504,
+  timing options -1 and the 8 times shown.
+- **Latency caveat:** the four runs ran at the same time (one call at a time each), so their latency is
+  inflated by about the 4-worker effect seen in the trial; compare input tokens per clip for speed.
+- **Run IDs:** started together, all four were given vid3 by `run_ids`; renumbered vid3-vid6 after the runs.
+- **Clef left partial (Tyler):** stopped at 191/287 by Cloudflare's daily free allocation (10,000 units);
+  finishing needs the Workers Paid plan. luna Decisions finished 287/287 once the pipeline used the `.env`
+  key (a stale `OPENAI_API_KEY` exported in the shell took precedence over `.env`).

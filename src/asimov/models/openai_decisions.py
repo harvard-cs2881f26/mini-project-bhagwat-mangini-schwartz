@@ -6,9 +6,15 @@ id, with `choices` = [{value, description}] (option value -> the paper's option 
 are matched by `name`, not position, and mapped back to letters (models.decision). A per-question
 `refusal` leaves that question unanswered (scored wrong; `finish` = refused). The SDK retries
 429/5xx itself (2 retries by default). Decisions has no thinking setting, so `thinking` doesn't apply.
+
+Video (a DecisionPart with frames): `input` is one user message of parts, in the LLM request's order:
+the state, then each frame's label and its image (full size, detail "high", like the LLM runs), then
+the lead text.
 """
 
 from __future__ import annotations
+
+import base64
 
 import openai
 
@@ -40,7 +46,7 @@ class OpenAIDecisionsClient:
             }
             for q in part.questions
         ]
-        raw = self.client.decisions.create(model=self.model, input=part.state, questions=questions).to_dict()
+        raw = self.client.decisions.create(model=self.model, input=decision_input(part), questions=questions).to_dict()
         answers = {a.get("name"): a for a in raw.get("answers") or []}
         require_answers(part, set(answers))
         usage = raw.get("usage") or {}
@@ -58,3 +64,17 @@ def choice_probs(answer: dict | None) -> dict[str, float] | None:
     if not answer or answer.get("type") != "choice":
         return None
     return {p["value"]: p["probability"] for p in answer.get("probabilities") or []}
+
+
+def decision_input(part: DecisionPart) -> str | list[dict]:
+    """The state as plain text, or (video) one user message with each frame after its label."""
+    if not part.frames:
+        return part.state
+    content: list[dict] = [{"type": "input_text", "text": part.state}]
+    for f in part.frames:
+        content.append({"type": "input_text", "text": f.label})
+        url = f"data:{f.media_type};base64,{base64.b64encode(f.data).decode()}"
+        content.append({"type": "input_image", "image_url": url, "detail": "high"})
+    if part.lead:
+        content.append({"type": "input_text", "text": part.lead})
+    return [{"role": "user", "content": content}]
