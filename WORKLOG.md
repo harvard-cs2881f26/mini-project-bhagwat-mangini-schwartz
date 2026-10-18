@@ -2038,3 +2038,24 @@ Numbers only; interpretation is Noa's. Write-up: `results/part2_designs/writeup.
 - **Config note:** the run first included four more models; its saved `config.yaml` was replaced by the
   trimmed config (settings and prompt unchanged) before the full run, because `ConfigChanged` otherwise stops it.
 
+
+## 2026-10-18: Fig. 5 (video) at default thinking, with the newest API models
+
+- **DECIDED (Tyler): run all 14 models at `thinking: default`** (`configs/repro_fig5_newest_default.yaml`,
+  run `vid1`): the 8 reproduction models plus the same 6 newest models as Noa's text run
+  (`claude-fable-5-1`, `claude-haiku-5-5`, `gpt-6-astra`, `gpt-6-luna`, `gemini-4-argon`,
+  `gemini-3.5-flash-lite`). Same prompt as `repro_fig5` (`video_v2`). *Alternatives:* the 6 newest only
+  (~$125), the 4 cheap newest only (~$14).
+- **Claude 4.5 replies reused, not re-called:** our Claude client sends the same request at min and default,
+  so `scripts/reuse_replies.py` copied 287 replies each for Sonnet 4.5 and Opus 4.5 from `repro_fig5`.
+  The GPT-5 and Gemini 3.x models are re-called (their thinking setting changes the request).
+- **Estimate before the run:** ~$160 (Fable ~$58, Astra ~$53, Argon ~$11, the 6 older OpenAI/Gemini ~$35,
+  rest < $2). Almost all of it is input (~18-20K tokens of frames per video).
+- **Prompt file check:** a local edit removed the trailing newline of `src/asimov/prompts/video_v2.txt`
+  (which changes every cache key); it was found when the Claude reuse copied nothing and was restored to the
+  committed version. The 5-video dry-run replies of the 6 newest models carry the committed key, so they
+  were kept and reused.
+- **Incomplete (2026-10-18 14:03):** the Gemini prepaid balance ran out mid-run (402 RESOURCE_EXHAUSTED):
+  Gemini 3.1 Pro has 115/287 replies, Gemini 3.5 Flash-Lite and Gemini 4 Argon 5/287 each (the dry run).
+  Every other model has 287/287. Rerunning the config after a Gemini top-up calls only the missing items.
+  Until then, compare those three models only on their answered items, or leave them out.
