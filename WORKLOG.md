@@ -2039,6 +2039,26 @@ Numbers only; interpretation is Noa's. Write-up: `results/part2_designs/writeup.
   trimmed config (settings and prompt unchanged) before the full run, because `ConfigChanged` otherwise stops it.
 
 
+## 2026-10-18: Fig. 5 (video) at default thinking, with the newest API models
+
+- **DECIDED (Tyler): run all 14 models at `thinking: default`** (`configs/repro_fig5_newest_default.yaml`,
+  run `vid1`): the 8 reproduction models plus the same 6 newest models as Noa's text run
+  (`claude-fable-5-1`, `claude-haiku-5-5`, `gpt-6-astra`, `gpt-6-luna`, `gemini-4-argon`,
+  `gemini-3.5-flash-lite`). Same prompt as `repro_fig5` (`video_v2`). *Alternatives:* the 6 newest only
+  (~$125), the 4 cheap newest only (~$14).
+- **Claude 4.5 replies reused, not re-called:** our Claude client sends the same request at min and default,
+  so `scripts/reuse_replies.py` copied 287 replies each for Sonnet 4.5 and Opus 4.5 from `repro_fig5`.
+  The GPT-5 and Gemini 3.x models are re-called (their thinking setting changes the request).
+- **Estimate before the run:** ~$160 (Fable ~$58, Astra ~$53, Argon ~$11, the 6 older OpenAI/Gemini ~$35,
+  rest < $2). Almost all of it is input (~18-20K tokens of frames per video).
+- **Prompt file check:** a local edit removed the trailing newline of `src/asimov/prompts/video_v2.txt`
+  (which changes every cache key); it was found when the Claude reuse copied nothing and was restored to the
+  committed version. The 5-video dry-run replies of the 6 newest models carry the committed key, so they
+  were kept and reused.
+- **Incomplete (2026-10-18 14:03):** the Gemini prepaid balance ran out mid-run (402 RESOURCE_EXHAUSTED):
+  Gemini 3.1 Pro has 115/287 replies, Gemini 3.5 Flash-Lite and Gemini 4 Argon 5/287 each (the dry run).
+  Every other model has 287/287. Rerunning the config after a Gemini top-up calls only the missing items.
+  Until then, compare those three models only on their answered items, or leave them out.
 ## 2026-10-18: Video (Fig. 5) with decision classifiers, live robot monitor framing
 
 Extension (Tyler): can a decision classifier flag danger in a clip fast and accurately enough for a robot
@@ -2071,9 +2091,10 @@ watching at 2 fps (a 500 ms budget per frame)? Run `video_decisions` (vid2), com
   - OpenJev and Clef-flash on Codiv: accepted, but 16 frames add ~70 input tokens and answers barely
     change vs no images: the images don't reach the model. Excluded (would be a text-only run).
   - Correction: `docs/apis/systemone.md` said Jev is text-only; Jev's docs list image input (experimental).
-- **luna blocked (for now):** OpenAI Decisions with any image returned 429 `credit_balance_exhausted` while
-  text-only calls passed; a new key helped briefly. Cause: the org balance was being used up by the
-  concurrent vid1 run (GPT-6 Astra, ~$0.19/clip). luna joins once the balance is topped up.
+- **luna's 429 `credit_balance_exhausted` (resolved):** a stale `OPENAI_API_KEY` exported in the shell
+  (`~/.zshrc`) took precedence over `.env` (`load_dotenv` doesn't override), so pipeline runs used an older
+  key whose balance was empty, while direct tests read the new `.env` key. luna ran with the shell variable
+  unset. The same shell key billed every pipeline run on this machine today, vid1 included.
 - **OPEN (Tyler): other classifiers considered**, from a web search: Llama Guard 4 and ShieldGemma 2 are
   content-moderation guards (no severity or timing), not run; JEV-27B, Strands Decider, Laya, Kev and
   ai_decide take no images (or it isn't documented).
@@ -2101,5 +2122,4 @@ watching at 2 fps (a 500 ms budget per frame)? Run `video_decisions` (vid2), com
   inflated by about the 4-worker effect seen in the trial; compare input tokens per clip for speed.
 - **Run IDs:** started together, all four were given vid3 by `run_ids`; renumbered vid3-vid6 after the runs.
 - **Clef left partial (Tyler):** stopped at 191/287 by Cloudflare's daily free allocation (10,000 units);
-  finishing needs the Workers Paid plan. luna Decisions finished 287/287 once the pipeline used the `.env`
-  key (a stale `OPENAI_API_KEY` exported in the shell took precedence over `.env`).
+  finishing needs the Workers Paid plan. luna Decisions: 287/287.
