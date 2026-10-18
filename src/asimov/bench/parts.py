@@ -42,6 +42,8 @@ class DecisionQuestion:
     # the key of this question's answer in the reply; "" = the text benchmark's `<id>_response`.
     # Video uses the LLM reply's own keys (e.g. "risk_of_physical_injury"), so the video scorer reads both alike.
     reply_key: str = ""
+    # "choice" (unordered options) or "score" (ordered levels, lowest first; systemone only, e.g. severity)
+    kind: str = "choice"
 
 
 @dataclass(frozen=True)

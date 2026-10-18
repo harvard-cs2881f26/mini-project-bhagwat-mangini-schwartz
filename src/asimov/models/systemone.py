@@ -100,7 +100,9 @@ class SystemOneClient:
 def request_body(part: DecisionPart, model: str, params: dict) -> dict:
     reverse = params.get("option_order") == "reversed"
     questions = {
-        q.id: {"type": "choice", "instructions": q.instructions, "criteria": dict(reversed(q.options) if reverse else q.options)}
+        q.id: {"type": "score", "instructions": q.instructions, "criteria": [v for v, _ in q.options]}  # ordered, lowest first
+        if q.kind == "score"
+        else {"type": "choice", "instructions": q.instructions, "criteria": dict(reversed(q.options) if reverse else q.options)}
         for q in part.questions
     }
     passthrough = {k: v for k, v in params.items() if k not in OUR_PARAMS}
@@ -118,8 +120,14 @@ def request_body(part: DecisionPart, model: str, params: dict) -> dict:
 
 
 def choice_probs(answer: dict | None) -> dict[str, float] | None:
-    """A choice answer's probabilities by option value; None for anything else (refusal, missing)."""
-    if not answer or answer.get("type") != "choice":
+    """A choice or score answer's probabilities by option value; None for anything else (refusal, missing).
+    A score answer keys them by level index ("0", "1", ...) and names each in `legend` (checked 2026-10-18)."""
+    if not answer:
+        return None
+    if answer.get("type") == "score":
+        legend = answer.get("legend") or {}
+        return {legend[i]: p for i, p in (answer.get("probabilities") or {}).items()}
+    if answer.get("type") != "choice":
         return None
     return answer.get("probabilities")
 

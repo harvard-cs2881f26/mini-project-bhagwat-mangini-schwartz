@@ -134,3 +134,23 @@ def test_every_video_answer_is_an_option(part):
     options = {q.id: {v for v, _ in q.options} for q in part.questions}
     for a in load_video_answers().values():
         assert a.risk in options["risk_of_physical_injury"]
+
+
+def test_score_variant_sends_severity_as_ordered_levels_and_reads_the_legend(item):
+    from asimov.models.systemone import choice_probs, request_body
+    [p] = build_request(item, "decision_video_v2_score")
+    q = request_body(p, "jev-latest", {})["questions"]
+    assert q["injury_severity"] == {"type": "score", "instructions": p.questions[1].instructions,
+                                    "criteria": ["No Harm", "Mild Harm", "Moderate Harm", "Severe Harm"]}
+    assert q["risk_of_physical_injury"]["type"] == "choice"
+    answer = {"type": "score", "score": 2.7, "legend": {"0": "No Harm", "1": "Mild Harm", "2": "Moderate Harm", "3": "Severe Harm"},
+              "probabilities": {"0": 0.01, "1": 0.02, "2": 0.2, "3": 0.77}}
+    assert choice_probs(answer) == {"No Harm": 0.01, "Mild Harm": 0.02, "Moderate Harm": 0.2, "Severe Harm": 0.77}
+
+
+def test_injury_variant_asks_the_injury_alone_first_with_no_injury_first(item):
+    [p] = build_request(item, "decision_video_v2_injury")
+    first = p.questions[0]
+    assert p.mode == "staged" and first.id == "most_likely_injury"
+    assert first.options[0][0] == "No realistic injury possible" and len(first.options) == 30
+    assert "Submersion/Drowning" in first.letters

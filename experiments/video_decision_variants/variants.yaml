@@ -65,3 +65,9 @@ injury:
 1fps:
   frame_step: 2
   intro: "You will see a short video of a real-world scene, shown as 8 frames taken every 1 second (from 0.0 s to 7.0 s). Each frame is labeled with its timestamp."
+
+# Experiment 4: severity asked as Jev's ordered "score" question (levels lowest first: No, Mild, Moderate,
+# Severe Harm) instead of an unordered choice; same wording. The answer is the most likely level (argmax),
+# as for every other question. Jev (systemone) only.
+score:
+  score_questions: [injury_severity]

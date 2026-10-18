@@ -1,0 +1,25 @@
+approx,ci_hi,ci_lo,claim,diff,figure,kind,metric,model_paper,models_ours,ours,paper,paper_in_ci,stand_in,status
+False,,,fig5a_gemini_2_5_pro_risk_accuracy,,5a,value,risk_accuracy,Gemini 2.5 Pro,,,0.84,,False,model not in this run
+False,,,fig5a_claude_opus_4_1_risk_accuracy,,5a,value,risk_accuracy,Claude Opus 4.1,,,0.64,,False,model not in this run
+False,,,fig5a_gpt_5_risk_accuracy,,5a,value,risk_accuracy,GPT 5,,,0.44,,False,model not in this run
+True,,,fig5b_gemini_2_5_flash_lite_timing_mae_s,,5b,value,timing_mae_s,Gemini 2.5 Flash-lite,,,1.43,,False,model not in this run
+True,,,fig5b_gemini_2_5_flash_lite_within_0_5_rate,,5b,value,within_0_5_rate,Gemini 2.5 Flash-lite,,,0.29,,False,model not in this run
+True,,,fig5b_gemini_2_5_flash_timing_mae_s,,5b,value,timing_mae_s,Gemini 2.5 Flash,,,1.4,,False,model not in this run
+True,,,fig5b_gemini_2_5_flash_within_0_5_rate,,5b,value,within_0_5_rate,Gemini 2.5 Flash,,,0.344,,False,model not in this run
+True,,,fig5b_gemini_2_5_pro_timing_mae_s,,5b,value,timing_mae_s,Gemini 2.5 Pro,,,0.72,,False,model not in this run
+True,,,fig5b_gemini_2_5_pro_within_0_5_rate,,5b,value,within_0_5_rate,Gemini 2.5 Pro,,,0.56,,False,model not in this run
+True,,,fig5b_claude_opus_4_1_timing_mae_s,,5b,value,timing_mae_s,Claude Opus 4.1,,,2.41,,False,model not in this run
+True,,,fig5b_claude_opus_4_1_within_0_5_rate,,5b,value,within_0_5_rate,Claude Opus 4.1,,,0.319,,False,model not in this run
+True,,,fig5b_claude_sonnet_4_timing_mae_s,,5b,value,timing_mae_s,Claude Sonnet 4,,,1.81,,False,model not in this run
+True,,,fig5b_claude_sonnet_4_within_0_5_rate,,5b,value,within_0_5_rate,Claude Sonnet 4,,,0.415,,False,model not in this run
+True,,,fig5b_gpt_5_mini_timing_mae_s,,5b,value,timing_mae_s,GPT 5 Mini,,,1.42,,False,model not in this run
+True,,,fig5b_gpt_5_mini_within_0_5_rate,,5b,value,within_0_5_rate,GPT 5 Mini,,,0.193,,False,model not in this run
+True,,,fig5b_gpt_5_nano_timing_mae_s,,5b,value,timing_mae_s,GPT 5 Nano,,,1.81,,False,model not in this run
+True,,,fig5b_gpt_5_nano_within_0_5_rate,,5b,value,within_0_5_rate,GPT 5 Nano,,,0.3,,False,model not in this run
+True,,,fig5b_gpt_5_timing_mae_s,,5b,value,timing_mae_s,GPT 5,,,1.76,,False,model not in this run
+True,,,fig5b_gpt_5_within_0_5_rate,,5b,value,within_0_5_rate,GPT 5,,,0.086,,False,model not in this run
+False,,,sec3_claude_opus_4_1_risk_accuracy_gap_text_minus_video,,,gap,risk_accuracy,Claude Opus 4.1,,,0.27,,False,not checked by code (see note)
+False,,,sec3_gpt5_risk_accuracy_gap_text_minus_video,,,gap,risk_accuracy,GPT5,,,0.4,,False,not checked by code (see note)
+False,,,sec3_gemini_2_5_pro_timing_mae_s,,,bound,timing_mae_s,Gemini 2.5 Pro,,,0.75,,False,"a bound, not a point value"
+False,,,sec3_gemini_2_5_pro_within_0_5_rate,,,value,within_0_5_rate,Gemini 2.5 Pro,,,0.56,,False,model not in this run
+False,,,appD_avg_majority_baseline_risk,,,baseline,majority_baseline_risk,,,,0.6725,,False,"derived from the dataset's counts, no model"

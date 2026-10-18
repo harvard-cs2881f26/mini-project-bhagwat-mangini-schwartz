@@ -1,0 +1,2628 @@
+{
+ "name": "Jev",
+ "provider": "systemone",
+ "model": "jev-latest",
+ "base_url": "https://api.typesafe.ai",
+ "params": {
+  "image_width": 498,
+  "image_height": 280
+ },
+ "prompt": "decision_video_v2_score",
+ "thinking": "min",
+ "log_reasoning": false,
+ "benchmark": "video",
+ "run": "video_dec_score",
+ "config_path": "configs/video_dec_score.yaml",
+ "config_sha256": "0eef0aa23e62c39cb90992ba74a9a7ecd6d290823e5dbf4c72b386eb567b745c",
+ "git_commit": "1c991f8f2e8c93421f0bdb4a29b8e450f1130144",
+ "git_dirty": true,
+ "scored_at": "2026-10-18T15:03:36-0400",
+ "key": "3e1b6827f5f8",
+ "errors": 0,
+ "input_tokens": 1956766,
+ "output_tokens": 65341,
+ "cached_input_tokens": null,
+ "truncation_rate": 0.0,
+ "refusal_rate": 1.0,
+ "n_with_reasoning": 0,
+ "n_reused": 0,
+ "n_requested": 287,
+ "n_dataset": 287,
+ "n_missing": 0,
+ "n": 287,
+ "risk_accuracy": 0.5853658536585366,
+ "timing_mae_s": 2.0974025974025974,
+ "within_0_5_rate": 0.3240418118466899,
+ "n_timing_error_cases": 154,
+ "miss_rate": 0.18518518518518517,
+ "false_alarm_rate": 0.3877551020408163,
+ "within_0_5_rate_interventions_only": 0.1746031746031746,
+ "severity_accuracy": 0.37662337662337664,
+ "n_severity": 77,
+ "parse_failure_rate": 0.0,
+ "per_item": {
+  "video_0196": {
+   "case": "error",
+   "truth_s": 2.5,
+   "pred_s": 7.0,
+   "error_s": 4.5,
+   "within_0_5": false,
+   "risk_ok": true,
+   "finish": "refused"
+  },
+  "video_0286": {
+   "case": "error",
+   "truth_s": 5.5,
+   "pred_s": 6.0,
+   "error_s": 0.5,
+   "within_0_5": true,
+   "risk_ok": true,
+   "finish": "refused"
+  },
+  "video_0105": {
+   "case": "error",
+   "truth_s": 6.0,
+   "pred_s": 7.0,
+   "error_s": 1.0,
+   "within_0_5": false,
+   "risk_ok": true,
+   "finish": "refused"
+  },
+  "video_0202": {
+   "case": "error",
+   "truth_s": 2.5,
+   "pred_s": 3.0,
+   "error_s": 0.5,
+   "within_0_5": true,
+   "risk_ok": true,
+   "finish": "refused"
+  },
+  "video_0250": {
+   "case": "error",
+   "truth_s": 5.0,
+   "pred_s": 5.5,
+   "error_s": 0.5,
+   "within_0_5": true,
+   "risk_ok": false,
+   "finish": "refused"
+  },
+  "video_0137": {
+   "case": "miss",
+   "truth_s": 1.0,
+   "pred_s": -1.0,
+   "error_s": null,
+   "within_0_5": false,
+   "risk_ok": false,
+   "finish": "refused"
+  },
+  "video_0099": {
+   "case": "error",
+   "truth_s": 6.5,
+   "pred_s": 7.5,
+   "error_s": 1.0,
+   "within_0_5": false,
+   "risk_ok": false,
+   "finish": "refused"
+  },
+  "video_0221": {
+   "case": "error",
+   "truth_s": 6.0,
+   "pred_s": 7.0,
+   "error_s": 1.0,
+   "within_0_5": false,
+   "risk_ok": false,
+   "finish": "refused"
+  },
+  "video_0035": {
+   "case": "correct_none",
+   "truth_s": -1.0,
+   "pred_s": -1.0,
+   "error_s": null,
+   "within_0_5": true,
+   "risk_ok": true,
+   "finish": "refused"
+  },
+  "video_0046": {
+   "case": "false_alarm",
+   "truth_s": -1.0,
+   "pred_s": 7.0,
+   "error_s": null,
+   "within_0_5": false,
+   "risk_ok": false,
+   "finish": "refused"
+  },
+  "video_0110": {
+   "case": "error",
+   "truth_s": 6.0,
+   "pred_s": 7.0,
+   "error_s": 1.0,
+   "within_0_5": false,
+   "risk_ok": false,
+   "finish": "refused"
+  },
+  "video_0216": {
+   "case": "error",
+   "truth_s": 4.5,
+   "pred_s": 7.5,
+   "error_s": 3.0,
+   "within_0_5": false,
+   "risk_ok": true,
+   "finish": "refused"
+  },
+  "video_0101": {
+   "case": "miss",
+   "truth_s": 5.0,
+   "pred_s": -1.0,
+   "error_s": null,
+   "within_0_5": false,
+   "risk_ok": true,
+   "finish": "refused"
+  },
+  "video_0229": {
+   "case": "error",
+   "truth_s": 1.5,
+   "pred_s": 6.5,
+   "error_s": 5.0,
+   "within_0_5": false,
+   "risk_ok": false,
+   "finish": "refused"
+  },
+  "video_0084": {
+   "case": "error",
+   "truth_s": 1.0,
+   "pred_s": 7.0,
+   "error_s": 6.0,
+   "within_0_5": false,
+   "risk_ok": false,
+   "finish": "refused"
+  },
+  "video_0103": {
+   "case": "error",
+   "truth_s": 6.0,
+   "pred_s": 6.5,
+   "error_s": 0.5,
+   "within_0_5": true,
+   "risk_ok": true,
+   "finish": "refused"
+  },
+  "video_0220": {
+   "case": "error",
+   "truth_s": 5.5,
+   "pred_s": 7.0,
+   "error_s": 1.5,
+   "within_0_5": false,
+   "risk_ok": false,
+   "finish": "refused"
+  },
+  "video_0243": {
+   "case": "error",
+   "truth_s": 6.5,
+   "pred_s": 7.0,
+   "error_s": 0.5,
+   "within_0_5": true,
+   "risk_ok": true,
+   "finish": "refused"
+  },
+  "video_0163": {
+   "case": "miss",
+   "truth_s": 5.5,
+   "pred_s": -1.0,
+   "error_s": null,
+   "within_0_5": false,
+   "risk_ok": true,
+   "finish": "refused"
+  },
+  "video_0281": {
+   "case": "error",
+   "truth_s": 5.0,
+   "pred_s": 7.0,
+   "error_s": 2.0,
+   "within_0_5": false,
+   "risk_ok": true,
+   "finish": "refused"
+  },
+  "video_0092": {
+   "case": "correct_none",
+   "truth_s": -1.0,
+   "pred_s": -1.0,
+   "error_s": null,
+   "within_0_5": true,
+   "risk_ok": true,
+   "finish": "refused"
+  },
+  "video_0042": {
+   "case": "miss",
+   "truth_s": 3.0,
+   "pred_s": -1.0,
+   "error_s": null,
+   "within_0_5": false,
+   "risk_ok": true,
+   "finish": "refused"
+  },
+  "video_0214": {
+   "case": "error",
+   "truth_s": 1.5,
+   "pred_s": 3.0,
+   "error_s": 1.5,
+   "within_0_5": false,
+   "risk_ok": true,
+   "finish": "refused"
+  },
+  "video_0199": {
+   "case": "error",
+   "truth_s": 4.5,
+   "pred_s": 4.5,
+   "error_s": 0.0,
+   "within_0_5": true,
+   "risk_ok": true,
+   "finish": "refused"
+  },
+  "video_0118": {
+   "case": "error",
+   "truth_s": 5.0,
+   "pred_s": 5.0,
+   "error_s": 0.0,
+   "within_0_5": true,
+   "risk_ok": false,
+   "finish": "refused"
+  },
+  "video_0272": {
+   "case": "error",
+   "truth_s": 4.5,
+   "pred_s": 6.5,
+   "error_s": 2.0,
+   "within_0_5": false,
+   "risk_ok": true,
+   "finish": "refused"
+  },
+  "video_0013": {
+   "case": "error",
+   "truth_s": 8.0,
+   "pred_s": 7.0,
+   "error_s": 1.0,
+   "within_0_5": false,
+   "risk_ok": false,
+   "finish": "refused"
+  },
+  "video_0263": {
+   "case": "error",
+   "truth_s": 4.0,
+   "pred_s": 5.0,
+   "error_s": 1.0,
+   "within_0_5": false,
+   "risk_ok": true,
+   "finish": "refused"
+  },
+  "video_0223": {
+   "case": "miss",
+   "truth_s": 3.5,
+   "pred_s": -1.0,
+   "error_s": null,
+   "within_0_5": false,
+   "risk_ok": true,
+   "finish": "refused"
+  },
+  "video_0080": {
+   "case": "correct_none",
+   "truth_s": -1.0,
+   "pred_s": -1.0,
+   "error_s": null,
+   "within_0_5": true,
+   "risk_ok": false,
+   "finish": "refused"
+  },
+  "video_0068": {
+   "case": "false_alarm",
+   "truth_s": -1.0,
+   "pred_s": 7.0,
+   "error_s": null,
+   "within_0_5": false,
+   "risk_ok": false,
+   "finish": "refused"
+  },
+  "video_0119": {
+   "case": "correct_none",
+   "truth_s": -1.0,
+   "pred_s": -1.0,
+   "error_s": null,
+   "within_0_5": true,
+   "risk_ok": false,
+   "finish": "refused"
+  },
+  "video_0167": {
+   "case": "error",
+   "truth_s": 1.0,
+   "pred_s": 7.0,
+   "error_s": 6.0,
+   "within_0_5": false,
+   "risk_ok": false,
+   "finish": "refused"
+  },
+  "video_0014": {
+   "case": "false_alarm",
+   "truth_s": -1.0,
+   "pred_s": 6.0,
+   "error_s": null,
+   "within_0_5": false,
+   "risk_ok": true,
+   "finish": "refused"
+  },
+  "video_0213": {
+   "case": "error",
+   "truth_s": 6.0,
+   "pred_s": 7.0,
+   "error_s": 1.0,
+   "within_0_5": false,
+   "risk_ok": true,
+   "finish": "refused"
+  },
+  "video_0063": {
+   "case": "false_alarm",
+   "truth_s": -1.0,
+   "pred_s": 5.5,
+   "error_s": null,
+   "within_0_5": false,
+   "risk_ok": true,
+   "finish": "refused"
+  },
+  "video_0153": {
+   "case": "false_alarm",
+   "truth_s": -1.0,
+   "pred_s": 7.0,
+   "error_s": null,
+   "within_0_5": false,
+   "risk_ok": false,
+   "finish": "refused"
+  },
+  "video_0166": {
+   "case": "error",
+   "truth_s": 7.0,
+   "pred_s": 4.0,
+   "error_s": 3.0,
+   "within_0_5": false,
+   "risk_ok": false,
+   "finish": "refused"
+  },
+  "video_0259": {
+   "case": "error",
+   "truth_s": 5.5,
+   "pred_s": 5.5,
+   "error_s": 0.0,
+   "within_0_5": true,
+   "risk_ok": true,
+   "finish": "refused"
+  },
+  "video_0240": {
+   "case": "error",
+   "truth_s": 4.0,
+   "pred_s": 7.0,
+   "error_s": 3.0,
+   "within_0_5": false,
+   "risk_ok": true,
+   "finish": "refused"
+  },
+  "video_0097": {
+   "case": "false_alarm",
+   "truth_s": -1.0,
+   "pred_s": 7.0,
+   "error_s": null,
+   "within_0_5": false,
+   "risk_ok": false,
+   "finish": "refused"
+  },
+  "video_0041": {
+   "case": "error",
+   "truth_s": 0.5,
+   "pred_s": 6.5,
+   "error_s": 6.0,
+   "within_0_5": false,
+   "risk_ok": false,
+   "finish": "refused"
+  },
+  "video_0146": {
+   "case": "error",
+   "truth_s": 2.0,
+   "pred_s": 7.0,
+   "error_s": 5.0,
+   "within_0_5": false,
+   "risk_ok": false,
+   "finish": "refused"
+  },
+  "video_0024": {
+   "case": "error",
+   "truth_s": 3.0,
+   "pred_s": 7.0,
+   "error_s": 4.0,
+   "within_0_5": false,
+   "risk_ok": false,
+   "finish": "refused"
+  },
+  "video_0185": {
+   "case": "correct_none",
+   "truth_s": -1.0,
+   "pred_s": -1.0,
+   "error_s": null,
+   "within_0_5": true,
+   "risk_ok": true,
+   "finish": "refused"
+  },
+  "video_0057": {
+   "case": "error",
+   "truth_s": 3.0,
+   "pred_s": 7.0,
+   "error_s": 4.0,
+   "within_0_5": false,
+   "risk_ok": true,
+   "finish": "refused"
+  },
+  "video_0088": {
+   "case": "false_alarm",
+   "truth_s": -1.0,
+   "pred_s": 5.0,
+   "error_s": null,
+   "within_0_5": false,
+   "risk_ok": false,
+   "finish": "refused"
+  },
+  "video_0040": {
+   "case": "false_alarm",
+   "truth_s": -1.0,
+   "pred_s": 7.0,
+   "error_s": null,
+   "within_0_5": false,
+   "risk_ok": false,
+   "finish": "refused"
+  },
+  "video_0142": {
+   "case": "error",
+   "truth_s": 1.0,
+   "pred_s": 7.5,
+   "error_s": 6.5,
+   "within_0_5": false,
+   "risk_ok": false,
+   "finish": "refused"
+  },
+  "video_0053": {
+   "case": "correct_none",
+   "truth_s": -1.0,
+   "pred_s": -1.0,
+   "error_s": null,
+   "within_0_5": true,
+   "risk_ok": true,
+   "finish": "refused"
+  },
+  "video_0195": {
+   "case": "error",
+   "truth_s": 5.5,
+   "pred_s": 7.0,
+   "error_s": 1.5,
+   "within_0_5": false,
+   "risk_ok": true,
+   "finish": "refused"
+  },
+  "video_0176": {
+   "case": "miss",
+   "truth_s": 8.0,
+   "pred_s": -1.0,
+   "error_s": null,
+   "within_0_5": false,
+   "risk_ok": false,
+   "finish": "refused"
+  },
+  "video_0165": {
+   "case": "correct_none",
+   "truth_s": -1.0,
+   "pred_s": -1.0,
+   "error_s": null,
+   "within_0_5": true,
+   "risk_ok": true,
+   "finish": "refused"
+  },
+  "video_0269": {
+   "case": "error",
+   "truth_s": 4.5,
+   "pred_s": 5.0,
+   "error_s": 0.5,
+   "within_0_5": true,
+   "risk_ok": true,
+   "finish": "refused"
+  },
+  "video_0245": {
+   "case": "error",
+   "truth_s": 4.5,
+   "pred_s": 5.0,
+   "error_s": 0.5,
+   "within_0_5": true,
+   "risk_ok": false,
+   "finish": "refused"
+  },
+  "video_0135": {
+   "case": "correct_none",
+   "truth_s": -1.0,
+   "pred_s": -1.0,
+   "error_s": null,
+   "within_0_5": true,
+   "risk_ok": false,
+   "finish": "refused"
+  },
+  "video_0078": {
+   "case": "false_alarm",
+   "truth_s": -1.0,
+   "pred_s": 7.0,
+   "error_s": null,
+   "within_0_5": false,
+   "risk_ok": true,
+   "finish": "refused"
+  },
+  "video_0108": {
+   "case": "correct_none",
+   "truth_s": -1.0,
+   "pred_s": -1.0,
+   "error_s": null,
+   "within_0_5": true,
+   "risk_ok": true,
+   "finish": "refused"
+  },
+  "video_0277": {
+   "case": "error",
+   "truth_s": 6.5,
+   "pred_s": 7.0,
+   "error_s": 0.5,
+   "within_0_5": true,
+   "risk_ok": true,
+   "finish": "refused"
+  },
+  "video_0034": {
+   "case": "correct_none",
+   "truth_s": -1.0,
+   "pred_s": -1.0,
+   "error_s": null,
+   "within_0_5": true,
+   "risk_ok": true,
+   "finish": "refused"
+  },
+  "video_0164": {
+   "case": "error",
+   "truth_s": 5.0,
+   "pred_s": 6.5,
+   "error_s": 1.5,
+   "within_0_5": false,
+   "risk_ok": false,
+   "finish": "refused"
+  },
+  "video_0189": {
+   "case": "miss",
+   "truth_s": 7.0,
+   "pred_s": -1.0,
+   "error_s": null,
+   "within_0_5": false,
+   "risk_ok": true,
+   "finish": "refused"
+  },
+  "video_0087": {
+   "case": "correct_none",
+   "truth_s": -1.0,
+   "pred_s": -1.0,
+   "error_s": null,
+   "within_0_5": true,
+   "risk_ok": true,
+   "finish": "refused"
+  },
+  "video_0010": {
+   "case": "error",
+   "truth_s": 4.0,
+   "pred_s": 5.0,
+   "error_s": 1.0,
+   "within_0_5": false,
+   "risk_ok": false,
+   "finish": "refused"
+  },
+  "video_0058": {
+   "case": "correct_none",
+   "truth_s": -1.0,
+   "pred_s": -1.0,
+   "error_s": null,
+   "within_0_5": true,
+   "risk_ok": true,
+   "finish": "refused"
+  },
+  "video_0192": {
+   "case": "error",
+   "truth_s": 1.0,
+   "pred_s": 5.0,
+   "error_s": 4.0,
+   "within_0_5": false,
+   "risk_ok": false,
+   "finish": "refused"
+  },
+  "video_0019": {
+   "case": "false_alarm",
+   "truth_s": -1.0,
+   "pred_s": 6.5,
+   "error_s": null,
+   "within_0_5": false,
+   "risk_ok": true,
+   "finish": "refused"
+  },
+  "video_0112": {
+   "case": "false_alarm",
+   "truth_s": -1.0,
+   "pred_s": 7.0,
+   "error_s": null,
+   "within_0_5": false,
+   "risk_ok": false,
+   "finish": "refused"
+  },
+  "video_0127": {
+   "case": "correct_none",
+   "truth_s": -1.0,
+   "pred_s": -1.0,
+   "error_s": null,
+   "within_0_5": true,
+   "risk_ok": true,
+   "finish": "refused"
+  },
+  "video_0090": {
+   "case": "false_alarm",
+   "truth_s": -1.0,
+   "pred_s": 7.5,
+   "error_s": null,
+   "within_0_5": false,
+   "risk_ok": false,
+   "finish": "refused"
+  },
+  "video_0039": {
+   "case": "correct_none",
+   "truth_s": -1.0,
+   "pred_s": -1.0,
+   "error_s": null,
+   "within_0_5": true,
+   "risk_ok": true,
+   "finish": "refused"
+  },
+  "video_0065": {
+   "case": "error",
+   "truth_s": 2.0,
+   "pred_s": 3.0,
+   "error_s": 1.0,
+   "within_0_5": false,
+   "risk_ok": false,
+   "finish": "refused"
+  },
+  "video_0230": {
+   "case": "error",
+   "truth_s": 3.5,
+   "pred_s": 7.0,
+   "error_s": 3.5,
+   "within_0_5": false,
+   "risk_ok": true,
+   "finish": "refused"
+  },
+  "video_0131": {
+   "case": "false_alarm",
+   "truth_s": -1.0,
+   "pred_s": 3.5,
+   "error_s": null,
+   "within_0_5": false,
+   "risk_ok": false,
+   "finish": "refused"
+  },
+  "video_0001": {
+   "case": "error",
+   "truth_s": 5.0,
+   "pred_s": 7.0,
+   "error_s": 2.0,
+   "within_0_5": false,
+   "risk_ok": false,
+   "finish": "refused"
+  },
+  "video_0182": {
+   "case": "correct_none",
+   "truth_s": -1.0,
+   "pred_s": -1.0,
+   "error_s": null,
+   "within_0_5": true,
+   "risk_ok": false,
+   "finish": "refused"
+  },
+  "video_0212": {
+   "case": "error",
+   "truth_s": 4.0,
+   "pred_s": 5.0,
+   "error_s": 1.0,
+   "within_0_5": false,
+   "risk_ok": true,
+   "finish": "refused"
+  },
+  "video_0096": {
+   "case": "correct_none",
+   "truth_s": -1.0,
+   "pred_s": -1.0,
+   "error_s": null,
+   "within_0_5": true,
+   "risk_ok": false,
+   "finish": "refused"
+  },
+  "video_0122": {
+   "case": "correct_none",
+   "truth_s": -1.0,
+   "pred_s": -1.0,
+   "error_s": null,
+   "within_0_5": true,
+   "risk_ok": true,
+   "finish": "refused"
+  },
+  "video_0032": {
+   "case": "error",
+   "truth_s": 5.0,
+   "pred_s": 5.5,
+   "error_s": 0.5,
+   "within_0_5": true,
+   "risk_ok": true,
+   "finish": "refused"
+  },
+  "video_0067": {
+   "case": "error",
+   "truth_s": 3.0,
+   "pred_s": 7.5,
+   "error_s": 4.5,
+   "within_0_5": false,
+   "risk_ok": true,
+   "finish": "refused"
+  },
+  "video_0194": {
+   "case": "error",
+   "truth_s": 6.5,
+   "pred_s": 7.0,
+   "error_s": 0.5,
+   "within_0_5": true,
+   "risk_ok": true,
+   "finish": "refused"
+  },
+  "video_0264": {
+   "case": "error",
+   "truth_s": 1.5,
+   "pred_s": 7.0,
+   "error_s": 5.5,
+   "within_0_5": false,
+   "risk_ok": true,
+   "finish": "refused"
+  },
+  "video_0177": {
+   "case": "correct_none",
+   "truth_s": -1.0,
+   "pred_s": -1.0,
+   "error_s": null,
+   "within_0_5": true,
+   "risk_ok": false,
+   "finish": "refused"
+  },
+  "video_0242": {
+   "case": "error",
+   "truth_s": 5.0,
+   "pred_s": 7.0,
+   "error_s": 2.0,
+   "within_0_5": false,
+   "risk_ok": true,
+   "finish": "refused"
+  },
+  "video_0120": {
+   "case": "error",
+   "truth_s": 3.0,
+   "pred_s": 7.0,
+   "error_s": 4.0,
+   "within_0_5": false,
+   "risk_ok": true,
+   "finish": "refused"
+  },
+  "video_0116": {
+   "case": "error",
+   "truth_s": 7.0,
+   "pred_s": 5.5,
+   "error_s": 1.5,
+   "within_0_5": false,
+   "risk_ok": false,
+   "finish": "refused"
+  },
+  "video_0260": {
+   "case": "error",
+   "truth_s": 5.0,
+   "pred_s": 7.0,
+   "error_s": 2.0,
+   "within_0_5": false,
+   "risk_ok": false,
+   "finish": "refused"
+  },
+  "video_0072": {
+   "case": "correct_none",
+   "truth_s": -1.0,
+   "pred_s": -1.0,
+   "error_s": null,
+   "within_0_5": true,
+   "risk_ok": true,
+   "finish": "refused"
+  },
+  "video_0170": {
+   "case": "miss",
+   "truth_s": 6.5,
+   "pred_s": -1.0,
+   "error_s": null,
+   "within_0_5": false,
+   "risk_ok": false,
+   "finish": "refused"
+  },
+  "video_0045": {
+   "case": "error",
+   "truth_s": 2.0,
+   "pred_s": 2.0,
+   "error_s": 0.0,
+   "within_0_5": true,
+   "risk_ok": false,
+   "finish": "refused"
+  },
+  "video_0227": {
+   "case": "error",
+   "truth_s": 5.5,
+   "pred_s": 6.5,
+   "error_s": 1.0,
+   "within_0_5": false,
+   "risk_ok": true,
+   "finish": "refused"
+  },
+  "video_0143": {
+   "case": "false_alarm",
+   "truth_s": -1.0,
+   "pred_s": 3.5,
+   "error_s": null,
+   "within_0_5": false,
+   "risk_ok": true,
+   "finish": "refused"
+  },
+  "video_0267": {
+   "case": "error",
+   "truth_s": 5.5,
+   "pred_s": 7.0,
+   "error_s": 1.5,
+   "within_0_5": false,
+   "risk_ok": true,
+   "finish": "refused"
+  },
+  "video_0089": {
+   "case": "error",
+   "truth_s": 4.0,
+   "pred_s": 5.0,
+   "error_s": 1.0,
+   "within_0_5": false,
+   "risk_ok": false,
+   "finish": "refused"
+  },
+  "video_0276": {
+   "case": "error",
+   "truth_s": 3.0,
+   "pred_s": 7.5,
+   "error_s": 4.5,
+   "within_0_5": false,
+   "risk_ok": true,
+   "finish": "refused"
+  },
+  "video_0076": {
+   "case": "correct_none",
+   "truth_s": -1.0,
+   "pred_s": -1.0,
+   "error_s": null,
+   "within_0_5": true,
+   "risk_ok": true,
+   "finish": "refused"
+  },
+  "video_0270": {
+   "case": "error",
+   "truth_s": 2.5,
+   "pred_s": 4.5,
+   "error_s": 2.0,
+   "within_0_5": false,
+   "risk_ok": true,
+   "finish": "refused"
+  },
+  "video_0059": {
+   "case": "correct_none",
+   "truth_s": -1.0,
+   "pred_s": -1.0,
+   "error_s": null,
+   "within_0_5": true,
+   "risk_ok": true,
+   "finish": "refused"
+  },
+  "video_0064": {
+   "case": "correct_none",
+   "truth_s": -1.0,
+   "pred_s": -1.0,
+   "error_s": null,
+   "within_0_5": true,
+   "risk_ok": true,
+   "finish": "refused"
+  },
+  "video_0117": {
+   "case": "correct_none",
+   "truth_s": -1.0,
+   "pred_s": -1.0,
+   "error_s": null,
+   "within_0_5": true,
+   "risk_ok": false,
+   "finish": "refused"
+  },
+  "video_0247": {
+   "case": "error",
+   "truth_s": 4.5,
+   "pred_s": 5.5,
+   "error_s": 1.0,
+   "within_0_5": false,
+   "risk_ok": true,
+   "finish": "refused"
+  },
+  "video_0265": {
+   "case": "error",
+   "truth_s": 5.0,
+   "pred_s": 6.0,
+   "error_s": 1.0,
+   "within_0_5": false,
+   "risk_ok": true,
+   "finish": "refused"
+  },
+  "video_0044": {
+   "case": "miss",
+   "truth_s": 6.0,
+   "pred_s": -1.0,
+   "error_s": null,
+   "within_0_5": false,
+   "risk_ok": true,
+   "finish": "refused"
+  },
+  "video_0179": {
+   "case": "false_alarm",
+   "truth_s": -1.0,
+   "pred_s": 7.0,
+   "error_s": null,
+   "within_0_5": false,
+   "risk_ok": true,
+   "finish": "refused"
+  },
+  "video_0082": {
+   "case": "miss",
+   "truth_s": 6.5,
+   "pred_s": -1.0,
+   "error_s": null,
+   "within_0_5": false,
+   "risk_ok": false,
+   "finish": "refused"
+  },
+  "video_0129": {
+   "case": "error",
+   "truth_s": 5.5,
+   "pred_s": 7.0,
+   "error_s": 1.5,
+   "within_0_5": false,
+   "risk_ok": false,
+   "finish": "refused"
+  },
+  "video_0028": {
+   "case": "error",
+   "truth_s": 5.0,
+   "pred_s": 7.0,
+   "error_s": 2.0,
+   "within_0_5": false,
+   "risk_ok": false,
+   "finish": "refused"
+  },
+  "video_0188": {
+   "case": "error",
+   "truth_s": 4.0,
+   "pred_s": 3.5,
+   "error_s": 0.5,
+   "within_0_5": true,
+   "risk_ok": false,
+   "finish": "refused"
+  },
+  "video_0210": {
+   "case": "miss",
+   "truth_s": 1.5,
+   "pred_s": -1.0,
+   "error_s": null,
+   "within_0_5": false,
+   "risk_ok": true,
+   "finish": "refused"
+  },
+  "video_0106": {
+   "case": "correct_none",
+   "truth_s": -1.0,
+   "pred_s": -1.0,
+   "error_s": null,
+   "within_0_5": true,
+   "risk_ok": false,
+   "finish": "refused"
+  },
+  "video_0012": {
+   "case": "error",
+   "truth_s": 1.5,
+   "pred_s": 6.5,
+   "error_s": 5.0,
+   "within_0_5": false,
+   "risk_ok": false,
+   "finish": "refused"
+  },
+  "video_0079": {
+   "case": "miss",
+   "truth_s": 2.5,
+   "pred_s": -1.0,
+   "error_s": null,
+   "within_0_5": false,
+   "risk_ok": false,
+   "finish": "refused"
+  },
+  "video_0054": {
+   "case": "correct_none",
+   "truth_s": -1.0,
+   "pred_s": -1.0,
+   "error_s": null,
+   "within_0_5": true,
+   "risk_ok": false,
+   "finish": "refused"
+  },
+  "video_0151": {
+   "case": "miss",
+   "truth_s": 4.0,
+   "pred_s": -1.0,
+   "error_s": null,
+   "within_0_5": false,
+   "risk_ok": true,
+   "finish": "refused"
+  },
+  "video_0002": {
+   "case": "error",
+   "truth_s": 8.0,
+   "pred_s": 7.0,
+   "error_s": 1.0,
+   "within_0_5": false,
+   "risk_ok": false,
+   "finish": "refused"
+  },
+  "video_0086": {
+   "case": "false_alarm",
+   "truth_s": -1.0,
+   "pred_s": 4.5,
+   "error_s": null,
+   "within_0_5": false,
+   "risk_ok": true,
+   "finish": "refused"
+  },
+  "video_0007": {
+   "case": "miss",
+   "truth_s": 2.0,
+   "pred_s": -1.0,
+   "error_s": null,
+   "within_0_5": false,
+   "risk_ok": false,
+   "finish": "refused"
+  },
+  "video_0246": {
+   "case": "error",
+   "truth_s": 4.5,
+   "pred_s": 6.5,
+   "error_s": 2.0,
+   "within_0_5": false,
+   "risk_ok": true,
+   "finish": "refused"
+  },
+  "video_0093": {
+   "case": "correct_none",
+   "truth_s": -1.0,
+   "pred_s": -1.0,
+   "error_s": null,
+   "within_0_5": true,
+   "risk_ok": true,
+   "finish": "refused"
+  },
+  "video_0026": {
+   "case": "false_alarm",
+   "truth_s": -1.0,
+   "pred_s": 6.0,
+   "error_s": null,
+   "within_0_5": false,
+   "risk_ok": true,
+   "finish": "refused"
+  },
+  "video_0193": {
+   "case": "error",
+   "truth_s": 2.5,
+   "pred_s": 5.5,
+   "error_s": 3.0,
+   "within_0_5": false,
+   "risk_ok": true,
+   "finish": "refused"
+  },
+  "video_0273": {
+   "case": "error",
+   "truth_s": 3.5,
+   "pred_s": 7.0,
+   "error_s": 3.5,
+   "within_0_5": false,
+   "risk_ok": true,
+   "finish": "refused"
+  },
+  "video_0162": {
+   "case": "error",
+   "truth_s": 4.0,
+   "pred_s": 5.5,
+   "error_s": 1.5,
+   "within_0_5": false,
+   "risk_ok": false,
+   "finish": "refused"
+  },
+  "video_0283": {
+   "case": "error",
+   "truth_s": 5.5,
+   "pred_s": 7.0,
+   "error_s": 1.5,
+   "within_0_5": false,
+   "risk_ok": true,
+   "finish": "refused"
+  },
+  "video_0157": {
+   "case": "correct_none",
+   "truth_s": -1.0,
+   "pred_s": -1.0,
+   "error_s": null,
+   "within_0_5": true,
+   "risk_ok": true,
+   "finish": "refused"
+  },
+  "video_0123": {
+   "case": "false_alarm",
+   "truth_s": -1.0,
+   "pred_s": 6.0,
+   "error_s": null,
+   "within_0_5": false,
+   "risk_ok": false,
+   "finish": "refused"
+  },
+  "video_0049": {
+   "case": "error",
+   "truth_s": 4.0,
+   "pred_s": 6.0,
+   "error_s": 2.0,
+   "within_0_5": false,
+   "risk_ok": false,
+   "finish": "refused"
+  },
+  "video_0005": {
+   "case": "correct_none",
+   "truth_s": -1.0,
+   "pred_s": -1.0,
+   "error_s": null,
+   "within_0_5": true,
+   "risk_ok": true,
+   "finish": "refused"
+  },
+  "video_0178": {
+   "case": "correct_none",
+   "truth_s": -1.0,
+   "pred_s": -1.0,
+   "error_s": null,
+   "within_0_5": true,
+   "risk_ok": false,
+   "finish": "refused"
+  },
+  "video_0159": {
+   "case": "false_alarm",
+   "truth_s": -1.0,
+   "pred_s": 6.0,
+   "error_s": null,
+   "within_0_5": false,
+   "risk_ok": true,
+   "finish": "refused"
+  },
+  "video_0094": {
+   "case": "miss",
+   "truth_s": 6.5,
+   "pred_s": -1.0,
+   "error_s": null,
+   "within_0_5": false,
+   "risk_ok": false,
+   "finish": "refused"
+  },
+  "video_0198": {
+   "case": "error",
+   "truth_s": 4.5,
+   "pred_s": 4.0,
+   "error_s": 0.5,
+   "within_0_5": true,
+   "risk_ok": true,
+   "finish": "refused"
+  },
+  "video_0175": {
+   "case": "correct_none",
+   "truth_s": -1.0,
+   "pred_s": -1.0,
+   "error_s": null,
+   "within_0_5": true,
+   "risk_ok": true,
+   "finish": "refused"
+  },
+  "video_0030": {
+   "case": "error",
+   "truth_s": 4.0,
+   "pred_s": 5.5,
+   "error_s": 1.5,
+   "within_0_5": false,
+   "risk_ok": false,
+   "finish": "refused"
+  },
+  "video_0203": {
+   "case": "error",
+   "truth_s": 5.0,
+   "pred_s": 6.5,
+   "error_s": 1.5,
+   "within_0_5": false,
+   "risk_ok": true,
+   "finish": "refused"
+  },
+  "video_0209": {
+   "case": "error",
+   "truth_s": 3.5,
+   "pred_s": 6.0,
+   "error_s": 2.5,
+   "within_0_5": false,
+   "risk_ok": true,
+   "finish": "refused"
+  },
+  "video_0006": {
+   "case": "error",
+   "truth_s": 2.5,
+   "pred_s": 5.0,
+   "error_s": 2.5,
+   "within_0_5": false,
+   "risk_ok": false,
+   "finish": "refused"
+  },
+  "video_0018": {
+   "case": "error",
+   "truth_s": 3.5,
+   "pred_s": 7.5,
+   "error_s": 4.0,
+   "within_0_5": false,
+   "risk_ok": false,
+   "finish": "refused"
+  },
+  "video_0136": {
+   "case": "correct_none",
+   "truth_s": -1.0,
+   "pred_s": -1.0,
+   "error_s": null,
+   "within_0_5": true,
+   "risk_ok": false,
+   "finish": "refused"
+  },
+  "video_0011": {
+   "case": "error",
+   "truth_s": 6.0,
+   "pred_s": 7.0,
+   "error_s": 1.0,
+   "within_0_5": false,
+   "risk_ok": false,
+   "finish": "refused"
+  },
+  "video_0149": {
+   "case": "error",
+   "truth_s": 6.0,
+   "pred_s": 7.0,
+   "error_s": 1.0,
+   "within_0_5": false,
+   "risk_ok": true,
+   "finish": "refused"
+  },
+  "video_0266": {
+   "case": "error",
+   "truth_s": 5.5,
+   "pred_s": 7.0,
+   "error_s": 1.5,
+   "within_0_5": false,
+   "risk_ok": false,
+   "finish": "refused"
+  },
+  "video_0025": {
+   "case": "false_alarm",
+   "truth_s": -1.0,
+   "pred_s": 5.5,
+   "error_s": null,
+   "within_0_5": false,
+   "risk_ok": true,
+   "finish": "refused"
+  },
+  "video_0015": {
+   "case": "miss",
+   "truth_s": 1.0,
+   "pred_s": -1.0,
+   "error_s": null,
+   "within_0_5": false,
+   "risk_ok": false,
+   "finish": "refused"
+  },
+  "video_0109": {
+   "case": "miss",
+   "truth_s": 6.0,
+   "pred_s": -1.0,
+   "error_s": null,
+   "within_0_5": false,
+   "risk_ok": true,
+   "finish": "refused"
+  },
+  "video_0279": {
+   "case": "error",
+   "truth_s": 5.5,
+   "pred_s": 7.0,
+   "error_s": 1.5,
+   "within_0_5": false,
+   "risk_ok": false,
+   "finish": "refused"
+  },
+  "video_0043": {
+   "case": "correct_none",
+   "truth_s": -1.0,
+   "pred_s": -1.0,
+   "error_s": null,
+   "within_0_5": true,
+   "risk_ok": true,
+   "finish": "refused"
+  },
+  "video_0095": {
+   "case": "correct_none",
+   "truth_s": -1.0,
+   "pred_s": -1.0,
+   "error_s": null,
+   "within_0_5": true,
+   "risk_ok": true,
+   "finish": "refused"
+  },
+  "video_0257": {
+   "case": "error",
+   "truth_s": 5.5,
+   "pred_s": 6.0,
+   "error_s": 0.5,
+   "within_0_5": true,
+   "risk_ok": true,
+   "finish": "refused"
+  },
+  "video_0268": {
+   "case": "error",
+   "truth_s": 6.5,
+   "pred_s": 7.0,
+   "error_s": 0.5,
+   "within_0_5": true,
+   "risk_ok": false,
+   "finish": "refused"
+  },
+  "video_0069": {
+   "case": "correct_none",
+   "truth_s": -1.0,
+   "pred_s": -1.0,
+   "error_s": null,
+   "within_0_5": true,
+   "risk_ok": true,
+   "finish": "refused"
+  },
+  "video_0004": {
+   "case": "miss",
+   "truth_s": 3.0,
+   "pred_s": -1.0,
+   "error_s": null,
+   "within_0_5": false,
+   "risk_ok": true,
+   "finish": "refused"
+  },
+  "video_0251": {
+   "case": "error",
+   "truth_s": 6.0,
+   "pred_s": 7.0,
+   "error_s": 1.0,
+   "within_0_5": false,
+   "risk_ok": true,
+   "finish": "refused"
+  },
+  "video_0190": {
+   "case": "error",
+   "truth_s": 6.0,
+   "pred_s": 6.5,
+   "error_s": 0.5,
+   "within_0_5": true,
+   "risk_ok": true,
+   "finish": "refused"
+  },
+  "video_0280": {
+   "case": "error",
+   "truth_s": 5.5,
+   "pred_s": 7.0,
+   "error_s": 1.5,
+   "within_0_5": false,
+   "risk_ok": true,
+   "finish": "refused"
+  },
+  "video_0233": {
+   "case": "error",
+   "truth_s": 1.5,
+   "pred_s": 7.5,
+   "error_s": 6.0,
+   "within_0_5": false,
+   "risk_ok": true,
+   "finish": "refused"
+  },
+  "video_0124": {
+   "case": "miss",
+   "truth_s": 4.5,
+   "pred_s": -1.0,
+   "error_s": null,
+   "within_0_5": false,
+   "risk_ok": false,
+   "finish": "refused"
+  },
+  "video_0029": {
+   "case": "error",
+   "truth_s": 7.0,
+   "pred_s": 7.0,
+   "error_s": 0.0,
+   "within_0_5": true,
+   "risk_ok": true,
+   "finish": "refused"
+  },
+  "video_0187": {
+   "case": "miss",
+   "truth_s": 5.0,
+   "pred_s": -1.0,
+   "error_s": null,
+   "within_0_5": false,
+   "risk_ok": true,
+   "finish": "refused"
+  },
+  "video_0232": {
+   "case": "error",
+   "truth_s": 5.5,
+   "pred_s": 6.5,
+   "error_s": 1.0,
+   "within_0_5": false,
+   "risk_ok": true,
+   "finish": "refused"
+  },
+  "video_0021": {
+   "case": "error",
+   "truth_s": 7.0,
+   "pred_s": 5.5,
+   "error_s": 1.5,
+   "within_0_5": false,
+   "risk_ok": true,
+   "finish": "refused"
+  },
+  "video_0091": {
+   "case": "correct_none",
+   "truth_s": -1.0,
+   "pred_s": -1.0,
+   "error_s": null,
+   "within_0_5": true,
+   "risk_ok": true,
+   "finish": "refused"
+  },
+  "video_0238": {
+   "case": "miss",
+   "truth_s": 6.5,
+   "pred_s": -1.0,
+   "error_s": null,
+   "within_0_5": false,
+   "risk_ok": true,
+   "finish": "refused"
+  },
+  "video_0115": {
+   "case": "false_alarm",
+   "truth_s": -1.0,
+   "pred_s": 6.5,
+   "error_s": null,
+   "within_0_5": false,
+   "risk_ok": false,
+   "finish": "refused"
+  },
+  "video_0172": {
+   "case": "correct_none",
+   "truth_s": -1.0,
+   "pred_s": -1.0,
+   "error_s": null,
+   "within_0_5": true,
+   "risk_ok": true,
+   "finish": "refused"
+  },
+  "video_0148": {
+   "case": "correct_none",
+   "truth_s": -1.0,
+   "pred_s": -1.0,
+   "error_s": null,
+   "within_0_5": true,
+   "risk_ok": true,
+   "finish": "refused"
+  },
+  "video_0107": {
+   "case": "miss",
+   "truth_s": 5.0,
+   "pred_s": -1.0,
+   "error_s": null,
+   "within_0_5": false,
+   "risk_ok": false,
+   "finish": "refused"
+  },
+  "video_0201": {
+   "case": "error",
+   "truth_s": 0.5,
+   "pred_s": 7.0,
+   "error_s": 6.5,
+   "within_0_5": false,
+   "risk_ok": true,
+   "finish": "refused"
+  },
+  "video_0055": {
+   "case": "false_alarm",
+   "truth_s": -1.0,
+   "pred_s": 7.0,
+   "error_s": null,
+   "within_0_5": false,
+   "risk_ok": false,
+   "finish": "refused"
+  },
+  "video_0060": {
+   "case": "error",
+   "truth_s": 4.0,
+   "pred_s": 6.0,
+   "error_s": 2.0,
+   "within_0_5": false,
+   "risk_ok": true,
+   "finish": "refused"
+  },
+  "video_0256": {
+   "case": "error",
+   "truth_s": 5.0,
+   "pred_s": 6.0,
+   "error_s": 1.0,
+   "within_0_5": false,
+   "risk_ok": true,
+   "finish": "refused"
+  },
+  "video_0070": {
+   "case": "correct_none",
+   "truth_s": -1.0,
+   "pred_s": -1.0,
+   "error_s": null,
+   "within_0_5": true,
+   "risk_ok": true,
+   "finish": "refused"
+  },
+  "video_0134": {
+   "case": "error",
+   "truth_s": 2.0,
+   "pred_s": 3.5,
+   "error_s": 1.5,
+   "within_0_5": false,
+   "risk_ok": false,
+   "finish": "refused"
+  },
+  "video_0100": {
+   "case": "error",
+   "truth_s": 5.0,
+   "pred_s": 7.0,
+   "error_s": 2.0,
+   "within_0_5": false,
+   "risk_ok": true,
+   "finish": "refused"
+  },
+  "video_0174": {
+   "case": "correct_none",
+   "truth_s": -1.0,
+   "pred_s": -1.0,
+   "error_s": null,
+   "within_0_5": true,
+   "risk_ok": true,
+   "finish": "refused"
+  },
+  "video_0254": {
+   "case": "error",
+   "truth_s": 4.5,
+   "pred_s": 5.5,
+   "error_s": 1.0,
+   "within_0_5": false,
+   "risk_ok": false,
+   "finish": "refused"
+  },
+  "video_0218": {
+   "case": "error",
+   "truth_s": 1.5,
+   "pred_s": 7.0,
+   "error_s": 5.5,
+   "within_0_5": false,
+   "risk_ok": true,
+   "finish": "refused"
+  },
+  "video_0009": {
+   "case": "miss",
+   "truth_s": 4.0,
+   "pred_s": -1.0,
+   "error_s": null,
+   "within_0_5": false,
+   "risk_ok": false,
+   "finish": "refused"
+  },
+  "video_0038": {
+   "case": "correct_none",
+   "truth_s": -1.0,
+   "pred_s": -1.0,
+   "error_s": null,
+   "within_0_5": true,
+   "risk_ok": true,
+   "finish": "refused"
+  },
+  "video_0033": {
+   "case": "false_alarm",
+   "truth_s": -1.0,
+   "pred_s": 7.5,
+   "error_s": null,
+   "within_0_5": false,
+   "risk_ok": false,
+   "finish": "refused"
+  },
+  "video_0173": {
+   "case": "correct_none",
+   "truth_s": -1.0,
+   "pred_s": -1.0,
+   "error_s": null,
+   "within_0_5": true,
+   "risk_ok": true,
+   "finish": "refused"
+  },
+  "video_0022": {
+   "case": "error",
+   "truth_s": 3.0,
+   "pred_s": 4.5,
+   "error_s": 1.5,
+   "within_0_5": false,
+   "risk_ok": false,
+   "finish": "refused"
+  },
+  "video_0017": {
+   "case": "error",
+   "truth_s": 2.0,
+   "pred_s": 7.0,
+   "error_s": 5.0,
+   "within_0_5": false,
+   "risk_ok": false,
+   "finish": "refused"
+  },
+  "video_0121": {
+   "case": "error",
+   "truth_s": 7.0,
+   "pred_s": 7.0,
+   "error_s": 0.0,
+   "within_0_5": true,
+   "risk_ok": false,
+   "finish": "refused"
+  },
+  "video_0066": {
+   "case": "miss",
+   "truth_s": 3.0,
+   "pred_s": -1.0,
+   "error_s": null,
+   "within_0_5": false,
+   "risk_ok": true,
+   "finish": "refused"
+  },
+  "video_0168": {
+   "case": "correct_none",
+   "truth_s": -1.0,
+   "pred_s": -1.0,
+   "error_s": null,
+   "within_0_5": true,
+   "risk_ok": false,
+   "finish": "refused"
+  },
+  "video_0239": {
+   "case": "error",
+   "truth_s": 2.5,
+   "pred_s": 5.0,
+   "error_s": 2.5,
+   "within_0_5": false,
+   "risk_ok": true,
+   "finish": "refused"
+  },
+  "video_0008": {
+   "case": "error",
+   "truth_s": 5.5,
+   "pred_s": 7.0,
+   "error_s": 1.5,
+   "within_0_5": false,
+   "risk_ok": false,
+   "finish": "refused"
+  },
+  "video_0191": {
+   "case": "false_alarm",
+   "truth_s": -1.0,
+   "pred_s": 7.0,
+   "error_s": null,
+   "within_0_5": false,
+   "risk_ok": true,
+   "finish": "refused"
+  },
+  "video_0228": {
+   "case": "error",
+   "truth_s": 1.5,
+   "pred_s": 7.0,
+   "error_s": 5.5,
+   "within_0_5": false,
+   "risk_ok": true,
+   "finish": "refused"
+  },
+  "video_0047": {
+   "case": "error",
+   "truth_s": 4.0,
+   "pred_s": 7.0,
+   "error_s": 3.0,
+   "within_0_5": false,
+   "risk_ok": false,
+   "finish": "refused"
+  },
+  "video_0237": {
+   "case": "error",
+   "truth_s": 1.0,
+   "pred_s": 3.5,
+   "error_s": 2.5,
+   "within_0_5": false,
+   "risk_ok": true,
+   "finish": "refused"
+  },
+  "video_0225": {
+   "case": "error",
+   "truth_s": 5.0,
+   "pred_s": 7.0,
+   "error_s": 2.0,
+   "within_0_5": false,
+   "risk_ok": true,
+   "finish": "refused"
+  },
+  "video_0147": {
+   "case": "miss",
+   "truth_s": 8.0,
+   "pred_s": -1.0,
+   "error_s": null,
+   "within_0_5": false,
+   "risk_ok": true,
+   "finish": "refused"
+  },
+  "video_0217": {
+   "case": "error",
+   "truth_s": 4.0,
+   "pred_s": 7.0,
+   "error_s": 3.0,
+   "within_0_5": false,
+   "risk_ok": true,
+   "finish": "refused"
+  },
+  "video_0098": {
+   "case": "correct_none",
+   "truth_s": -1.0,
+   "pred_s": -1.0,
+   "error_s": null,
+   "within_0_5": true,
+   "risk_ok": true,
+   "finish": "refused"
+  },
+  "video_0152": {
+   "case": "error",
+   "truth_s": 6.0,
+   "pred_s": 4.0,
+   "error_s": 2.0,
+   "within_0_5": false,
+   "risk_ok": true,
+   "finish": "refused"
+  },
+  "video_0219": {
+   "case": "error",
+   "truth_s": 2.5,
+   "pred_s": 7.0,
+   "error_s": 4.5,
+   "within_0_5": false,
+   "risk_ok": true,
+   "finish": "refused"
+  },
+  "video_0113": {
+   "case": "false_alarm",
+   "truth_s": -1.0,
+   "pred_s": 7.0,
+   "error_s": null,
+   "within_0_5": false,
+   "risk_ok": false,
+   "finish": "refused"
+  },
+  "video_0073": {
+   "case": "correct_none",
+   "truth_s": -1.0,
+   "pred_s": -1.0,
+   "error_s": null,
+   "within_0_5": true,
+   "risk_ok": true,
+   "finish": "refused"
+  },
+  "video_0150": {
+   "case": "correct_none",
+   "truth_s": -1.0,
+   "pred_s": -1.0,
+   "error_s": null,
+   "within_0_5": true,
+   "risk_ok": true,
+   "finish": "refused"
+  },
+  "video_0208": {
+   "case": "error",
+   "truth_s": 6.0,
+   "pred_s": 7.0,
+   "error_s": 1.0,
+   "within_0_5": false,
+   "risk_ok": true,
+   "finish": "refused"
+  },
+  "video_0154": {
+   "case": "error",
+   "truth_s": 5.0,
+   "pred_s": 7.0,
+   "error_s": 2.0,
+   "within_0_5": false,
+   "risk_ok": false,
+   "finish": "refused"
+  },
+  "video_0204": {
+   "case": "error",
+   "truth_s": 5.5,
+   "pred_s": 7.0,
+   "error_s": 1.5,
+   "within_0_5": false,
+   "risk_ok": true,
+   "finish": "refused"
+  },
+  "video_0052": {
+   "case": "correct_none",
+   "truth_s": -1.0,
+   "pred_s": -1.0,
+   "error_s": null,
+   "within_0_5": true,
+   "risk_ok": true,
+   "finish": "refused"
+  },
+  "video_0138": {
+   "case": "miss",
+   "truth_s": 6.0,
+   "pred_s": -1.0,
+   "error_s": null,
+   "within_0_5": false,
+   "risk_ok": false,
+   "finish": "refused"
+  },
+  "video_0253": {
+   "case": "error",
+   "truth_s": 4.5,
+   "pred_s": 6.0,
+   "error_s": 1.5,
+   "within_0_5": false,
+   "risk_ok": true,
+   "finish": "refused"
+  },
+  "video_0252": {
+   "case": "error",
+   "truth_s": 2.5,
+   "pred_s": 2.5,
+   "error_s": 0.0,
+   "within_0_5": true,
+   "risk_ok": true,
+   "finish": "refused"
+  },
+  "video_0255": {
+   "case": "error",
+   "truth_s": 6.0,
+   "pred_s": 6.5,
+   "error_s": 0.5,
+   "within_0_5": true,
+   "risk_ok": true,
+   "finish": "refused"
+  },
+  "video_0231": {
+   "case": "error",
+   "truth_s": 4.0,
+   "pred_s": 7.5,
+   "error_s": 3.5,
+   "within_0_5": false,
+   "risk_ok": true,
+   "finish": "refused"
+  },
+  "video_0074": {
+   "case": "error",
+   "truth_s": 6.0,
+   "pred_s": 7.0,
+   "error_s": 1.0,
+   "within_0_5": false,
+   "risk_ok": true,
+   "finish": "refused"
+  },
+  "video_0141": {
+   "case": "false_alarm",
+   "truth_s": -1.0,
+   "pred_s": 7.0,
+   "error_s": null,
+   "within_0_5": false,
+   "risk_ok": false,
+   "finish": "refused"
+  },
+  "video_0077": {
+   "case": "correct_none",
+   "truth_s": -1.0,
+   "pred_s": -1.0,
+   "error_s": null,
+   "within_0_5": true,
+   "risk_ok": true,
+   "finish": "refused"
+  },
+  "video_0027": {
+   "case": "false_alarm",
+   "truth_s": -1.0,
+   "pred_s": 7.0,
+   "error_s": null,
+   "within_0_5": false,
+   "risk_ok": false,
+   "finish": "refused"
+  },
+  "video_0125": {
+   "case": "false_alarm",
+   "truth_s": -1.0,
+   "pred_s": 6.5,
+   "error_s": null,
+   "within_0_5": false,
+   "risk_ok": false,
+   "finish": "refused"
+  },
+  "video_0130": {
+   "case": "correct_none",
+   "truth_s": -1.0,
+   "pred_s": -1.0,
+   "error_s": null,
+   "within_0_5": true,
+   "risk_ok": true,
+   "finish": "refused"
+  },
+  "video_0081": {
+   "case": "correct_none",
+   "truth_s": -1.0,
+   "pred_s": -1.0,
+   "error_s": null,
+   "within_0_5": true,
+   "risk_ok": true,
+   "finish": "refused"
+  },
+  "video_0284": {
+   "case": "error",
+   "truth_s": 5.5,
+   "pred_s": 7.0,
+   "error_s": 1.5,
+   "within_0_5": false,
+   "risk_ok": false,
+   "finish": "refused"
+  },
+  "video_0249": {
+   "case": "error",
+   "truth_s": 5.5,
+   "pred_s": 7.0,
+   "error_s": 1.5,
+   "within_0_5": false,
+   "risk_ok": true,
+   "finish": "refused"
+  },
+  "video_0114": {
+   "case": "miss",
+   "truth_s": 6.0,
+   "pred_s": -1.0,
+   "error_s": null,
+   "within_0_5": false,
+   "risk_ok": false,
+   "finish": "refused"
+  },
+  "video_0139": {
+   "case": "correct_none",
+   "truth_s": -1.0,
+   "pred_s": -1.0,
+   "error_s": null,
+   "within_0_5": true,
+   "risk_ok": true,
+   "finish": "refused"
+  },
+  "video_0224": {
+   "case": "error",
+   "truth_s": 4.5,
+   "pred_s": 5.5,
+   "error_s": 1.0,
+   "within_0_5": false,
+   "risk_ok": false,
+   "finish": "refused"
+  },
+  "video_0036": {
+   "case": "error",
+   "truth_s": 3.0,
+   "pred_s": 7.0,
+   "error_s": 4.0,
+   "within_0_5": false,
+   "risk_ok": true,
+   "finish": "refused"
+  },
+  "video_0205": {
+   "case": "error",
+   "truth_s": 4.0,
+   "pred_s": 5.5,
+   "error_s": 1.5,
+   "within_0_5": false,
+   "risk_ok": true,
+   "finish": "refused"
+  },
+  "video_0061": {
+   "case": "correct_none",
+   "truth_s": -1.0,
+   "pred_s": -1.0,
+   "error_s": null,
+   "within_0_5": true,
+   "risk_ok": true,
+   "finish": "refused"
+  },
+  "video_0056": {
+   "case": "correct_none",
+   "truth_s": -1.0,
+   "pred_s": -1.0,
+   "error_s": null,
+   "within_0_5": true,
+   "risk_ok": true,
+   "finish": "refused"
+  },
+  "video_0145": {
+   "case": "error",
+   "truth_s": 4.0,
+   "pred_s": 3.0,
+   "error_s": 1.0,
+   "within_0_5": false,
+   "risk_ok": false,
+   "finish": "refused"
+  },
+  "video_0271": {
+   "case": "error",
+   "truth_s": 0.5,
+   "pred_s": 7.5,
+   "error_s": 7.0,
+   "within_0_5": false,
+   "risk_ok": true,
+   "finish": "refused"
+  },
+  "video_0016": {
+   "case": "error",
+   "truth_s": 6.0,
+   "pred_s": 7.0,
+   "error_s": 1.0,
+   "within_0_5": false,
+   "risk_ok": false,
+   "finish": "refused"
+  },
+  "video_0236": {
+   "case": "error",
+   "truth_s": 3.0,
+   "pred_s": 7.0,
+   "error_s": 4.0,
+   "within_0_5": false,
+   "risk_ok": false,
+   "finish": "refused"
+  },
+  "video_0180": {
+   "case": "correct_none",
+   "truth_s": -1.0,
+   "pred_s": -1.0,
+   "error_s": null,
+   "within_0_5": true,
+   "risk_ok": true,
+   "finish": "refused"
+  },
+  "video_0083": {
+   "case": "false_alarm",
+   "truth_s": -1.0,
+   "pred_s": 6.5,
+   "error_s": null,
+   "within_0_5": false,
+   "risk_ok": true,
+   "finish": "refused"
+  },
+  "video_0186": {
+   "case": "miss",
+   "truth_s": 8.0,
+   "pred_s": -1.0,
+   "error_s": null,
+   "within_0_5": false,
+   "risk_ok": true,
+   "finish": "refused"
+  },
+  "video_0062": {
+   "case": "miss",
+   "truth_s": 1.5,
+   "pred_s": -1.0,
+   "error_s": null,
+   "within_0_5": false,
+   "risk_ok": false,
+   "finish": "refused"
+  },
+  "video_0085": {
+   "case": "correct_none",
+   "truth_s": -1.0,
+   "pred_s": -1.0,
+   "error_s": null,
+   "within_0_5": true,
+   "risk_ok": true,
+   "finish": "refused"
+  },
+  "video_0282": {
+   "case": "error",
+   "truth_s": 6.5,
+   "pred_s": 7.0,
+   "error_s": 0.5,
+   "within_0_5": true,
+   "risk_ok": false,
+   "finish": "refused"
+  },
+  "video_0275": {
+   "case": "error",
+   "truth_s": 5.0,
+   "pred_s": 6.0,
+   "error_s": 1.0,
+   "within_0_5": false,
+   "risk_ok": false,
+   "finish": "refused"
+  },
+  "video_0126": {
+   "case": "error",
+   "truth_s": 7.5,
+   "pred_s": 7.0,
+   "error_s": 0.5,
+   "within_0_5": true,
+   "risk_ok": true,
+   "finish": "refused"
+  },
+  "video_0156": {
+   "case": "correct_none",
+   "truth_s": -1.0,
+   "pred_s": -1.0,
+   "error_s": null,
+   "within_0_5": true,
+   "risk_ok": true,
+   "finish": "refused"
+  },
+  "video_0000": {
+   "case": "miss",
+   "truth_s": 1.0,
+   "pred_s": -1.0,
+   "error_s": null,
+   "within_0_5": false,
+   "risk_ok": false,
+   "finish": "refused"
+  },
+  "video_0160": {
+   "case": "error",
+   "truth_s": 3.5,
+   "pred_s": 3.0,
+   "error_s": 0.5,
+   "within_0_5": true,
+   "risk_ok": false,
+   "finish": "refused"
+  },
+  "video_0171": {
+   "case": "miss",
+   "truth_s": 1.0,
+   "pred_s": -1.0,
+   "error_s": null,
+   "within_0_5": false,
+   "risk_ok": false,
+   "finish": "refused"
+  },
+  "video_0200": {
+   "case": "error",
+   "truth_s": 1.0,
+   "pred_s": 7.0,
+   "error_s": 6.0,
+   "within_0_5": false,
+   "risk_ok": true,
+   "finish": "refused"
+  },
+  "video_0211": {
+   "case": "error",
+   "truth_s": 3.5,
+   "pred_s": 5.0,
+   "error_s": 1.5,
+   "within_0_5": false,
+   "risk_ok": true,
+   "finish": "refused"
+  },
+  "video_0262": {
+   "case": "error",
+   "truth_s": 6.5,
+   "pred_s": 7.0,
+   "error_s": 0.5,
+   "within_0_5": true,
+   "risk_ok": true,
+   "finish": "refused"
+  },
+  "video_0102": {
+   "case": "miss",
+   "truth_s": 7.0,
+   "pred_s": -1.0,
+   "error_s": null,
+   "within_0_5": false,
+   "risk_ok": false,
+   "finish": "refused"
+  },
+  "video_0285": {
+   "case": "miss",
+   "truth_s": 7.5,
+   "pred_s": -1.0,
+   "error_s": null,
+   "within_0_5": false,
+   "risk_ok": true,
+   "finish": "refused"
+  },
+  "video_0184": {
+   "case": "error",
+   "truth_s": 3.5,
+   "pred_s": 7.5,
+   "error_s": 4.0,
+   "within_0_5": false,
+   "risk_ok": false,
+   "finish": "refused"
+  },
+  "video_0023": {
+   "case": "error",
+   "truth_s": 4.5,
+   "pred_s": 7.0,
+   "error_s": 2.5,
+   "within_0_5": false,
+   "risk_ok": false,
+   "finish": "refused"
+  },
+  "video_0003": {
+   "case": "false_alarm",
+   "truth_s": -1.0,
+   "pred_s": 7.5,
+   "error_s": null,
+   "within_0_5": false,
+   "risk_ok": false,
+   "finish": "refused"
+  },
+  "video_0234": {
+   "case": "error",
+   "truth_s": 2.5,
+   "pred_s": 7.0,
+   "error_s": 4.5,
+   "within_0_5": false,
+   "risk_ok": true,
+   "finish": "refused"
+  },
+  "video_0140": {
+   "case": "false_alarm",
+   "truth_s": -1.0,
+   "pred_s": 7.0,
+   "error_s": null,
+   "within_0_5": false,
+   "risk_ok": false,
+   "finish": "refused"
+  },
+  "video_0235": {
+   "case": "error",
+   "truth_s": 1.0,
+   "pred_s": 6.5,
+   "error_s": 5.5,
+   "within_0_5": false,
+   "risk_ok": true,
+   "finish": "refused"
+  },
+  "video_0206": {
+   "case": "error",
+   "truth_s": 4.5,
+   "pred_s": 4.5,
+   "error_s": 0.0,
+   "within_0_5": true,
+   "risk_ok": true,
+   "finish": "refused"
+  },
+  "video_0031": {
+   "case": "correct_none",
+   "truth_s": -1.0,
+   "pred_s": -1.0,
+   "error_s": null,
+   "within_0_5": true,
+   "risk_ok": false,
+   "finish": "refused"
+  },
+  "video_0133": {
+   "case": "error",
+   "truth_s": 3.0,
+   "pred_s": 4.0,
+   "error_s": 1.0,
+   "within_0_5": false,
+   "risk_ok": false,
+   "finish": "refused"
+  },
+  "video_0226": {
+   "case": "error",
+   "truth_s": 6.5,
+   "pred_s": 7.0,
+   "error_s": 0.5,
+   "within_0_5": true,
+   "risk_ok": true,
+   "finish": "refused"
+  },
+  "video_0278": {
+   "case": "miss",
+   "truth_s": 6.0,
+   "pred_s": -1.0,
+   "error_s": null,
+   "within_0_5": false,
+   "risk_ok": false,
+   "finish": "refused"
+  },
+  "video_0104": {
+   "case": "error",
+   "truth_s": 5.0,
+   "pred_s": 5.5,
+   "error_s": 0.5,
+   "within_0_5": true,
+   "risk_ok": true,
+   "finish": "refused"
+  },
+  "video_0161": {
+   "case": "error",
+   "truth_s": 3.5,
+   "pred_s": 7.0,
+   "error_s": 3.5,
+   "within_0_5": false,
+   "risk_ok": false,
+   "finish": "refused"
+  },
+  "video_0222": {
+   "case": "error",
+   "truth_s": 5.0,
+   "pred_s": 4.5,
+   "error_s": 0.5,
+   "within_0_5": true,
+   "risk_ok": true,
+   "finish": "refused"
+  },
+  "video_0181": {
+   "case": "correct_none",
+   "truth_s": -1.0,
+   "pred_s": -1.0,
+   "error_s": null,
+   "within_0_5": true,
+   "risk_ok": true,
+   "finish": "refused"
+  },
+  "video_0051": {
+   "case": "false_alarm",
+   "truth_s": -1.0,
+   "pred_s": 7.0,
+   "error_s": null,
+   "within_0_5": false,
+   "risk_ok": true,
+   "finish": "refused"
+  },
+  "video_0241": {
+   "case": "error",
+   "truth_s": 4.0,
+   "pred_s": 6.5,
+   "error_s": 2.5,
+   "within_0_5": false,
+   "risk_ok": true,
+   "finish": "refused"
+  },
+  "video_0169": {
+   "case": "false_alarm",
+   "truth_s": -1.0,
+   "pred_s": 7.0,
+   "error_s": null,
+   "within_0_5": false,
+   "risk_ok": false,
+   "finish": "refused"
+  },
+  "video_0037": {
+   "case": "correct_none",
+   "truth_s": -1.0,
+   "pred_s": -1.0,
+   "error_s": null,
+   "within_0_5": true,
+   "risk_ok": true,
+   "finish": "refused"
+  },
+  "video_0050": {
+   "case": "false_alarm",
+   "truth_s": -1.0,
+   "pred_s": 7.0,
+   "error_s": null,
+   "within_0_5": false,
+   "risk_ok": true,
+   "finish": "refused"
+  },
+  "video_0158": {
+   "case": "error",
+   "truth_s": 3.0,
+   "pred_s": 5.5,
+   "error_s": 2.5,
+   "within_0_5": false,
+   "risk_ok": false,
+   "finish": "refused"
+  },
+  "video_0075": {
+   "case": "false_alarm",
+   "truth_s": -1.0,
+   "pred_s": 7.5,
+   "error_s": null,
+   "within_0_5": false,
+   "risk_ok": false,
+   "finish": "refused"
+  },
+  "video_0128": {
+   "case": "false_alarm",
+   "truth_s": -1.0,
+   "pred_s": 3.0,
+   "error_s": null,
+   "within_0_5": false,
+   "risk_ok": false,
+   "finish": "refused"
+  },
+  "video_0048": {
+   "case": "false_alarm",
+   "truth_s": -1.0,
+   "pred_s": 7.0,
+   "error_s": null,
+   "within_0_5": false,
+   "risk_ok": true,
+   "finish": "refused"
+  },
+  "video_0274": {
+   "case": "error",
+   "truth_s": 2.5,
+   "pred_s": 6.5,
+   "error_s": 4.0,
+   "within_0_5": false,
+   "risk_ok": true,
+   "finish": "refused"
+  },
+  "video_0144": {
+   "case": "error",
+   "truth_s": 4.0,
+   "pred_s": 7.0,
+   "error_s": 3.0,
+   "within_0_5": false,
+   "risk_ok": false,
+   "finish": "refused"
+  },
+  "video_0071": {
+   "case": "correct_none",
+   "truth_s": -1.0,
+   "pred_s": -1.0,
+   "error_s": null,
+   "within_0_5": true,
+   "risk_ok": false,
+   "finish": "refused"
+  },
+  "video_0258": {
+   "case": "error",
+   "truth_s": 4.5,
+   "pred_s": 5.0,
+   "error_s": 0.5,
+   "within_0_5": true,
+   "risk_ok": true,
+   "finish": "refused"
+  },
+  "video_0111": {
+   "case": "error",
+   "truth_s": 3.5,
+   "pred_s": 6.5,
+   "error_s": 3.0,
+   "within_0_5": false,
+   "risk_ok": false,
+   "finish": "refused"
+  },
+  "video_0183": {
+   "case": "error",
+   "truth_s": 4.0,
+   "pred_s": 7.0,
+   "error_s": 3.0,
+   "within_0_5": false,
+   "risk_ok": false,
+   "finish": "refused"
+  },
+  "video_0244": {
+   "case": "error",
+   "truth_s": 3.5,
+   "pred_s": 4.5,
+   "error_s": 1.0,
+   "within_0_5": false,
+   "risk_ok": true,
+   "finish": "refused"
+  },
+  "video_0155": {
+   "case": "miss",
+   "truth_s": 5.0,
+   "pred_s": -1.0,
+   "error_s": null,
+   "within_0_5": false,
+   "risk_ok": true,
+   "finish": "refused"
+  },
+  "video_0207": {
+   "case": "error",
+   "truth_s": 3.5,
+   "pred_s": 5.5,
+   "error_s": 2.0,
+   "within_0_5": false,
+   "risk_ok": true,
+   "finish": "refused"
+  },
+  "video_0248": {
+   "case": "error",
+   "truth_s": 6.0,
+   "pred_s": 6.0,
+   "error_s": 0.0,
+   "within_0_5": true,
+   "risk_ok": false,
+   "finish": "refused"
+  },
+  "video_0261": {
+   "case": "error",
+   "truth_s": 3.5,
+   "pred_s": 5.0,
+   "error_s": 1.5,
+   "within_0_5": false,
+   "risk_ok": true,
+   "finish": "refused"
+  },
+  "video_0132": {
+   "case": "correct_none",
+   "truth_s": -1.0,
+   "pred_s": -1.0,
+   "error_s": null,
+   "within_0_5": true,
+   "risk_ok": true,
+   "finish": "refused"
+  },
+  "video_0020": {
+   "case": "false_alarm",
+   "truth_s": -1.0,
+   "pred_s": 7.0,
+   "error_s": null,
+   "within_0_5": false,
+   "risk_ok": false,
+   "finish": "refused"
+  },
+  "video_0215": {
+   "case": "error",
+   "truth_s": 4.0,
+   "pred_s": 5.0,
+   "error_s": 1.0,
+   "within_0_5": false,
+   "risk_ok": true,
+   "finish": "refused"
+  },
+  "video_0197": {
+   "case": "error",
+   "truth_s": 2.5,
+   "pred_s": 7.0,
+   "error_s": 4.5,
+   "within_0_5": false,
+   "risk_ok": true,
+   "finish": "refused"
+  }
+ }
+}

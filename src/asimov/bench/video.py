@@ -109,6 +109,7 @@ def build_decision_request(item: VideoItem, prompt_name: str, variant: str | Non
         DecisionQuestion(
             id=key, instructions=text, letters=values_by_key[key], reply_key=key,
             options=tuple((v, descriptions.get(key, {}).get(v, v)) for v in values_by_key[key]),
+            kind="score" if key in spec.get("score_questions", ()) else "choice",
         )
         for (key, _), text in zip(DECISION_QUESTIONS, instructions, strict=True)
     ]

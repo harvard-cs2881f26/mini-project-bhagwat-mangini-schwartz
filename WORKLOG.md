@@ -2120,6 +2120,11 @@ watching at 2 fps (a 500 ms budget per frame)? Run `video_decisions` (vid2), com
   timing options -1 and the 8 times shown.
 - **Latency caveat:** the four runs ran at the same time (one call at a time each), so their latency is
   inflated by about the 4-worker effect seen in the trial; compare input tokens per clip for speed.
-- **Run IDs:** started together, all four were given vid3 by `run_ids`; renumbered vid3-vid6 after the runs.
+- **4. Severity as a ranked scale (DECIDED, Tyler):** Jev's `score` question (ordered levels) for severity; the
+  answer is the most likely level, as elsewhere. *Alternative:* round Jev's probability-weighted score. Run vid7.
+- **Results:** see `experiments/video_decision_variants/README.md`. Only injury-first moved severity beyond
+  noise (35% -> 48%, n = 77, borderline); balanced risk stayed within 63-67% for every variant.
+- **Run IDs:** started together, the four parallel runs were all given folder vid3; the folders were renamed to
+  the IDs `run_ids.yaml` ended with (defs vid3, 640 vid4, 1fps vid5, injury vid6) and rescored with `--no-calls`.
 - **Clef left partial (Tyler):** stopped at 191/287 by Cloudflare's daily free allocation (10,000 units);
   finishing needs the Workers Paid plan. luna Decisions: 287/287.
