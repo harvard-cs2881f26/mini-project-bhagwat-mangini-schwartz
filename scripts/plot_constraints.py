@@ -12,6 +12,7 @@ from __future__ import annotations
 
 import argparse
 import csv
+import hashlib
 import json
 import os
 import sys
@@ -205,9 +206,125 @@ def plot_model_rates(root: Path, summaries: list[dict], unavailable=(), extra_no
         plt.close(fig)
 
 
+def thinking_rows(configs: list[dict], results: Path) -> list[dict]:
+    """Pair default models with same-role min runs; never use native overrides."""
+    ids = read_ids(results)
+    available = {}
+    defaults = {}
+    for cfg in configs:
+        if cfg["benchmark"] != "image" or cfg["thinking"] not in ("min", "default"):
+            raise ValueError("Comparison requires image min/default configs")
+        roles = cfg.get("message_roles", "user")
+        for spec in cfg["models"]:
+            if spec.get("reasoning_effort") or spec.get("thinking_budget"):
+                raise ValueError("Explicit reasoning overrides are separate from min/default")
+            key = (spec["model"], cfg["thinking"], roles)
+            if key in available:
+                raise ValueError(f"Ambiguous comparison condition: {key}")
+            folder = folder_name(ids[cfg["run"]], cfg["run"])
+            path = results / folder / spec["model"] / "summary.json"
+            summary = json.loads(path.read_text()) if path.exists() else {}
+            available[key] = (cfg, spec, path, summary)
+            if cfg["thinking"] == "default":
+                defaults[spec["model"]] = roles
+    rows = []
+    for model, roles in defaults.items():
+        for thinking in ("min", "default"):
+            key = (model, thinking, roles)
+            if key not in available:
+                raise ValueError(f"No matching-role config for {key}")
+            cfg, spec, path, summary = available[key]
+            n, required = summary.get("n", 0), summary.get("n_dataset", 164)
+            rows.append(
+                {
+                    "name": spec["name"],
+                    "model": model,
+                    "thinking": thinking,
+                    "message_roles": roles,
+                    "run": cfg["run"],
+                    "n": n,
+                    "n_dataset": required,
+                    "complete": n == required,
+                    "n_parsed": summary.get("n_parsed", 0),
+                    "n_violations": summary.get("n_violations", 0),
+                    "violation_rate": summary.get("violation_rate") if n == required else None,
+                    "same_request_settings": spec["provider"] == "anthropic",
+                    "summary": str(path.relative_to(results.parent)),
+                    "summary_sha256": hashlib.sha256(path.read_bytes()).hexdigest() if path.exists() else "",
+                }
+            )
+    return rows
+
+
+def plot_thinking_comparison(root: Path, rows: list[dict]):
+    """Show complete rates only; missing responses are counts, never zero bars."""
+    root.mkdir(parents=True, exist_ok=True)
+    with (root / "fig6a.csv").open("w") as stream:
+        writer = csv.DictWriter(stream, fieldnames=list(rows[0]), lineterminator="\n")
+        writer.writeheader()
+        writer.writerows(rows)
+    models = list(dict.fromkeys(row["model"] for row in rows))
+    models.sort(
+        key=lambda m: max((r["violation_rate"] for r in rows if r["model"] == m and r["violation_rate"] is not None), default=-1),
+        reverse=True,
+    )
+    with plt.style.context("seaborn-v0_8-darkgrid"):
+        fig, ax = plt.subplots(figsize=(16, 10))
+        labels = []
+        for index, model in enumerate(models):
+            pair = [r for r in rows if r["model"] == model]
+            label = pair[0]["name"].replace(" (system constraints)", "")
+            if pair[0]["same_request_settings"]:
+                label += "\n(min/default: identical request settings)"
+            labels.append(label)
+            for row in pair:
+                minimum = row["thinking"] == "min"
+                y = index + (-0.18 if minimum else 0.18)
+                color = "#414487" if minimum else "#35b779"
+                if row["violation_rate"] is None:
+                    ax.text(
+                        1,
+                        y,
+                        f"{row['thinking']}: incomplete ({row['n']}/{row['n_dataset']})",
+                        va="center",
+                        fontsize=10,
+                        color=color,
+                    )
+                else:
+                    value = 100 * row["violation_rate"]
+                    ax.barh(y, value, height=0.32, color=color)
+                    ax.text(value + 0.7, y, f"{value:.1f}%", va="center", fontsize=11)
+        from matplotlib.patches import Patch
+
+        ax.legend(handles=[Patch(color="#414487", label="min"), Patch(color="#35b779", label="default")], loc="lower right")
+        ax.set_yticks(range(len(models)), labels)
+        ax.set_ylim(len(models) - 0.5, -0.5)
+        ax.set_xlim(0, 100)
+        ax.set_xlabel("Constraint violation rate (%) — lower is better", fontsize=14)
+        ax.set_title("Figure 6a reproduction: minimum vs provider-default settings", fontsize=18, pad=18)
+        note = (
+            "Rates require 164/164 responses; malformed replies excluded. Incomplete conditions show counts only.\n"
+            "Claude min/default send identical parameters; bars are independent repeated samples, "
+            "not different reasoning budgets.\n"
+            "Mini uses system/user roles in both runs; other pairs use user-only roles. "
+            "Explicit-budget candidates are excluded.\n"
+            "Gemini and Claude successors are labeled substitutes. Exact author inference/aggregation settings remain unverified."
+        )
+        fig.text(0.02, 0.02, note, fontsize=10, linespacing=1.5)
+        fig.tight_layout(rect=(0, 0.13, 1, 1))
+        for extension in ("png", "pdf"):
+            fig.savefig(root / f"fig6a.{extension}", dpi=180)
+        plt.close(fig)
+    (root / "provenance.json").write_text(json.dumps({"mode": "matched_role_min_default", "inputs": rows}, indent=2) + "\n")
+
+
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("config")
+    parser.add_argument(
+        "--compare-thinking", nargs="+", type=Path, help="Additional min/default configs; pair by model and roles"
+    )
+    parser.add_argument("--output-dir", type=Path, help="Output folder for --compare-thinking")
     parser.add_argument("--categories", type=Path)
     parser.add_argument(
         "--allow-proposed-categories", action="store_true", help="Generate explicitly provisional outputs from unreviewed labels"
@@ -217,6 +334,12 @@ def main():
     )
     args = parser.parse_args()
     cfg = yaml.safe_load(Path(args.config).read_text())
+    if args.compare_thinking:
+        configs = [cfg, *(yaml.safe_load(path.read_text()) for path in args.compare_thinking)]
+        root = args.output_dir or ROOT / "results" / "repro_fig6_comparison"
+        plot_thinking_comparison(root, thinking_rows(configs, ROOT / "results"))
+        print(f"Saved {root / 'fig6a.png'}, PDF, CSV and provenance")
+        return
     variant = cfg.get("variant", cfg.get("benchmark", "image"))
     if args.write_category_template:
         data_root = DATA_DIR / variant

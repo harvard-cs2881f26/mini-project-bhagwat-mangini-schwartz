@@ -2,6 +2,7 @@
 
 import csv
 import importlib.util
+import json
 from pathlib import Path
 
 import pytest
@@ -10,6 +11,44 @@ spec = importlib.util.spec_from_file_location("plot_constraints", Path(__file__)
 assert spec is not None and spec.loader is not None
 plot = importlib.util.module_from_spec(spec)
 spec.loader.exec_module(plot)
+
+
+def test_thinking_comparison_matches_roles_and_hides_incomplete_rates(tmp_path):
+    results = tmp_path / "results"
+    results.mkdir()
+    (results / "run_ids.yaml").write_text("old: img0\npaired: img1\ndefault: img2\n")
+    configs = []
+    for name, thinking, roles, n, rate in [
+        ("old", "min", "user", 164, 0.8),
+        ("paired", "min", "system_user", 164, 0.6),
+        ("default", "default", "system_user", 22, 0.4),
+    ]:
+        cfg = {
+            "run": name,
+            "benchmark": "image",
+            "thinking": thinking,
+            "message_roles": roles,
+            "models": [{"name": "Model", "model": "m", "provider": "openai"}],
+        }
+        configs.append(cfg)
+        path = results / f"img{len(configs) - 1}_{name}" / "m"
+        path.mkdir(parents=True)
+        (path / "summary.json").write_text(json.dumps({"n": n, "n_dataset": 164, "violation_rate": rate}))
+    minimum, default = plot.thinking_rows(configs, results)
+    assert minimum["run"] == "paired" and minimum["violation_rate"] == 0.6
+    assert default["n"] == 22 and default["violation_rate"] is None
+    assert default["complete"] is False
+
+
+def test_thinking_comparison_rejects_budget_candidates(tmp_path):
+    cfg = {
+        "run": "candidate",
+        "benchmark": "image",
+        "thinking": "default",
+        "models": [{"name": "Claude", "model": "m", "provider": "anthropic", "thinking_budget": 1024}],
+    }
+    with pytest.raises(ValueError, match="overrides"):
+        plot.thinking_rows([cfg], tmp_path)
 
 
 def write_mapping(tmp_path, rows):

@@ -75,3 +75,15 @@ before the writeup is submitted.
 2026-10-13: Riddhi authorized Codex to complete the predeclared thinking sweep, integrate latest main, finish phased commits and push. Codex ran the authorized experiments, retained raw caches/execution provenance, adapted image integration to the current shared runner, migrated six runs through free CLI rescoring, checked 21 model summaries for unchanged results, and validated code/schema/generated pages. Student interpretation and category review remain with Riddhi.
 
 | 2026-10-14 | Noa | Part 2 decision models, Session 3 (part 2): local decision models on Modal (Qwen3.5-4B-Base and Qwen3.5-4B option probabilities, Qwen3.5-4B generate, NLI), one-shot Qwen-Base row, full runs of every hosted and local system, the wording x question-mode grid (txt9-txt24, txt30-txt32), Qwen generate rerun at a 2048-token cap; decisions on local wording, greedy decoding, output cap, Modal backend, one-shot example, Kev redeploy | `src/asimov/models/{local_hf,local_text,nli,remote,modal_app}.py`, `configs/part2_*.yaml`, `results/txt2_*`-`results/txt33_*`, WORKLOG 2026-10-13/14, PRs #17, #18, #20, #21, #22 | Noa made each scope, wording, run and spend decision and approved every paid run; Claude (Claude Code, with background subagents) wrote the code, tests and configs, deployed and ran the models, checked every run for bugs (and fixed the tie-breaking, probability-sum and bf16-precision bugs it found), resolved merges and run-ID clashes, and logged results as numbers only |
+
+2026-10-18: Riddhi requested an experiment on whether injury/constraint type affects performance.
+Codex implemented `scripts/category_effects.py`, reusing canonical per-item scores, text/video answer
+loaders and guarded image-category validation. AI assistance included six focused tests, static
+checks and a provisional offline 164-item image smoke check in `/tmp`. No model calls, training,
+commits or downloaded data; taxonomy review and interpretation remain with Riddhi.
+
+2026-10-18 follow-up: Codex analyzed the downloaded full text annotations against all 16 canonical
+min/default model summaries, checked 32 injury labels and reconciled all 64 category-weighted metrics
+to the original summaries exactly. Offline CSV remains in `/tmp`; no API calls or scoring changes.
+
+2026-10-18: Riddhi authorized Codex to fill the missing image min/default matrix and publish the necessary components. Codex resumed cached shared-runner calls, completed both Claude defaults, exposed provider billing/quota blockers, paired matching Mini roles, and amended the graph/notes to identify identical Claude request settings and incomplete conditions. No new planning docs included.

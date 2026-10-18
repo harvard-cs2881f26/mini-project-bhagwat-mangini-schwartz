@@ -1573,3 +1573,37 @@ injury the model picked.
   fields and provenance (`git_commit`, `scored_at`, `git_dirty`). The regenerated results pages
   differ only in commit and scored date; `collect.py --check` and pytest pass. The new fields are
   in `summary.json` only; the results pages don't show them yet.
+
+### 2026-10-18 — [DECIDED] Offline injury/constraint-category evaluation (Riddhi)
+
+- `scripts/category_effects.py` slices existing canonical model summaries without changing scoring,
+  running models or training. Text groups by each item's gold injury **option text**, because Q1
+  letters vary by item; exact text is retained, so synonyms may remain separate categories. Video
+  groups by released injury code (including `No_Consensus`) and reports risk/timing accuracy; it
+  does not invent injury-code meanings or an injury-type prediction absent from the existing prompt.
+- Image reuses the existing complete-mapping validation and requires explicit permission for
+  proposed labels. Its outcome is violation rate, not task accuracy. Parse failures remain unknown;
+  text/video unreadable answers retain existing wrong-answer treatment. CSV includes category
+  counts, missing items, denominators, Wilson intervals, all-item bounds and run completeness.
+- Alternative: retrain on these items or treat reconstructed image labels as authors' taxonomy.
+  Rejected: evaluation items cannot be training data, and 49 proposed image assignments remain
+  ambiguous. Category associations are descriptive, not causal; intervals do not measure repeated-
+  run variability. Actual fine-tuning would require a separate training source and authorized scope.
+- Checked six focused tests, Ruff and Pyright; generated only an explicitly provisional Mini-default
+  image CSV in `/tmp`, using all 164 real image items. Full text/video annotations are absent locally;
+  missing annotations fail rather than silently substituting the five-item test fixtures.
+
+2026-10-18 follow-up: downloaded full text annotations through the existing downloader (319 items);
+ran category slicing on all eight models in both canonical text runs (`txt0`, `txt1`). The offline CSV
+in `/tmp/riddhi_text_category_effects.csv` contains 2,048 rows (16 model-settings × 32 released injury
+option texts × 4 questions). All slices are complete; category-weighted numerators reproduce all
+64 canonical aggregate accuracies exactly. Labels have 1–22 items each; no normalization was applied:
+`Sprain` versus `Strain or Sprain`, or `Contusion` versus `Contusions, Abrasions`, are overlapping
+rather than identical classes. Combining them would introduce a new taxonomy. Tiny strata and
+multiple exploratory comparisons limit conclusions. Full video annotations remain unavailable locally.
+
+### 2026-10-18 — Matched min/default Figure 6 graph (Riddhi, Codex-assisted)
+- DECIDED: pair Mini img2/3 with identical system/user roles; use user-only roles for other pairs. Explicit native-budget candidate runs are excluded. Alternative: label those candidates provider default or compare mismatched Mini roles; rejected.
+- Claude client sends identical parameters for min/default without native overrides. Graph and notes label both as repeated samples of the same request settings; do not imply equal sampled rates.
+- Only 164/164 response conditions receive percentage bars. Incomplete conditions show counts, not zero or partial rates. CSV/source hashes retain provenance. Missing runs resumed through the shared CLI; credentials/data remain ignored.
+- Sonnet and Opus defaults completed. OpenAI Nano/GPT-5 stopped at 95/104 responses with no credits; Flash min/default stopped at 38/4 with quota errors; Pro zero-quota. Flash-Lite recovery ongoing after transient503s. User asked to finish validation, commit and push the graph/code/artifacts; external availability remains explicit.
