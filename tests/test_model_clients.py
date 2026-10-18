@@ -38,6 +38,15 @@ def test_gemini_format_and_min_thinking():
     assert min_thinking("gemini-3.1-flash-lite").thinking_level == "MINIMAL"
 
 
+def test_gemini_high_thinking_is_the_largest_each_model_offers():
+    from asimov.models.gemini_client import high_thinking
+
+    assert high_thinking("gemini-2.5-pro").thinking_budget == 32768
+    assert high_thinking("gemini-2.5-flash").thinking_budget == 24576
+    assert high_thinking("gemini-3.1-pro-preview").thinking_level == "HIGH"
+    assert high_thinking("gemini-3.1-flash-lite").thinking_level == "HIGH"
+
+
 def test_mock_clients():
     assert '"No"' in get_client("mock", "mock-always-no").generate(PARTS).text
     with pytest.raises(ValueError):

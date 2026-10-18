@@ -58,6 +58,11 @@ def get_client(provider: str, model: str, **service):
     return client_class(provider)(model, **options)
 
 
+def same_thinking_request(provider: str, a: str, b: str) -> bool:
+    """True if two thinking values send this provider the same request (Claude: min and default)."""
+    return a == b or {a, b} <= getattr(client_class(provider), "thinking_sends_nothing", frozenset())
+
+
 def request_settings(provider: str) -> frozenset[str]:
     """Config settings that change what this provider's client sends (asimov.reuse uses it)."""
     return client_class(provider).request_settings

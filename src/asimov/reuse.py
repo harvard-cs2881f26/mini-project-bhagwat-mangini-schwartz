@@ -19,20 +19,24 @@ from pathlib import Path
 
 from asimov.bench import get_benchmark
 from asimov.config import RunConfig
-from asimov.models import request_settings
+from asimov.models import request_settings, same_thinking_request
 from asimov.run_ids import run_dir
 from asimov.runner import ROOT, load_saved, request_extra, run_key
 
 SETTINGS = ("thinking", "log_reasoning")  # config settings a client may or may not send
 
 
-def differing_settings(src: dict, dst: dict) -> set[str]:
-    return {s for s in SETTINGS if src.get(s, False) != dst.get(s, False)}
+def differing_settings(src: dict, dst: dict, provider: str | None = None) -> set[str]:
+    """Settings that differ; with a provider, a thinking difference its client doesn't send is left out."""
+    diff = {s for s in SETTINGS if src.get(s, False) != dst.get(s, False)}
+    if provider and "thinking" in diff and same_thinking_request(provider, src["thinking"], dst["thinking"]):
+        diff.discard("thinking")
+    return diff
 
 
 def reusable(provider: str, src: dict, dst: dict) -> bool:
     same_request = src["benchmark"] == dst["benchmark"] and src["prompt"] == dst["prompt"]
-    return same_request and not (differing_settings(src, dst) & request_settings(provider))
+    return same_request and not (differing_settings(src, dst, provider) & request_settings(provider))
 
 
 def copy_rows(rows: list[dict], src_key: str, dst_key: str, src_run: str, already: set[str]) -> list[dict]:
@@ -60,7 +64,7 @@ def reuse(src: dict, dst: dict, only: list[str] | None = None, results_dir: Path
         src_extra, dst_extra = request_extra(src_models[model]), request_extra(spec)
         if not reusable(provider, src, dst) or src_extra != dst_extra:
             if only:
-                why = sorted(differing_settings(src, dst) & request_settings(provider))
+                why = sorted(differing_settings(src, dst, provider) & request_settings(provider))
                 if src_extra != dst_extra:
                     why.append(f"service/params {src_extra!r} vs {dst_extra!r}")
                 raise ValueError(f"{model}: request differs between {src['run']} and {dst['run']} ({why}); call it instead")

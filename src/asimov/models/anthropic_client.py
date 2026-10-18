@@ -1,7 +1,8 @@
 """Claude via the Anthropic Messages API (anthropic SDK 1.11).
 
 Thinking: the paper's Claude models (Opus 4.1, Sonnet 4) run without thinking when the
-`thinking` parameter is omitted, so "min" and "default" both omit it here.
+`thinking` parameter is omitted, so "min" and "default" both omit it here. "high" turns extended
+thinking on with a HIGH_BUDGET_TOKENS budget (max_tokens is raised above it).
 """
 from __future__ import annotations
 
@@ -13,6 +14,7 @@ from asimov.bench.parts import Part, TextPart
 from asimov.models.base import ModelResponse, Thinking, Timer
 
 MAX_TOKENS = 2048  # the answer is a short JSON object
+HIGH_BUDGET_TOKENS = 16000  # thinking "high"
 
 
 def to_content(parts: list[Part]) -> list[dict]:
@@ -36,7 +38,8 @@ def to_content(parts: list[Part]) -> list[dict]:
 
 class AnthropicClient:
     provider = "anthropic"
-    request_settings: frozenset[str] = frozenset()  # thinking and log_reasoning change nothing sent
+    request_settings = frozenset({"thinking"})  # only "high" sends a thinking budget; log_reasoning sends nothing new
+    thinking_sends_nothing = frozenset({"min", "default"})  # these two values give the same request (asimov.reuse)
 
     def __init__(self, model: str):
         self.model = model
@@ -44,8 +47,11 @@ class AnthropicClient:
 
     def generate(self, parts: list[Part], thinking: Thinking = "min", log_reasoning: bool = False,
                  system: str | None = None, thinking_budget: int | None = None) -> ModelResponse:
-        """log_reasoning sends nothing new (no thinking parameter is sent); it keeps any thinking blocks."""
+        """log_reasoning sends nothing new; it keeps any thinking blocks. thinking "high" sends a HIGH_BUDGET_TOKENS
+        budget unless the model spec gives its own thinking_budget."""
         kwargs = {}
+        if thinking == "high" and thinking_budget is None:
+            thinking_budget = HIGH_BUDGET_TOKENS
         max_tokens = MAX_TOKENS
         if system is not None:
             kwargs["system"] = system

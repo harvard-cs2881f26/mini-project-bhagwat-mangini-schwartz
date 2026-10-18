@@ -7,6 +7,7 @@ errors; the runner decides what to retry and never caches a failure.
 thinking:
     "min"      lowest thinking each model allows (our reproduction default; WORKLOG 2026-10-10)
     "default"  send no thinking/reasoning parameter at all; the provider decides
+    "high"     the strongest thinking each model offers (WORKLOG 2026-10-18); output caps are raised to fit it
 Temperature is never set: provider defaults (the paper states nothing, and GPT-5 rejects it).
 
 log_reasoning (config flag, default off): ask for the provider's reasoning/thought summary and
@@ -21,7 +22,7 @@ from typing import Literal, Protocol
 
 from asimov.bench.parts import Part
 
-Thinking = Literal["min", "default"]
+Thinking = Literal["min", "default", "high"]
 
 
 @dataclass

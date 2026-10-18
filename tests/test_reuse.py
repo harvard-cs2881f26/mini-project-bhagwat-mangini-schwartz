@@ -22,7 +22,7 @@ DEFAULT = {**MIN, "run": "b", "thinking": "default"}
 
 
 def test_each_provider_declares_what_changes_its_request():
-    assert request_settings("anthropic") == frozenset()
+    assert request_settings("anthropic") == {"thinking"}  # only "high" sends anything
     assert request_settings("openai") == request_settings("gemini") == {"thinking", "log_reasoning"}
 
 
@@ -33,6 +33,7 @@ def test_differing_settings():
 
 def test_reusable_only_when_the_request_is_identical():
     assert reusable("anthropic", MIN, DEFAULT)
+    assert not reusable("anthropic", MIN, {**MIN, "thinking": "high"})  # high turns extended thinking on
     assert not reusable("openai", MIN, DEFAULT)
     assert not reusable("gemini", MIN, {**MIN, "log_reasoning": False})
     assert reusable("openai", MIN, {**MIN, "run": "c"})  # same settings, only the run name differs
