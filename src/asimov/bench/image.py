@@ -1,7 +1,7 @@
 """Image constraint requests and registration with the shared benchmark runner.
 
 No answer boxes are included in requests. Parsing is local policy, not an authors'
-released evaluator; see docs/constraints_implementation.md.
+released evaluator; see WORKLOG.md.
 """
 
 from __future__ import annotations

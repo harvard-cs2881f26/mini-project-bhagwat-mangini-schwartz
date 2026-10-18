@@ -2093,3 +2093,9 @@ Numbers only; interpretation is Noa's. Write-up: `results/part2_designs/writeup.
   Gemini 3.1 Pro has 115/287 replies, Gemini 3.5 Flash-Lite and Gemini 4 Argon 5/287 each (the dry run).
   Every other model has 287/287. Rerunning the config after a Gemini top-up calls only the missing items.
   Until then, compare those three models only on their answered items, or leave them out.
+
+### 2026-10-18 — Image recovery final snapshot and category outputs
+- Recovered Flash min from22 to38 responses, Claude defaults164 each, Nano default95, GPT-5 default104, Flash-Lite default145, Flash default4, Pro0 in both settings. All missing items remain resumable; no partial percentage bars. OpenAI credits exhausted; Gemini Flash/Pro quota exhaustion and19 Flash-Lite transient503 failures prevent completion now. Nine of16 conditions complete (six min, three default); no claim all16 finished.
+- Follow-up text CSV covers16 original min/default model/settings,319 items,32 released injury descriptions and four questions; all64 weighted rates reconcile. In16 injury groups with n>=10, Mini improves6/ties7/worsens3; Nano improves15/ties1/worsens0. Descriptive only, with small strata/multiple comparisons and no causal or training claim. Image category CSV is explicitly provisional and uses only complete matched pairs (Mini/Sonnet/Opus).
+- Validation:553 unit/integration tests passed,12 skipped before final result-schema check; Ruff/Pyright clean. Graphs exported from canonical CLI summaries with hashes; existing README records exact regeneration command. The three untracked planning/technical docs stay local.
+- Final result-schema validation:148 passed, for701 passed/12 skipped across the source and schema suites; generated pages checked current. Historical image response bytes preserved.

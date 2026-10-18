@@ -148,12 +148,12 @@ def main() -> None:
         parser.error("No category rows")
     if args.output:
         with args.output.open("w") as stream:
-            writer = csv.DictWriter(stream, fieldnames=list(rows[0]))
+            writer = csv.DictWriter(stream, fieldnames=list(rows[0]), lineterminator="\n")
             writer.writeheader()
             writer.writerows(rows)
         print(f"Wrote {len(rows)} category measurements to {args.output}")
     else:
-        writer = csv.DictWriter(sys.stdout, fieldnames=list(rows[0]))
+        writer = csv.DictWriter(sys.stdout, fieldnames=list(rows[0]), lineterminator="\n")
         writer.writeheader()
         writer.writerows(rows)
 

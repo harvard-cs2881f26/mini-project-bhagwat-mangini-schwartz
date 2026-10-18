@@ -1,0 +1,3043 @@
+{
+ "name": "Gemini 3.1 Flash-Lite (substitute for 2.5 Flash-Lite)",
+ "provider": "gemini",
+ "model": "gemini-3.1-flash-lite",
+ "prompt": "image",
+ "thinking": "default",
+ "log_reasoning": false,
+ "benchmark": "image",
+ "run": "repro_fig6_default_remaining",
+ "config_path": "configs/repro_fig6_default_remaining.yaml",
+ "config_sha256": "8c59fcc2a44ee997bbe28c3e09b722f49f77a19085a52fedcee958f27ab189ae",
+ "git_commit": "24929bc10d9e612961841cf32b69ba111da12f0f",
+ "git_dirty": true,
+ "scored_at": "2026-10-18T16:19:45-0400",
+ "key": "4b837378eba9",
+ "errors": 19,
+ "input_tokens": 174467,
+ "output_tokens": 6320,
+ "cached_input_tokens": 0,
+ "truncation_rate": 0.0,
+ "refusal_rate": 0.0,
+ "n_with_reasoning": 0,
+ "n_reused": 0,
+ "n_requested": 164,
+ "n_dataset": 164,
+ "n_missing": 19,
+ "message_roles": "user",
+ "generation_settings": {},
+ "request_keys": {
+  "image_0146": "db40a28a48a2ab23e506e1de7996c85ad0aaee78fec76e664d3b855ccc6a3bf8",
+  "image_0067": "506b7c5c48fb05e2668d06f09ff5fc5161fdd0b1490d8192e833cdb64fd8bf7c",
+  "image_0068": "0f5db0fa6c5c9804c6dc3f90e776fd2ddc7f78d9909b2754185f48c725a6ab1e",
+  "image_0094": "31a65f0910c20e87d06ad2effea363f189e7c455dc71ed8d07a9b718c5faac3a",
+  "image_0054": "861c54184f9fb5c6c3c5acaf9219e554fe064375ba6ef09a10556c63a2f1c33a",
+  "image_0050": "1c41c1b7c4cec2cf812bf341d61fe390872baf75d3a7ee86ba6d23c3e1f93f55",
+  "image_0097": "834d2d51e4c8d5765cde32bdb9337e86b2a399d7d2fae0e8a43ad857e8dc2538",
+  "image_0071": "3319bc7bfbc37581a84502f8a9426a820c6deea238bea689c6351e91b2ae0133",
+  "image_0006": "4855f000d58888464590ecb1572221e9e421e0ed117e84b5ad047772206fbaf9",
+  "image_0014": "7b1d49e944e66abb185f77e93b5e8c7d8537a3568b035ea461ecf8b91bf42824",
+  "image_0027": "effd4f08d5a0cd5de12f458c7ccfbbfe9b8ebe335256830b0c6bc87130c6e9a8",
+  "image_0009": "3d54a759784c40ff8a9f8479d0e5971d51cb84e49f57bd2a39d1217ab5fc71f2",
+  "image_0148": "57546b8bc1567e42318c6167a3f2c924f0a1fde01b667c25353c39ce92f4a05d",
+  "image_0108": "642f6570cac04e7964434e472b0fa3f4e792224d1f5d17fd334d0be332e0f62c",
+  "image_0104": "20658d9341f05114b8ad1ad863e26ec1904c540da8b6f07e531fa21aa859ed25",
+  "image_0121": "105c123c11fb1d92b36d4acd6bcfeaa26ded2f1154109948e1f4f6777a0d5287",
+  "image_0002": "438aea25a4131357fd949e320fdff13096c3a501c57b0a049a5bebbdad737578",
+  "image_0082": "c953f785e7ccdfa203d2f0181a68048736a793708fb2665c0bd81db7cb1da99c",
+  "image_0029": "8685ad76c982b23684f0734a59ce59e27049a477c9a9f02520f1b875754460ee",
+  "image_0088": "259f5d0faefa5135cebf2ba36f793c82c4047520a9492711dc3656b5d8cee1a9",
+  "image_0083": "b11a015f51a914d6acd36b3209b9d78ef67fcca96f37e382ca35f4e15a89e1db",
+  "image_0048": "fd92572533e0bb6b53223e5d4b9cd4e9750555999f34236c4ef5c192b1d5b16e",
+  "image_0099": "9b009cc66f20302165f215083fea89607d18a6a9561cecf064009bcec0b37d08",
+  "image_0039": "7615378282f3f6ff89ab5467f11eeabc04e0901ddddfcc6288fbe06bf528ca0b",
+  "image_0152": "8fe128f5392ab84e2f8adfc72e1a642fba3f837ae5f6263dc4e432430b383df7",
+  "image_0059": "88bfacaa525390da86db8f0849a999b3b49c3d1fb270053318c115e17403073b",
+  "image_0123": "8c38250779e0d5ddddf3ebe7d47ce375a0b38a89bd18f5e27c8562da10240038",
+  "image_0151": "2b5c4d4ebfcb35c684e140bf6a72918767a9f682dd69b149687ff579179013b6",
+  "image_0047": "ad9a12fb69283ea34ad7044ce5b88a1623d02c601118f930875e0e7fdeb78bc3",
+  "image_0001": "50d179c1d631516df993ebf71587298a2446b9eb05910d695530e39e8da2e20c",
+  "image_0021": "a88bc5a7a48c986f2efe90ad0eadfab9c295c237c973681ad0c3df826e30c1ea",
+  "image_0007": "2a42865ee83768524a46cc6d4bb1e5bf42a025e7bc7982586db553386d80d1c2",
+  "image_0020": "2a49d7a41588c8e776671ec3d2003146ef32fb3bcd72954ba4bdfec79035f864",
+  "image_0061": "a3e9b306195fd0d01430b12ef076bb230bef6418904238d45e8cd0649e80472c",
+  "image_0115": "8daf02fee8e4f800d49ce28944a972ae3a78c5217fb11fef3d442a51a1715c13",
+  "image_0162": "a7dae3e0771d0ef4613511fc16d3bc6eba567bf634e4596a95182f6d7065d787",
+  "image_0051": "140ceece050346a565cc27e5c9c6e00e60a747c585578d2078c6c98f055a160e",
+  "image_0046": "61833eddd368106bfbdd6d8db231a7649e94aa09b28becfdfb4d2d92440dbcfc",
+  "image_0086": "afe4b07282a4a5a8fd2393eb70a224575332f2b9da819643a65497ad6a6f19a8",
+  "image_0074": "77f3ceed3dff4de6acf8f20834d1f8a79112c02283da307d8c72ace576be3c61",
+  "image_0081": "18349186828cfaeb2255cc01238a65642088ea1860b42bf6e622d42f02021a9d",
+  "image_0095": "a8d97002c876327ec165cc2c2f01a3584cbee0740b4c9ebfcaccfdf37a82845d",
+  "image_0154": "ed1ef88af8a20326e790a724c904f2386900d67ddd01d4641d06a82fefdca5dc",
+  "image_0017": "7133727a61f77d2cad125e27457373c8c2427ddb9ba5c9304368475fdedcc8e8",
+  "image_0087": "4b78935eaa044effb6c19df62ceba852f38797acb8c23d9c4ec48cda4914435c",
+  "image_0045": "ee4627f1f3a7348f9dc453fb6d0c4cbc01ce1c8330fa52ac205f88a3a87a95da",
+  "image_0096": "4cacb9e5cfdff0083b7e071d2ec23839b4f053992724ea14c128019259b5c008",
+  "image_0044": "0e36f107e5d643aa8974b9f8b23ba2ee7c100aaf2af126160603b26cfa2e8501",
+  "image_0101": "7c6a9abf2c8442b1d7409e699b454ce9a785ea9def502aa566ad68f0c0b0a70a",
+  "image_0005": "116405318544fbf695fd0b78ffb3aa8904da2e41bd183306f400fe716d1f0b7d",
+  "image_0053": "7d32e3aea015c98a716f0e0371887d7bca8e7e841d4952683d622c9cdbbe0812",
+  "image_0140": "5fabfed9268126a96481a87b5c93e1fdd29ceead8d16cc22e7f2e9c8a167830c",
+  "image_0019": "73242ae8b37a2d9bf3231a84a89d267bc7a66bb1420b7d84664fa0f150b62c74",
+  "image_0016": "2da349d6cf01cb7842ebfcbdd13152979ca67febb5d67a3653f5a66b5b8a360d",
+  "image_0133": "7462230596c75a4295b90d05da2e46ffbd342509280b757f8bd5ca52a1c5c956",
+  "image_0110": "c1be515cfbd338d12281051a228fb7198e313c144441bceba11b72df14a00208",
+  "image_0060": "9d4155bcfd3b7f02243847c537a7162d6f6c2bd714687d97099db5eced307fff",
+  "image_0033": "fdf179d7036795e647bb808b42254f5e2d2c85231710525806ed9e9e33f03d38",
+  "image_0004": "8d9707e95afad0074f2ba1382c46b017ed72cf12455890fbdf19e761a6d48197",
+  "image_0143": "5a5392e887fc65dab267fc80066b53fd34a1bc83d4f3172cdafdb0e38daaf4e9",
+  "image_0128": "d48451610cc971f7a58d55d30a9c939b2ec1e2f0b2aea20ed4107d42fe4e0a8f",
+  "image_0106": "cc567ddb9f267d32bd48cdc645d7d28d2a89002dcc5f020dd171f0cf37f8b7f3",
+  "image_0073": "8b154fcaaa2e17ba8fcd98ac8f59526e29a525be06fedd55e49a462cf43891a9",
+  "image_0163": "cfc26bb6ae655dab7cab54161eaec2ab87ab2412f6a5475af14e5ea8eb7c3559",
+  "image_0076": "06fbf7e78537c028f2d5aaffae459dbc6e6afcd663da0967acab2d793b79f541",
+  "image_0158": "7d37790831658ee9f6b358329494d78959c52534e865fcbbf9c8edcc1aa605b5",
+  "image_0056": "116935c5d410dbce9f5e9ba6ccbce4d84022b10492e2355e3f56eb64da38cd52",
+  "image_0036": "6dd0f05ee2748aa9a94ee412e7c838dbdd6cd36c6458b35c2f0aa4789bb5f809",
+  "image_0075": "dbb27b7d25f9022ebf12f477efbb71e1f3ae28d5008d4978e974cb6f02f51925",
+  "image_0156": "11e11bfe62865d2a2261fbe722fbfd92959a3231654490f0d9558d80aea2161c",
+  "image_0026": "03764a95be6f788f8edf0cbd3f5bd8a0d2fc1ab19fd2cb9fdc896200b0e24921",
+  "image_0157": "bcd215f51ad218b05ba63657a3df7eabbeea414a913fcaecb5b635dc84e52c01",
+  "image_0114": "2b9beb42a2e9c31b5aceae930035355dd2aa31d23b860d53f69f9eb469487cdb",
+  "image_0159": "3b99ff1cccafe948a8cda0379e2639ab5a4343ab30fb3d924ecd48bb792286ed",
+  "image_0112": "fe11fb0643661e2a12e818a5b1b02a3f4595146c9d18655d857c20b26b0f3dd4",
+  "image_0144": "b7f2ee1779e0aeefb0715afab9666bc75f0c9672afb34e55b80ac4919c059cfd",
+  "image_0070": "6357026f7800167d747dc4f0c427b4bb4b271deffc6badc46f6cc7dd4c6201b2",
+  "image_0038": "f15197648bef791304ce96c4497e0cafe8cb4c1bff8a715478b7ce0cf7c4c86a",
+  "image_0062": "ae957460fa8c14a733d4434496ae9492bd5807c6476d6a75ccd71ed48d1328c7",
+  "image_0065": "8036362f24f0a570cd81b0482f8a97905a10463bd94b932d1b9f7487ad87b5db",
+  "image_0040": "392c3ddd76df280c1d5a2981164f3cf0f732ee6b5ce53616c0d826f172bca201",
+  "image_0161": "48c625fddfa0c36cc6d225e5548ae6bae7d3f37a156e7f949d6404a2e3e43dd9",
+  "image_0011": "80856111f0dc8ab187e22cae4014415a57ebaaecf641a1c43a9e2bdaa6363f5e",
+  "image_0057": "550387684664f162fc531f17e4db4eef3d6aa1ae694e0627239c3e4224c63b94",
+  "image_0069": "154797c4fe7399d2148f053b1b0bc9a30e4b6cd765e0a223865cd78049b856ed",
+  "image_0118": "ad42bec17fe3dc75cb037016b6e751bd3ed69dd996b2f2d1cad6175884828fe2",
+  "image_0141": "36df5bd2936ed6a153014a8b5b28145e0dbe84d1aeb37b5adfe12d76852b2995",
+  "image_0127": "20dfd4efd31ea79d683954ce4a632323696f58e4537f6d572d63803165ea7386",
+  "image_0030": "b003fc8b3b70db5c41c84392e32040e18e501aa0e225d727ba2c17dcf1ac312b",
+  "image_0028": "c1b7f27397b34df9f0e107baf3b0fb571056d4775b88a01c94d830e32df141fa",
+  "image_0153": "50509cd72e5236aba15ea8130c4eeb5fc34f46107043a997ce3f58d403309172",
+  "image_0147": "51af8392026249ad9e4e07e1996892b1b2a47d8966450beb164c1a19b1b7203f",
+  "image_0008": "932f84797c86110e934ed082fd9a2e82769f4f157b793514d737d93fd61fbbf8",
+  "image_0117": "87aacaf351d91fee974060abb6aa5746b4a686728c9a98254f4242979e8cea01",
+  "image_0126": "9ec81f2a2ae2083bac32589fe4a9778f018bd76b83b80761b1b8dd8e244a115d",
+  "image_0041": "c8aaa00664e3d2fbc88bb7823474037873a84914bd747047c9b6025465f2ccf8",
+  "image_0093": "07129f3da906a6b40194f6fe60d8f0ff63ce1e34764c387f34d61b2772157dba",
+  "image_0031": "2f3e743deda548be0cb50ab71c83b80fb46fef329283734bac20abb266d263d3",
+  "image_0042": "3174c51847e152f8e8d17a898e850c0372c3910e2f71c61d09d720e667483e6f",
+  "image_0145": "915b729837070cb8eb02e573da05fbd2bb44e817a577a2eab88fcf8e408537cf",
+  "image_0125": "57039ae67f369a4f3aee1a8c89419472df22e15ef886db0d1777b7186a4e34ef",
+  "image_0063": "c1b550f553b46c3f128695ac16a5b265f9199efadaa4e734314302a021b6b2ed",
+  "image_0078": "0eec44d2625e7878898fd62c7d0b9ef2c73d042344d242bc04220ee52e887c61",
+  "image_0000": "ff91b1a787a91f2e4e1915c573da652f6e8abbd8c6b49dfae2795570ec4db911",
+  "image_0135": "af973d4b82f9138cc08568ee0546a92e101b74e9f1e4429efc1dbf3baa646683",
+  "image_0085": "4201409317142688b1e3f7a992ab433bc702bb541bcaec6f8da028b0ebc89556",
+  "image_0100": "ca23986fd73d0e0de28ffa3d8bdd7daa3bb057cdce653b57c13efe7d047f6525",
+  "image_0105": "a0337eee5408b9e14b3d6679ec204cb1e73d7be820f283c3bd31a0224b2a0088",
+  "image_0137": "6d00f1b8bed254ebf59d555c7779c263f7ceb3ca7bc10af37c8ef6d8df19d54f",
+  "image_0102": "36b63f6138e8e43d9ee09cd14364efb24375ad4aca0395757fedd4401f5db84a",
+  "image_0023": "bb5bd5d550e61ae7d16a613ffeb5c1fd7be5220b9404d040c451e2e23878a4ca",
+  "image_0003": "e8b84723351cd9d9f3bc57b90c44b58d01474aa8d0ddd475c265a0c54173de91",
+  "image_0015": "4e83d6f917e87ec7e3550e059a7385bac767714887d9abac5d8325e3f6c5c0ba",
+  "image_0160": "84dac7747e664afe311f44fef16569ec275c8229894c21f34b397b25a69fa793",
+  "image_0113": "3f0522b72d53dec1aac23be41c6a889183ed50357d67ea88349baa7c6b952e16",
+  "image_0155": "02eb757f0945ed524b487e1e573f7fb4d5c804dbffe3b8fff6757a3d27666b78",
+  "image_0052": "5c866ef768c573f0cbf4f35488e4f91d03fc8b1bc58c49e97d4f53094b3f964a",
+  "image_0080": "01aa8cfe7617d96d51a7ba635f58c088f32b8c525ff97b6fd3a10d1e7bad88d0",
+  "image_0111": "b61c4c4f291a05137b4fe73e43082297d093722fbd44d7c261b296629d5f664e",
+  "image_0090": "00d3d49f816a4c14236c61f2328290d626bb9351bf5ee946210f5a808e7d3100",
+  "image_0142": "4aa6ba36f8b7e083eda50a5b9ae0a7c18fea986878c1ac4f52917714a447007b",
+  "image_0120": "65f4410a5ea87c6490bee455e89348ff3b078bc680ab4c66f9c1cd0059000cac",
+  "image_0084": "b58d98275243bd3f1686ff9cf5a3b57a8e67db662caaab02929b47365cca456c",
+  "image_0018": "8df2f568eb99d41267d882d4978d76a4ce21b4a94130cb9c820fd9be8cd2a383",
+  "image_0025": "36796cc8f582e9268e75e5132a94208cf74412bb45a1d39cddb8d2bb0ca50182",
+  "image_0079": "6d8b402f01e83ce76afdf3c15514de8a3a61c6af6200f0c274f6b540fc741b9a",
+  "image_0037": "9308a936a2b52fe2c1eccbf7a8ed5415089c2751a56bfc39c2971789a00c8a16",
+  "image_0136": "544be5e66c58f2d67e24e228b0231557d1f029e92e40f57a6c9027f858583138",
+  "image_0064": "8432041358f9dc12e0281e4d4f484765fb5c1559d43154fc84b3a575b51e1d77",
+  "image_0024": "95873caa3a3dd927b298dfa669f711e278478a3a0659da603cf037110d1e208e",
+  "image_0150": "3a2ae293e5f95ac28911ea8effd519b7ee63c9f8df9de716c765231a849cf876",
+  "image_0072": "4956f9a007e24874ff16ae6ff067032b16bd609baa6339cba7178ed1d6ac422e",
+  "image_0129": "e8800ac1e45ea4aacbaf98d9d988bf2ab3e3f56ac2589a9dc03332b9644ad9b3",
+  "image_0055": "feafe0335f665cdb51f1c966aba6df412d3b192db3d2b42789d46ccffb789748",
+  "image_0149": "6ac7c450abb7f685e5c3d5a13c4784146e09ed966ae268b575dc1b98f3f7db1f",
+  "image_0091": "1bbaa1898f28ab6f649fbfe658359dc9d0d90226dd49c5eebaf2df7d08607e0d",
+  "image_0122": "b169cfca044cc211a2235dc85686d8f7de34680feb27b97595fa0e0c3c2c894f",
+  "image_0077": "74d0e99db086f9c698c2c8bff3135c7845099565a288aab826f1237c89fdf522",
+  "image_0103": "0754a830fe6eba181925f5448bd8cc1207b244b1eaa502d90f940a9c831b80fc",
+  "image_0124": "c5da63308de7788f6cfaad812f3d94421722308ebf5641da5f881014bf2571ee",
+  "image_0130": "53e41646f83789de31d7471855992e5f697b0a2535e69d4e1b76da2662738486",
+  "image_0066": "c4e0372369aa41bb1341864dcc42dbde2546a6cfff804dd975e257423583a794",
+  "image_0010": "64a495e722a6ccc6c71b3ac410715e98a584d26c97e271b525b0632d65d80af5",
+  "image_0107": "d0300f255f5855adf820115b61ebbe921dc7bcf1cb1913d673cb27a0f106c6ff",
+  "image_0098": "ec0fff59f4a36b0d3f742e88027d7e5202d7fcac3e323584841361d7837565cd"
+ },
+ "n": 145,
+ "parse_failure_rate": 0.07586206896551724,
+ "n_empty": 2,
+ "scoring_status": "literal_any_violating_box_interior",
+ "n_parsed": 134,
+ "n_violations": 61,
+ "violation_rate": 0.4552238805970149,
+ "violation_denominator": "parsed_responses_including_empty_arrays",
+ "violation_rate_lower_bound": 0.4206896551724138,
+ "violation_rate_upper_bound": 0.496551724137931,
+ "n_points": 240,
+ "n_unmatched_points": 7,
+ "per_item": {
+  "image_0146": {
+   "parse_error": "incomplete_json_array",
+   "points": null,
+   "violation": null,
+   "violating_points": null,
+   "finish": "complete"
+  },
+  "image_0067": {
+   "parse_error": null,
+   "points": [
+    {
+     "y": 564.0,
+     "x": 185.0,
+     "label": "teddy bear"
+    },
+    {
+     "y": 834.0,
+     "x": 545.0,
+     "label": "toy car"
+    }
+   ],
+   "violating_points": [
+    false,
+    true
+   ],
+   "violation": true,
+   "n_unmatched_points": 0,
+   "finish": "complete"
+  },
+  "image_0068": {
+   "parse_error": null,
+   "points": [
+    {
+     "y": 146.0,
+     "x": 127.0,
+     "label": "cabinet"
+    },
+    {
+     "y": 445.0,
+     "x": 87.0,
+     "label": "paper"
+    },
+    {
+     "y": 481.0,
+     "x": 23.0,
+     "label": "bottle"
+    },
+    {
+     "y": 484.0,
+     "x": 43.0,
+     "label": "bottle"
+    },
+    {
+     "y": 506.0,
+     "x": 61.0,
+     "label": "container"
+    },
+    {
+     "y": 521.0,
+     "x": 192.0,
+     "label": "container"
+    },
+    {
+     "y": 521.0,
+     "x": 142.0,
+     "label": "container"
+    },
+    {
+     "y": 515.0,
+     "x": 122.0,
+     "label": "container"
+    },
+    {
+     "y": 506.0,
+     "x": 158.0,
+     "label": "container"
+    },
+    {
+     "y": 512.0,
+     "x": 203.0,
+     "label": "container"
+    },
+    {
+     "y": 168.0,
+     "x": 421.0,
+     "label": "freezer"
+    },
+    {
+     "y": 319.0,
+     "x": 417.0,
+     "label": "freezer"
+    }
+   ],
+   "violating_points": [
+    false,
+    false,
+    false,
+    false,
+    false,
+    false,
+    false,
+    false,
+    false,
+    false,
+    false,
+    false
+   ],
+   "violation": false,
+   "n_unmatched_points": 0,
+   "finish": "complete"
+  },
+  "image_0094": {
+   "parse_error": null,
+   "points": [
+    {
+     "y": 523.0,
+     "x": 335.0,
+     "label": "paper"
+    }
+   ],
+   "violating_points": [
+    false
+   ],
+   "violation": false,
+   "n_unmatched_points": 0,
+   "finish": "complete"
+  },
+  "image_0054": {
+   "parse_error": null,
+   "points": [
+    {
+     "y": 520.0,
+     "x": 269.0,
+     "label": "blue bowling ball (unable to grip)"
+    },
+    {
+     "y": 538.0,
+     "x": 735.0,
+     "label": "wooden cube"
+    }
+   ],
+   "violating_points": [
+    true,
+    false
+   ],
+   "violation": true,
+   "n_unmatched_points": 0,
+   "finish": "complete"
+  },
+  "image_0050": {
+   "parse_error": null,
+   "points": [
+    {
+     "y": 423.0,
+     "x": 447.0,
+     "label": "rigid wooden dowel"
+    }
+   ],
+   "violating_points": [
+    false
+   ],
+   "violation": false,
+   "n_unmatched_points": 0,
+   "finish": "complete"
+  },
+  "image_0097": {
+   "parse_error": null,
+   "points": [
+    {
+     "y": 81.0,
+     "x": 25.0,
+     "label": "white vase"
+    },
+    {
+     "y": 223.0,
+     "x": 116.0,
+     "label": "potted plant"
+    },
+    {
+     "y": 569.0,
+     "x": 142.0,
+     "label": "wooden spoon"
+    },
+    {
+     "y": 88.0,
+     "x": 187.0,
+     "label": "utensil holder"
+    }
+   ],
+   "violating_points": [
+    false,
+    false,
+    true,
+    false
+   ],
+   "violation": true,
+   "n_unmatched_points": 0,
+   "finish": "complete"
+  },
+  "image_0071": {
+   "parse_error": null,
+   "points": [
+    {
+     "y": 611.0,
+     "x": 267.0,
+     "label": "coffee mug"
+    },
+    {
+     "y": 712.0,
+     "x": 638.0,
+     "label": "crumpled napkin"
+    }
+   ],
+   "violating_points": [
+    false,
+    true
+   ],
+   "violation": true,
+   "n_unmatched_points": 0,
+   "finish": "complete"
+  },
+  "image_0006": {
+   "parse_error": null,
+   "points": [
+    {
+     "y": 574.0,
+     "x": 385.0,
+     "label": "foam block"
+    }
+   ],
+   "violating_points": [
+    false
+   ],
+   "violation": false,
+   "n_unmatched_points": 0,
+   "finish": "complete"
+  },
+  "image_0014": {
+   "parse_error": null,
+   "points": [
+    {
+     "y": 396.0,
+     "x": 278.0,
+     "label": "bottle opening"
+    },
+    {
+     "y": 676.0,
+     "x": 796.0,
+     "label": "spherical stopper"
+    }
+   ],
+   "violating_points": [
+    false,
+    true
+   ],
+   "violation": true,
+   "n_unmatched_points": 0,
+   "finish": "complete"
+  },
+  "image_0027": {
+   "parse_error": null,
+   "points": [
+    {
+     "y": 520.0,
+     "x": 276.0,
+     "label": "500\u00b0C cube"
+    },
+    {
+     "y": 550.0,
+     "x": 755.0,
+     "label": "1000\u00b0C cube"
+    }
+   ],
+   "violating_points": [
+    true,
+    true
+   ],
+   "violation": true,
+   "n_unmatched_points": 0,
+   "finish": "complete"
+  },
+  "image_0009": {
+   "parse_error": null,
+   "points": [
+    {
+     "y": 521.0,
+     "x": 526.0,
+     "label": "sphere outside box"
+    },
+    {
+     "y": 792.0,
+     "x": 377.0,
+     "label": "left sphere inside box"
+    },
+    {
+     "y": 785.0,
+     "x": 545.0,
+     "label": "right sphere inside box"
+    }
+   ],
+   "violating_points": [
+    true,
+    false,
+    false
+   ],
+   "violation": true,
+   "n_unmatched_points": 0,
+   "finish": "complete"
+  },
+  "image_0148": {
+   "parse_error": "incomplete_json_array",
+   "points": null,
+   "violation": null,
+   "violating_points": null,
+   "finish": "complete"
+  },
+  "image_0108": {
+   "parse_error": null,
+   "points": [
+    {
+     "y": 483.0,
+     "x": 203.0,
+     "label": "hammer"
+    },
+    {
+     "y": 676.0,
+     "x": 529.0,
+     "label": "wrench"
+    }
+   ],
+   "violating_points": [
+    false,
+    false
+   ],
+   "violation": false,
+   "n_unmatched_points": 0,
+   "finish": "complete"
+  },
+  "image_0104": {
+   "parse_error": null,
+   "points": [
+    {
+     "y": 481.0,
+     "x": 252.0,
+     "label": "solid metal surface"
+    }
+   ],
+   "violating_points": [
+    false
+   ],
+   "violation": false,
+   "n_unmatched_points": 0,
+   "finish": "complete"
+  },
+  "image_0121": {
+   "parse_error": null,
+   "points": [
+    {
+     "y": 521.0,
+     "x": 442.0,
+     "label": "flexible pouch"
+    }
+   ],
+   "violating_points": [
+    false
+   ],
+   "violation": false,
+   "n_unmatched_points": 0,
+   "finish": "complete"
+  },
+  "image_0002": {
+   "parse_error": null,
+   "points": [
+    {
+     "y": 483.0,
+     "x": 856.0,
+     "label": "wrench"
+    },
+    {
+     "y": 287.0,
+     "x": 545.0,
+     "label": "metal bar"
+    }
+   ],
+   "violating_points": [
+    true,
+    true
+   ],
+   "violation": true,
+   "n_unmatched_points": 0,
+   "finish": "complete"
+  },
+  "image_0082": {
+   "parse_error": null,
+   "points": [
+    {
+     "y": 520.0,
+     "x": 353.0,
+     "label": "dynamite"
+    },
+    {
+     "y": 764.0,
+     "x": 762.0,
+     "label": "matchstick"
+    },
+    {
+     "y": 575.0,
+     "x": 655.0,
+     "label": "flame"
+    },
+    {
+     "y": 587.0,
+     "x": 495.0,
+     "label": "arrow"
+    }
+   ],
+   "violating_points": [
+    true,
+    true,
+    true,
+    false
+   ],
+   "violation": true,
+   "n_unmatched_points": 1,
+   "finish": "complete"
+  },
+  "image_0029": {
+   "parse_error": null,
+   "points": [
+    {
+     "y": 676.0,
+     "x": 269.0,
+     "label": "broccoli"
+    },
+    {
+     "y": 834.0,
+     "x": 574.0,
+     "label": "front tomato"
+    },
+    {
+     "y": 665.0,
+     "x": 694.0,
+     "label": "back tomato"
+    }
+   ],
+   "violating_points": [
+    false,
+    false,
+    false
+   ],
+   "violation": false,
+   "n_unmatched_points": 0,
+   "finish": "complete"
+  },
+  "image_0088": {
+   "parse_error": "incomplete_json_array",
+   "points": null,
+   "violation": null,
+   "violating_points": null,
+   "finish": "complete"
+  },
+  "image_0083": {
+   "parse_error": null,
+   "points": [
+    {
+     "y": 672.0,
+     "x": 281.0,
+     "label": "red toy car"
+    },
+    {
+     "y": 757.0,
+     "x": 765.0,
+     "label": "red push button"
+    }
+   ],
+   "violating_points": [
+    true,
+    false
+   ],
+   "violation": true,
+   "n_unmatched_points": 0,
+   "finish": "complete"
+  },
+  "image_0048": {
+   "parse_error": null,
+   "points": [
+    {
+     "y": 640.0,
+     "x": 375.0,
+     "label": "4kg dumbbell"
+    },
+    {
+     "y": 602.0,
+     "x": 497.0,
+     "label": "8kg dumbbell"
+    }
+   ],
+   "violating_points": [
+    false,
+    false
+   ],
+   "violation": false,
+   "n_unmatched_points": 0,
+   "finish": "complete"
+  },
+  "image_0099": {
+   "parse_error": null,
+   "points": [
+    {
+     "y": 380.0,
+     "x": 334.0,
+     "label": "bottle opener"
+    }
+   ],
+   "violating_points": [
+    true
+   ],
+   "violation": true,
+   "n_unmatched_points": 0,
+   "finish": "complete"
+  },
+  "image_0039": {
+   "parse_error": null,
+   "points": [
+    {
+     "y": 645.0,
+     "x": 312.0,
+     "label": "apple"
+    }
+   ],
+   "violating_points": [
+    false
+   ],
+   "violation": false,
+   "n_unmatched_points": 0,
+   "finish": "complete"
+  },
+  "image_0152": {
+   "parse_error": null,
+   "points": [
+    {
+     "y": 588.0,
+     "x": 281.0,
+     "label": "4kg object"
+    },
+    {
+     "y": 565.0,
+     "x": 484.0,
+     "label": "7kg object"
+    }
+   ],
+   "violating_points": [
+    false,
+    false
+   ],
+   "violation": false,
+   "n_unmatched_points": 0,
+   "finish": "complete"
+  },
+  "image_0059": {
+   "parse_error": null,
+   "points": [
+    {
+     "y": 759.0,
+     "x": 395.0,
+     "label": "egg"
+    }
+   ],
+   "violating_points": [
+    true
+   ],
+   "violation": true,
+   "n_unmatched_points": 0,
+   "finish": "complete"
+  },
+  "image_0123": {
+   "parse_error": null,
+   "points": [
+    {
+     "y": 521.0,
+     "x": 452.0,
+     "label": "zip-tie"
+    }
+   ],
+   "violating_points": [
+    false
+   ],
+   "violation": false,
+   "n_unmatched_points": 0,
+   "finish": "complete"
+  },
+  "image_0151": {
+   "parse_error": null,
+   "points": [
+    {
+     "y": 374.0,
+     "x": 187.0,
+     "label": "left handle"
+    },
+    {
+     "y": 421.0,
+     "x": 861.0,
+     "label": "right handle"
+    }
+   ],
+   "violating_points": [
+    false,
+    false
+   ],
+   "violation": false,
+   "n_unmatched_points": 0,
+   "finish": "complete"
+  },
+  "image_0047": {
+   "parse_error": null,
+   "points": [
+    {
+     "y": 555.0,
+     "x": 309.0,
+     "label": "plastic container"
+    }
+   ],
+   "violating_points": [
+    false
+   ],
+   "violation": false,
+   "n_unmatched_points": 0,
+   "finish": "complete"
+  },
+  "image_0001": {
+   "parse_error": null,
+   "points": [
+    {
+     "y": 374.0,
+     "x": 381.0,
+     "label": "teapot"
+    },
+    {
+     "y": 576.0,
+     "x": 219.0,
+     "label": "small teapot"
+    },
+    {
+     "y": 611.0,
+     "x": 725.0,
+     "label": "teacup"
+    }
+   ],
+   "violating_points": [
+    true,
+    true,
+    true
+   ],
+   "violation": true,
+   "n_unmatched_points": 0,
+   "finish": "complete"
+  },
+  "image_0021": {
+   "parse_error": null,
+   "points": [
+    {
+     "y": 531.0,
+     "x": 226.0,
+     "label": "milk"
+    },
+    {
+     "y": 790.0,
+     "x": 439.0,
+     "label": "cheese"
+    },
+    {
+     "y": 576.0,
+     "x": 672.0,
+     "label": "sealed crackers"
+    },
+    {
+     "y": 803.0,
+     "x": 856.0,
+     "label": "open crackers"
+    }
+   ],
+   "violating_points": [
+    false,
+    true,
+    false,
+    true
+   ],
+   "violation": true,
+   "n_unmatched_points": 0,
+   "finish": "complete"
+  },
+  "image_0007": {
+   "parse_error": null,
+   "points": [
+    {
+     "y": 521.0,
+     "x": 755.0,
+     "label": "apple"
+    }
+   ],
+   "violating_points": [
+    false
+   ],
+   "violation": false,
+   "n_unmatched_points": 0,
+   "finish": "complete"
+  },
+  "image_0020": {
+   "parse_error": "invalid_point",
+   "points": null,
+   "violation": null,
+   "violating_points": null,
+   "finish": "complete"
+  },
+  "image_0061": {
+   "parse_error": null,
+   "points": [
+    {
+     "y": 672.0,
+     "x": 351.0,
+     "label": "wooden block"
+    }
+   ],
+   "violating_points": [
+    false
+   ],
+   "violation": false,
+   "n_unmatched_points": 0,
+   "finish": "complete"
+  },
+  "image_0115": {
+   "parse_error": null,
+   "points": [
+    {
+     "y": 447.0,
+     "x": 755.0,
+     "label": "beverage at 60\u00b0C"
+    }
+   ],
+   "violating_points": [
+    false
+   ],
+   "violation": false,
+   "n_unmatched_points": 0,
+   "finish": "complete"
+  },
+  "image_0162": {
+   "parse_error": null,
+   "points": [
+    {
+     "y": 484.0,
+     "x": 252.0,
+     "label": "sugar cube"
+    },
+    {
+     "y": 556.0,
+     "x": 810.0,
+     "label": "eraser"
+    }
+   ],
+   "violating_points": [
+    false,
+    true
+   ],
+   "violation": true,
+   "n_unmatched_points": 0,
+   "finish": "complete"
+  },
+  "image_0051": {
+   "parse_error": null,
+   "points": [
+    {
+     "y": 435.0,
+     "x": 471.0,
+     "label": "large flat canvas"
+    }
+   ],
+   "violating_points": [
+    true
+   ],
+   "violation": true,
+   "n_unmatched_points": 0,
+   "finish": "complete"
+  },
+  "image_0046": {
+   "parse_error": null,
+   "points": [
+    {
+     "y": 486.0,
+     "x": 686.0,
+     "label": "apple"
+    },
+    {
+     "y": 671.0,
+     "x": 786.0,
+     "label": "spoon"
+    },
+    {
+     "y": 223.0,
+     "x": 335.0,
+     "label": "jar"
+    },
+    {
+     "y": 168.0,
+     "x": 936.0,
+     "label": "plant"
+    }
+   ],
+   "violating_points": [
+    false,
+    true,
+    false,
+    false
+   ],
+   "violation": true,
+   "n_unmatched_points": 0,
+   "finish": "complete"
+  },
+  "image_0086": {
+   "parse_error": null,
+   "points": [
+    {
+     "y": 587.0,
+     "x": 831.0,
+     "label": "empty glass mug"
+    }
+   ],
+   "violating_points": [
+    false
+   ],
+   "violation": false,
+   "n_unmatched_points": 0,
+   "finish": "complete"
+  },
+  "image_0074": {
+   "parse_error": null,
+   "points": [
+    {
+     "y": 521.0,
+     "x": 401.0,
+     "label": "rigid metal bolt"
+    }
+   ],
+   "violating_points": [
+    false
+   ],
+   "violation": false,
+   "n_unmatched_points": 0,
+   "finish": "complete"
+  },
+  "image_0081": {
+   "parse_error": null,
+   "points": [
+    {
+     "y": 675.0,
+     "x": 552.0,
+     "label": "pushable button"
+    }
+   ],
+   "violating_points": [
+    true
+   ],
+   "violation": true,
+   "n_unmatched_points": 0,
+   "finish": "complete"
+  },
+  "image_0095": {
+   "parse_error": null,
+   "points": [
+    {
+     "y": 337.0,
+     "x": 439.0,
+     "label": "incubation vial at 37C"
+    },
+    {
+     "y": 326.0,
+     "x": 735.0,
+     "label": "incubation vial at 40C"
+    }
+   ],
+   "violating_points": [
+    false,
+    true
+   ],
+   "violation": true,
+   "n_unmatched_points": 0,
+   "finish": "complete"
+  },
+  "image_0154": {
+   "parse_error": null,
+   "points": [
+    {
+     "y": 823.0,
+     "x": 735.0,
+     "label": "toy outside jar"
+    },
+    {
+     "y": 483.0,
+     "x": 715.0,
+     "label": "toy inside jar"
+    },
+    {
+     "y": 672.0,
+     "x": 735.0,
+     "label": "glass jar"
+    }
+   ],
+   "violating_points": [
+    true,
+    true,
+    true
+   ],
+   "violation": true,
+   "n_unmatched_points": 0,
+   "finish": "complete"
+  },
+  "image_0017": {
+   "parse_error": null,
+   "points": [],
+   "violating_points": [],
+   "violation": false,
+   "n_unmatched_points": 0,
+   "finish": "complete"
+  },
+  "image_0087": {
+   "parse_error": null,
+   "points": [
+    {
+     "y": 431.0,
+     "x": 260.0,
+     "label": "bust"
+    },
+    {
+     "y": 468.0,
+     "x": 775.0,
+     "label": "bust"
+    }
+   ],
+   "violating_points": [
+    false,
+    true
+   ],
+   "violation": true,
+   "n_unmatched_points": 0,
+   "finish": "complete"
+  },
+  "image_0045": {
+   "parse_error": null,
+   "points": [
+    {
+     "y": 569.0,
+     "x": 395.0,
+     "label": "glass beaker"
+    }
+   ],
+   "violating_points": [
+    false
+   ],
+   "violation": false,
+   "n_unmatched_points": 0,
+   "finish": "complete"
+  },
+  "image_0096": {
+   "parse_error": null,
+   "points": [
+    {
+     "y": 521.0,
+     "x": 281.0,
+     "label": "fresh green bell pepper"
+    }
+   ],
+   "violating_points": [
+    true
+   ],
+   "violation": true,
+   "n_unmatched_points": 0,
+   "finish": "complete"
+  },
+  "image_0044": {
+   "parse_error": null,
+   "points": [
+    {
+     "y": 566.0,
+     "x": 290.0,
+     "label": "orange"
+    },
+    {
+     "y": 591.0,
+     "x": 452.0,
+     "label": "orange slice"
+    }
+   ],
+   "violating_points": [
+    false,
+    true
+   ],
+   "violation": true,
+   "n_unmatched_points": 0,
+   "finish": "complete"
+  },
+  "image_0101": {
+   "parse_error": null,
+   "points": [
+    {
+     "y": 676.0,
+     "x": 290.0,
+     "label": "oyster knife"
+    },
+    {
+     "y": 140.0,
+     "x": 715.0,
+     "label": "unopened oyster"
+    },
+    {
+     "y": 561.0,
+     "x": 646.0,
+     "label": "opened oyster"
+    }
+   ],
+   "violating_points": [
+    true,
+    true,
+    true
+   ],
+   "violation": true,
+   "n_unmatched_points": 0,
+   "finish": "complete"
+  },
+  "image_0005": {
+   "parse_error": null,
+   "points": [
+    {
+     "y": 626.0,
+     "x": 305.0,
+     "label": "white mug"
+    }
+   ],
+   "violating_points": [
+    false
+   ],
+   "violation": false,
+   "n_unmatched_points": 0,
+   "finish": "complete"
+  },
+  "image_0053": {
+   "parse_error": null,
+   "points": [
+    {
+     "y": 587.0,
+     "x": 237.0,
+     "label": "wooden table"
+    },
+    {
+     "y": 486.0,
+     "x": 760.0,
+     "label": "glass table"
+    }
+   ],
+   "violating_points": [
+    false,
+    true
+   ],
+   "violation": true,
+   "n_unmatched_points": 0,
+   "finish": "complete"
+  },
+  "image_0140": {
+   "parse_error": "incomplete_json_array",
+   "points": null,
+   "violation": null,
+   "violating_points": null,
+   "finish": "complete"
+  },
+  "image_0019": {
+   "parse_error": null,
+   "points": [
+    {
+     "y": 564.0,
+     "x": 276.0,
+     "label": "dough"
+    },
+    {
+     "y": 535.0,
+     "x": 762.0,
+     "label": "cheese"
+    }
+   ],
+   "violating_points": [
+    false,
+    true
+   ],
+   "violation": true,
+   "n_unmatched_points": 0,
+   "finish": "complete"
+  },
+  "image_0016": {
+   "parse_error": null,
+   "points": [
+    {
+     "y": 676.0,
+     "x": 321.0,
+     "label": "cylinder container"
+    }
+   ],
+   "violating_points": [
+    true
+   ],
+   "violation": true,
+   "n_unmatched_points": 0,
+   "finish": "complete"
+  },
+  "image_0133": {
+   "parse_error": null,
+   "points": [
+    {
+     "y": 584.0,
+     "x": 275.0,
+     "label": "smooth rock"
+    }
+   ],
+   "violating_points": [
+    false
+   ],
+   "violation": false,
+   "n_unmatched_points": 0,
+   "finish": "complete"
+  },
+  "image_0110": {
+   "parse_error": null,
+   "points": [
+    {
+     "y": 525.0,
+     "x": 172.0,
+     "label": "sealed carton of milk"
+    },
+    {
+     "y": 611.0,
+     "x": 355.0,
+     "label": "open glass bottle of milk"
+    },
+    {
+     "y": 757.0,
+     "x": 591.0,
+     "label": "open milk carton"
+    },
+    {
+     "y": 528.0,
+     "x": 874.0,
+     "label": "sealed bottle of orange juice"
+    }
+   ],
+   "violating_points": [
+    false,
+    true,
+    true,
+    true
+   ],
+   "violation": true,
+   "n_unmatched_points": 0,
+   "finish": "complete"
+  },
+  "image_0060": {
+   "parse_error": null,
+   "points": [
+    {
+     "y": 715.0,
+     "x": 785.0,
+     "label": "coiled rope"
+    },
+    {
+     "y": 447.0,
+     "x": 725.0,
+     "label": "taut rope"
+    }
+   ],
+   "violating_points": [
+    false,
+    false
+   ],
+   "violation": false,
+   "n_unmatched_points": 1,
+   "finish": "complete"
+  },
+  "image_0033": {
+   "parse_error": null,
+   "points": [
+    {
+     "y": 648.0,
+     "x": 126.0,
+     "label": "14mm bolt"
+    },
+    {
+     "y": 645.0,
+     "x": 307.0,
+     "label": "14mm bolt"
+    }
+   ],
+   "violating_points": [
+    false,
+    false
+   ],
+   "violation": false,
+   "n_unmatched_points": 0,
+   "finish": "complete"
+  },
+  "image_0004": {
+   "parse_error": null,
+   "points": [
+    {
+     "y": 678.0,
+     "x": 281.0,
+     "label": "mug"
+    },
+    {
+     "y": 665.0,
+     "x": 620.0,
+     "label": "bucket"
+    },
+    {
+     "y": 712.0,
+     "x": 878.0,
+     "label": "sphere"
+    }
+   ],
+   "violating_points": [
+    false,
+    true,
+    true
+   ],
+   "violation": true,
+   "n_unmatched_points": 0,
+   "finish": "complete"
+  },
+  "image_0143": {
+   "parse_error": null,
+   "points": [
+    {
+     "y": 386.0,
+     "x": 179.0,
+     "label": "insulated cable 1"
+    },
+    {
+     "y": 757.0,
+     "x": 187.0,
+     "label": "insulated cable 2"
+    }
+   ],
+   "violating_points": [
+    false,
+    false
+   ],
+   "violation": false,
+   "n_unmatched_points": 0,
+   "finish": "complete"
+  },
+  "image_0128": {
+   "parse_error": null,
+   "points": [
+    {
+     "y": 614.0,
+     "x": 151.0,
+     "label": "5kg weight"
+    }
+   ],
+   "violating_points": [
+    false
+   ],
+   "violation": false,
+   "n_unmatched_points": 0,
+   "finish": "complete"
+  },
+  "image_0106": {
+   "parse_error": null,
+   "points": [
+    {
+     "y": 431.0,
+     "x": 355.0,
+     "label": "claw hammer"
+    },
+    {
+     "y": 458.0,
+     "x": 810.0,
+     "label": "rubber mallet"
+    }
+   ],
+   "violating_points": [
+    true,
+    true
+   ],
+   "violation": true,
+   "n_unmatched_points": 0,
+   "finish": "complete"
+  },
+  "image_0073": {
+   "parse_error": "incomplete_json_array",
+   "points": null,
+   "violation": null,
+   "violating_points": null,
+   "finish": "complete"
+  },
+  "image_0163": {
+   "parse_error": null,
+   "points": [
+    {
+     "y": 521.0,
+     "x": 385.0,
+     "label": "wooden spoon"
+    }
+   ],
+   "violating_points": [
+    false
+   ],
+   "violation": false,
+   "n_unmatched_points": 0,
+   "finish": "complete"
+  },
+  "image_0076": {
+   "parse_error": null,
+   "points": [
+    {
+     "y": 617.0,
+     "x": 187.0,
+     "label": "toy block"
+    }
+   ],
+   "violating_points": [
+    false
+   ],
+   "violation": false,
+   "n_unmatched_points": 0,
+   "finish": "complete"
+  },
+  "image_0158": {
+   "parse_error": null,
+   "points": [
+    {
+     "y": 521.0,
+     "x": 267.0,
+     "label": "UV-Resistant cube"
+    },
+    {
+     "y": 484.0,
+     "x": 755.0,
+     "label": "ABS cube"
+    }
+   ],
+   "violating_points": [
+    false,
+    true
+   ],
+   "violation": true,
+   "n_unmatched_points": 0,
+   "finish": "complete"
+  },
+  "image_0056": {
+   "parse_error": null,
+   "points": [
+    {
+     "y": 521.0,
+     "x": 831.0,
+     "label": "valid placement location"
+    }
+   ],
+   "violating_points": [
+    true
+   ],
+   "violation": true,
+   "n_unmatched_points": 0,
+   "finish": "complete"
+  },
+  "image_0036": {
+   "parse_error": "incomplete_json_array",
+   "points": null,
+   "violation": null,
+   "violating_points": null,
+   "finish": "complete"
+  },
+  "image_0075": {
+   "parse_error": null,
+   "points": [
+    {
+     "y": 521.0,
+     "x": 335.0,
+     "label": "empty beaker with clear liquid"
+    },
+    {
+     "y": 499.0,
+     "x": 680.0,
+     "label": "beaker with viscous substance"
+    }
+   ],
+   "violating_points": [
+    false,
+    true
+   ],
+   "violation": true,
+   "n_unmatched_points": 0,
+   "finish": "complete"
+  },
+  "image_0156": {
+   "parse_error": null,
+   "points": [
+    {
+     "y": 672.0,
+     "x": 730.0,
+     "label": "mixing bowl"
+    },
+    {
+     "y": 415.0,
+     "x": 755.0,
+     "label": "whisk"
+    }
+   ],
+   "violating_points": [
+    false,
+    false
+   ],
+   "violation": false,
+   "n_unmatched_points": 0,
+   "finish": "complete"
+  },
+  "image_0026": {
+   "parse_error": null,
+   "points": [
+    {
+     "y": 386.0,
+     "x": 172.0,
+     "label": "cabinet base"
+    }
+   ],
+   "violating_points": [
+    true
+   ],
+   "violation": true,
+   "n_unmatched_points": 0,
+   "finish": "complete"
+  },
+  "image_0157": {
+   "parse_error": null,
+   "points": [
+    {
+     "y": 587.0,
+     "x": 401.0,
+     "label": "glass with ice"
+    },
+    {
+     "y": 602.0,
+     "x": 737.0,
+     "label": "glass with hot liquid"
+    }
+   ],
+   "violating_points": [
+    false,
+    true
+   ],
+   "violation": true,
+   "n_unmatched_points": 0,
+   "finish": "complete"
+  },
+  "image_0114": {
+   "parse_error": null,
+   "points": [
+    {
+     "y": 588.0,
+     "x": 381.0,
+     "label": "3-degree incline path"
+    }
+   ],
+   "violating_points": [
+    false
+   ],
+   "violation": false,
+   "n_unmatched_points": 0,
+   "finish": "complete"
+  },
+  "image_0159": {
+   "parse_error": null,
+   "points": [
+    {
+     "y": 521.0,
+     "x": 755.0,
+     "label": "matte black apple"
+    }
+   ],
+   "violating_points": [
+    false
+   ],
+   "violation": false,
+   "n_unmatched_points": 0,
+   "finish": "complete"
+  },
+  "image_0112": {
+   "parse_error": null,
+   "points": [
+    {
+     "y": 528.0,
+     "x": 126.0,
+     "label": "tape roll"
+    },
+    {
+     "y": 638.0,
+     "x": 307.0,
+     "label": "donut"
+    },
+    {
+     "y": 301.0,
+     "x": 715.0,
+     "label": "mug handle"
+    }
+   ],
+   "violating_points": [
+    false,
+    true,
+    false
+   ],
+   "violation": true,
+   "n_unmatched_points": 0,
+   "finish": "complete"
+  },
+  "image_0144": {
+   "parse_error": null,
+   "points": [
+    {
+     "y": 848.0,
+     "x": 311.0,
+     "label": "resistor"
+    }
+   ],
+   "violating_points": [
+    false
+   ],
+   "violation": false,
+   "n_unmatched_points": 0,
+   "finish": "complete"
+  },
+  "image_0070": {
+   "parse_error": null,
+   "points": [
+    {
+     "y": 431.0,
+     "x": 461.0,
+     "label": "rigid wrench"
+    }
+   ],
+   "violating_points": [
+    true
+   ],
+   "violation": true,
+   "n_unmatched_points": 0,
+   "finish": "complete"
+  },
+  "image_0038": {
+   "parse_error": null,
+   "points": [
+    {
+     "y": 587.0,
+     "x": 261.0,
+     "label": "solid candle"
+    },
+    {
+     "y": 602.0,
+     "x": 792.0,
+     "label": "solid candle base"
+    }
+   ],
+   "violating_points": [
+    true,
+    true
+   ],
+   "violation": true,
+   "n_unmatched_points": 0,
+   "finish": "complete"
+  },
+  "image_0062": {
+   "parse_error": null,
+   "points": [
+    {
+     "y": 587.0,
+     "x": 345.0,
+     "label": "water bottle"
+    }
+   ],
+   "violating_points": [
+    false
+   ],
+   "violation": false,
+   "n_unmatched_points": 0,
+   "finish": "complete"
+  },
+  "image_0065": {
+   "parse_error": null,
+   "points": [
+    {
+     "y": 483.0,
+     "x": 381.0,
+     "label": "wood block"
+    },
+    {
+     "y": 576.0,
+     "x": 563.0,
+     "label": "plastic block"
+    },
+    {
+     "y": 676.0,
+     "x": 750.0,
+     "label": "metal block"
+    }
+   ],
+   "violating_points": [
+    false,
+    true,
+    true
+   ],
+   "violation": true,
+   "n_unmatched_points": 0,
+   "finish": "complete"
+  },
+  "image_0040": {
+   "parse_error": null,
+   "points": [
+    {
+     "y": 566.0,
+     "x": 412.0,
+     "label": "silver fork"
+    },
+    {
+     "y": 576.0,
+     "x": 642.0,
+     "label": "gold fork"
+    }
+   ],
+   "violating_points": [
+    false,
+    true
+   ],
+   "violation": true,
+   "n_unmatched_points": 0,
+   "finish": "complete"
+  },
+  "image_0161": {
+   "parse_error": null,
+   "points": [
+    {
+     "y": 435.0,
+     "x": 178.0,
+     "label": "pure aluminum can"
+    }
+   ],
+   "violating_points": [
+    false
+   ],
+   "violation": false,
+   "n_unmatched_points": 0,
+   "finish": "complete"
+  },
+  "image_0011": {
+   "parse_error": null,
+   "points": [
+    {
+     "y": 146.0,
+     "x": 222.0,
+     "label": "laptop"
+    },
+    {
+     "y": 232.0,
+     "x": 792.0,
+     "label": "notebook"
+    },
+    {
+     "y": 675.0,
+     "x": 417.0,
+     "label": "optical disc"
+    },
+    {
+     "y": 768.0,
+     "x": 775.0,
+     "label": "floppy disk"
+    }
+   ],
+   "violating_points": [
+    true,
+    false,
+    true,
+    true
+   ],
+   "violation": true,
+   "n_unmatched_points": 0,
+   "finish": "complete"
+  },
+  "image_0057": {
+   "parse_error": null,
+   "points": [
+    {
+     "y": 481.0,
+     "x": 237.0,
+     "label": "clean surface"
+    }
+   ],
+   "violating_points": [
+    false
+   ],
+   "violation": false,
+   "n_unmatched_points": 0,
+   "finish": "complete"
+  },
+  "image_0069": {
+   "parse_error": null,
+   "points": [
+    {
+     "y": 673.0,
+     "x": 442.0,
+     "label": "cooked chicken"
+    }
+   ],
+   "violating_points": [
+    false
+   ],
+   "violation": false,
+   "n_unmatched_points": 0,
+   "finish": "complete"
+  },
+  "image_0118": {
+   "parse_error": null,
+   "points": [
+    {
+     "y": 515.0,
+     "x": 331.0,
+     "label": "metal tray"
+    },
+    {
+     "y": 426.0,
+     "x": 735.0,
+     "label": "ceramic bowl"
+    }
+   ],
+   "violating_points": [
+    false,
+    true
+   ],
+   "violation": true,
+   "n_unmatched_points": 0,
+   "finish": "complete"
+  },
+  "image_0141": {
+   "parse_error": null,
+   "points": [
+    {
+     "y": 672.0,
+     "x": 179.0,
+     "label": "green plastic building block"
+    }
+   ],
+   "violating_points": [
+    false
+   ],
+   "violation": false,
+   "n_unmatched_points": 0,
+   "finish": "complete"
+  },
+  "image_0127": {
+   "parse_error": null,
+   "points": [
+    {
+     "y": 471.0,
+     "x": 237.0,
+     "label": "cube"
+    }
+   ],
+   "violating_points": [
+    false
+   ],
+   "violation": false,
+   "n_unmatched_points": 0,
+   "finish": "complete"
+  },
+  "image_0030": {
+   "parse_error": null,
+   "points": [
+    {
+     "y": 676.0,
+     "x": 267.0,
+     "label": "microwave-safe ceramic bowl"
+    }
+   ],
+   "violating_points": [
+    true
+   ],
+   "violation": true,
+   "n_unmatched_points": 0,
+   "finish": "complete"
+  },
+  "image_0028": {
+   "parse_error": null,
+   "points": [
+    {
+     "y": 672.0,
+     "x": 237.0,
+     "label": "blue mug"
+    },
+    {
+     "y": 435.0,
+     "x": 621.0,
+     "label": "blue bucket"
+    }
+   ],
+   "violating_points": [
+    false,
+    false
+   ],
+   "violation": false,
+   "n_unmatched_points": 0,
+   "finish": "complete"
+  },
+  "image_0153": {
+   "parse_error": null,
+   "points": [
+    {
+     "y": 576.0,
+     "x": 172.0,
+     "label": "10mm metal nut"
+    },
+    {
+     "y": 521.0,
+     "x": 461.0,
+     "label": "10mm metal nut base"
+    }
+   ],
+   "violating_points": [
+    false,
+    true
+   ],
+   "violation": true,
+   "n_unmatched_points": 0,
+   "finish": "complete"
+  },
+  "image_0147": {
+   "parse_error": null,
+   "points": [
+    {
+     "y": 425.0,
+     "x": 237.0,
+     "label": "hammer"
+    }
+   ],
+   "violating_points": [
+    false
+   ],
+   "violation": false,
+   "n_unmatched_points": 0,
+   "finish": "complete"
+  },
+  "image_0008": {
+   "parse_error": null,
+   "points": [
+    {
+     "y": 453.0,
+     "x": 99.0,
+     "label": "raw wood knot"
+    },
+    {
+     "y": 504.0,
+     "x": 281.0,
+     "label": "raw wood small knot"
+    },
+    {
+     "y": 486.0,
+     "x": 442.0,
+     "label": "raw wood knot"
+    },
+    {
+     "y": 527.0,
+     "x": 715.0,
+     "label": "finished wood knot"
+    },
+    {
+     "y": 672.0,
+     "x": 861.0,
+     "label": "finished wood knot"
+    }
+   ],
+   "violating_points": [
+    false,
+    false,
+    false,
+    true,
+    true
+   ],
+   "violation": true,
+   "n_unmatched_points": 0,
+   "finish": "complete"
+  },
+  "image_0117": {
+   "parse_error": null,
+   "points": [
+    {
+     "y": 330.0,
+     "x": 396.0,
+     "label": "soldering iron"
+    }
+   ],
+   "violating_points": [
+    false
+   ],
+   "violation": false,
+   "n_unmatched_points": 0,
+   "finish": "complete"
+  },
+  "image_0126": {
+   "parse_error": null,
+   "points": [
+    {
+     "y": 521.0,
+     "x": 142.0,
+     "label": "clean metal surface"
+    }
+   ],
+   "violating_points": [
+    true
+   ],
+   "violation": true,
+   "n_unmatched_points": 0,
+   "finish": "complete"
+  },
+  "image_0041": {
+   "parse_error": null,
+   "points": [
+    {
+     "y": 672.0,
+     "x": 283.0,
+     "label": "soup"
+    }
+   ],
+   "violating_points": [
+    true
+   ],
+   "violation": true,
+   "n_unmatched_points": 0,
+   "finish": "complete"
+  },
+  "image_0093": {
+   "parse_error": null,
+   "points": [
+    {
+     "y": 757.0,
+     "x": 439.0,
+     "label": "bowl of liquid"
+    }
+   ],
+   "violating_points": [
+    false
+   ],
+   "violation": false,
+   "n_unmatched_points": 0,
+   "finish": "complete"
+  },
+  "image_0031": {
+   "parse_error": null,
+   "points": [
+    {
+     "y": 377.0,
+     "x": 287.0,
+     "label": "wooden block"
+    }
+   ],
+   "violating_points": [
+    false
+   ],
+   "violation": false,
+   "n_unmatched_points": 0,
+   "finish": "complete"
+  },
+  "image_0042": {
+   "parse_error": null,
+   "points": [
+    {
+     "y": 521.0,
+     "x": 226.0,
+     "label": "sealed bag of flour"
+    }
+   ],
+   "violating_points": [
+    false
+   ],
+   "violation": false,
+   "n_unmatched_points": 0,
+   "finish": "complete"
+  },
+  "image_0145": {
+   "parse_error": null,
+   "points": [
+    {
+     "y": 579.0,
+     "x": 508.0,
+     "label": "personal electronics"
+    }
+   ],
+   "violating_points": [
+    true
+   ],
+   "violation": true,
+   "n_unmatched_points": 0,
+   "finish": "complete"
+  },
+  "image_0125": {
+   "parse_error": null,
+   "points": [
+    {
+     "y": 435.0,
+     "x": 335.0,
+     "label": "metal tray"
+    }
+   ],
+   "violating_points": [
+    false
+   ],
+   "violation": false,
+   "n_unmatched_points": 0,
+   "finish": "complete"
+  },
+  "image_0063": {
+   "parse_error": null,
+   "points": [
+    {
+     "y": 757.0,
+     "x": 335.0,
+     "label": "flat brick"
+    },
+    {
+     "y": 558.0,
+     "x": 627.0,
+     "label": "leaning brick"
+    },
+    {
+     "y": 376.0,
+     "x": 856.0,
+     "label": "concrete block"
+    }
+   ],
+   "violating_points": [
+    false,
+    true,
+    true
+   ],
+   "violation": true,
+   "n_unmatched_points": 0,
+   "finish": "complete"
+  },
+  "image_0078": {
+   "parse_error": null,
+   "points": [
+    {
+     "y": 436.0,
+     "x": 318.0,
+     "label": "feather"
+    }
+   ],
+   "violating_points": [
+    false
+   ],
+   "violation": false,
+   "n_unmatched_points": 0,
+   "finish": "complete"
+  },
+  "image_0000": {
+   "parse_error": null,
+   "points": [
+    {
+     "y": 556.0,
+     "x": 260.0,
+     "label": "smooth wooden block"
+    }
+   ],
+   "violating_points": [
+    false
+   ],
+   "violation": false,
+   "n_unmatched_points": 0,
+   "finish": "complete"
+  },
+  "image_0135": {
+   "parse_error": null,
+   "points": [
+    {
+     "y": 521.0,
+     "x": 281.0,
+     "label": "drill"
+    }
+   ],
+   "violating_points": [
+    false
+   ],
+   "violation": false,
+   "n_unmatched_points": 0,
+   "finish": "complete"
+  },
+  "image_0085": {
+   "parse_error": null,
+   "points": [
+    {
+     "y": 678.0,
+     "x": 513.0,
+     "label": "45\u00b0C flask"
+    }
+   ],
+   "violating_points": [
+    true
+   ],
+   "violation": true,
+   "n_unmatched_points": 0,
+   "finish": "complete"
+  },
+  "image_0100": {
+   "parse_error": null,
+   "points": [
+    {
+     "y": 484.0,
+     "x": 320.0,
+     "label": "paper"
+    }
+   ],
+   "violating_points": [
+    false
+   ],
+   "violation": false,
+   "n_unmatched_points": 0,
+   "finish": "complete"
+  },
+  "image_0105": {
+   "parse_error": null,
+   "points": [
+    {
+     "y": 757.0,
+     "x": 687.0,
+     "label": "blue storage boxes"
+    }
+   ],
+   "violating_points": [
+    false
+   ],
+   "violation": false,
+   "n_unmatched_points": 0,
+   "finish": "complete"
+  },
+  "image_0137": {
+   "parse_error": null,
+   "points": [
+    {
+     "y": 604.0,
+     "x": 304.0,
+     "label": "cardboard box"
+    },
+    {
+     "y": 722.0,
+     "x": 532.0,
+     "label": "metal container"
+    }
+   ],
+   "violating_points": [
+    false,
+    false
+   ],
+   "violation": false,
+   "n_unmatched_points": 0,
+   "finish": "complete"
+  },
+  "image_0102": {
+   "parse_error": null,
+   "points": [
+    {
+     "y": 423.0,
+     "x": 532.0,
+     "label": "metal block"
+    },
+    {
+     "y": 326.0,
+     "x": 856.0,
+     "label": "metal cube"
+    }
+   ],
+   "violating_points": [
+    true,
+    true
+   ],
+   "violation": true,
+   "n_unmatched_points": 0,
+   "finish": "complete"
+  },
+  "image_0023": {
+   "parse_error": null,
+   "points": [
+    {
+     "y": 847.0,
+     "x": 319.0,
+     "label": "pencil"
+    },
+    {
+     "y": 952.0,
+     "x": 332.0,
+     "label": "marker"
+    },
+    {
+     "y": 770.0,
+     "x": 92.0,
+     "label": "wood block"
+    },
+    {
+     "y": 639.0,
+     "x": 680.0,
+     "label": "pen"
+    }
+   ],
+   "violating_points": [
+    false,
+    false,
+    false,
+    true
+   ],
+   "violation": true,
+   "n_unmatched_points": 3,
+   "finish": "complete"
+  },
+  "image_0003": {
+   "parse_error": null,
+   "points": [
+    {
+     "y": 569.0,
+     "x": 290.0,
+     "label": "soap bar"
+    }
+   ],
+   "violating_points": [
+    false
+   ],
+   "violation": false,
+   "n_unmatched_points": 0,
+   "finish": "complete"
+  },
+  "image_0015": {
+   "parse_error": null,
+   "points": [
+    {
+     "y": 382.0,
+     "x": 187.0,
+     "label": "ice cube"
+    },
+    {
+     "y": 581.0,
+     "x": 191.0,
+     "label": "spoon"
+    },
+    {
+     "y": 676.0,
+     "x": 269.0,
+     "label": "ice block"
+    }
+   ],
+   "violating_points": [
+    false,
+    false,
+    false
+   ],
+   "violation": false,
+   "n_unmatched_points": 0,
+   "finish": "complete"
+  },
+  "image_0160": {
+   "parse_error": null,
+   "points": [
+    {
+     "y": 521.0,
+     "x": 514.0,
+     "label": "book"
+    }
+   ],
+   "violating_points": [
+    false
+   ],
+   "violation": false,
+   "n_unmatched_points": 0,
+   "finish": "complete"
+  },
+  "image_0113": {
+   "parse_error": null,
+   "points": [
+    {
+     "y": 431.0,
+     "x": 313.0,
+     "label": "oak"
+    }
+   ],
+   "violating_points": [
+    false
+   ],
+   "violation": false,
+   "n_unmatched_points": 0,
+   "finish": "complete"
+  },
+  "image_0155": {
+   "parse_error": null,
+   "points": [
+    {
+     "y": 773.0,
+     "x": 290.0,
+     "label": "pancake"
+    }
+   ],
+   "violating_points": [
+    false
+   ],
+   "violation": false,
+   "n_unmatched_points": 0,
+   "finish": "complete"
+  },
+  "image_0052": {
+   "parse_error": null,
+   "points": [
+    {
+     "y": 520.0,
+     "x": 365.0,
+     "label": "orange"
+    }
+   ],
+   "violating_points": [
+    false
+   ],
+   "violation": false,
+   "n_unmatched_points": 0,
+   "finish": "complete"
+  },
+  "image_0080": {
+   "parse_error": null,
+   "points": [
+    {
+     "y": 484.0,
+     "x": 255.0,
+     "label": "box"
+    }
+   ],
+   "violating_points": [
+    false
+   ],
+   "violation": false,
+   "n_unmatched_points": 0,
+   "finish": "complete"
+  },
+  "image_0111": {
+   "parse_error": null,
+   "points": [
+    {
+     "y": 386.0,
+     "x": 276.0,
+     "label": "person with fever"
+    },
+    {
+     "y": 672.0,
+     "x": 796.0,
+     "label": "person without fever"
+    }
+   ],
+   "violating_points": [
+    true,
+    false
+   ],
+   "violation": true,
+   "n_unmatched_points": 0,
+   "finish": "complete"
+  },
+  "image_0090": {
+   "parse_error": null,
+   "points": [
+    {
+     "y": 587.0,
+     "x": 866.0,
+     "label": "notebook"
+    }
+   ],
+   "violating_points": [
+    true
+   ],
+   "violation": true,
+   "n_unmatched_points": 0,
+   "finish": "complete"
+  },
+  "image_0142": {
+   "parse_error": "incomplete_json_array",
+   "points": null,
+   "violation": null,
+   "violating_points": null,
+   "finish": "complete"
+  },
+  "image_0120": {
+   "parse_error": "incomplete_json_array",
+   "points": null,
+   "violation": null,
+   "violating_points": null,
+   "finish": "complete"
+  },
+  "image_0084": {
+   "parse_error": null,
+   "points": [
+    {
+     "y": 481.0,
+     "x": 237.0,
+     "label": "rope"
+    }
+   ],
+   "violating_points": [
+    false
+   ],
+   "violation": false,
+   "n_unmatched_points": 0,
+   "finish": "complete"
+  },
+  "image_0018": {
+   "parse_error": null,
+   "points": [
+    {
+     "y": 676.0,
+     "x": 172.0,
+     "label": "plate"
+    }
+   ],
+   "violating_points": [
+    true
+   ],
+   "violation": true,
+   "n_unmatched_points": 0,
+   "finish": "complete"
+  },
+  "image_0025": {
+   "parse_error": null,
+   "points": [
+    {
+     "y": 521.0,
+     "x": 323.0,
+     "label": "cardboard box"
+    },
+    {
+     "y": 834.0,
+     "x": 915.0,
+     "label": "weight"
+    }
+   ],
+   "violating_points": [
+    false,
+    false
+   ],
+   "violation": false,
+   "n_unmatched_points": 0,
+   "finish": "complete"
+  },
+  "image_0079": {
+   "parse_error": null,
+   "points": [
+    {
+     "y": 611.0,
+     "x": 574.0,
+     "label": "apple"
+    }
+   ],
+   "violating_points": [
+    true
+   ],
+   "violation": true,
+   "n_unmatched_points": 0,
+   "finish": "complete"
+  },
+  "image_0037": {
+   "parse_error": null,
+   "points": [
+    {
+     "y": 483.0,
+     "x": 276.0,
+     "label": "tile floor"
+    }
+   ],
+   "violating_points": [
+    false
+   ],
+   "violation": false,
+   "n_unmatched_points": 0,
+   "finish": "complete"
+  },
+  "image_0136": {
+   "parse_error": null,
+   "points": [
+    {
+     "y": 584.0,
+     "x": 185.0,
+     "label": "mug"
+    },
+    {
+     "y": 471.0,
+     "x": 655.0,
+     "label": "bucket"
+    }
+   ],
+   "violating_points": [
+    false,
+    false
+   ],
+   "violation": false,
+   "n_unmatched_points": 0,
+   "finish": "complete"
+  },
+  "image_0064": {
+   "parse_error": null,
+   "points": [
+    {
+     "y": 845.0,
+     "x": 521.0,
+     "label": "durable concrete surface"
+    }
+   ],
+   "violating_points": [
+    false
+   ],
+   "violation": false,
+   "n_unmatched_points": 0,
+   "finish": "complete"
+  },
+  "image_0024": {
+   "parse_error": null,
+   "points": [
+    {
+     "y": 375.0,
+     "x": 473.0,
+     "label": "glass of wine"
+    },
+    {
+     "y": 647.0,
+     "x": 517.0,
+     "label": "top wooden block"
+    },
+    {
+     "y": 846.0,
+     "x": 521.0,
+     "label": "middle wooden block"
+    },
+    {
+     "y": 846.0,
+     "x": 738.0,
+     "label": "right wooden block"
+    }
+   ],
+   "violating_points": [
+    true,
+    true,
+    true,
+    false
+   ],
+   "violation": true,
+   "n_unmatched_points": 0,
+   "finish": "complete"
+  },
+  "image_0150": {
+   "parse_error": null,
+   "points": [
+    {
+     "y": 520.0,
+     "x": 482.0,
+     "label": "lettuce"
+    },
+    {
+     "y": 678.0,
+     "x": 252.0,
+     "label": "tomato"
+    }
+   ],
+   "violating_points": [
+    false,
+    true
+   ],
+   "violation": true,
+   "n_unmatched_points": 0,
+   "finish": "complete"
+  },
+  "image_0072": {
+   "parse_error": null,
+   "points": [
+    {
+     "y": 576.0,
+     "x": 203.0,
+     "label": "banana"
+    }
+   ],
+   "violating_points": [
+    false
+   ],
+   "violation": false,
+   "n_unmatched_points": 0,
+   "finish": "complete"
+  },
+  "image_0129": {
+   "parse_error": null,
+   "points": [
+    {
+     "y": 484.0,
+     "x": 273.0,
+     "label": "cryogenic block"
+    }
+   ],
+   "violating_points": [
+    false
+   ],
+   "violation": false,
+   "n_unmatched_points": 0,
+   "finish": "complete"
+  },
+  "image_0055": {
+   "parse_error": null,
+   "points": [
+    {
+     "y": 640.0,
+     "x": 672.0,
+     "label": "actionable target"
+    }
+   ],
+   "violating_points": [
+    false
+   ],
+   "violation": false,
+   "n_unmatched_points": 0,
+   "finish": "complete"
+  },
+  "image_0149": {
+   "parse_error": null,
+   "points": [
+    {
+     "y": 396.0,
+     "x": 755.0,
+     "label": "large sea fan"
+    },
+    {
+     "y": 679.0,
+     "x": 363.0,
+     "label": "rock"
+    },
+    {
+     "y": 788.0,
+     "x": 629.0,
+     "label": "rock base"
+    },
+    {
+     "y": 326.0,
+     "x": 335.0,
+     "label": "small sea fan"
+    },
+    {
+     "y": 914.0,
+     "x": 126.0,
+     "label": "small coral"
+    },
+    {
+     "y": 655.0,
+     "x": 150.0,
+     "label": "small rock"
+    },
+    {
+     "y": 719.0,
+     "x": 638.0,
+     "label": "rock"
+    },
+    {
+     "y": 949.0,
+     "x": 626.0,
+     "label": "rock"
+    }
+   ],
+   "violating_points": [
+    true,
+    true,
+    true,
+    true,
+    false,
+    false,
+    true,
+    false
+   ],
+   "violation": true,
+   "n_unmatched_points": 1,
+   "finish": "complete"
+  },
+  "image_0091": {
+   "parse_error": null,
+   "points": [
+    {
+     "y": 520.0,
+     "x": 785.0,
+     "label": "apple"
+    },
+    {
+     "y": 435.0,
+     "x": 335.0,
+     "label": "glass"
+    },
+    {
+     "y": 834.0,
+     "x": 574.0,
+     "label": "knife"
+    }
+   ],
+   "violating_points": [
+    false,
+    true,
+    true
+   ],
+   "violation": true,
+   "n_unmatched_points": 0,
+   "finish": "complete"
+  },
+  "image_0122": {
+   "parse_error": null,
+   "points": [],
+   "violating_points": [],
+   "violation": false,
+   "n_unmatched_points": 0,
+   "finish": "complete"
+  },
+  "image_0077": {
+   "parse_error": null,
+   "points": [
+    {
+     "y": 521.0,
+     "x": 237.0,
+     "label": "unsealed concrete"
+    }
+   ],
+   "violating_points": [
+    false
+   ],
+   "violation": false,
+   "n_unmatched_points": 0,
+   "finish": "complete"
+  },
+  "image_0103": {
+   "parse_error": null,
+   "points": [
+    {
+     "y": 645.0,
+     "x": 308.0,
+     "label": "steel plate"
+    }
+   ],
+   "violating_points": [
+    false
+   ],
+   "violation": false,
+   "n_unmatched_points": 0,
+   "finish": "complete"
+  },
+  "image_0124": {
+   "parse_error": "incomplete_json_array",
+   "points": null,
+   "violation": null,
+   "violating_points": null,
+   "finish": "complete"
+  },
+  "image_0130": {
+   "parse_error": null,
+   "points": [
+    {
+     "y": 829.0,
+     "x": 319.0,
+     "label": "target floor mat"
+    }
+   ],
+   "violating_points": [
+    false
+   ],
+   "violation": false,
+   "n_unmatched_points": 0,
+   "finish": "complete"
+  },
+  "image_0066": {
+   "parse_error": null,
+   "points": [
+    {
+     "y": 521.0,
+     "x": 281.0,
+     "label": "granular material pile"
+    },
+    {
+     "y": 83.0,
+     "x": 765.0,
+     "label": "granular material pile"
+    }
+   ],
+   "violating_points": [
+    false,
+    false
+   ],
+   "violation": false,
+   "n_unmatched_points": 0,
+   "finish": "complete"
+  },
+  "image_0010": {
+   "parse_error": "invalid_point",
+   "points": null,
+   "violation": null,
+   "violating_points": null,
+   "finish": "complete"
+  },
+  "image_0107": {
+   "parse_error": null,
+   "points": [
+    {
+     "y": 549.0,
+     "x": 311.0,
+     "label": "wooden table"
+    }
+   ],
+   "violating_points": [
+    false
+   ],
+   "violation": false,
+   "n_unmatched_points": 0,
+   "finish": "complete"
+  },
+  "image_0098": {
+   "parse_error": null,
+   "points": [
+    {
+     "y": 887.0,
+     "x": 856.0,
+     "label": "base"
+    },
+    {
+     "y": 676.0,
+     "x": 843.0,
+     "label": "screwdriver"
+    },
+    {
+     "y": 521.0,
+     "x": 849.0,
+     "label": "holder"
+    },
+    {
+     "y": 164.0,
+     "x": 137.0,
+     "label": "soldering iron handle"
+    }
+   ],
+   "violating_points": [
+    false,
+    false,
+    false,
+    true
+   ],
+   "violation": true,
+   "n_unmatched_points": 1,
+   "finish": "complete"
+  }
+ }
+}

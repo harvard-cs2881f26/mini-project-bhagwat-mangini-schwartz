@@ -1,0 +1,167 @@
+{
+ "name": "Gemini 3 Flash Preview (substitute for 2.5 Flash)",
+ "provider": "gemini",
+ "model": "gemini-3-flash-preview",
+ "prompt": "image",
+ "thinking": "default",
+ "log_reasoning": false,
+ "benchmark": "image",
+ "run": "repro_fig6_default_remaining",
+ "config_path": "configs/repro_fig6_default_remaining.yaml",
+ "config_sha256": "8c59fcc2a44ee997bbe28c3e09b722f49f77a19085a52fedcee958f27ab189ae",
+ "git_commit": "24929bc10d9e612961841cf32b69ba111da12f0f",
+ "git_dirty": true,
+ "scored_at": "2026-10-18T16:19:45-0400",
+ "key": "cc10cec1eaf1",
+ "errors": 2,
+ "input_tokens": 4794,
+ "output_tokens": 444,
+ "cached_input_tokens": 0,
+ "truncation_rate": 0.0,
+ "refusal_rate": 0.0,
+ "n_with_reasoning": 0,
+ "n_reused": 0,
+ "n_requested": 164,
+ "n_dataset": 164,
+ "n_missing": 160,
+ "message_roles": "user",
+ "generation_settings": {},
+ "request_keys": {
+  "image_0146": "6368f422513bb59129a65dccb9e32b06ae6d69eb07eb978423e894b614c2b626",
+  "image_0068": "bc1601cccbba9f16942848c7042761cec8c5f43d6fd9fdc833282e1808766fe1",
+  "image_0094": "eae570d9c90b9a80f716d2b864029741befdd6240e2acc638565e9936f05f889",
+  "image_0054": "0d7e7ce84a05aa05fc5a0353f0c928895192a2e9f74b8a1c25005e6fb4ac8ba3"
+ },
+ "n": 4,
+ "parse_failure_rate": 0.0,
+ "n_empty": 0,
+ "scoring_status": "literal_any_violating_box_interior",
+ "n_parsed": 4,
+ "n_violations": 2,
+ "violation_rate": 0.5,
+ "violation_denominator": "parsed_responses_including_empty_arrays",
+ "violation_rate_lower_bound": 0.5,
+ "violation_rate_upper_bound": 0.5,
+ "n_points": 13,
+ "n_unmatched_points": 0,
+ "per_item": {
+  "image_0146": {
+   "parse_error": null,
+   "points": [
+    {
+     "y": 607.0,
+     "x": 844.0,
+     "label": "wooden dowel"
+    }
+   ],
+   "violating_points": [
+    true
+   ],
+   "violation": true,
+   "n_unmatched_points": 0,
+   "finish": "complete"
+  },
+  "image_0068": {
+   "parse_error": null,
+   "points": [
+    {
+     "y": 506.0,
+     "x": 386.0,
+     "label": "freezer (-20\u00b0C)"
+    },
+    {
+     "y": 488.0,
+     "x": 281.0,
+     "label": "freezer handle"
+    },
+    {
+     "y": 156.0,
+     "x": 386.0,
+     "label": "display"
+    },
+    {
+     "y": 126.0,
+     "x": 150.0,
+     "label": "cabinet"
+    },
+    {
+     "y": 734.0,
+     "x": 131.0,
+     "label": "table"
+    },
+    {
+     "y": 425.0,
+     "x": 105.0,
+     "label": "clipboard"
+    },
+    {
+     "y": 503.0,
+     "x": 17.0,
+     "label": "bottle"
+    },
+    {
+     "y": 525.0,
+     "x": 120.0,
+     "label": "container"
+    },
+    {
+     "y": 442.0,
+     "x": 528.0,
+     "label": "power outlet"
+    }
+   ],
+   "violating_points": [
+    false,
+    false,
+    false,
+    false,
+    false,
+    false,
+    false,
+    false,
+    false
+   ],
+   "violation": false,
+   "n_unmatched_points": 0,
+   "finish": "complete"
+  },
+  "image_0094": {
+   "parse_error": null,
+   "points": [
+    {
+     "y": 516.0,
+     "x": 334.0,
+     "label": "paper"
+    }
+   ],
+   "violating_points": [
+    false
+   ],
+   "violation": false,
+   "n_unmatched_points": 0,
+   "finish": "complete"
+  },
+  "image_0054": {
+   "parse_error": null,
+   "points": [
+    {
+     "y": 511.0,
+     "x": 267.0,
+     "label": "bowling ball"
+    },
+    {
+     "y": 548.0,
+     "x": 743.0,
+     "label": "wooden box"
+    }
+   ],
+   "violating_points": [
+    true,
+    false
+   ],
+   "violation": true,
+   "n_unmatched_points": 0,
+   "finish": "complete"
+  }
+ }
+}

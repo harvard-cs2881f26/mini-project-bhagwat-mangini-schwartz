@@ -1,0 +1,30 @@
+# Missing provider-default runs; user-only roles match the corresponding min runs.
+# No per-model reasoning overrides. Mini default remains in repro_fig6_default.
+run: repro_fig6_default_remaining
+benchmark: image
+prompt: image
+variant: image
+thinking: default
+models:
+- name: GPT-5 Nano
+  provider: openai
+  model: gpt-5-nano
+- name: GPT-5
+  provider: openai
+  model: gpt-5
+- name: Gemini 3.1 Flash-Lite (substitute for 2.5 Flash-Lite)
+  provider: gemini
+  model: gemini-3.1-flash-lite
+- name: Gemini 3 Flash Preview (substitute for 2.5 Flash)
+  provider: gemini
+  model: gemini-3-flash-preview
+  request_interval_s: 13
+- name: Gemini 3.1 Pro Preview (substitute for 2.5 Pro)
+  provider: gemini
+  model: gemini-3.1-pro-preview
+- name: Claude Sonnet 4.5 (substitute for Sonnet 4)
+  provider: anthropic
+  model: claude-sonnet-4-5-20250929
+- name: Claude Opus 4.5 (substitute for Opus 4.1)
+  provider: anthropic
+  model: claude-opus-4-5-20251101

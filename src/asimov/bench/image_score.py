@@ -1,7 +1,7 @@
 """Parse [y,x] responses and apply Figure 3's literal constraint violation rule.
 
 Parsing and failure-denominator choices are local policy; the author evaluator
-was not released. See docs/constraints_implementation.md.
+was not released. See WORKLOG.md.
 """
 
 from __future__ import annotations

@@ -35,7 +35,7 @@ Paper: arXiv 2509.21651v2, read on 2026-10-12 into `configs/paper/claims.yaml`. 
 | Model | Input tokens / item | Output tokens / item | Latency p50 / p95 s | Refused | Parse failures | $ / item | $ run |
 |---|---|---|---|---|---|---|---|
 | Gemini 3.1 Flash-Lite (substitute for 2.5 Flash-Lite) | 1203 | 44 | – / – | 0 | 7 | – | – |
-| Gemini 3 Flash Preview (substitute for 2.5 Flash) | 1202 | 65 | – / – | 0 | 2 | – | – |
+| Gemini 3 Flash Preview (substitute for 2.5 Flash) | 1204 | 63 | – / – | 0 | 2 | – | – |
 | Gemini 3.1 Pro Preview (substitute for 2.5 Pro) | – | – | – / – | 0 | 0 | – | – |
 | Claude Sonnet 4.5 (substitute for Sonnet 4) | 495 | 176 | – / – | 2 | 5 | – | – |
 | Claude Opus 4.5 (substitute for Opus 4.1) | 495 | 116 | – / – | 0 | 3 | – | – |
@@ -52,8 +52,8 @@ Per item: the model's totals over this run divided by its replies. Refused and P
 | Prompt | image |
 | Thinking | min |
 | Reasoning logged | False |
-| Git commit | 68bf1cfb13 (dirty) |
-| Scored | 2026-10-13 |
+| Git commit | 24929bc10d (dirty) |
+| Scored | 2026-10-18 |
 | Config | [config.yaml](config.yaml) (sha256 50131700a1db) |
 
 ## Models
@@ -61,8 +61,8 @@ Per item: the model's totals over this run divided by its replies. Refused and P
 | Model | Requested | Served | Stand-in | Replies | Errors | Parse failures | Refused | Truncated | Malformed | Near-key reads | With reasoning | Input tokens | Output tokens | Cost $ | Latency p50 / p95 s |
 |---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|
 | Gemini 3.1 Flash-Lite (substitute for 2.5 Flash-Lite) | `gemini-3.1-flash-lite` | – | yes | 164 | 0 | 7 | 0 | 0 | – | 0 | 0 | 197286 | 7275 | – | – / – |
-| Gemini 3 Flash Preview (substitute for 2.5 Flash) | `gemini-3-flash-preview` | – | yes | 22 | 0 | 2 | 0 | 0 | – | 0 | 0 | 26437 | 1429 | – | – / – |
-| Gemini 3.1 Pro Preview (substitute for 2.5 Pro) | `gemini-3.1-pro-preview` | – | yes | 0 | 0 | 0 | 0 | 0 | – | 0 | – | – | – | – | – / – |
+| Gemini 3 Flash Preview (substitute for 2.5 Flash) | `gemini-3-flash-preview` | – | yes | 38 | 3 | 2 | 0 | 0 | – | 0 | 0 | 45743 | 2409 | – | – / – |
+| Gemini 3.1 Pro Preview (substitute for 2.5 Pro) | `gemini-3.1-pro-preview` | – | yes | 0 | 1 | 0 | 0 | 0 | – | 0 | – | – | – | – | – / – |
 | Claude Sonnet 4.5 (substitute for Sonnet 4) | `claude-sonnet-4-5-20250929` | – | yes | 164 | 0 | 5 | 2 | 0 | – | 0 | 0 | 81191 | 28790 | – | – / – |
 | Claude Opus 4.5 (substitute for Opus 4.1) | `claude-opus-4-5-20251101` | – | yes | 164 | 0 | 3 | 0 | 0 | – | 0 | 0 | 81191 | 19035 | – | – / – |
 
@@ -73,7 +73,7 @@ Parse failures: replies with no readable answer; all count as wrong (CLAUDE.md, 
 | Model | violation_rate |
 |---|---|
 | Gemini 3.1 Flash-Lite (substitute for 2.5 Flash-Lite) | 0.478 [0.401, 0.552] |
-| Gemini 3 Flash Preview (substitute for 2.5 Flash) | 0.500 [0.307, 0.693] |
+| Gemini 3 Flash Preview (substitute for 2.5 Flash) | 0.417 [0.279, 0.578] |
 | Gemini 3.1 Pro Preview (substitute for 2.5 Pro) | – |
 | Claude Sonnet 4.5 (substitute for Sonnet 4) | 0.308 [0.245, 0.385] |
 | Claude Opus 4.5 (substitute for Opus 4.1) | 0.385 [0.313, 0.460] |
