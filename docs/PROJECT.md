@@ -15,7 +15,7 @@ guidance, presentation and links.
 | Task tracking (source of truth) | [AI Safety - Mini Project](https://docs.google.com/document/d/1eh77clNa1WYOpOYLe7mxsv3JcFEXPAvDvj6xE79GYOo/edit) (Google Doc) |
 | Code | https://github.com/gini007/mini-project-asimov-v2 (private) |
 | Paper | Jindal et al., "Can AI Perceive Physical Danger and Intervene?", [arXiv 2509.21651](https://arxiv.org/abs/2509.21651) · [project page](https://asimov-benchmark.github.io/v2) |
-| Presentation template | [ASIMOV-2.0 Deck Template](https://claude.ai/artifact/X4zHzrwjBHkvDCbv7uTRMj) (claude.ai; share it from the page before sending) |
+| Findings deck | [ASIMOV-2.0 Deck](https://claude.ai/artifact/X4zHzrwjBHkvDCbv7uTRMj) (claude.ai; edit it through Claude, see Presentation) |
 | Presentation outline | [`docs/presentation_outline.md`](presentation_outline.md) |
 | Course: group sign-up | [mini project groups](https://docs.google.com/spreadsheets/d/11K5XUUoItswowS95hw4iaUJtTzfoJE5RlGOjHqE1fzQ/edit) |
 | Course: assignment spec | [CS2881 Mini-projects [2026].pdf](https://drive.google.com/file/d/1Z34ufC1wQqBe_j5s3gk3EIb3apN7lFzZ/view) (**not mirrored**: the Drive connector couldn't open it; add its requirements here by hand) |
@@ -83,8 +83,11 @@ Posted by course staff, copied from the Google Doc:
 
 ## Presentation
 
-- **Template deck:** [ASIMOV-2.0 Deck Template](https://claude.ai/artifact/X4zHzrwjBHkvDCbv7uTRMj),
-  19 slides. It is a cover, five numbered section dividers (Background, Prior work,
+- **Findings deck:** [ASIMOV-2.0 Deck](https://claude.ai/artifact/X4zHzrwjBHkvDCbv7uTRMj) is
+  where we present all our findings. **To update it,** open your usual Claude (claude.ai or Claude
+  Code), paste the deck link and describe the change. Claude edits the HTML slides in place and
+  the link stays the same. You need edit access to the deck (ask Tyler).
+- **Layout:** 19 slides. It is a cover, five numbered section dividers (Background, Prior work,
   Reproduction, Hypotheses, Results), title-only content slides, paper-vs-ours frames for
   Figs. 4–6, an H1/H2 slide, accuracy-vs-cost chart frames and a closing slide. Export to
   PowerPoint from the page's Share menu.
