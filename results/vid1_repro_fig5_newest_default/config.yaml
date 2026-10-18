@@ -1,0 +1,23 @@
+# Fig. 5 (video) at default thinking, with the newest API models beside the 8 reproduction models. Owner: Tyler.
+# Same models as configs/repro_fig4_newest_default.yaml (Noa); same prompt as configs/repro_fig5.yaml.
+run: repro_fig5_newest_default
+benchmark: video
+prompt: video_v2        # src/asimov/prompts/video_v2.txt
+thinking: default       # the provider decides (no reasoning parameter sent); repro_fig5 is the min run
+models:
+  # --- reproduction models, at default thinking (new calls; repro_fig5 ran them at min) ---
+  - {name: GPT-5 Nano,            provider: openai,    model: gpt-5-nano}
+  - {name: GPT-5 Mini,            provider: openai,    model: gpt-5-mini}
+  - {name: GPT-5,                 provider: openai,    model: gpt-5}
+  - {name: Claude Sonnet 4 (4.5), provider: anthropic, model: claude-sonnet-4-5-20250929}  # stand-in
+  - {name: Claude Opus 4.1 (4.5), provider: anthropic, model: claude-opus-4-5-20251101}    # stand-in
+  - {name: Gemini 2.5 Flash-Lite (3.1), provider: gemini, model: gemini-3.1-flash-lite}    # stand-in
+  - {name: Gemini 2.5 Flash (3),        provider: gemini, model: gemini-3-flash-preview}   # stand-in
+  - {name: Gemini 2.5 Pro (3.1),        provider: gemini, model: gemini-3.1-pro-preview}   # stand-in
+  # --- newest on each provider's API ---
+  - {name: Claude Haiku 5.5,  provider: anthropic, model: claude-haiku-5-5}
+  - {name: Claude Fable 5.1,  provider: anthropic, model: claude-fable-5-1}
+  - {name: GPT-6 Luna,        provider: openai,    model: gpt-6-luna}
+  - {name: GPT-6 Astra,       provider: openai,    model: gpt-6-astra}
+  - {name: Gemini 3.5 Flash-Lite, provider: gemini, model: gemini-3.5-flash-lite}
+  - {name: Gemini 4 Argon,        provider: gemini, model: gemini-4-argon}
