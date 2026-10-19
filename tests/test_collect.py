@@ -179,7 +179,7 @@ def test_comparison_page(results, claims, tmp_path):
     comparisons = [{"name": "a_vs_b", "a": "text_run", "b": "text_run_b"}]
     files = build(load_results(results), claims, {}, {}, comparisons)
     page = files["compare/a_vs_b.md"]
-    assert "McNemar" in page and "<details>" in page
+    assert "A − B [95% CI]" in page and "<details>" in page
 
 
 def test_cli_writes_then_check_passes_then_fails_after_edit(results, tmp_path):
@@ -778,3 +778,51 @@ def test_severity_score_is_named_in_plain_words_on_the_pages(results, claims):
     files = build(load_results(results), claims, {}, {}, [])
     for page in (files["text_run/README.md"], files["README.md"]):
         assert "multiple-choice severity questions answered with the exact right level" in page
+
+
+# ---- comparison pages: accuracies, mean row, model mapping, answers only ------------------------
+
+
+def comparison_files(results: Path, comparisons: list[dict]) -> dict[str, str]:
+    text_run(results, "text_run_b", [[False, False, False, False]] * 4)
+    return build(load_results(results), empty_claims(), {}, {}, comparisons)
+
+
+def test_comparison_page_shows_both_accuracies_and_the_mean_row(results):
+    page = comparison_files(results, [{"name": "a_vs_b", "a": "text_run", "b": "text_run_b"}])["compare/a_vs_b.md"]
+    gpt5 = page[page.index("## GPT-5\n") : page.index("## GPT-5 Nano")]
+    assert "| latent_risk | 4 | 1.000 | 0.000 | 1.000 [1.000, 1.000] | 4 | 0 |\n" in gpt5
+    assert "| mean of 4 | 4 | 0.750 | 0.000 | 0.750 [0.750, 0.750] | – | – |\n" in gpt5
+    assert "McNemar" not in page and "Holm" not in page  # plain accuracy only (Noa, 2026-10-15)
+
+
+def test_comparison_disagreements_show_answers_without_reply_text(results):
+    page = comparison_files(results, [{"name": "a_vs_b", "a": "text_run", "b": "text_run_b"}])["compare/a_vs_b.md"]
+    assert "| Item | Question | A answer | B answer |" in page
+    assert "reply t" not in page  # the fixture's reply text never reaches the page (docs/PLAN.md §11)
+
+
+def test_comparison_models_maps_different_model_ids(results):
+    comps = [{"name": "x", "a": "text_run", "b": "text_run_b", "models": {"gpt-5": "gpt-5-nano"}}]
+    page = comparison_files(results, comps)["compare/x.md"]
+    assert "## GPT-5 (A) vs GPT-5 Nano (B)" in page
+    assert page.count("\n## ") == 1  # only the mapped pair
+
+
+def test_comparison_models_unknown_id_and_unknown_key_fail(results):
+    with pytest.raises(ValueError, match="no model"):
+        comparison_files(results, [{"name": "x", "a": "text_run", "b": "text_run_b", "models": {"gpt-5": "nope"}}])
+    with pytest.raises(ValueError, match="unknown key"):
+        build(load_results(results), empty_claims(), {}, {}, [{"name": "x", "a": "text_run", "b": "text_run", "family": "f"}])
+
+
+def test_comparison_page_flags_parse_failures_above_the_review_line(results):
+    text_run(results, "text_run_b", [[False, False, False, False]] * 4)
+    runs = load_results(results)
+    run_b = next(r for r in runs if r.name == "text_run_b")
+    for m in run_b.models:
+        m.summary["parse_failure_rate"] = 0.0815
+    page = build(runs, empty_claims(), {}, {}, [{"name": "a_vs_b", "a": "text_run", "b": "text_run_b"}])["compare/a_vs_b.md"]
+    assert "Unreadable replies (parse failures): A 0.0%, B 8.2%" in page
+    assert "**Flag:** B's parse-failure rate (8.2%) is above the 2% review line" in page
+    assert "count as wrong, never dropped" in page

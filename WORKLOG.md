@@ -2253,3 +2253,113 @@ check" session). $0: everything comes from probabilities already saved in `respo
   so its Brier and ECE are both close to 1 - accuracy: its confidence barely varies between items.
 - Every other decision run is in `results/index.csv`; the per-question mean confidence and accuracy are on
   each run page. Numbers only; interpretation is Noa's.
+## 2026-10-15: Paired comparisons (plan's contrasts + thinking)
+
+$0: saved replies only. Pages `results/compare/<name>.md`, listed in `results/comparisons.yaml`, rendered by
+`scripts/collect.py`. Same 319 items on both sides of every pair.
+
+- **Pair list: DECIDED (Noa, 2026-10-15, via the "Plan progress check" session):** the plan's three Part 2
+  contrasts (docs/PLAN.md §4 step 2) plus thinking min vs default:
+  1. `part2_interface_small`: Qwen3.5-4B generate, txt33 (A) vs Qwen3.5-4B option probabilities, txt28 (B);
+  2. `part2_interface_frontier`: gpt-6-luna generate, txt7 (A) vs luna Decisions, txt6 (B);
+  3. `part2_trained_for_decisions`: Kev-4B, txt8 (A) vs Qwen3.5-4B-Base option probabilities, txt26 (B);
+  4. `fig4_thinking_min_vs_default`: `repro_fig4`, txt0 (A) vs `repro_fig4_default`, txt1 (B), per LLM.
+
+  Rule: both sides share wording and question mode, and the pre-registered runs (short wording, independent
+  questions) are used, never the best grid cell. Pair 3 meets it (txt26's `decision_short_local` is the short
+  wording rendered for a local model). *Alternative considered:* the best-setting rows (e.g. Kev full wording
+  txt30, Qwen-Base one-shot txt29): exploratory only, not used.
+- **Wording caveat, pairs 1-2:** the generate side uses the paper's verbatim prompt and the other side the short
+  decision wording. Wording can't match by design: the interface is what is compared. Said in one line on each page.
+- **Pair 1 uses txt33, not the pre-registered txt27:** txt33 (2048-token cap) replaced txt27 (1024 cap) per Noa's
+  2026-10-14 decision ("Part 2 follow-ups"). txt33 has 8.2% parse failures (above the 2% line), flagged on the
+  page; unanswered counts as wrong, never dropped.
+- **Pair 4, Claude:** our Claude client sends the same request for min and default, so 314 of 319 default replies
+  per Claude model are reused from txt0 (2026-10-12 entry). Said on the page.
+- **Comparison pages show plain accuracy only: DECIDED (Noa, 2026-10-15, via the "Plan progress check" session).**
+  Per question: accuracy of A and B, paired bootstrap difference A - B with 95% CI (`stats.py`, "Statistics
+  methods: DECIDED"), A-right-only and B-right-only counts; plus a mean-of-4 row. No McNemar or Holm p on these
+  pages. *Alternative considered:* keep the p columns (exact McNemar raw, and Holm across pairs 1-3 and, separately,
+  across pair 4's 32 model x question tests; the first version of this PR had them). Noa's call: drop. McNemar and
+  Holm stay in `stats.py` and on the paper-check pages. The `family` key and `metrics.holm_by_family` were removed
+  with their tests (no dead code, PLAN §9.3).
+- **Items where A and B differ: answers only (PLAN §11, "no prompt or scenario text in any page").** The section
+  quoted the first 160 characters of each reply, and rationales restate the scenario. It now shows item id,
+  question and each side's answer, no reply text, on every comparison page (`pages.excerpt` and `EXCERPT_CHARS`
+  removed as unused). No other generated page under results/ quotes reply text (grep for excerpts, rationales and
+  scenario phrases: none). **Test changed:** the existing `test_comparison_page` asserted "McNemar" on the page;
+  it now asserts the difference column instead, because McNemar was removed from these pages at Noa's request.
+  `ModelResult.replies` (collect/load.py) is now read by no page; kept because two existing tests use it
+  (`test_collect.py`, `test_router_search.py`), for Noa to decide.
+- **Code (general, tested):** `results/comparisons.yaml` entries take an optional `models` key (A's model id ->
+  B's, needed for pair 3, where the ids differ). Unknown keys fail. Pages show both accuracies, the mean-of-4 row
+  and each side's parse-failure rate (flagged above 2% on text). No comparison pages existed before, so no other
+  page changed.
+- **Cross-check with `results/part2_same_size/contrasts.csv` (PR #28):** pair 1 is its contrast (2) with A and B
+  swapped, pair 3 its contrast (1). Differences, CIs (mirrored for pair 1), discordant counts and McNemar p (checked
+  before the p columns were dropped) match on all 4 questions and the mean. No mismatch.
+
+### Numbers (319 items; A - B)
+
+| Pair | Question | Acc A | Acc B | A - B [95% CI] |
+|---|---|---|---|---|
+| (1) txt33 - txt28 | latent_risk | 0.771 | 0.571 | 0.201 [0.150, 0.251] |
+| (1) txt33 - txt28 | latent_severity | 0.618 | 0.389 | 0.229 [0.166, 0.295] |
+| (1) txt33 - txt28 | effect | 0.596 | 0.458 | 0.138 [0.056, 0.223] |
+| (1) txt33 - txt28 | activated_risk | 0.580 | 0.445 | 0.135 [0.069, 0.204] |
+| (1) txt33 - txt28 | mean of 4 | 0.641 | 0.466 | 0.176 [0.139, 0.213] |
+| (2) txt7 - txt6 | latent_risk | 0.834 | 0.821 | 0.013 [-0.028, 0.053] |
+| (2) txt7 - txt6 | latent_severity | 0.690 | 0.379 | 0.310 [0.251, 0.370] |
+| (2) txt7 - txt6 | effect | 0.643 | 0.398 | 0.245 [0.191, 0.298] |
+| (2) txt7 - txt6 | activated_risk | 0.577 | 0.461 | 0.116 [0.041, 0.191] |
+| (2) txt7 - txt6 | mean of 4 | 0.686 | 0.515 | 0.171 [0.139, 0.205] |
+| (3) txt8 - txt26 | latent_risk | 0.429 | 0.683 | -0.254 [-0.304, -0.207] |
+| (3) txt8 - txt26 | latent_severity | 0.382 | 0.408 | -0.025 [-0.072, 0.025] |
+| (3) txt8 - txt26 | effect | 0.586 | 0.361 | 0.226 [0.172, 0.282] |
+| (3) txt8 - txt26 | activated_risk | 0.429 | 0.335 | 0.094 [0.047, 0.141] |
+| (3) txt8 - txt26 | mean of 4 | 0.457 | 0.447 | 0.010 [-0.016, 0.038] |
+
+Pair 4, txt0 (min) - txt1 (default):
+
+| Model | Question | Acc A | Acc B | A - B [95% CI] |
+|---|---|---|---|---|
+| GPT-5 Nano | latent_risk | 0.555 | 0.868 | -0.313 [-0.367, -0.260] |
+| GPT-5 Nano | latent_severity | 0.533 | 0.592 | -0.060 [-0.125, 0.006] |
+| GPT-5 Nano | effect | 0.467 | 0.633 | -0.166 [-0.232, -0.100] |
+| GPT-5 Nano | activated_risk | 0.404 | 0.552 | -0.147 [-0.219, -0.075] |
+| GPT-5 Nano | mean of 4 | 0.490 | 0.661 | -0.172 [-0.208, -0.135] |
+| GPT-5 Mini | latent_risk | 0.887 | 0.922 | -0.034 [-0.069, 0.000] |
+| GPT-5 Mini | latent_severity | 0.702 | 0.705 | -0.003 [-0.053, 0.047] |
+| GPT-5 Mini | effect | 0.561 | 0.671 | -0.110 [-0.160, -0.063] |
+| GPT-5 Mini | activated_risk | 0.527 | 0.592 | -0.066 [-0.122, -0.009] |
+| GPT-5 Mini | mean of 4 | 0.669 | 0.723 | -0.053 [-0.083, -0.025] |
+| GPT-5 | latent_risk | 0.934 | 0.937 | -0.003 [-0.028, 0.022] |
+| GPT-5 | latent_severity | 0.774 | 0.721 | 0.053 [0.006, 0.103] |
+| GPT-5 | effect | 0.643 | 0.690 | -0.047 [-0.088, -0.006] |
+| GPT-5 | activated_risk | 0.655 | 0.583 | 0.072 [0.022, 0.122] |
+| GPT-5 | mean of 4 | 0.752 | 0.733 | 0.019 [-0.005, 0.043] |
+| Claude Sonnet 4 (4.5) | latent_risk | 0.875 | 0.875 | 0.000 [0.000, 0.000] |
+| Claude Sonnet 4 (4.5) | latent_severity | 0.661 | 0.661 | 0.000 [0.000, 0.000] |
+| Claude Sonnet 4 (4.5) | effect | 0.646 | 0.646 | 0.000 [0.000, 0.000] |
+| Claude Sonnet 4 (4.5) | activated_risk | 0.602 | 0.602 | 0.000 [0.000, 0.000] |
+| Claude Sonnet 4 (4.5) | mean of 4 | 0.696 | 0.696 | 0.000 [0.000, 0.000] |
+| Claude Opus 4.1 (4.5) | latent_risk | 0.918 | 0.918 | 0.000 [0.000, 0.000] |
+| Claude Opus 4.1 (4.5) | latent_severity | 0.737 | 0.734 | 0.003 [0.000, 0.009] |
+| Claude Opus 4.1 (4.5) | effect | 0.671 | 0.671 | 0.000 [0.000, 0.000] |
+| Claude Opus 4.1 (4.5) | activated_risk | 0.655 | 0.658 | -0.003 [-0.009, 0.000] |
+| Claude Opus 4.1 (4.5) | mean of 4 | 0.745 | 0.745 | 0.000 [-0.002, 0.002] |
+| Gemini 2.5 Flash-Lite (3.1) | latent_risk | 0.862 | 0.859 | 0.003 [-0.009, 0.016] |
+| Gemini 2.5 Flash-Lite (3.1) | latent_severity | 0.680 | 0.661 | 0.019 [-0.013, 0.050] |
+| Gemini 2.5 Flash-Lite (3.1) | effect | 0.665 | 0.690 | -0.025 [-0.053, 0.000] |
+| Gemini 2.5 Flash-Lite (3.1) | activated_risk | 0.608 | 0.639 | -0.031 [-0.066, 0.003] |
+| Gemini 2.5 Flash-Lite (3.1) | mean of 4 | 0.704 | 0.712 | -0.009 [-0.024, 0.007] |
+| Gemini 2.5 Flash (3) | latent_risk | 0.928 | 0.925 | 0.003 [-0.022, 0.028] |
+| Gemini 2.5 Flash (3) | latent_severity | 0.715 | 0.708 | 0.006 [-0.025, 0.041] |
+| Gemini 2.5 Flash (3) | effect | 0.690 | 0.730 | -0.041 [-0.075, -0.009] |
+| Gemini 2.5 Flash (3) | activated_risk | 0.671 | 0.680 | -0.009 [-0.047, 0.028] |
+| Gemini 2.5 Flash (3) | mean of 4 | 0.751 | 0.761 | -0.010 [-0.029, 0.009] |
+| Gemini 2.5 Pro (3.1) | latent_risk | 0.925 | 0.937 | -0.013 [-0.028, 0.003] |
+| Gemini 2.5 Pro (3.1) | latent_severity | 0.674 | 0.696 | -0.022 [-0.047, 0.003] |
+| Gemini 2.5 Pro (3.1) | effect | 0.687 | 0.671 | 0.016 [-0.016, 0.047] |
+| Gemini 2.5 Pro (3.1) | activated_risk | 0.605 | 0.630 | -0.025 [-0.056, 0.006] |
+| Gemini 2.5 Pro (3.1) | mean of 4 | 0.723 | 0.734 | -0.011 [-0.028, 0.005] |

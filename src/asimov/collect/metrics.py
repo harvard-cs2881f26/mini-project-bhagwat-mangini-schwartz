@@ -112,6 +112,8 @@ class Paired:
     a_only: int  # items a got right and b wrong
     b_only: int
     p: float  # exact McNemar
+    a_acc: float  # mean(a) on the common items
+    b_acc: float
 
 
 def paired(a: dict[str, bool], b: dict[str, bool]) -> Paired | None:
@@ -123,4 +125,29 @@ def paired(a: dict[str, bool], b: dict[str, bool]) -> Paired | None:
     diff, lo, hi = paired_bootstrap_diff(va, vb)
     a_only = sum(x and not y for x, y in zip(va, vb, strict=True))
     b_only = sum(y and not x for x, y in zip(va, vb, strict=True))
-    return Paired(len(common), diff, lo, hi, a_only, b_only, mcnemar_exact(a_only, b_only))
+    return Paired(len(common), diff, lo, hi, a_only, b_only, mcnemar_exact(a_only, b_only), sum(va) / len(va), sum(vb) / len(vb))
+
+
+@dataclass(frozen=True)
+class PairedMean:
+    n: int
+    a_acc: float  # per item, mean correct over the questions; then averaged over items
+    b_acc: float
+    diff: float
+    lo: float
+    hi: float
+
+
+def paired_mean(a: dict[str, dict[str, bool]], b: dict[str, dict[str, bool]]) -> PairedMean | None:
+    """Mean over questions per item, a vs b, on the items both scored on every question (paired bootstrap CI, no
+    test: there is no exact paired test for a 0-1 average). None for fewer than two questions in common."""
+    questions = sorted(a.keys() & b.keys())
+    if len(questions) < 2:
+        return None
+    common = sorted(set.intersection(*(set(a[q]) & set(b[q]) for q in questions)))
+    if not common:
+        return None
+    va = [sum(a[q][i] for q in questions) / len(questions) for i in common]
+    vb = [sum(b[q][i] for q in questions) / len(questions) for i in common]
+    diff, lo, hi = paired_bootstrap_diff(va, vb)
+    return PairedMean(len(common), sum(va) / len(va), sum(vb) / len(vb), diff, lo, hi)

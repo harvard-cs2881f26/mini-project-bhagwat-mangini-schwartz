@@ -594,9 +594,10 @@ figures/
 
 **Comparison pages (`results/compare/<name>.md`).** Listed by hand in `results/comparisons.yaml`
 (e.g. `repro_fig4` vs `repro_fig4_default`); `collect.py` renders each one: per-question metrics
-for both runs, the difference with a paired bootstrap CI and McNemar p-value, the overlaid figure,
-and the items where they disagree (item id, each side's answer and a short reply excerpt inside
-`<details>`). No prompt or scenario text in any page: that's dataset content we don't commit.
+for both runs (accuracy of each side), the difference with a paired bootstrap CI, the overlaid figure, and the items where
+they disagree (item id and each side's answer inside `<details>`, no reply text). No p-values on these
+pages (Noa, 2026-10-15; WORKLOG "Paired comparisons"). No prompt or scenario text in any page: that's
+dataset content we don't commit.
 
 **Paper check (`results/<id>_<run>/paper_check.md`, linked from the run page and the summary).**
 Rebuilt after every run from `configs/paper/claims.yaml`, which is written once by re-reading the
