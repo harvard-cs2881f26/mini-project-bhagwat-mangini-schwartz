@@ -1,0 +1,11 @@
+<!doctype html><html><head><meta charset="utf-8"><title>Old vs new thinking slide</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wght@400..700&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<style>p,h1,h2,h3,ul,ol,table{margin:0}html,body{margin:0;background:#2b2b2b;overflow:hidden;font-family:Archivo,Arial}
+.row{display:flex;gap:16px;padding:8px}.cell{position:relative;flex:1}.cell>.lab{color:#ddd;font:600 18px Archivo,Arial;position:absolute;top:-2px;left:2px}
+.stage{width:1920px;height:1080px;transform-origin:0 0;position:absolute;top:26px;left:0}.stage>section{position:relative;width:1920px;height:1080px;box-sizing:border-box}</style></head><body>
+<div class="row"><div class="cell" id="a"><div class="lab">CURRENT (published title)</div><div class="stage"></div></div><div class="cell" id="b"><div class="lab">COPY (question title)</div><div class="stage"></div></div></div>
+<script>
+function fit(){document.querySelectorAll(".cell").forEach(c=>{var k=c.clientWidth/1920;c.querySelector(".stage").style.transform="scale("+k+")";c.style.height=(1080*k+30)+"px"})}
+Promise.all(["fig4think_high.html","fig4think_high_q.html"].map(f=>fetch(f).then(r=>r.text()))).then(ts=>{["a","b"].forEach((id,i)=>{var s=document.querySelector("#"+id+" .stage");s.innerHTML=ts[i];s.querySelectorAll("aside").forEach(a=>a.remove())});fit()});
+addEventListener("resize",fit);
+</script></body></html>

@@ -87,6 +87,30 @@ with the paper's.
    and 131 by OpenJev think 0. Laya picked "moderate" on 306 of 319 Q4 items, and NLI picked "no
    injury" on 318 of 319 Q4 items.
 
+#### H1 (text): accuracy against cost and speed
+
+EXPLORATORY. The blue points are the router search's held-out picks (`results/router_search/`: 60,078
+candidates, each chosen on 4/5 of the items and scored on the other 1/5, 5 folds x 5 seeds), with 95% ranges.
+The orange and black points are single systems at their best setting, picked on all 319 items, so they are
+optimistic. The dashed line is GPT-5 at thinking min (75.2%).
+
+![H1 text: accuracy vs cost](../figures/h1_frontier/accuracy_vs_cost.png)
+
+- A mix scores 72.8% at $0.07 per 1,000 items, 75.9% at $1.69 and 78.0% at $3.10. GPT-5 alone scores 75.2% at
+  $3.90. The ranges overlap GPT-5, so the mixes are level with it, not shown to be better.
+- GPT-5 Mini (66.9%, $1.04) and Flash-Lite at min (70.4%, $0.78) sit below the blue line at the same cost.
+  Flash-Lite at high thinking (76.6%, $3.29) is not in the search pool.
+
+![H1 text: accuracy vs speed](../figures/h1_frontier/accuracy_vs_speed.png)
+
+- The mixes reach about 77% at a median of 0.8 s, but the median hides the slow half: these mixes send about
+  half the items on to GPT-5 in sequence, and those items wait for both calls (about 4 s). The same points
+  cost $2.09 to $3.73 per 1,000 items.
+- Jev alone (73.2%, 0.70 s, $0.12) and luna Decisions (67.8%, 0.52 s) are inside the 2.5 s window. GPT-5
+  (3.29 s) and Mini (2.89 s) are outside it.
+
+Made by `scripts/h1_frontier_figure.py` from `results/router_search/*.csv` and `results/index.csv`.
+
 ### Caveats
 
 - **Post-hoc selection.** The rows in the Summary table are each system's best of up to 8 settings,
