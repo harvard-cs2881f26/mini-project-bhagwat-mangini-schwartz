@@ -1,0 +1,185 @@
+<section id="fig4think" data-transition="fade" style="display:flex; flex-direction:column; gap:24px; padding:112px 128px 176px; background:#f2f0ea">
+  <div style="position:absolute; right:128px; bottom:112px; left:128px; height:1px; display:flex; flex-direction:column; background:#c9c3b6">
+  </div>
+  <p style="position:absolute; bottom:64px; left:128px; width:1664px; font-family:'IBM Plex Mono', 'Courier New', monospace; font-size:24px; letter-spacing:2px; color:#4a4e52">02 · THE BENCHMARK &nbsp;|&nbsp; n = 319</p>
+  <div style="display:flex; flex-direction:column; gap:12px">
+    <h2 style="width:1664px; font-family:Archivo, Arial, sans-serif; font-size:72px; font-weight:600; line-height:1.08; letter-spacing:-1.5px; color:#16181a">Injury: thinking min vs. default</h2>
+    <p style="font-family:Archivo, Arial, sans-serif; font-size:32px; line-height:1.3; color:#4a4e52">Thinking = big gain for GPT-5 Nano (56% → 87% on risk type). Large models barely move</p>
+  </div>
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1664 640" width="1664" height="640" role="img" aria-label="Four charts, one per question, comparing each model with thinking at minimum (orange ring) and at default (blue dot). Blue arrows mark changes of 5 points or more. GPT-5 Nano gains the most, 31 points on risk type. GPT-5 Mini gains 11 on effect of action. GPT-5 drops 5 on severity and 8 on severity after the action. Claude does not change.">
+<defs><marker id="ab" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse"><path d="M0 0 L10 5 L0 10 z" fill="#2F5D8A"/></marker></defs>
+<text x="0" y="22" font-family="Archivo, Arial, sans-serif" font-size="26" font-weight="600" fill="#16181A">Q1: Scenario alone, which injury is most likely?</text>
+<text x="808" y="22" text-anchor="end" font-family="IBM Plex Mono, monospace" font-size="22" letter-spacing="2" font-weight="600" fill="#4A4E52">SCENARIO</text>
+<line x1="305.6" y1="36" x2="305.6" y2="248" stroke="#E4DFD2" stroke-width="2"/>
+<text x="305.6" y="272" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="22" fill="#4A4E52">60%</text>
+<line x1="536.8" y1="36" x2="536.8" y2="248" stroke="#E4DFD2" stroke-width="2"/>
+<text x="536.8" y="272" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="22" fill="#4A4E52">80%</text>
+<line x1="768.0" y1="36" x2="768.0" y2="248" stroke="#E4DFD2" stroke-width="2"/>
+<text x="768.0" y="272" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="22" fill="#4A4E52">100%</text>
+<text x="0" y="60.0" font-family="IBM Plex Mono, monospace" font-size="22" font-weight="400" fill="#8A857C">GPT-5</text>
+<line x1="691.9" y1="53.0" x2="695.5" y2="53.0" stroke="#C9C3B6" stroke-width="3"/>
+<circle cx="691.9" cy="53.0" r="7" fill="#F2F0EA" stroke="#8A857C" stroke-width="2.5"/>
+<circle cx="695.5" cy="53.0" r="6" fill="#8A857C"/>
+<text x="0" y="86.0" font-family="IBM Plex Mono, monospace" font-size="22" font-weight="400" fill="#8A857C">GPT-5 Mini</text>
+<line x1="637.5" y1="79.0" x2="677.4" y2="79.0" stroke="#C9C3B6" stroke-width="3"/>
+<circle cx="637.5" cy="79.0" r="7" fill="#F2F0EA" stroke="#8A857C" stroke-width="2.5"/>
+<circle cx="677.4" cy="79.0" r="6" fill="#8A857C"/>
+<text x="0" y="112.0" font-family="IBM Plex Mono, monospace" font-size="22" font-weight="400" fill="#16181A">GPT-5 Nano</text>
+<line x1="262.4" y1="105.0" x2="604.8" y2="105.0" stroke="#2F5D8A" stroke-width="4" marker-end="url(#ab)"/>
+<circle cx="253.4" cy="105.0" r="8" fill="#F2F0EA" stroke="#E2581E" stroke-width="3"/>
+<circle cx="615.8" cy="105.0" r="8" fill="#2F5D8A"/>
+<text x="0" y="138.0" font-family="IBM Plex Mono, monospace" font-size="22" font-weight="400" fill="#8A857C">Opus 4.5</text>
+<line x1="673.8" y1="131.0" x2="673.8" y2="131.0" stroke="#C9C3B6" stroke-width="3"/>
+<circle cx="673.8" cy="131.0" r="7" fill="#F2F0EA" stroke="#8A857C" stroke-width="2.5"/>
+<circle cx="673.8" cy="131.0" r="6" fill="#8A857C"/>
+<text x="0" y="164.0" font-family="IBM Plex Mono, monospace" font-size="22" font-weight="400" fill="#8A857C">Sonnet 4.5</text>
+<line x1="623.0" y1="157.0" x2="623.0" y2="157.0" stroke="#C9C3B6" stroke-width="3"/>
+<circle cx="623.0" cy="157.0" r="7" fill="#F2F0EA" stroke="#8A857C" stroke-width="2.5"/>
+<circle cx="623.0" cy="157.0" r="6" fill="#8A857C"/>
+<text x="605.0" y="164.0" text-anchor="end" font-family="IBM Plex Mono, monospace" font-size="22" fill="#4A4E52">min = default</text>
+<text x="0" y="190.0" font-family="IBM Plex Mono, monospace" font-size="22" font-weight="400" fill="#8A857C">Gemini 3.1 Pro</text>
+<line x1="681.0" y1="183.0" x2="695.5" y2="183.0" stroke="#C9C3B6" stroke-width="3"/>
+<circle cx="681.0" cy="183.0" r="7" fill="#F2F0EA" stroke="#8A857C" stroke-width="2.5"/>
+<circle cx="695.5" cy="183.0" r="6" fill="#8A857C"/>
+<text x="0" y="216.0" font-family="IBM Plex Mono, monospace" font-size="22" font-weight="400" fill="#8A857C">Gemini 3 Flash</text>
+<line x1="684.7" y1="209.0" x2="681.0" y2="209.0" stroke="#C9C3B6" stroke-width="3"/>
+<circle cx="684.7" cy="209.0" r="7" fill="#F2F0EA" stroke="#8A857C" stroke-width="2.5"/>
+<circle cx="681.0" cy="209.0" r="6" fill="#8A857C"/>
+<text x="0" y="242.0" font-family="IBM Plex Mono, monospace" font-size="22" font-weight="400" fill="#8A857C">Flash-Lite 3.1</text>
+<line x1="608.6" y1="235.0" x2="604.9" y2="235.0" stroke="#C9C3B6" stroke-width="3"/>
+<circle cx="608.6" cy="235.0" r="7" fill="#F2F0EA" stroke="#8A857C" stroke-width="2.5"/>
+<circle cx="604.9" cy="235.0" r="6" fill="#8A857C"/>
+<text x="856" y="22" font-family="Archivo, Arial, sans-serif" font-size="26" font-weight="600" fill="#16181A">Q2: How severe is that injury?</text>
+<text x="1664" y="22" text-anchor="end" font-family="IBM Plex Mono, monospace" font-size="22" letter-spacing="2" font-weight="600" fill="#4A4E52">SCENARIO</text>
+<line x1="1046.0" y1="36" x2="1046.0" y2="248" stroke="#E4DFD2" stroke-width="2"/>
+<text x="1046.0" y="272" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="22" fill="#4A4E52">50%</text>
+<line x1="1238.7" y1="36" x2="1238.7" y2="248" stroke="#E4DFD2" stroke-width="2"/>
+<text x="1238.7" y="272" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="22" fill="#4A4E52">60%</text>
+<line x1="1431.3" y1="36" x2="1431.3" y2="248" stroke="#E4DFD2" stroke-width="2"/>
+<text x="1431.3" y="272" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="22" fill="#4A4E52">70%</text>
+<line x1="1624.0" y1="36" x2="1624.0" y2="248" stroke="#E4DFD2" stroke-width="2"/>
+<text x="1624.0" y="272" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="22" fill="#4A4E52">80%</text>
+<text x="856" y="60.0" font-family="IBM Plex Mono, monospace" font-size="22" font-weight="400" fill="#16181A">GPT-5</text>
+<line x1="1565.5" y1="53.0" x2="1482.8" y2="53.0" stroke="#2F5D8A" stroke-width="4" marker-end="url(#ab)"/>
+<circle cx="1574.5" cy="53.0" r="8" fill="#F2F0EA" stroke="#E2581E" stroke-width="3"/>
+<circle cx="1471.8" cy="53.0" r="8" fill="#2F5D8A"/>
+<text x="856" y="86.0" font-family="IBM Plex Mono, monospace" font-size="22" font-weight="400" fill="#8A857C">GPT-5 Mini</text>
+<line x1="1435.6" y1="79.0" x2="1441.6" y2="79.0" stroke="#C9C3B6" stroke-width="3"/>
+<circle cx="1435.6" cy="79.0" r="7" fill="#F2F0EA" stroke="#8A857C" stroke-width="2.5"/>
+<circle cx="1441.6" cy="79.0" r="6" fill="#8A857C"/>
+<text x="856" y="112.0" font-family="IBM Plex Mono, monospace" font-size="22" font-weight="400" fill="#16181A">GPT-5 Nano</text>
+<line x1="1118.4" y1="105.0" x2="1213.2" y2="105.0" stroke="#2F5D8A" stroke-width="4" marker-end="url(#ab)"/>
+<circle cx="1109.4" cy="105.0" r="8" fill="#F2F0EA" stroke="#E2581E" stroke-width="3"/>
+<circle cx="1224.2" cy="105.0" r="8" fill="#2F5D8A"/>
+<text x="856" y="138.0" font-family="IBM Plex Mono, monospace" font-size="22" font-weight="400" fill="#8A857C">Opus 4.5</text>
+<line x1="1502.0" y1="131.0" x2="1496.0" y2="131.0" stroke="#C9C3B6" stroke-width="3"/>
+<circle cx="1502.0" cy="131.0" r="7" fill="#F2F0EA" stroke="#8A857C" stroke-width="2.5"/>
+<circle cx="1496.0" cy="131.0" r="6" fill="#8A857C"/>
+<text x="856" y="164.0" font-family="IBM Plex Mono, monospace" font-size="22" font-weight="400" fill="#8A857C">Sonnet 4.5</text>
+<line x1="1357.0" y1="157.0" x2="1357.0" y2="157.0" stroke="#C9C3B6" stroke-width="3"/>
+<circle cx="1357.0" cy="157.0" r="7" fill="#F2F0EA" stroke="#8A857C" stroke-width="2.5"/>
+<circle cx="1357.0" cy="157.0" r="6" fill="#8A857C"/>
+<text x="856" y="190.0" font-family="IBM Plex Mono, monospace" font-size="22" font-weight="400" fill="#8A857C">Gemini 3.1 Pro</text>
+<line x1="1381.2" y1="183.0" x2="1423.5" y2="183.0" stroke="#C9C3B6" stroke-width="3"/>
+<circle cx="1381.2" cy="183.0" r="7" fill="#F2F0EA" stroke="#8A857C" stroke-width="2.5"/>
+<circle cx="1423.5" cy="183.0" r="6" fill="#8A857C"/>
+<text x="856" y="216.0" font-family="IBM Plex Mono, monospace" font-size="22" font-weight="400" fill="#8A857C">Gemini 3 Flash</text>
+<line x1="1459.7" y1="209.0" x2="1447.6" y2="209.0" stroke="#C9C3B6" stroke-width="3"/>
+<circle cx="1459.7" cy="209.0" r="7" fill="#F2F0EA" stroke="#8A857C" stroke-width="2.5"/>
+<circle cx="1447.6" cy="209.0" r="6" fill="#8A857C"/>
+<text x="856" y="242.0" font-family="IBM Plex Mono, monospace" font-size="22" font-weight="400" fill="#8A857C">Flash-Lite 3.1</text>
+<line x1="1393.3" y1="235.0" x2="1357.0" y2="235.0" stroke="#C9C3B6" stroke-width="3"/>
+<circle cx="1393.3" cy="235.0" r="7" fill="#F2F0EA" stroke="#8A857C" stroke-width="2.5"/>
+<circle cx="1357.0" cy="235.0" r="6" fill="#8A857C"/>
+<text x="0" y="340" font-family="Archivo, Arial, sans-serif" font-size="26" font-weight="600" fill="#16181A">Q3: What does the action do to the risk of injury?</text>
+<text x="808" y="340" text-anchor="end" font-family="IBM Plex Mono, monospace" font-size="22" letter-spacing="2" font-weight="600" fill="#4A4E52">ACTION</text>
+<line x1="190.0" y1="354" x2="190.0" y2="566" stroke="#E4DFD2" stroke-width="2"/>
+<text x="190.0" y="590" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="22" fill="#4A4E52">40%</text>
+<line x1="334.5" y1="354" x2="334.5" y2="566" stroke="#E4DFD2" stroke-width="2"/>
+<text x="334.5" y="590" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="22" fill="#4A4E52">50%</text>
+<line x1="479.0" y1="354" x2="479.0" y2="566" stroke="#E4DFD2" stroke-width="2"/>
+<text x="479.0" y="590" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="22" fill="#4A4E52">60%</text>
+<line x1="623.5" y1="354" x2="623.5" y2="566" stroke="#E4DFD2" stroke-width="2"/>
+<text x="623.5" y="590" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="22" fill="#4A4E52">70%</text>
+<line x1="768.0" y1="354" x2="768.0" y2="566" stroke="#E4DFD2" stroke-width="2"/>
+<text x="768.0" y="590" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="22" fill="#4A4E52">80%</text>
+<text x="0" y="378.0" font-family="IBM Plex Mono, monospace" font-size="22" font-weight="400" fill="#16181A">GPT-5</text>
+<line x1="549.6" y1="371.0" x2="597.6" y2="371.0" stroke="#2F5D8A" stroke-width="4" marker-end="url(#ab)"/>
+<circle cx="540.6" cy="371.0" r="8" fill="#F2F0EA" stroke="#E2581E" stroke-width="3"/>
+<circle cx="608.6" cy="371.0" r="8" fill="#2F5D8A"/>
+<text x="0" y="404.0" font-family="IBM Plex Mono, monospace" font-size="22" font-weight="400" fill="#16181A">GPT-5 Mini</text>
+<line x1="431.8" y1="397.0" x2="570.4" y2="397.0" stroke="#2F5D8A" stroke-width="4" marker-end="url(#ab)"/>
+<circle cx="422.8" cy="397.0" r="8" fill="#F2F0EA" stroke="#E2581E" stroke-width="3"/>
+<circle cx="581.4" cy="397.0" r="8" fill="#2F5D8A"/>
+<text x="0" y="430.0" font-family="IBM Plex Mono, monospace" font-size="22" font-weight="400" fill="#16181A">GPT-5 Nano</text>
+<line x1="295.9" y1="423.0" x2="516.0" y2="423.0" stroke="#2F5D8A" stroke-width="4" marker-end="url(#ab)"/>
+<circle cx="286.9" cy="423.0" r="8" fill="#F2F0EA" stroke="#E2581E" stroke-width="3"/>
+<circle cx="527.0" cy="423.0" r="8" fill="#2F5D8A"/>
+<text x="0" y="456.0" font-family="IBM Plex Mono, monospace" font-size="22" font-weight="400" fill="#8A857C">Opus 4.5</text>
+<line x1="581.4" y1="449.0" x2="581.4" y2="449.0" stroke="#C9C3B6" stroke-width="3"/>
+<circle cx="581.4" cy="449.0" r="7" fill="#F2F0EA" stroke="#8A857C" stroke-width="2.5"/>
+<circle cx="581.4" cy="449.0" r="6" fill="#8A857C"/>
+<text x="0" y="482.0" font-family="IBM Plex Mono, monospace" font-size="22" font-weight="400" fill="#8A857C">Sonnet 4.5</text>
+<line x1="545.1" y1="475.0" x2="545.1" y2="475.0" stroke="#C9C3B6" stroke-width="3"/>
+<circle cx="545.1" cy="475.0" r="7" fill="#F2F0EA" stroke="#8A857C" stroke-width="2.5"/>
+<circle cx="545.1" cy="475.0" r="6" fill="#8A857C"/>
+<text x="0" y="508.0" font-family="IBM Plex Mono, monospace" font-size="22" font-weight="400" fill="#8A857C">Gemini 3.1 Pro</text>
+<line x1="604.0" y1="501.0" x2="581.4" y2="501.0" stroke="#C9C3B6" stroke-width="3"/>
+<circle cx="604.0" cy="501.0" r="7" fill="#F2F0EA" stroke="#8A857C" stroke-width="2.5"/>
+<circle cx="581.4" cy="501.0" r="6" fill="#8A857C"/>
+<text x="0" y="534.0" font-family="IBM Plex Mono, monospace" font-size="22" font-weight="400" fill="#8A857C">Gemini 3 Flash</text>
+<line x1="608.6" y1="527.0" x2="667.4" y2="527.0" stroke="#C9C3B6" stroke-width="3"/>
+<circle cx="608.6" cy="527.0" r="7" fill="#F2F0EA" stroke="#8A857C" stroke-width="2.5"/>
+<circle cx="667.4" cy="527.0" r="6" fill="#8A857C"/>
+<text x="0" y="560.0" font-family="IBM Plex Mono, monospace" font-size="22" font-weight="400" fill="#8A857C">Flash-Lite 3.1</text>
+<line x1="572.3" y1="553.0" x2="608.6" y2="553.0" stroke="#C9C3B6" stroke-width="3"/>
+<circle cx="572.3" cy="553.0" r="7" fill="#F2F0EA" stroke="#8A857C" stroke-width="2.5"/>
+<circle cx="608.6" cy="553.0" r="6" fill="#8A857C"/>
+<text x="856" y="340" font-family="Archivo, Arial, sans-serif" font-size="26" font-weight="600" fill="#16181A">Q4: How severe is the injury after the action?</text>
+<text x="1664" y="340" text-anchor="end" font-family="IBM Plex Mono, monospace" font-size="22" letter-spacing="2" font-weight="600" fill="#4A4E52">ACTION</text>
+<line x1="1118.2" y1="354" x2="1118.2" y2="566" stroke="#E4DFD2" stroke-width="2"/>
+<text x="1118.2" y="590" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="22" fill="#4A4E52">40%</text>
+<line x1="1262.8" y1="354" x2="1262.8" y2="566" stroke="#E4DFD2" stroke-width="2"/>
+<text x="1262.8" y="590" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="22" fill="#4A4E52">50%</text>
+<line x1="1407.2" y1="354" x2="1407.2" y2="566" stroke="#E4DFD2" stroke-width="2"/>
+<text x="1407.2" y="590" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="22" fill="#4A4E52">60%</text>
+<line x1="1551.8" y1="354" x2="1551.8" y2="566" stroke="#E4DFD2" stroke-width="2"/>
+<text x="1551.8" y="590" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="22" fill="#4A4E52">70%</text>
+<text x="856" y="378.0" font-family="IBM Plex Mono, monospace" font-size="22" font-weight="400" fill="#16181A">GPT-5</text>
+<line x1="1478.0" y1="371.0" x2="1393.8" y2="371.0" stroke="#2F5D8A" stroke-width="4" marker-end="url(#ab)"/>
+<circle cx="1487.0" cy="371.0" r="8" fill="#F2F0EA" stroke="#E2581E" stroke-width="3"/>
+<circle cx="1382.8" cy="371.0" r="8" fill="#2F5D8A"/>
+<text x="856" y="404.0" font-family="IBM Plex Mono, monospace" font-size="22" font-weight="400" fill="#16181A">GPT-5 Mini</text>
+<line x1="1310.3" y1="397.0" x2="1385.4" y2="397.0" stroke="#2F5D8A" stroke-width="4" marker-end="url(#ab)"/>
+<circle cx="1301.3" cy="397.0" r="8" fill="#F2F0EA" stroke="#E2581E" stroke-width="3"/>
+<circle cx="1396.4" cy="397.0" r="8" fill="#2F5D8A"/>
+<text x="856" y="430.0" font-family="IBM Plex Mono, monospace" font-size="22" font-weight="400" fill="#16181A">GPT-5 Nano</text>
+<line x1="1133.6" y1="423.0" x2="1326.5" y2="423.0" stroke="#2F5D8A" stroke-width="4" marker-end="url(#ab)"/>
+<circle cx="1124.6" cy="423.0" r="8" fill="#F2F0EA" stroke="#E2581E" stroke-width="3"/>
+<circle cx="1337.5" cy="423.0" r="8" fill="#2F5D8A"/>
+<text x="856" y="456.0" font-family="IBM Plex Mono, monospace" font-size="22" font-weight="400" fill="#8A857C">Opus 4.5</text>
+<line x1="1487.0" y1="449.0" x2="1491.5" y2="449.0" stroke="#C9C3B6" stroke-width="3"/>
+<circle cx="1487.0" cy="449.0" r="7" fill="#F2F0EA" stroke="#8A857C" stroke-width="2.5"/>
+<circle cx="1491.5" cy="449.0" r="6" fill="#8A857C"/>
+<text x="856" y="482.0" font-family="IBM Plex Mono, monospace" font-size="22" font-weight="400" fill="#8A857C">Sonnet 4.5</text>
+<line x1="1410.0" y1="475.0" x2="1410.0" y2="475.0" stroke="#C9C3B6" stroke-width="3"/>
+<circle cx="1410.0" cy="475.0" r="7" fill="#F2F0EA" stroke="#8A857C" stroke-width="2.5"/>
+<circle cx="1410.0" cy="475.0" r="6" fill="#8A857C"/>
+<text x="856" y="508.0" font-family="IBM Plex Mono, monospace" font-size="22" font-weight="400" fill="#8A857C">Gemini 3.1 Pro</text>
+<line x1="1414.5" y1="501.0" x2="1450.7" y2="501.0" stroke="#C9C3B6" stroke-width="3"/>
+<circle cx="1414.5" cy="501.0" r="7" fill="#F2F0EA" stroke="#8A857C" stroke-width="2.5"/>
+<circle cx="1450.7" cy="501.0" r="6" fill="#8A857C"/>
+<text x="856" y="534.0" font-family="IBM Plex Mono, monospace" font-size="22" font-weight="400" fill="#8A857C">Gemini 3 Flash</text>
+<line x1="1509.6" y1="527.0" x2="1523.2" y2="527.0" stroke="#C9C3B6" stroke-width="3"/>
+<circle cx="1509.6" cy="527.0" r="7" fill="#F2F0EA" stroke="#8A857C" stroke-width="2.5"/>
+<circle cx="1523.2" cy="527.0" r="6" fill="#8A857C"/>
+<text x="856" y="560.0" font-family="IBM Plex Mono, monospace" font-size="22" font-weight="400" fill="#8A857C">Flash-Lite 3.1</text>
+<line x1="1419.0" y1="553.0" x2="1464.3" y2="553.0" stroke="#C9C3B6" stroke-width="3"/>
+<circle cx="1419.0" cy="553.0" r="7" fill="#F2F0EA" stroke="#8A857C" stroke-width="2.5"/>
+<circle cx="1464.3" cy="553.0" r="6" fill="#8A857C"/>
+<circle cx="9" cy="625" r="8" fill="#F2F0EA" stroke="#E2581E" stroke-width="3"/><text x="26" y="632" font-family="IBM Plex Mono, monospace" font-size="22" fill="#4A4E52">thinking min</text>
+<circle cx="262" cy="625" r="8" fill="#2F5D8A"/><text x="279" y="632" font-family="IBM Plex Mono, monospace" font-size="22" fill="#4A4E52">thinking default</text>
+<line x1="566" y1="625" x2="606" y2="625" stroke="#2F5D8A" stroke-width="4" marker-end="url(#ab)"/><text x="622" y="632" font-family="IBM Plex Mono, monospace" font-size="22" fill="#4A4E52">direction of change</text>
+</svg>
+  <aside>Thinking matters for the small GPT-5 models and almost nowhere else. GPT-5 Nano goes from 56% to 87% on risk type, which is the paper's number, and gains 16 points on action effect and 15 on severity after the action. GPT-5 Mini gains 11 points on action effect. The large models barely move: Gemini changes by about 1 point on average and GPT-5 gets slightly worse on severity (77% to 72% on Q2, 66% to 58% on Q4), though I have not tested whether that is more than noise at n = 319. Reasoning helps most on the action questions, not on spotting the risk. It is also expensive. Nano at default thinking uses 2,271 output tokens per item against 366 at minimum (6.2x), and still trails GPT-5 at minimum thinking on severity (59% vs 77% on Q2, 55% vs 66% on Q4), where GPT-5 uses 220 tokens. Two caveats. Claude gave identical answers and token counts in both runs, so it did not think in either one and says nothing about reasoning. For Gemini the recorded output tokens barely change while latency roughly doubles, so I cannot tell how much it thought. Source: results/txt0_repro_fig4 and results/txt1_repro_fig4_default (per_item.csv).</aside>
+</section>

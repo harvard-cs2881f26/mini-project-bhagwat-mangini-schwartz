@@ -1,0 +1,14 @@
+# Fig. 4 reproduction (text), small models at the strongest thinking. Owner: Noa.
+# This is the thinking: high twin of configs/repro_fig4.yaml (min) and repro_fig4_default.yaml (default);
+# everything else is identical. WORKLOG 2026-10-18. Small models only (H1: can they close the gap?).
+run: repro_fig4_high
+benchmark: text
+prompt: text_verbatim   # the dataset's prompt, unchanged (src/asimov/bench/text.py)
+thinking: high          # OpenAI effort high; Gemini level HIGH; (no Claude: Sonnet dropped, WORKLOG 2026-10-18)
+log_reasoning: true     # save reasoning/thought summaries in each reply's `reasoning` field (never scored)
+models:
+  - {name: GPT-5 Nano,            provider: openai,    model: gpt-5-nano}
+  - {name: GPT-5 Mini,            provider: openai,    model: gpt-5-mini}
+  - {name: GPT-5,                 provider: openai,    model: gpt-5}
+  - {name: Gemini 2.5 Flash-Lite (3.1), provider: gemini, model: gemini-3.1-flash-lite}    # stand-in
+  - {name: Gemini 2.5 Flash (3),        provider: gemini, model: gemini-3-flash-preview}   # stand-in

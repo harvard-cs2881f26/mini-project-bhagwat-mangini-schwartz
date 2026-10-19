@@ -3,6 +3,8 @@
 Thinking "min": Gemini 2.5 takes a token budget (Pro's minimum is 128; Flash and Flash-Lite accept
 0). Gemini 3+ takes a level instead: "minimal" for Flash and Flash-Lite, "low" for Pro, whose
 lowest level it is. "default" sends no thinking config (dynamic thinking).
+"high": Gemini 2.5 gets its largest budget (Pro 32768, Flash and Flash-Lite 24576), Gemini 3+ level
+"high"; the output cap is raised to HIGH_MAX_OUTPUT_TOKENS.
 """
 from __future__ import annotations
 
@@ -13,6 +15,7 @@ from asimov.bench.parts import Part, TextPart
 from asimov.models.base import ModelResponse, Thinking, Timer
 
 MAX_OUTPUT_TOKENS = 8192  # includes thinking tokens
+HIGH_MAX_OUTPUT_TOKENS = 40960  # thinking "high": room for the largest 2.5 budget plus the answer
 
 
 def to_contents(parts: list[Part]) -> list:
@@ -32,6 +35,12 @@ def min_thinking(model: str) -> types.ThinkingConfig:
     return types.ThinkingConfig(thinking_level=types.ThinkingLevel.LOW if pro else types.ThinkingLevel.MINIMAL)
 
 
+def high_thinking(model: str) -> types.ThinkingConfig:
+    if model.startswith("gemini-2.5"):
+        return types.ThinkingConfig(thinking_budget=32768 if "-pro" in model else 24576)
+    return types.ThinkingConfig(thinking_level=types.ThinkingLevel.HIGH)
+
+
 class GeminiClient:
     provider = "gemini"
     request_settings = frozenset({"thinking", "log_reasoning"})  # both change the thinking config sent
@@ -42,9 +51,9 @@ class GeminiClient:
 
     def generate(self, parts: list[Part], thinking: Thinking = "min", log_reasoning: bool = False) -> ModelResponse:
         # AFC is the SDK's tool-calling loop; we send no tools, and disabling it silences its warning
-        cfg = {"max_output_tokens": MAX_OUTPUT_TOKENS,
+        cfg = {"max_output_tokens": HIGH_MAX_OUTPUT_TOKENS if thinking == "high" else MAX_OUTPUT_TOKENS,
                "automatic_function_calling": types.AutomaticFunctionCallingConfig(disable=True)}
-        thinking_config = min_thinking(self.model) if thinking == "min" else None
+        thinking_config = {"min": min_thinking, "high": high_thinking}.get(thinking, lambda m: None)(self.model)
         if log_reasoning:  # thought summaries; r.text leaves thought parts out
             thinking_config = (thinking_config or types.ThinkingConfig()).model_copy(update={"include_thoughts": True})
         if thinking_config is not None:

@@ -2099,3 +2099,35 @@ Numbers only; interpretation is Noa's. Write-up: `results/part2_designs/writeup.
 - Follow-up text CSV covers16 original min/default model/settings,319 items,32 released injury descriptions and four questions; all64 weighted rates reconcile. In16 injury groups with n>=10, Mini improves6/ties7/worsens3; Nano improves15/ties1/worsens0. Descriptive only, with small strata/multiple comparisons and no causal or training claim. Image category CSV is explicitly provisional and uses only complete matched pairs (Mini/Sonnet/Opus).
 - Validation:553 unit/integration tests passed,12 skipped before final result-schema check; Ruff/Pyright clean. Graphs exported from canonical CLI summaries with hashes; existing README records exact regeneration command. The three untracked planning/technical docs stay local.
 - Final result-schema validation:148 passed, for701 passed/12 skipped across the source and schema suites; generated pages checked current. Historical image response bytes preserved.
+
+## 2026-10-18: Thinking level "high": DECIDED (Noa)
+Config `thinking` now also accepts `high` (before: `min`, `default`). It sends the strongest thinking
+each model offers, so small models can be tried at full reasoning for H1 (accuracy vs cost):
+- OpenAI: `reasoning.effort = "high"`; output cap 8192 -> 32768 (reasoning tokens count against it).
+- Gemini 2.5: largest budget (Pro 32768, Flash/Flash-Lite 24576); Gemini 3+: level HIGH; cap 8192 -> 40960.
+- Claude: extended thinking, `budget_tokens` 16000, `max_tokens` 2048 + budget. The paper's Claude runs had no
+  thinking, so this is a bigger change for Claude than for the others. The 4.5 stand-ins accept
+  `budget_tokens`; newer Claude models may want a different thinking parameter (unchecked).
+- Alternative considered: separate `high` and `max` levels. Rejected: "max" isn't a standard level
+  (Gemini 3 tops out at HIGH, OpenAI at `high`/`xhigh` depending on model), so one top level is enough.
+- The raised caps apply only to `high`; `min`/`default` requests are unchanged, so cached replies stay valid.
+- Reuse: Claude's client now sends something for `high`, so `high` never reuses `min`/`default` replies.
+  `min` and `default` still share them for Claude.
+- Model list changed from the first plan: Claude Sonnet dropped (Noa: not run), GPT-5 added so the GPT-5 family
+  has all three sizes. Final list: GPT-5 Nano, Mini, GPT-5, Gemini 3.1 Flash-Lite, Gemini 3 Flash (stand-ins).
+- **Run (2026-10-18, `txt40_repro_fig4_high`, text, `text_verbatim`, n=319 each, 5 x 319/319, 0 errors, 0 truncated,
+  retry pass found nothing to call). API cost about $12.41** (Nano $0.81, Mini $1.52, GPT-5 $6.64, Flash-Lite $1.05,
+  Flash $2.39; Gemini thinking billed as output). Dry run (`--limit 5`) projected $11.65. Run with `--workers 12`.
+  Average accuracy over the four questions, min / default / high:
+  Nano .490 / .661 / .681; Mini .669 / .723 / .726; GPT-5 .752 / .733 / .731;
+  Flash-Lite .704 / .712 / .766; Flash .751 / .761 / .774.
+- **Reading (numbers only; interpretation is Noa's).** n=319 and one run per setting, so about +-5 points is noise.
+  High vs default: no OpenAI model changes significantly (every Holm p >= .9). Flash-Lite improves on Q1 (3 right->wrong,
+  24 wrong->right, Holm p < .001) and Q3 (12 vs 30, p = .024); Flash-Lite's default barely thinks (286 tokens per item, same as
+  min), so its high is closer to min -> high. Flash is flat (all Holm p >= .7).
+  Cost and speed per item: Nano 6.2k tokens and 27.6 s (default 2.3k, 13.3 s); Mini 2.2k, 20.9 s (default 1.0k, 7.5 s);
+  GPT-5 1.9k, 15.6 s (default 1.0k, 10.3 s); Flash-Lite 2.0k, 9.2 s (default 0.3k, 1.4 s); Flash 2.3k, 9.0 s (default 2.1k, 10.7 s).
+  Severe-injury (gold D) false negatives on Q2 / Q4 at high: Nano 38 / 35, Mini 23 / 24, GPT-5 17 / 14, Flash-Lite 15 / 17,
+  Flash 6 / 4 (false positives 25-30 for the OpenAI models, 41 / 36 and 57 / 52 for Flash-Lite and Flash).
+- A first `--limit 5` folder `txt40_repro_fig4_high` made with the old model list (including Sonnet) was deleted
+  (25 untracked replies, about $0.20) because `ConfigChanged` blocks reusing a run name with a different model list.
