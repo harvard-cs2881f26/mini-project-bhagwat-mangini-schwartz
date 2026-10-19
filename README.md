@@ -20,6 +20,7 @@ Other docs:
 - `WORKLOG.md`: dated technical and scoring decisions (becomes the report's methods section)
 - `data/README.md`: dataset schemas
 - `docs/HANDOFF.md`: the original setup brief (historical)
+- `docs/deck/`: the presentation deck (one HTML file) and how to edit it
 
 ## Quickstart
 
@@ -73,6 +74,7 @@ CLAUDE.md              rules and gotchas for coding agents
 docs/PROJECT.md        repo copy of the project Google Doc (team, tasks, rubric, links)
 docs/HANDOFF.md        project brief
 docs/presentation_outline.md  talk structure; owners fill in results
+docs/deck/             the presentation deck (HTML) and how to edit it
 scripts/               download_data.py, draw_boxes.py (run.py, plot.py to come)
 src/asimov/data/       tfrecord.py (raw reader), image.py (box parsing)
 tests/
