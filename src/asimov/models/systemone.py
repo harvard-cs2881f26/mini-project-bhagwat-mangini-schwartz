@@ -11,7 +11,14 @@ raise with the service's message (a 422 names the bad field).
 
 params: request fields passed through (e.g. OpenJev `think`: 512), except our own options:
     option_order: "paper" (default) | "reversed"  -- options sent in reverse, to measure order bias
+    image_width, image_height: resize video frames to this size first (Jev: 498 x 280, see models/frames.py)
 `thinking` doesn't apply: these services have no thinking setting (OpenJev's is `think` in params).
+
+Video (a DecisionPart with frames): each frame goes in `assets` under a reference "[[frameNN]]" that is
+written into `state` after the frame's label, so labels and images interleave as in the LLM request;
+the request carries TypeSafe's `TypeSafe-Danger-Zone-Images: true` header (images are experimental).
+Checked 2026-10-18: Codiv accepts these requests but the images don't reach OpenJev (16 frames add
+~70 input tokens and barely move its answers), so OpenJev on video is effectively text-only.
 """
 
 from __future__ import annotations
@@ -21,9 +28,12 @@ import time
 
 import httpx
 
+import base64
+
 from asimov.bench.parts import DecisionPart, Part
 from asimov.models.base import ModelResponse, Thinking
 from asimov.models.decision import Decided, generate_decision, require_answers
+from asimov.models.frames import shrink
 
 PATH = "/v1/systemone"
 RETRY = {408, 429, 500, 502, 503, 504, 529}
@@ -31,7 +41,8 @@ ATTEMPTS = 5  # first try + 4 retries
 BACKOFF_S = (1, 2, 4, 8)
 TIMEOUT_S = 120  # a Modal cold start alone takes ~35 s (Kev README)
 OPTION_ORDERS = ("paper", "reversed")
-OUR_PARAMS = ("option_order",)
+OUR_PARAMS = ("option_order", "image_width", "image_height")
+IMAGES_HEADER = {"TypeSafe-Danger-Zone-Images": "true"}
 
 
 class SystemOneClient:
@@ -63,7 +74,7 @@ class SystemOneClient:
         return generate_decision(self, parts)
 
     def decide(self, part: DecisionPart) -> Decided:
-        raw = self.post(request_body(part, self.model, self.params))
+        raw = self.post(request_body(part, self.model, self.params), IMAGES_HEADER if part.frames else None)
         answers = raw.get("answers") or {}
         require_answers(part, set(answers))
         usage = raw.get("usage") or {}
@@ -75,9 +86,9 @@ class SystemOneClient:
             chosen={q.id: (answers.get(q.id) or {}).get("choice") for q in part.questions},
         )
 
-    def post(self, body: dict) -> dict:
+    def post(self, body: dict, headers: dict | None = None) -> dict:
         for attempt in range(ATTEMPTS):
-            r = self.http.post(self.url, json=body)
+            r = self.http.post(self.url, json=body, headers=headers)
             if r.status_code not in RETRY or attempt == ATTEMPTS - 1:
                 break
             self.sleep(retry_after(r) or BACKOFF_S[attempt])
@@ -89,16 +100,34 @@ class SystemOneClient:
 def request_body(part: DecisionPart, model: str, params: dict) -> dict:
     reverse = params.get("option_order") == "reversed"
     questions = {
-        q.id: {"type": "choice", "instructions": q.instructions, "criteria": dict(reversed(q.options) if reverse else q.options)}
+        q.id: {"type": "score", "instructions": q.instructions, "criteria": [v for v, _ in q.options]}  # ordered, lowest first
+        if q.kind == "score"
+        else {"type": "choice", "instructions": q.instructions, "criteria": dict(reversed(q.options) if reverse else q.options)}
         for q in part.questions
     }
     passthrough = {k: v for k, v in params.items() if k not in OUR_PARAMS}
-    return {"state": part.state, "model": model, "questions": questions, **passthrough}
+    body = {"state": part.state, "model": model, "questions": questions, **passthrough}
+    if part.frames:
+        size = (params["image_width"], params["image_height"]) if "image_width" in params else None
+        refs = [f"[[frame{i:02d}]]" for i in range(len(part.frames))]
+        lines = [f"{f.label}: {r}" for f, r in zip(part.frames, refs, strict=True)]
+        body["state"] = "\n".join([part.state, *lines]) + (f"\n\n{part.lead}" if part.lead else "")
+        body["assets"] = {
+            r: {"type": "image", "format": "jpg", "data_base64": base64.b64encode(shrink(f, size) if size else f.data).decode()}
+            for r, f in zip(refs, part.frames, strict=True)
+        }
+    return body
 
 
 def choice_probs(answer: dict | None) -> dict[str, float] | None:
-    """A choice answer's probabilities by option value; None for anything else (refusal, missing)."""
-    if not answer or answer.get("type") != "choice":
+    """A choice or score answer's probabilities by option value; None for anything else (refusal, missing).
+    A score answer keys them by level index ("0", "1", ...) and names each in `legend` (checked 2026-10-18)."""
+    if not answer:
+        return None
+    if answer.get("type") == "score":
+        legend = answer.get("legend") or {}
+        return {legend[i]: p for i, p in (answer.get("probabilities") or {}).items()}
+    if answer.get("type") != "choice":
         return None
     return answer.get("probabilities")
 

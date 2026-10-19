@@ -76,7 +76,10 @@ packing four into one call does not let answers see each other (Kev: probabiliti
 - Jev's docs list "Choice option order" as a known weakness: jev-1.13 leans toward the
   **first** option. Worth a permutation check (Kev has `/permute` built in).
 - Probabilities are only relative to the supplied options (no "none of these" unless we add one).
-- Jev is **text only**: no image or video input. Only the text benchmark applies.
+- **Correction (2026-10-18):** Jev takes images (experimental, https://docs.typesafe.ai/images):
+  `assets` keyed by a reference written into `state`, plus the header `TypeSafe-Danger-Zone-Images: true`.
+  16 full-size video frames give `max_tokens_exceeded`; 498x280 frames work (~6,850 input tokens).
+  Codiv accepts the same request but the images don't reach OpenJev (WORKLOG 2026-10-18).
 - Cost estimate: 319 items x ~1-2k input tokens ~ 0.3-0.6M tokens ~ $0.01-0.03
   (**UNVERIFIED**, depends on the wording rule).
 
