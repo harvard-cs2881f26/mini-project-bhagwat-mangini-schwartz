@@ -16,6 +16,11 @@ work there.
 **[`docs/PROJECT.md`](docs/PROJECT.md)** is the repo copy of it: team, tasks, grading rubric,
 course guidance, presentation and open items, with the date it was last synced.
 
+**[Findings deck](https://claude.ai/artifact/X4zHzrwjBHkvDCbv7uTRMj)** is where we present all
+our results. Its slides are HTML pages hosted on claude.ai. To change them, open your usual Claude
+(claude.ai or Claude Code), paste the deck link and describe the change; Claude updates the
+slides in place, so the link stays the same. You need edit access to the deck (ask Tyler).
+
 Other docs:
 - `WORKLOG.md`: dated technical and scoring decisions (becomes the report's methods section)
 - `data/README.md`: dataset schemas
