@@ -7,6 +7,8 @@ then run four extension experiments. Due **2026-10-18**.
 We name the benchmarks by input type: **text** (Fig. 4, the paper's Injury), **video** (Fig. 5)
 and **image** (Fig. 6, the paper's Constraints). Data folders, modules and configs use the same names.
 
+**Final report:** [`final_report.pdf`](final_report.pdf). Presentation deck: [`docs/deck/`](docs/deck/).
+
 ## Source of truth
 
 **[AI Safety - Mini Project (Google Doc)](https://docs.google.com/document/d/1eh77clNa1WYOpOYLe7mxsv3JcFEXPAvDvj6xE79GYOo/edit)**
