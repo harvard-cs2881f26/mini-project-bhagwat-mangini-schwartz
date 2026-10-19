@@ -24,7 +24,7 @@ session: Claude stops, shows the numbers, waits for a yes, and carries on.
 | Optional: Weave export (Noa's runs) | Claude, after Noa checks dataset terms | todo | |
 | Between 2 and 3: review, Part 2 scope, hypothesis | Noa (+ team) | Part 2 scope decided 2026-10-12; Part 1 review + hypothesis still to do | WORKLOG 2026-10-12 ("Part 2 approved") |
 | Session 3: build decision-model systems | Claude (Noa approves smoke spend) | done, merged (PRs [#9](https://github.com/gini007/mini-project-asimov-v2/pull/9), [#17](https://github.com/gini007/mini-project-asimov-v2/pull/17), [#18](https://github.com/gini007/mini-project-asimov-v2/pull/18), [#20](https://github.com/gini007/mini-project-asimov-v2/pull/20), [#21](https://github.com/gini007/mini-project-asimov-v2/pull/21), [#22](https://github.com/gini007/mini-project-asimov-v2/pull/22)) | clients: `/v1/systemone` (Jev, OpenJev, Laya, Kev), OpenAI Decisions, local Qwen3.5-4B(-Base) logprob/generate and NLI on Modal; question modes independent vs cumulative; 32 Part 2 runs x 319/319 (txt2-txt33), every run checked for bugs (WORKLOG 2026-10-13/14); API $0.42 total (full runs $0.131 + variants $0.066 + grid $0.221), Modal GPU ~$10 (estimate from run times; exact charge on the Modal dashboard); bugs fixed: tie-breaking, probability-sum tolerance, bf16 logit ties (fp32 head), Modal queue latency (use `raw.remote.compute_s`); held for Noa: Qwen generate txt33 8.2% parse failures; pytest 566 passed (full data); CI green |
-| Session 4: Part 2 runs + metrics | Claude (Noa approves spend) | done: verifier matches (3,774/3,774); PRs #25, #26, #28, #29 and #27 merged | **Confirmatory:** `results/part2_designs/` (rebuilt on main, unchanged), write-up `results/part2_designs/writeup.md`. **Exploratory:** router search (PR #26), prompt experiments $3.01 (PR #25). Verifier: `results/verify/part2/report.md`, 3,774 of 3,774 match (D/B tables 3,000; router-search single systems 730; 5 picks 44). Brier/ECE and `max_calls` DROPPED (§5). WORKLOG 2026-10-14 "Part 2 analysis, confirmatory vs exploratory" |
+| Session 4: Part 2 runs + metrics | Claude (Noa approves spend) | done: verifier matches (3,774/3,774); PRs #25, #26, #28, #29 and #27 merged | **Confirmatory:** `results/part2_designs/` (rebuilt on main, unchanged), write-up `results/part2_designs/writeup.md`. **Exploratory:** router search (PR #26), prompt experiments $3.01 (PR #25). Verifier: `results/verify/part2/report.md`, 3,774 of 3,774 match (D/B tables 3,000; router-search single systems 730; 5 picks 44). Brier/ECE done 2026-10-15 (`asimov.collect.calibration`, index.csv + run pages; WORKLOG 2026-10-15); reliability plots and `max_calls` DROPPED (§5). WORKLOG 2026-10-14 "Part 2 analysis, confirmatory vs exploratory" |
 | After 4: write-up + slides | Noa | todo | |
 
 ---
@@ -337,12 +337,15 @@ Brier/ECE, reliability plots, contrast tables) is in git history.
   - two paid prompt experiments feeding Jev's answers to GPT-5 / Mini, $3.01 (PR #25);
   - Qwen generate few-shot format run and a same-size comparison (in progress).
 - **Cross-run write-up:** `docs/part2_writeup.md` (PR #24).
+- **Calibration (added back 2026-10-15, Noa):** Brier and ECE per question for every decision model, from
+  the saved probabilities, in `results/index.csv` and a section on each run page (`asimov.collect.calibration`;
+  rule PROPOSED in WORKLOG 2026-10-15).
 - **Verifier:** `stats-verifier` on the Part 2 tables: 3,774 of 3,774 match, 0 mismatches
   (`results/verify/part2/report.md`).
 
 **Dropped** (Noa, 2026-10-14)
-- **Brier/ECE tables and reliability plots:** the functions exist in `stats.py`, but no hypothesis or
-  design needs them.
+- **Reliability plots:** the Brier/ECE table (below) carries the numbers; a plot per decision model is
+  only worth adding if a slide needs one.
 - **Per-run `max_calls` cap:** every paid run finished under projected cost with a person approving
   it, so it no longer protects anything.
 

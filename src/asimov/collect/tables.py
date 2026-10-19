@@ -9,6 +9,7 @@ from dataclasses import dataclass
 import numpy as np
 
 from asimov.claims import is_stand_in
+from asimov.collect.calibration import calibration_columns
 from asimov.collect.load import ModelResult, RunData
 from asimov.collect.metrics import item_rows
 from asimov.collect.run_ids import RunLabel
@@ -89,6 +90,7 @@ def index_row(run: RunData, model: ModelResult, prices: dict, labels: dict[str, 
         "latency_p50_s": p50,
         "latency_p95_s": p95,
         "cost_usd": cost_usd(model, prices) if run.benchmark in PRICED_BENCHMARKS else None,
+        **calibration_columns(model),  # decision models only (saved probabilities); LLM rows get no such columns
     }
     return {**s, **made}
 

@@ -213,6 +213,23 @@ How close each scoring comes to the paper's Fig 4a severity values (mean absolut
 |---|---|---|---|---|---|
 | gpt-6-luna (Decisions) | 0.401 | 0.734 | 0.407 (44 / 108) | 64 / 108 (0.593) | 21 / 211 (0.100) |
 
+## Calibration of the option probabilities
+
+Decision models return a probability for every option. This table asks whether those probabilities are honest: a model's **confidence** in an answer is the probability it put on the option it gave, and the answer is right or wrong against the key.
+
+- **Brier**: the mean squared gap between confidence and the 0/1 outcome, over the answers; 0 is perfect.
+- **ECE** (expected calibration error): answers are grouped into 10 equal-width confidence bins; in each bin the share actually right is compared with the mean confidence, and the gaps are averaged, weighted by bin size. 0 is perfect.
+- **Confidence minus accuracy**: above 0 the model is overconfident on average, below 0 underconfident.
+
+Answers with no probability (a refused question, or one that couldn't be read) are left out and shown by the smaller count. Probabilities are taken as the service returns them; a service that scales its own probabilities (Kev, fitted temperature, WORKLOG 2026-10-13) isn't comparable to one that doesn't. LLM rows save no probabilities, so they don't appear. Rule: WORKLOG 2026-10-15, "Calibration of the decision models".
+
+| Model | Question | Answers with a probability | Mean confidence | Accuracy on those | Brier (0 is perfect) | ECE (0 is perfect) | Confidence minus accuracy |
+|---|---|---|---|---|---|---|---|
+| gpt-6-luna (Decisions) | Q1 latent risk type | 319 / 319 | 0.751 | 0.831 | 0.124 | 0.080 | -0.080 |
+| gpt-6-luna (Decisions) | Q2 latent severity | 314 / 319 | 0.608 | 0.459 | 0.237 | 0.150 | +0.150 |
+| gpt-6-luna (Decisions) | Q3 action effect | 314 / 319 | 0.679 | 0.589 | 0.240 | 0.111 | +0.090 |
+| gpt-6-luna (Decisions) | Q4 activated risk | 315 / 319 | 0.607 | 0.406 | 0.287 | 0.210 | +0.201 |
+
 ## Files
 
 | Model | Replies | Summary |

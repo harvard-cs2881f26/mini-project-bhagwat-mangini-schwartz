@@ -2200,3 +2200,56 @@ watching at 2 fps (a 500 ms budget per frame)? Run `video_decisions` (vid2), com
   the IDs `run_ids.yaml` ended with (defs vid3, 640 vid4, 1fps vid5, injury vid6) and rescored with `--no-calls`.
 - **Clef left partial (Tyler):** stopped at 191/287 by Cloudflare's daily free allocation (10,000 units);
   finishing needs the Workers Paid plan. luna Decisions: 287/287.
+## 2026-10-15: Calibration of the decision models (Brier, ECE)
+
+Noa asked for the Brier/ECE item dropped on 2026-10-14 to be done after all (relayed by the "Plan progress
+check" session). $0: everything comes from probabilities already saved in `responses.jsonl`.
+
+### Rule: PROPOSED (Claude; Noa to confirm)
+- **Confidence = the probability the model put on the option it answered** (`pred` in `per_item`), not the
+  largest probability: ties go to the service's own answer (WORKLOG 2026-10-13), so the two differ on a few
+  Jev and luna items. **Outcome = strict `correct`** against the key. *Alternative:* multi-class Brier over
+  all options (sums the squared gap on every option); not used because the cascade routes on the chosen
+  option's probability, so that is the number whose honesty matters.
+- **Answers with no probability are left out, and the count is shown** (`<q>_n_calibrated`, e.g. luna 316
+  of 319 on Q1 after its 3 refusals). *Alternative:* confidence 0 and wrong (the cascade's rule 1), which
+  would give a refusal a perfect Brier contribution of 0 and reward refusing.
+- **Where:** computed in `asimov.collect.calibration` from `per_item` + saved `probs` when the pages are
+  built, like latency and cost; shown in `results/index.csv` (`<q>_brier`, `<q>_ece`, `<q>_n_calibrated`)
+  and a "Calibration of the option probabilities" section on every text run page whose models saved
+  probabilities. *Alternative:* in the scorer, which would need the runner to pass probabilities to
+  `bench.score` (an interface change for every benchmark) and a rescoring of 30 runs; not needed, since
+  nothing here changes a score.
+- Formulas unchanged: `stats.brier`, `stats.ece` with 10 equal-width bins (DECIDED 2026-10-12). LLM rows
+  (generate interface) save no probabilities and get no calibration; that is itself a difference between
+  the interfaces. Kev's probabilities are temperature-scaled by the service (T = 2.41, WORKLOG 2026-10-13),
+  so its numbers are not comparable to an untempered model's.
+- **Reliability plots: still dropped.** The table carries the same numbers; a plot per decision model can
+  be added to `plot.py` if a slide needs one.
+
+### Numbers (319 items; Brier / ECE per question; from `results/index.csv`)
+
+| Run | System | Q1 | Q2 | Q3 | Q4 |
+|---|---|---|---|---|---|
+| txt4 `part2_jev` | Jev, short, independent (pre-registered) | 0.103 / 0.044 | 0.242 / 0.131 | 0.366 / 0.320 | 0.294 / 0.222 |
+| txt15 `part2_jev_full_cumulative` | Jev, best setting | 0.086 / 0.045 | 0.223 / 0.155 | 0.165 / 0.026 | 0.205 / 0.155 |
+| txt6 `part2_luna_decide` | luna Decisions (pre-registered; n = 316) | 0.113 / 0.038 | 0.317 / 0.320 | 0.410 / 0.431 | 0.331 / 0.290 |
+| txt18 `part2_luna_decide_full_cumulative` | luna Decisions, best setting | 0.122 / 0.076 | 0.285 / 0.210 | 0.224 / 0.078 | 0.231 / 0.155 |
+| txt2 `part2_codiv` | OpenJev think 0, short (pre-registered) | 0.295 / 0.262 | 0.460 / 0.502 | 0.417 / 0.424 | 0.515 / 0.545 |
+| txt14 `part2_openjev_full` | OpenJev think 0, full | 0.118 / 0.077 | 0.218 / 0.144 | 0.213 / 0.138 | 0.283 / 0.258 |
+| txt23 `part2_openjev_think512_full` | OpenJev think 512, full | 0.131 / 0.131 | 0.316 / 0.316 | 0.227 / 0.226 | 0.328 / 0.316 |
+| txt8 `part2_kev` | Kev-4B, short (pre-registered; tempered) | 0.297 / 0.217 | 0.236 / 0.156 | 0.262 / 0.131 | 0.284 / 0.151 |
+| txt30 `part2_kev_full` | Kev-4B, full (tempered) | 0.228 / 0.101 | 0.218 / 0.095 | 0.229 / 0.092 | 0.284 / 0.165 |
+| txt26 `part2_qwen_base_logprob` | Qwen3.5-4B-Base option-logits | 0.157 / 0.087 | 0.255 / 0.106 | 0.335 / 0.364 | 0.263 / 0.182 |
+| txt28 `part2_qwen_logprob` | Qwen3.5-4B option-logits | 0.312 / 0.283 | 0.357 / 0.330 | 0.409 / 0.398 | 0.274 / 0.156 |
+| txt25 `part2_nli` | NLI DeBERTa-v3-large | 0.224 / 0.138 | 0.230 / 0.019 | 0.317 / 0.321 | 0.422 / 0.486 |
+| txt2 `part2_codiv` | Laya, short | 0.270 / 0.259 | 0.235 / 0.015 | 0.227 / 0.123 | 0.225 / 0.136 |
+
+- Of the 120 question rows (30 model rows x 4 questions), 107 are overconfident (mean confidence above
+  accuracy) and 13 underconfident: 10 of those 13 are Q1 (luna Decisions in all five settings, Jev full /
+  letters / full+cumulative, Qwen-Base one-shot, NLI), plus Kev full Q2, NLI Q2 and Jev full+cumulative Q3,
+  none below -0.14. E.g. Jev (txt4) Q1: confidence 0.843 vs accuracy 0.821 (+0.022); Q3: 0.812 vs 0.495 (+0.317).
+- OpenJev with thinking (txt3, txt23) puts a mean probability of 0.94-0.99 on its answers on every question,
+  so its Brier and ECE are both close to 1 - accuracy: its confidence barely varies between items.
+- Every other decision run is in `results/index.csv`; the per-question mean confidence and accuracy are on
+  each run page. Numbers only; interpretation is Noa's.

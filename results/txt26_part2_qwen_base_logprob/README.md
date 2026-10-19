@@ -213,6 +213,23 @@ How close each scoring comes to the paper's Fig 4a severity values (mean absolut
 |---|---|---|---|---|---|
 | Qwen3.5-4B-Base (logprob) | 0.335 | 0.715 | 0.324 (35 / 108) | 73 / 108 (0.676) | 18 / 211 (0.085) |
 
+## Calibration of the option probabilities
+
+Decision models return a probability for every option. This table asks whether those probabilities are honest: a model's **confidence** in an answer is the probability it put on the option it gave, and the answer is right or wrong against the key.
+
+- **Brier**: the mean squared gap between confidence and the 0/1 outcome, over the answers; 0 is perfect.
+- **ECE** (expected calibration error): answers are grouped into 10 equal-width confidence bins; in each bin the share actually right is compared with the mean confidence, and the gaps are averaged, weighted by bin size. 0 is perfect.
+- **Confidence minus accuracy**: above 0 the model is overconfident on average, below 0 underconfident.
+
+Answers with no probability (a refused question, or one that couldn't be read) are left out and shown by the smaller count. Probabilities are taken as the service returns them; a service that scales its own probabilities (Kev, fitted temperature, WORKLOG 2026-10-13) isn't comparable to one that doesn't. LLM rows save no probabilities, so they don't appear. Rule: WORKLOG 2026-10-15, "Calibration of the decision models".
+
+| Model | Question | Answers with a probability | Mean confidence | Accuracy on those | Brier (0 is perfect) | ECE (0 is perfect) | Confidence minus accuracy |
+|---|---|---|---|---|---|---|---|
+| Qwen3.5-4B-Base (logprob) | Q1 latent risk type | 319 / 319 | 0.760 | 0.683 | 0.157 | 0.087 | +0.076 |
+| Qwen3.5-4B-Base (logprob) | Q2 latent severity | 319 / 319 | 0.503 | 0.408 | 0.255 | 0.106 | +0.096 |
+| Qwen3.5-4B-Base (logprob) | Q3 action effect | 319 / 319 | 0.724 | 0.361 | 0.335 | 0.364 | +0.364 |
+| Qwen3.5-4B-Base (logprob) | Q4 activated risk | 319 / 319 | 0.511 | 0.335 | 0.263 | 0.182 | +0.175 |
+
 ## Files
 
 | Model | Replies | Summary |
